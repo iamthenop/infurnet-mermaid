@@ -24,7 +24,7 @@ export const shapes = {
   currentSource: { file: 'isource.svg', width: 120, height: 120, terminals: { P: [60, 0], N: [60, 120] } },
   inverter: { file: 'inverter.svg', width: 120, height: 120, terminals: { I: [0, 60], O: [120, 60] } },
   buffer: { file: 'buffer.svg', width: 120, height: 120, terminals: { I: [0, 60], O: [120, 60] } },
-  supplyRail: { file: 'vdd.svg', width: 120, height: 120, terminals: {}, anchor: [60, 120] },
+  supplyNet: { file: 'vdd.svg', width: 120, height: 120, terminals: {}, anchor: [60, 120] },
   ground: { file: 'ground.svg', width: 120, height: 120, terminals: {}, anchor: [60, 0] },
   pinIn: { file: 'pin-in.svg', width: 240, height: 120, terminals: {}, anchor: [240, 60] },
   pinOut: { file: 'pin-out.svg', width: 240, height: 120, terminals: {}, anchor: [0, 60] },
