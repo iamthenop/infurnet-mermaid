@@ -1,0 +1,7 @@
+{
+  "name": "infurnet-mermaid",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ]
+}
