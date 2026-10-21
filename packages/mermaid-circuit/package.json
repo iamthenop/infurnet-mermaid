@@ -2,7 +2,25 @@
   "name": "mermaid-circuit",
   "version": "0.0.0",
   "private": true,
-  "description": "circuitDiagram external diagram type for Mermaid (scaffold stub)",
+  "description": "Header-only circuitDiagram external diagram scaffold for Mermaid",
   "type": "module",
-  "main": "src/index.ts"
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": { ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" } },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "npm run build && tsc --ignoreConfig --noEmit --strict --skipLibCheck --target ES2022 --module NodeNext --moduleResolution NodeNext tests/detector.spec.ts tests/diagram.spec.ts tests/browser.spec.ts examples/browser/main.ts",
+    "test": "vitest run tests/detector.spec.ts tests/diagram.spec.ts",
+    "test:browser": "npm run build && vitest run tests/browser.spec.ts",
+    "dev": "npm run build && vite examples/browser --host 127.0.0.1"
+  },
+  "peerDependencies": { "mermaid": "12.2.0" },
+  "devDependencies": {
+    "mermaid": "12.2.0",
+    "typescript": "7.0.2",
+    "vite": "8.3.5",
+    "vitest": "5.0.5",
+    "playwright": "1.64.1"
+  }
 }
