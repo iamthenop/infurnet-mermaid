@@ -1,0 +1,8 @@
+{
+  "name": "mermaid-circuit",
+  "version": "0.0.0",
+  "private": true,
+  "description": "circuitDiagram external diagram type for Mermaid (scaffold stub)",
+  "type": "module",
+  "main": "src/index.ts"
+}
