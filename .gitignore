@@ -6,3 +6,6 @@ coverage/
 .cache/
 .DS_Store
 *.log
+.venv/
+test-results/
+playwright-report/

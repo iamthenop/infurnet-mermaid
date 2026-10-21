@@ -1,6 +1,13 @@
 {
   "name": "infurnet-mermaid",
   "private": true,
+  "engines": { "node": ">=24.22.1 <25" },
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "typecheck": "npm run typecheck --workspaces",
+    "test": "npm test --workspaces",
+    "test:browser": "npm run test:browser --workspaces"
+  },
   "workspaces": [
     "packages/*"
   ]
