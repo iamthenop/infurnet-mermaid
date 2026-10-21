@@ -35,7 +35,9 @@ infer it.
 
 | Package or directory | Ownership |
 | :--- | :--- |
-| *not yet defined* | *not yet defined* |
+| Repository root (`.`) | Workspace configuration, package coordination, and repository-level documentation. No diagram implementation. |
+| `packages/mermaid-circuit/` | `mermaid-circuit` owns the `circuitDiagram` plugin, including notation, electrical model, parsing, placement, rendering, SVG symbols, examples, and tests. |
+
 
 ## Import boundaries
 
