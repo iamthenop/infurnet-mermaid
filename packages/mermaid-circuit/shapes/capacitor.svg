@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  capacitor: capacitor.
+  Pane 1:1.
+  Terminals A (0, 60), B (120, 60).
+-->
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="120" height="120" viewBox="0 0 120 120">
+  <g id="capacitor" fill="none" stroke="#000"
+     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <line id="lead-a" x1="0" y1="60" x2="40" y2="60"/>
+    <line id="plate-a" x1="40" y1="30" x2="40" y2="90"/>
+    <line id="plate-b" x1="80" y1="30" x2="80" y2="90"/>
+    <line id="lead-b" x1="80" y1="60" x2="120" y2="60"/>
+  </g>
+</svg>

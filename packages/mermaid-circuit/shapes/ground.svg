@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ground: ground.
+  Pane 1:1.
+  No terminals. Attaches to its net at (60, 0).
+-->
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="120" height="120" viewBox="0 0 120 120">
+  <g id="ground" fill="none" stroke="#000"
+     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <line id="stem" x1="60" y1="0" x2="60" y2="60"/>
+    <line id="bar-1" x1="30" y1="60" x2="90" y2="60"/>
+    <line id="bar-2" x1="40" y1="80" x2="80" y2="80"/>
+    <line id="bar-3" x1="50" y1="100" x2="70" y2="100"/>
+  </g>
+</svg>

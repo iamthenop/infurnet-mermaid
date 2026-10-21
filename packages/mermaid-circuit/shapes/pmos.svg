@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  pmos: PMOS transistor with the bulk tied to the source.
+  Pane 1:1.
+  Terminals G (0, 60), S (90, 0), D (90, 120).
+-->
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="120" height="120" viewBox="0 0 120 120">
+  <g id="pmos" fill="none" stroke="#000"
+     stroke-width="2" stroke-linecap="round">
+    <line id="gate-lead" x1="0" y1="60" x2="30" y2="60"/>
+    <circle id="gate-bubble" cx="35" cy="60" r="5" fill="#fff"/>
+    <line id="gate-plate" x1="40" y1="30" x2="40" y2="90"/>
+    <line id="channel" x1="60" y1="30" x2="60" y2="90"/>
+    <polyline id="source" points="60,40 90,40 90,0"/>
+    <polyline id="drain" points="60,80 90,80 90,120"/>
+  </g>
+</svg>
