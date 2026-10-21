@@ -15,6 +15,6 @@
     <polyline id="source" points="60,40 90,40 90,0"/>
     <polyline id="drain" points="60,80 90,80 90,120"/>
     <line id="bulk" x1="60" y1="60" x2="120" y2="60"/>
-    <polygon id="bulk-arrow" points="74,60 82,54 82,66" fill="#000"/>
+    <polygon id="bulk-arrow" points="82,60 74,54 74,66" fill="#000"/>
   </g>
 </svg>

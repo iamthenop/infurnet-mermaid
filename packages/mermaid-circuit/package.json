@@ -10,8 +10,8 @@
   "files": ["dist"],
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "typecheck": "npm run build && tsc --ignoreConfig --noEmit --strict --skipLibCheck --target ES2022 --module NodeNext --moduleResolution NodeNext tests/detector.spec.ts tests/diagram.spec.ts tests/browser.spec.ts examples/browser/main.ts",
-    "test": "vitest run tests/detector.spec.ts tests/diagram.spec.ts",
+    "typecheck": "npm run build && tsc --ignoreConfig --noEmit --strict --skipLibCheck --target ES2022 --module NodeNext --moduleResolution NodeNext tests/detector.spec.ts tests/diagram.spec.ts tests/browser.spec.ts tests/shapes.spec.ts examples/browser/main.ts",
+    "test": "vitest run tests/detector.spec.ts tests/diagram.spec.ts tests/shapes.spec.ts",
     "test:browser": "npm run build && vitest run tests/browser.spec.ts",
     "dev": "npm run build && vite examples/browser --host 127.0.0.1"
   },

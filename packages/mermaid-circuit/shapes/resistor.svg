@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  resistor: resistor.
+  resistor: vertical IEEE zigzag resistor.
   Pane 1:1.
-  Terminals A (0, 60), B (120, 60).
+  Terminals A (60, 0), B (60, 120).
 -->
 <svg xmlns="http://www.w3.org/2000/svg"
      width="120" height="120" viewBox="0 0 120 120">
   <g id="resistor" fill="none" stroke="#000"
      stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <line id="lead-a" x1="0" y1="60" x2="30" y2="60"/>
-    <rect id="body" x="30" y="45" width="60" height="30"/>
-    <line id="lead-b" x1="90" y1="60" x2="120" y2="60"/>
+    <line id="lead-a" x1="60" y1="0" x2="60" y2="30"/>
+    <polyline id="body" points="60,30 80,40 40,60 80,80 60,90"/>
+    <line id="lead-b" x1="60" y1="90" x2="60" y2="120"/>
   </g>
 </svg>
