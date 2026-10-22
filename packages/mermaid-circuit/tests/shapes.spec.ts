@@ -246,11 +246,11 @@ describe('shape catalog', () => {
       expect(shape.terminals.S).toEqual([90, pChannel ? 0 : 120]);
       expect(shape.terminals.D).toEqual([90, pChannel ? 120 : 0]);
       expect(svg.includes('id="gate-bubble"')).toBe(pChannel);
-      const arrow = elements(svg, 'polygon').find((element) => element.attrs.id === 'bulk-arrow');
+      const arrow = elements(svg, 'path').find((element) => element.attrs.id === 'bulk-arrow');
       expect(Boolean(arrow)).toBe(bulk);
       if (bulk) {
         expect(shape.terminals.B).toEqual([120, 60]);
-        const triangle = points(arrow!.attrs.points!);
+        const triangle = pathPoints(arrow!.attrs).slice(0, 3);
         const tip = triangle.find((point) => point[1] === shape.terminals.B![1])!;
         const base = triangle.filter((point) => point !== tip);
         expect(base).toHaveLength(2);
