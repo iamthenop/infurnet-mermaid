@@ -25,26 +25,26 @@ SOFTWARE.
 -->
 <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
   <g id="pmosDiode" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <polygon id="reference-0" points="95,55 90,65 100,65" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-    <path id="reference-1" d="M 65 42.5 L 65 47.5" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-    <path id="reference-2" d="M 65 57.5 L 65 62.5" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-    <path id="reference-3" d="M 65 72.5 L 65 77.5" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-    <path id="reference-4" d="M 80 45 L 80 10" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-    <path id="reference-5" d="M 65 45 L 80 45" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-    <path id="reference-6" d="M 80 110 L 80 75" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-    <path id="reference-7" d="M 65 75 L 80 75" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-    <path id="reference-8" d="M 30 40 L 55 40" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-    <path id="reference-9" d="M 55 40 L 55 80" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-    <path id="reference-10" d="M 65 60 L 70 60" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-    <path id="reference-11" d="M 76.666667 60 L 70 65 L 70 55 Z" stroke="#000" fill="#000" stroke-linecap="butt" stroke-linejoin="miter" />
-    <path id="reference-12" d="M 80 60 L 80 45" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-    <path id="reference-13" d="M 80 45 L 95 45" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-    <path id="reference-14" d="M 95 45 L 95 55" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-    <path id="reference-15" d="M 90 55 L 100 55" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-    <path id="reference-16" d="M 95 65 L 95 75" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-    <path id="reference-17" d="M 95 75 L 80 75" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-    <line id="gate-extension" x1="0" y1="40" x2="30" y2="40" />
-    <line id="upper-extension" x1="80" y1="0" x2="80" y2="10" />
-    <line id="lower-extension" x1="80" y1="110" x2="80" y2="120" />
+    <polygon id="reference-0" points="92,52 88,60 96,60" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="reference-1" d="M 68 42 L 68 46" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="reference-2" d="M 68 54 L 68 58" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="reference-3" d="M 68 66 L 68 70" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="reference-4" d="M 80 44 L 80 16" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="reference-5" d="M 68 44 L 80 44" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="reference-6" d="M 80 96 L 80 68" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="reference-7" d="M 68 68 L 80 68" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="reference-8" d="M 40 40 L 60 40" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="reference-9" d="M 60 40 L 60 72" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="reference-10" d="M 68 56 L 72 56" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="reference-11" d="M 77.333334 56 L 72 60 L 72 52 Z" stroke="#000" fill="#000" stroke-linecap="butt" stroke-linejoin="miter" />
+    <path id="reference-12" d="M 80 56 L 80 44" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="reference-13" d="M 80 44 L 92 44" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="reference-14" d="M 92 44 L 92 52" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="reference-15" d="M 88 52 L 96 52" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="reference-16" d="M 92 60 L 92 68" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="reference-17" d="M 92 68 L 80 68" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <line id="gate-extension" x1="0" y1="40" x2="40" y2="40" />
+    <line id="upper-extension" x1="80" y1="0" x2="80" y2="16" />
+    <line id="lower-extension" x1="80" y1="96" x2="80" y2="120" />
   </g>
 </svg>
