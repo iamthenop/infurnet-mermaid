@@ -27,8 +27,7 @@ SOFTWARE.
   <g id="scr" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     <polygon points="53,50 67,60 53,70" id="reference-0" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
     <path d="M 0 60 L 53 60 M 67 50 L 67 70 M 67 60 L 120 60" id="reference-1" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-    <path d="M 67 60 L 79 72 L 79 80" id="reference-2" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-    <line id="gate-extension-h" x1="79" y1="80" x2="90" y2="80"/>
-    <line id="gate-extension-v" x1="90" y1="80" x2="90" y2="120"/>
+    <path d="M 67 60 L 90 83" id="reference-2" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <line id="gate-extension-v" x1="90" y1="83" x2="90" y2="120"/>
   </g>
 </svg>
