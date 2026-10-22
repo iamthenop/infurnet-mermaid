@@ -16,7 +16,10 @@
         90,
         120
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "nmos": {
     "file": "nmos.svg",
@@ -35,7 +38,10 @@
         90,
         120
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "pmosBlk": {
     "file": "pmos4.svg",
@@ -58,7 +64,10 @@
         120,
         60
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "nmosBlk": {
     "file": "nmos4.svg",
@@ -81,7 +90,10 @@
         120,
         60
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "resistor": {
     "file": "resistor.svg",
@@ -96,7 +108,10 @@
         120,
         60
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "capacitor": {
     "file": "capacitor.svg",
@@ -111,7 +126,10 @@
         120,
         60
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "diode": {
     "file": "diode.svg",
@@ -126,7 +144,10 @@
         120,
         60
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "voltageSource": {
     "file": "vsource.svg",
@@ -141,7 +162,10 @@
         60,
         120
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "currentSource": {
     "file": "isource.svg",
@@ -156,7 +180,10 @@
         60,
         120
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "inverter": {
     "file": "inverter.svg",
@@ -171,7 +198,10 @@
         120,
         60
       ]
-    }
+    },
+    "allowedModes": [
+      "D"
+    ]
   },
   "buffer": {
     "file": "buffer.svg",
@@ -186,7 +216,10 @@
         120,
         60
       ]
-    }
+    },
+    "allowedModes": [
+      "D"
+    ]
   },
   "supplyNet": {
     "file": "vdd.svg",
@@ -196,6 +229,10 @@
     "anchor": [
       60,
       120
+    ],
+    "allowedModes": [
+      "D",
+      "A"
     ]
   },
   "ground": {
@@ -206,6 +243,10 @@
     "anchor": [
       60,
       0
+    ],
+    "allowedModes": [
+      "D",
+      "A"
     ]
   },
   "pinIn": {
@@ -216,6 +257,10 @@
     "anchor": [
       120,
       60
+    ],
+    "allowedModes": [
+      "D",
+      "A"
     ]
   },
   "pinOut": {
@@ -226,6 +271,10 @@
     "anchor": [
       0,
       60
+    ],
+    "allowedModes": [
+      "D",
+      "A"
     ]
   },
   "pinInOut": {
@@ -236,6 +285,10 @@
     "anchor": [
       0,
       60
+    ],
+    "allowedModes": [
+      "D",
+      "A"
     ]
   },
   "source": {
@@ -251,7 +304,10 @@
         120,
         60
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "groundSignal": {
     "file": "ground-signal.svg",
@@ -261,6 +317,10 @@
     "anchor": [
       60,
       0
+    ],
+    "allowedModes": [
+      "D",
+      "A"
     ]
   },
   "groundChassis": {
@@ -271,6 +331,10 @@
     "anchor": [
       60,
       0
+    ],
+    "allowedModes": [
+      "D",
+      "A"
     ]
   },
   "vss": {
@@ -281,6 +345,10 @@
     "anchor": [
       60,
       0
+    ],
+    "allowedModes": [
+      "D",
+      "A"
     ]
   },
   "resistorIEC": {
@@ -296,7 +364,10 @@
         120,
         60
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "fuse": {
     "file": "fuse.svg",
@@ -311,7 +382,10 @@
         120,
         60
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "fuseIEC": {
     "file": "fuse-iec.svg",
@@ -326,7 +400,10 @@
         120,
         60
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "thermistor": {
     "file": "thermistor.svg",
@@ -341,7 +418,10 @@
         120,
         60
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "sourceSin": {
     "file": "source-sin.svg",
@@ -356,7 +436,10 @@
         120,
         60
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "sourceSquare": {
     "file": "source-square.svg",
@@ -371,7 +454,10 @@
         120,
         60
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "sourceTriangle": {
     "file": "source-triangle.svg",
@@ -386,7 +472,10 @@
         120,
         60
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "sourceRamp": {
     "file": "source-ramp.svg",
@@ -401,7 +490,10 @@
         120,
         60
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "batteryCell": {
     "file": "battery-cell.svg",
@@ -416,7 +508,10 @@
         120,
         60
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "battery": {
     "file": "battery.svg",
@@ -431,7 +526,10 @@
         120,
         60
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "diodeFilled": {
     "file": "diode-filled.svg",
@@ -446,7 +544,10 @@
         120,
         60
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "capacitor2": {
     "file": "capacitor2.svg",
@@ -461,7 +562,10 @@
         120,
         60
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "schottky": {
     "file": "schottky.svg",
@@ -476,7 +580,10 @@
         120,
         60
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "diodeTunnel": {
     "file": "diode-tunnel.svg",
@@ -491,7 +598,10 @@
         120,
         60
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "diodeShockley": {
     "file": "diode-shockley.svg",
@@ -506,7 +616,10 @@
         120,
         60
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "zener": {
     "file": "zener.svg",
@@ -521,7 +634,10 @@
         120,
         60
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "diodeTVS": {
     "file": "diode-tvs.svg",
@@ -536,7 +652,10 @@
         120,
         60
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "varactor": {
     "file": "varactor.svg",
@@ -551,7 +670,10 @@
         120,
         60
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "scr": {
     "file": "scr.svg",
@@ -570,7 +692,10 @@
         90,
         120
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "sourceControlled": {
     "file": "source-controlled.svg",
@@ -585,7 +710,10 @@
         120,
         60
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "sourceControlledI": {
     "file": "source-controlled-i.svg",
@@ -600,7 +728,10 @@
         0,
         60
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "sourceControlledV": {
     "file": "source-controlled-v.svg",
@@ -615,7 +746,10 @@
         0,
         60
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "resistorVar": {
     "file": "resistor-var.svg",
@@ -630,7 +764,10 @@
         120,
         60
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "resistorVarIEC": {
     "file": "resistor-var-iec.svg",
@@ -645,7 +782,10 @@
         120,
         60
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "jfet": {
     "file": "jfet.svg",
@@ -664,7 +804,10 @@
         80,
         120
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "fuseUs": {
     "file": "fuse-us.svg",
@@ -679,7 +822,10 @@
         120,
         60
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "capacitorVar": {
     "file": "capacitor-var.svg",
@@ -694,7 +840,10 @@
         120,
         60
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "jfetN": {
     "file": "jfet-n.svg",
@@ -713,7 +862,10 @@
         80,
         120
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "jfetP": {
     "file": "jfet-p.svg",
@@ -732,7 +884,10 @@
         80,
         120
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "jfetNCircle": {
     "file": "jfet-n-circle.svg",
@@ -751,7 +906,10 @@
         80,
         120
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "jfetPCircle": {
     "file": "jfet-p-circle.svg",
@@ -770,7 +928,10 @@
         80,
         120
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "hemt": {
     "file": "hemt.svg",
@@ -789,7 +950,10 @@
         90,
         120
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "hemtUnsplit": {
     "file": "hemt-unsplit.svg",
@@ -808,7 +972,10 @@
         90,
         120
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "nmosDiode": {
     "file": "nmos-diode.svg",
@@ -827,7 +994,10 @@
         80,
         120
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "pmosDiode": {
     "file": "pmos-diode.svg",
@@ -846,7 +1016,10 @@
         80,
         120
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "nmosCircle": {
     "file": "nmos-circle.svg",
@@ -865,7 +1038,10 @@
         80,
         120
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "pmosCircle": {
     "file": "pmos-circle.svg",
@@ -884,7 +1060,10 @@
         80,
         120
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "potentiometer": {
     "file": "potentiometer.svg",
@@ -903,7 +1082,10 @@
         60,
         0
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "potentiometerIEC": {
     "file": "potentiometer-iec.svg",
@@ -922,7 +1104,10 @@
         60,
         0
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "photoresistor": {
     "file": "photoresistor.svg",
@@ -937,7 +1122,10 @@
         120,
         60
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "photoresistorIEC": {
     "file": "photoresistor-iec.svg",
@@ -952,7 +1140,10 @@
         120,
         60
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "led": {
     "file": "led.svg",
@@ -967,7 +1158,10 @@
         120,
         60
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "led2": {
     "file": "led2.svg",
@@ -982,7 +1176,10 @@
         120,
         60
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "photodiode": {
     "file": "photodiode.svg",
@@ -997,7 +1194,10 @@
         120,
         60
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "diac": {
     "file": "diac.svg",
@@ -1012,7 +1212,10 @@
         120,
         60
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "triac": {
     "file": "triac.svg",
@@ -1031,7 +1234,10 @@
         120,
         30
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "capacitorPolar": {
     "file": "capacitor-polar.svg",
@@ -1046,7 +1252,10 @@
         120,
         60
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "capacitor2Polar": {
     "file": "capacitor2-polar.svg",
@@ -1061,7 +1270,10 @@
         120,
         60
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "capacitorTrim": {
     "file": "capacitor-trim.svg",
@@ -1076,7 +1288,10 @@
         120,
         60
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "sourcePulse": {
     "file": "source-pulse.svg",
@@ -1091,7 +1306,10 @@
         120,
         60
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "solar": {
     "file": "solar.svg",
@@ -1106,7 +1324,10 @@
         0,
         60
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "analogNFet": {
     "file": "analog-nfet.svg",
@@ -1125,7 +1346,10 @@
         90,
         120
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "analogPFet": {
     "file": "analog-pfet.svg",
@@ -1144,7 +1368,10 @@
         90,
         120
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "analogBiasedFet": {
     "file": "analog-biased-fet.svg",
@@ -1163,7 +1390,10 @@
         90,
         120
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "analogNFetBulk": {
     "file": "analog-nfet-bulk.svg",
@@ -1186,7 +1416,10 @@
         120,
         60
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "analogPFetBulk": {
     "file": "analog-pfet-bulk.svg",
@@ -1209,7 +1442,10 @@
         120,
         60
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "analogNFetCenteredGate": {
     "file": "analog-nfet-centered-gate.svg",
@@ -1228,7 +1464,10 @@
         90,
         120
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "analogPFetCenteredGate": {
     "file": "analog-pfet-centered-gate.svg",
@@ -1247,7 +1486,10 @@
         90,
         120
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "analogBiasedFetCenteredGate": {
     "file": "analog-biased-fet-centered-gate.svg",
@@ -1266,7 +1508,10 @@
         90,
         120
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "nfet2": {
     "file": "nfet2.svg",
@@ -1285,7 +1530,10 @@
         120,
         90
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "pfet2": {
     "file": "pfet2.svg",
@@ -1304,7 +1552,10 @@
         120,
         90
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "jfetN2": {
     "file": "jfet-n2.svg",
@@ -1323,7 +1574,10 @@
         120,
         90
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "jfetP2": {
     "file": "jfet-p2.svg",
@@ -1342,7 +1596,10 @@
         120,
         90
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "nmos2Diode": {
     "file": "nmos2-diode.svg",
@@ -1361,7 +1618,10 @@
         120,
         40
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "pmos2Diode": {
     "file": "pmos2-diode.svg",
@@ -1380,7 +1640,10 @@
         120,
         40
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "nmos2Circle": {
     "file": "nmos2-circle.svg",
@@ -1399,7 +1662,10 @@
         120,
         40
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "pmos2Circle": {
     "file": "pmos2-circle.svg",
@@ -1418,7 +1684,10 @@
         120,
         40
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "analogPFetNoArrow": {
     "file": "analog-pfet-no-arrow.svg",
@@ -1437,7 +1706,10 @@
         90,
         120
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "analogBiasedFetNoArrow": {
     "file": "analog-biased-fet-no-arrow.svg",
@@ -1456,7 +1728,10 @@
         90,
         120
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
   },
   "analogBiasedFetBulk": {
     "file": "analog-biased-fet-bulk.svg",
@@ -1479,6 +1754,287 @@
         120,
         60
       ]
-    }
+    },
+    "allowedModes": [
+      "A"
+    ]
+  },
+  "and": {
+    "file": "and.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "I1": [
+        0,
+        40
+      ],
+      "I2": [
+        0,
+        80
+      ],
+      "O": [
+        120,
+        60
+      ]
+    },
+    "allowedModes": [
+      "D"
+    ]
+  },
+  "nand": {
+    "file": "nand.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "I1": [
+        0,
+        40
+      ],
+      "I2": [
+        0,
+        80
+      ],
+      "O": [
+        120,
+        60
+      ]
+    },
+    "allowedModes": [
+      "D"
+    ]
+  },
+  "or": {
+    "file": "or.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "I1": [
+        0,
+        40
+      ],
+      "I2": [
+        0,
+        80
+      ],
+      "O": [
+        120,
+        60
+      ]
+    },
+    "allowedModes": [
+      "D"
+    ]
+  },
+  "nor": {
+    "file": "nor.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "I1": [
+        0,
+        40
+      ],
+      "I2": [
+        0,
+        80
+      ],
+      "O": [
+        120,
+        60
+      ]
+    },
+    "allowedModes": [
+      "D"
+    ]
+  },
+  "xor": {
+    "file": "xor.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "I1": [
+        0,
+        40
+      ],
+      "I2": [
+        0,
+        80
+      ],
+      "O": [
+        120,
+        60
+      ]
+    },
+    "allowedModes": [
+      "D"
+    ]
+  },
+  "xnor": {
+    "file": "xnor.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "I1": [
+        0,
+        40
+      ],
+      "I2": [
+        0,
+        80
+      ],
+      "O": [
+        120,
+        60
+      ]
+    },
+    "allowedModes": [
+      "D"
+    ]
+  },
+  "notNot": {
+    "file": "not-not.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "I": [
+        0,
+        60
+      ],
+      "O": [
+        120,
+        60
+      ]
+    },
+    "allowedModes": [
+      "D"
+    ]
+  },
+  "tgate": {
+    "file": "tgate.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "I": [
+        0,
+        60
+      ],
+      "O": [
+        120,
+        60
+      ],
+      "C": [
+        60,
+        0
+      ],
+      "Cbar": [
+        60,
+        120
+      ]
+    },
+    "allowedModes": [
+      "D"
+    ]
+  },
+  "tristate": {
+    "file": "tristate.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "I": [
+        0,
+        60
+      ],
+      "O": [
+        120,
+        60
+      ],
+      "C": [
+        60,
+        0
+      ]
+    },
+    "allowedModes": [
+      "D"
+    ]
+  },
+  "schmitt": {
+    "file": "schmitt.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "I": [
+        0,
+        60
+      ],
+      "O": [
+        120,
+        60
+      ]
+    },
+    "allowedModes": [
+      "D"
+    ]
+  },
+  "schmittNot": {
+    "file": "schmitt-not.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "I": [
+        0,
+        60
+      ],
+      "O": [
+        120,
+        60
+      ]
+    },
+    "allowedModes": [
+      "D"
+    ]
+  },
+  "schmittAnd": {
+    "file": "schmitt-and.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "I1": [
+        0,
+        40
+      ],
+      "I2": [
+        0,
+        80
+      ],
+      "O": [
+        120,
+        60
+      ]
+    },
+    "allowedModes": [
+      "D"
+    ]
+  },
+  "schmittNand": {
+    "file": "schmitt-nand.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "I1": [
+        0,
+        40
+      ],
+      "I2": [
+        0,
+        80
+      ],
+      "O": [
+        120,
+        60
+      ]
+    },
+    "allowedModes": [
+      "D"
+    ]
   }
 }

@@ -61,11 +61,14 @@ const variants = {
 };
 
 const deferredVariants = ['hemtNoArrow', 'rshunt', 'batteryDouble'] as const;
+const digitalAdditions = ['and', 'nand', 'or', 'nor', 'xor', 'xnor', 'notNot', 'tgate',
+  'tristate', 'schmitt', 'schmittNot', 'schmittAnd', 'schmittNand'] as const;
+const sharedShapes = ['pinIn', 'pinOut', 'pinInOut', 'supplyNet', 'ground', 'groundSignal', 'groundChassis', 'vss'];
 
 describe('shape catalog', () => {
   it('keeps the approved inventory complete and deferred variants absent', () => {
     expect(Object.values(variants).flat()).toHaveLength(74);
-    expect(Object.keys(shapes)).toHaveLength(90);
+    expect(Object.keys(shapes)).toHaveLength(103);
     for (const key of deferredVariants) expect(Object.keys(shapes)).not.toContain(key);
   });
   it.each(Object.entries(variants))('contains every approved %s variant', (_family, keys) => {
@@ -80,7 +83,7 @@ describe('shape catalog', () => {
     expect(definitions).toHaveLength(17);
     const existing = definitions.map((match) => match[1]!).filter((key) => key !== 'net');
     expect(Object.keys(shapes)).toEqual(expect.arrayContaining(existing));
-    const approved = new Set([...existing, ...Object.values(variants).flat()]);
+    const approved = new Set([...existing, ...Object.values(variants).flat(), ...digitalAdditions]);
     for (const key of Object.keys(shapes)) expect(approved.has(key), key).toBe(true);
     expect(existing).not.toContain('source');
     for (const [, key, , terminals] of definitions) {
@@ -88,6 +91,72 @@ describe('shape catalog', () => {
       const shape: ShapeEntry = shapes[key as ShapeType];
       expect(Object.keys(shape.terminals).sort()).toEqual(terminals === 'None' ? [] : terminals!.split(', ').sort());
     }
+  });
+
+  it('classifies every shape through its approved allowedModes contract', () => {
+    const digital: readonly string[] = ['buffer', 'inverter', ...digitalAdditions];
+    const counts = { digital: 0, shared: 0, electrical: 0 };
+    for (const [key, shape] of Object.entries(shapes)) {
+      expect([['D'], ['A'], ['D', 'A']]).toContainEqual(shape.allowedModes);
+      const family = digital.includes(key) ? 'digital' : sharedShapes.includes(key) ? 'shared' : 'electrical';
+      expect(shape.allowedModes, key).toEqual(family === 'digital' ? ['D'] : family === 'shared' ? ['D', 'A'] : ['A']);
+      counts[family]++;
+    }
+    expect(counts).toEqual({ digital: 15, shared: 8, electrical: 80 });
+  });
+
+  it('preserves all existing catalog values apart from mode eligibility', async () => {
+    const added: readonly string[] = digitalAdditions;
+    const existing = Object.fromEntries(Object.entries(shapes).filter(([key]) => !added.includes(key))
+      .map(([key, { allowedModes: _modes, ...entry }]) => [key, entry]));
+    expect(Object.keys(existing)).toHaveLength(90);
+    const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify(existing)));
+    expect(Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, '0')).join(''))
+      .toBe('0d496b1acc8dacb2252e46066fdc54aed4fd2f7b911b9d890b9ff04a0015e01b');
+  });
+
+  it.each(digitalAdditions)('%s preserves its digital terminal and marker contracts', (key) => {
+    const single: readonly string[] = ['notNot', 'schmitt', 'schmittNot', 'tristate', 'tgate'];
+    const expected: Record<string, Point> = single.includes(key)
+      ? { I: [0, 60], O: [120, 60] } : { I1: [0, 40], I2: [0, 80], O: [120, 60] };
+    if (key === 'tgate' || key === 'tristate') expected.C = [60, 0];
+    if (key === 'tgate') expected.Cbar = [60, 120];
+    expect(shapes[key].terminals).toEqual(expected);
+    const svg = readSvg(shapes[key].file);
+    const circles = elements(svg, 'circle').map(({ attrs }) => attrs);
+    const inverted: readonly string[] = ['nand', 'nor', 'xnor', 'notNot', 'tristate', 'schmittNot', 'schmittNand'];
+    expect(circles.map((circle) => circle.id).sort()).toEqual(
+      (key === 'notNot' ? ['input-bubble', 'output-bubble']
+        : key === 'tgate' ? ['control-bubble'] : inverted.includes(key) ? ['output-bubble'] : []).sort(),
+    );
+    for (const circle of circles.filter((circle) => circle.id !== 'control-bubble')) {
+      expect(Number(circle.cy)).toBe(60);
+      expect(Number(circle.r)).toBeCloseTo(7.776);
+    }
+    const paths = referencePaths(key);
+    const marker = paths.find((path) => path.id === 'schmitt-mark');
+    expect(Boolean(marker)).toBe(key.startsWith('schmitt'));
+    if (marker) {
+      const segments = pathSubpaths(marker.d!);
+      expect(segments.map((segment) => segment.length)).toEqual([3, 3]);
+      for (const segment of segments) {
+        expect(segment[0]![1]).toBe(segment[1]![1]);
+        expect(segment[1]![0]).toBe(segment[2]![0]);
+        expect(Math.abs(segment[2]![1] - segment[1]![1])).toBeCloseTo(19.44);
+      }
+    }
+    expect(paths.some((path) => path.id === 'exclusive-input')).toBe(key === 'xor' || key === 'xnor');
+    if (key === 'tgate') {
+      expect(paths.some((path) => path.id === 'reverse-body')).toBe(true);
+      expect(Number(circles[0]!.cx)).toBe(60);
+      expect(Number(circles[0]!.cy)).toBeGreaterThan(60);
+      const contact = pathPoints(paths.find((path) => path.id === 'control-contact')!);
+      expect(contact.at(-1)![1]).toBeCloseTo(Number(circles[0]!.cy) - Number(circles[0]!.r));
+    }
+    expect(svg).toContain('https://schemdraw.readthedocs.io/en/stable/_images/logic_');
+    expect(svg).toContain('Copyright (c) 2014-2026 Collin J. Delker');
+    expect(svg).not.toMatch(/<(?:text|tspan|use)\b|(?:href|font-family)=/u);
+    expect(notation).not.toContain(`:::${key}`);
   });
 
   it.each(Object.entries(shapes))('%s has grid-aligned attachments and geometry inside its pane', (_key, entry) => {
