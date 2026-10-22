@@ -52,7 +52,7 @@ Wires use orthogonal routing. Junction markers are placed according to the [junc
 
 ## Panes and snap points
 
-Standard shapes occupy a 120 × 120 pane. Pin flags occupy a 240 × 120 pane.
+Standard shapes, including pin flags, occupy a 120 × 120 pane.
 
 Snap points are defined at these fractions of a 120-unit span:
 

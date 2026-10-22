@@ -210,17 +210,17 @@
   },
   "pinIn": {
     "file": "pin-in.svg",
-    "width": 240,
+    "width": 120,
     "height": 120,
     "terminals": {},
     "anchor": [
-      240,
+      120,
       60
     ]
   },
   "pinOut": {
     "file": "pin-out.svg",
-    "width": 240,
+    "width": 120,
     "height": 120,
     "terminals": {},
     "anchor": [
@@ -230,7 +230,7 @@
   },
   "pinInOut": {
     "file": "pin-io.svg",
-    "width": 240,
+    "width": 120,
     "height": 120,
     "terminals": {},
     "anchor": [

@@ -91,7 +91,7 @@ describe('shape catalog', () => {
     expect([Number(root.width), Number(root.height)]).toEqual([shape.width, shape.height]);
     expect(root.viewBox!.split(/\s+/u).map(Number)).toEqual([0, 0, shape.width, shape.height]);
     expect(shape.height).toBe(120);
-    expect(shape.width).toBe(shape.file.startsWith('pin-') ? 240 : 120);
+    expect(shape.width).toBe(120);
     const group = elements(svg, 'g')[0]!.attrs;
     expect(group.stroke).toBe('#000');
     expect(group['stroke-width']).toBe('2');
