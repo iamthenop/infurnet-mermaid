@@ -1,20 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  pmos4: PMOS transistor with the bulk drawn.
-  Pane 1:1.
-  Terminals G (0, 60), S (90, 0), D (90, 120), B (120, 60).
+Adapted from https://schemdraw.readthedocs.io/en/stable/_images/electrical_163_0.svg
+Uniform scaling and horizontal reflection; external leads extend to snap points.
+
+Copyright (c) 2014-2026 Collin J. Delker
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 -->
-<svg xmlns="http://www.w3.org/2000/svg"
-     width="120" height="120" viewBox="0 0 120 120">
-  <g id="pmos4" fill="none" stroke="#000"
-     stroke-width="2" stroke-linecap="round">
-    <line id="gate-lead" x1="0" y1="60" x2="30" y2="60"/>
-    <circle id="gate-bubble" cx="35" cy="60" r="5" fill="#fff"/>
-    <line id="gate-plate" x1="40" y1="30" x2="40" y2="90"/>
-    <line id="channel" x1="60" y1="30" x2="60" y2="90"/>
-    <polyline id="source" points="60,40 90,40 90,0"/>
-    <polyline id="drain" points="60,80 90,80 90,120"/>
-    <line id="bulk" x1="60" y1="60" x2="120" y2="60"/>
-    <polygon id="bulk-arrow" points="74,60 82,54 82,66" fill="#000"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="pmosBlk" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="35.28" cy="60" r="6.72" id="gate-bubble" stroke="#000" fill="none" stroke-width="2" />
+    <path d="M 90 16.8 L 90 40.8 L 51.6 40.8 L 51.6 79.2 L 90 79.2 L 90 103.2" id="reference-1" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M 42 40.8 L 42 79.2" id="reference-2" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M 28.56 60 L 11.28 60" id="reference-3" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M 90 60 L 66 60" id="reference-4" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M 54.799999 60 L 66 65.76 L 66 54.24 Z" id="bulk-arrow" stroke="#000" fill="#000" stroke-linecap="butt" stroke-linejoin="miter" />
+    <line id="gate-extension" x1="0" y1="60" x2="11.28" y2="60"/>
+    <line id="upper-extension" x1="90" y1="0" x2="90" y2="16.8"/>
+    <line id="lower-extension" x1="90" y1="103.2" x2="90" y2="120"/>
+    <line id="bulk-extension" x1="90" y1="60" x2="120" y2="60"/>
   </g>
 </svg>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Adapted from https://schemdraw.readthedocs.io/en/stable/_images/electrical_21_0.svg
+Uniform coordinate scaling, pane placement, and terminal lead extensions.
+
+Copyright (c) 2014-2026 Collin J. Delker
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fuseUs" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 0 60 L 38.88 60 L 39.742667 58.465333 L 40.604 56.956 L 41.466667 55.497334 L 42.328 54.112 L 43.190666 52.822667 L 44.052 51.652 L 44.914667 50.618666 L 45.776 49.738667 L 46.638667 49.026667 L 47.5 48.496 L 48.362666 48.153334 L 49.224 48.006667 L 50.086667 48.056 L 50.948 48.301333 L 51.810667 48.738667 L 52.672 49.361333 L 53.534666 50.157334 L 54.397333 51.116 L 55.258667 52.221334 L 56.121334 53.453333 L 56.982667 54.793333 L 57.845333 56.218667 L 58.706666 57.706667 L 59.569333 59.230667 L 60.430667 60.769333 L 61.293334 62.293333 L 62.154667 63.781333 L 63.017333 65.206667 L 63.878666 66.546667 L 64.741333 67.778666 L 65.602667 68.884 L 66.465334 69.842666 L 67.328 70.638667 L 68.189333 71.261333 L 69.052 71.698667 L 69.913333 71.944 L 70.776 71.993333 L 71.637334 71.846666 L 72.5 71.504 L 73.361333 70.973333 L 74.224 70.261333 L 75.085333 69.381334 L 75.948 68.348 L 76.809334 67.177333 L 77.672 65.888 L 78.533333 64.502666 L 79.396 63.044 L 80.257333 61.534667 L 81.12 60 L 120 60" id="reference-0" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M 27.36 60 M 92.64 60" id="reference-1" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <circle cx="33.12" cy="60" r="5.76" id="reference-2" stroke="#000" fill="white" stroke-width="2" />
+    <circle cx="86.88" cy="60" r="5.76" id="reference-3" stroke="#000" fill="white" stroke-width="2" />
+  </g>
+</svg>

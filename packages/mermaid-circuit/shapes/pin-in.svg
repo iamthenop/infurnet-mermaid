@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
   pin-in: input pin flag.
-  Pane 2:1.
-  No terminals. Attaches to its net at (240, 60).
+  Pane 1:1.
+  No terminals. Attaches to its net at (120, 60).
 -->
 <svg xmlns="http://www.w3.org/2000/svg"
-     width="240" height="120" viewBox="0 0 240 120">
+     width="120" height="120" viewBox="0 0 120 120">
   <g id="pin-in" fill="none" stroke="#000"
      stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <polygon id="body" points="30,30 180,30 210,60 180,90 30,90"/>
-    <line id="stem" x1="210" y1="60" x2="240" y2="60"/>
+    <polygon id="body" points="6,24 96,24 114,60 96,96 6,96"/>
+    <line id="stem" x1="114" y1="60" x2="120" y2="60"/>
   </g>
 </svg>

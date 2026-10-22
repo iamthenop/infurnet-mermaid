@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Adapted from https://schemdraw.readthedocs.io/en/stable/_images/electrical_46_0.svg
+Uniform scale 1.333333; external leads meet catalog snap points.
+
+Copyright (c) 2014-2026 Collin J. Delker
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="photodiode" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polygon id="reference-0" points="51.6,48 68.4,60 51.6,72" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="reference-1" d="M 0 60 L 51.6 60 M 68.4 48 L 68.4 72 M 68.4 60 L 120 60" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="reference-2" d="M 45.610303 17.229202 L 46.525333 19.386667 L 47.362667 21.328 L 48.124 23.062667 L 48.813333 24.598667 L 49.434667 25.946667 L 49.990667 27.114667 L 50.484 28.112 L 50.918667 28.949333 L 51.298667 29.634667 L 51.626667 30.177333 L 51.905333 30.586667 L 52.14 30.872 L 52.332 31.041333 L 52.485333 31.105333 L 52.604 31.073333 L 52.690667 30.953333 L 52.748 30.754667 L 52.781333 30.488 L 52.793333 30.161333 L 52.785333 29.784 L 52.764 29.364 L 52.729333 28.913333 L 52.688 28.438667 L 52.64 27.950667 L 52.590667 27.458667 L 52.544 26.970667 L 52.501333 26.496 L 52.468 26.045333 L 52.445333 25.626667 L 52.438667 25.249333 L 52.449333 24.922667 L 52.482667 24.654667 L 52.541333 24.457333 L 52.628 24.337333 L 52.746667 24.304 L 52.9 24.368 L 53.092 24.538667 L 53.326667 24.824 L 53.605333 25.233333 L 53.933333 25.774667 L 54.313333 26.46 L 54.748 27.297333 L 55.241333 28.296 L 55.797333 29.464 L 56.417333 30.812 L 57.106667 32.348 L 57.869333 34.082667 L 58.705333 36.022667 L 59.621333 38.181333" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="reference-3" d="M 36.589254 20.512596 L 37.505333 22.670667 L 38.341333 24.610667 L 39.102667 26.345333 L 39.792 27.881333 L 40.413333 29.229333 L 40.969333 30.397333 L 41.462667 31.396 L 41.897333 32.233333 L 42.277333 32.918667 L 42.605333 33.46 L 42.884 33.869333 L 43.118667 34.154667 L 43.310667 34.325333 L 43.464 34.389333 L 43.582667 34.356 L 43.669333 34.236 L 43.728 34.038667 L 43.76 33.770667 L 43.772 33.444 L 43.765333 33.066667 L 43.742667 32.648 L 43.709333 32.197333 L 43.666667 31.722667 L 43.618667 31.234667 L 43.570667 30.742667 L 43.522667 30.254667 L 43.48 29.78 L 43.446667 29.329333 L 43.424 28.909333 L 43.417333 28.532 L 43.429333 28.205333 L 43.461333 27.938667 L 43.52 27.74 L 43.606667 27.62 L 43.725333 27.588 L 43.878667 27.652 L 44.070667 27.821333 L 44.305333 28.106667 L 44.584 28.516 L 44.912 29.058667 L 45.292 29.744 L 45.726667 30.581333 L 46.22 31.578667 L 46.776 32.746667 L 47.397333 34.094667 L 48.086667 35.632 L 48.848 37.365333 L 49.684 39.306667 L 50.6 41.464" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="reference-4" d="M 58.705564 36.023326 L 57.825333 33.728" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="reference-5" d="M 60.308 40.201333 L 54.24 35.102667 L 61.410667 32.353333 Z" stroke="#000" fill="#000" stroke-linecap="butt" stroke-linejoin="miter" />
+    <path id="reference-6" d="M 49.684514 39.30672 L 48.804 37.010667" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="reference-7" d="M 51.286667 43.485333 L 45.218667 38.386667 L 52.389333 35.636 Z" stroke="#000" fill="#000" stroke-linecap="butt" stroke-linejoin="miter" />
+  </g>
+</svg>
