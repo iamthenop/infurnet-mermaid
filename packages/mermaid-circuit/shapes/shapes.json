@@ -237,5 +237,463 @@
       0,
       60
     ]
+  },
+  "source": {
+    "file": "source.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "A": [
+        60,
+        0
+      ],
+      "B": [
+        60,
+        120
+      ]
+    }
+  },
+  "groundSignal": {
+    "file": "ground-signal.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {},
+    "anchor": [
+      60,
+      0
+    ]
+  },
+  "groundChassis": {
+    "file": "ground-chassis.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {},
+    "anchor": [
+      60,
+      0
+    ]
+  },
+  "vss": {
+    "file": "vss.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {},
+    "anchor": [
+      60,
+      0
+    ]
+  },
+  "resistorIEC": {
+    "file": "resistor-iec.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "A": [
+        60,
+        0
+      ],
+      "B": [
+        60,
+        120
+      ]
+    }
+  },
+  "fuse": {
+    "file": "fuse.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "A": [
+        60,
+        0
+      ],
+      "B": [
+        60,
+        120
+      ]
+    }
+  },
+  "fuseIEC": {
+    "file": "fuse-iec.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "A": [
+        60,
+        0
+      ],
+      "B": [
+        60,
+        120
+      ]
+    }
+  },
+  "thermistor": {
+    "file": "thermistor.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "A": [
+        60,
+        0
+      ],
+      "B": [
+        60,
+        120
+      ]
+    }
+  },
+  "sourceSin": {
+    "file": "source-sin.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "P": [
+        60,
+        0
+      ],
+      "N": [
+        60,
+        120
+      ]
+    }
+  },
+  "sourceSquare": {
+    "file": "source-square.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "P": [
+        60,
+        0
+      ],
+      "N": [
+        60,
+        120
+      ]
+    }
+  },
+  "sourceTriangle": {
+    "file": "source-triangle.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "P": [
+        60,
+        0
+      ],
+      "N": [
+        60,
+        120
+      ]
+    }
+  },
+  "sourceRamp": {
+    "file": "source-ramp.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "P": [
+        60,
+        0
+      ],
+      "N": [
+        60,
+        120
+      ]
+    }
+  },
+  "batteryCell": {
+    "file": "battery-cell.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "P": [
+        60,
+        0
+      ],
+      "N": [
+        60,
+        120
+      ]
+    }
+  },
+  "battery": {
+    "file": "battery.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "P": [
+        60,
+        0
+      ],
+      "N": [
+        60,
+        120
+      ]
+    }
+  },
+  "diodeFilled": {
+    "file": "diode-filled.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "A": [
+        0,
+        60
+      ],
+      "K": [
+        120,
+        60
+      ]
+    }
+  },
+  "capacitor2": {
+    "file": "capacitor2.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "A": [
+        0,
+        60
+      ],
+      "B": [
+        120,
+        60
+      ]
+    }
+  },
+  "schottky": {
+    "file": "schottky.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "A": [
+        0,
+        60
+      ],
+      "K": [
+        120,
+        60
+      ]
+    }
+  },
+  "diodeTunnel": {
+    "file": "diode-tunnel.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "A": [
+        0,
+        60
+      ],
+      "K": [
+        120,
+        60
+      ]
+    }
+  },
+  "diodeShockley": {
+    "file": "diode-shockley.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "A": [
+        0,
+        60
+      ],
+      "K": [
+        120,
+        60
+      ]
+    }
+  },
+  "zener": {
+    "file": "zener.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "A": [
+        0,
+        60
+      ],
+      "K": [
+        120,
+        60
+      ]
+    }
+  },
+  "diodeTVS": {
+    "file": "diode-tvs.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "A": [
+        0,
+        60
+      ],
+      "K": [
+        120,
+        60
+      ]
+    }
+  },
+  "varactor": {
+    "file": "varactor.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "A": [
+        0,
+        60
+      ],
+      "K": [
+        120,
+        60
+      ]
+    }
+  },
+  "scr": {
+    "file": "scr.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "A": [
+        0,
+        60
+      ],
+      "K": [
+        120,
+        60
+      ],
+      "G": [
+        90,
+        120
+      ]
+    }
+  },
+  "sourceControlled": {
+    "file": "source-controlled.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "A": [
+        60,
+        0
+      ],
+      "B": [
+        60,
+        120
+      ]
+    }
+  },
+  "sourceControlledI": {
+    "file": "source-controlled-i.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "P": [
+        60,
+        0
+      ],
+      "N": [
+        60,
+        120
+      ]
+    }
+  },
+  "sourceControlledV": {
+    "file": "source-controlled-v.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "P": [
+        60,
+        0
+      ],
+      "N": [
+        60,
+        120
+      ]
+    }
+  },
+  "resistorVar": {
+    "file": "resistor-var.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "A": [
+        60,
+        0
+      ],
+      "B": [
+        60,
+        120
+      ]
+    }
+  },
+  "resistorVarIEC": {
+    "file": "resistor-var-iec.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "A": [
+        60,
+        0
+      ],
+      "B": [
+        60,
+        120
+      ]
+    }
+  },
+  "jfet": {
+    "file": "jfet.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "G": [
+        0,
+        60
+      ],
+      "D": [
+        90,
+        0
+      ],
+      "S": [
+        90,
+        120
+      ]
+    }
+  },
+  "fuseUs": {
+    "file": "fuse-us.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "A": [
+        60,
+        0
+      ],
+      "B": [
+        60,
+        120
+      ]
+    }
+  },
+  "capacitorVar": {
+    "file": "capacitor-var.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "A": [
+        0,
+        60
+      ],
+      "B": [
+        120,
+        60
+      ]
+    }
   }
 }

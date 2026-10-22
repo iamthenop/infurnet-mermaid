@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  diode: diode, anode left, cathode right.
+  Pane 1:1.
+  Terminals A (0, 60), K (120, 60).
+-->
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="120" height="120" viewBox="0 0 120 120">
+  <g id="diodeFilled" fill="none" stroke="#000"
+     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <line id="lead-a" x1="0" y1="60" x2="30" y2="60"/>
+    <polygon id="body" fill="#000" points="30,30 30,90 90,60"/>
+    <line id="bar" x1="90" y1="30" x2="90" y2="90"/>
+    <line id="lead-k" x1="90" y1="60" x2="120" y2="60"/>
+  </g>
+</svg>

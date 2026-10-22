@@ -25,15 +25,31 @@ const snap = (span: number) => span === 240
   ? [0, 30, 40, 60, 80, 90, 120, 150, 160, 180, 200, 210, 240]
   : [0, 30, 40, 60, 80, 90, 120];
 
+const variants = {
+  fets: 'jfet jfetN jfetP jfetNCircle jfetPCircle hemt hemtUnsplit hemtNoArrow nmosDiode pmosDiode nmosCircle pmosCircle analogNFet analogPFet analogBiasedFet analogNFetBulk analogPFetBulk analogBiasedFetBulk analogPFetNoArrow analogBiasedFetNoArrow analogNFetCenteredGate analogPFetCenteredGate analogBiasedFetCenteredGate nfet2 pfet2 jfetN2 jfetP2 nmos2Diode pmos2Diode nmos2Circle pmos2Circle'.split(' '),
+  resistors: 'resistorIEC resistorVar resistorVarIEC potentiometer potentiometerIEC photoresistor photoresistorIEC rshunt fuse fuseUs fuseIEC thermistor'.split(' '),
+  diodes: 'diodeFilled schottky diodeTunnel diodeShockley zener diodeTVS varactor led led2 photodiode diac triac scr'.split(' '),
+  capacitors: 'capacitorPolar capacitor2 capacitor2Polar capacitorVar capacitorTrim'.split(' '),
+  sources: 'source sourceSin sourcePulse sourceSquare sourceTriangle sourceRamp sourceControlled sourceControlledI sourceControlledV batteryCell battery batteryDouble solar'.split(' '),
+  grounds: 'groundSignal groundChassis vss'.split(' '),
+};
+
 describe('shape catalog', () => {
-  it('retains all 16 assets and agrees with the TypeScript export', () => {
-    expect(Object.keys(catalog)).toHaveLength(16);
+  it.each(Object.entries(variants))('contains every approved %s variant', (_family, keys) => {
+    expect(Object.keys(shapes)).toEqual(expect.arrayContaining(keys));
+  });
+  it('retains existing assets and exposes only approved catalog keys', () => {
     expect(shapes).toEqual(catalog);
     expect(Object.values(shapes).map((shape) => shape.file).sort()).toEqual(
       Object.keys(assets).map((path) => path.split('/').at(-1)!).sort(),
     );
     const definitions = [...notation.matchAll(/^\| `([^`]+)` \| (Device|Net) \| ([^|]+) \|$/gmu)];
-    expect(Object.keys(shapes).sort()).toEqual(definitions.map((match) => match[1]).filter((key) => key !== 'net').sort());
+    expect(definitions).toHaveLength(17);
+    const existing = definitions.map((match) => match[1]!).filter((key) => key !== 'net');
+    expect(Object.keys(shapes)).toEqual(expect.arrayContaining(existing));
+    const approved = new Set([...existing, ...Object.values(variants).flat()]);
+    for (const key of Object.keys(shapes)) expect(approved.has(key), key).toBe(true);
+    expect(existing).not.toContain('source');
     for (const [, key, , terminals] of definitions) {
       if (key === 'net') continue;
       const shape: ShapeEntry = shapes[key as ShapeType];
@@ -74,10 +90,10 @@ describe('shape catalog', () => {
     }
 
     const exempt = new Set(
-      shape.file === 'vsource.svg' ? ['plus-h', 'plus-v', 'minus']
+      ['vsource.svg', 'source-controlled-v.svg'].includes(shape.file) ? ['plus-h', 'plus-v', 'minus']
         : shape.file === 'ground.svg' ? ['bar-3']
-          : shape.file === 'isource.svg' ? ['arrow', 'arrow-head']
-            : shape.file === 'resistor.svg' ? ['body'] : ['bulk-arrow'],
+          : ['isource.svg', 'source-controlled-i.svg'].includes(shape.file) ? ['arrow', 'arrow-head']
+            : ['resistor.svg', 'resistor-var.svg'].includes(shape.file) ? ['body'] : ['bulk-arrow'],
     );
     for (const { name, attrs } of elements(svg, 'line|polyline|polygon|circle')) {
       if (exempt.has(attrs.id!)) continue;
@@ -95,6 +111,36 @@ describe('shape catalog', () => {
         }
       }
     }
+  });
+
+  it('preserves terminal contracts for added visual symbols', () => {
+    const added = new Set(Object.values(variants).flat());
+    for (const [key, entry] of Object.entries(shapes)) {
+      if (!added.has(key)) continue;
+      const shape: ShapeEntry = entry;
+      const expected = variants.grounds.includes(key) ? []
+        : variants.fets.includes(key) ? ['G', 'S', 'D', ...(key.endsWith('Bulk') ? ['B'] : [])]
+          : key === 'triac' ? ['A1', 'A2', 'G']
+            : key === 'scr' ? ['A', 'K', 'G']
+              : key === 'diac' || key === 'source' || key === 'sourceControlled' ? ['A', 'B']
+                : variants.diodes.includes(key) ? ['A', 'K']
+                  : variants.sources.includes(key) ? ['P', 'N']
+                    : key.startsWith('potentiometer') ? ['A', 'B', 'W'] : ['A', 'B'];
+      expect(Object.keys(shape.terminals).sort(), key).toEqual(expected.sort());
+      expect(Boolean(shape.anchor), key).toBe(variants.grounds.includes(key));
+    }
+  });
+
+  it('distinguishes controlled sources without making them notation types', () => {
+    for (const key of ['sourceControlled', 'sourceControlledI', 'sourceControlledV'] as const) {
+      const svg = readSvg(shapes[key].file);
+      expect(elements(svg, 'polygon').find(({ attrs }) => attrs.id === 'body')).toBeDefined();
+      expect(svg.includes('id="arrow"')).toBe(key === 'sourceControlledI');
+      expect(svg.includes('id="plus-h"')).toBe(key === 'sourceControlledV');
+      expect(svg.includes('id="minus"')).toBe(key === 'sourceControlledV');
+      expect(notation).not.toContain(`:::${key}`);
+    }
+    expect(elements(readSvg(shapes.source.file), 'circle')).toHaveLength(1);
   });
 
   it('uses a vertical zigzag resistor with straight leads', () => {

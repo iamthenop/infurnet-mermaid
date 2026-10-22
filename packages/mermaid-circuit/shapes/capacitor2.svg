@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="capacitor2" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <line id="lead-a" x1="0" y1="60" x2="40" y2="60"/>
+    <line id="plate-a" x1="40" y1="30" x2="40" y2="90"/>
+    <path id="curved-plate" d="M80 30 Q40 60 80 90"/>
+    <line id="lead-b" x1="60" y1="60" x2="120" y2="60"/>
+  </g>
+</svg>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="schottky" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <line id="lead-a" x1="0" y1="60" x2="40" y2="60"/>
+    <line id="lead-k" x1="80" y1="60" x2="120" y2="60"/>
+    <polygon id="body" points="40,40 40,80 80,60"/>
+    <polyline id="bar" points="60,40 60,30 80,30 80,90 90,90 90,80"/>
+  </g>
+</svg>

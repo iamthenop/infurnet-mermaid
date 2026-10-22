@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fuseUs" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <line id="lead-a" x1="60" y1="0" x2="60" y2="30"/>
+    <path id="body" d="M60 30 C30 40 90 80 60 90"/>
+    <line id="lead-b" x1="60" y1="90" x2="60" y2="120"/>
+    <circle id="contact-a" cx="60" cy="30" r="3" fill="#fff"/>
+    <circle id="contact-b" cx="60" cy="90" r="3" fill="#fff"/>
+  </g>
+</svg>

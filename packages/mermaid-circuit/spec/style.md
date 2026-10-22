@@ -100,3 +100,13 @@ The standard resistor uses Schemdraw's IEEE-style zigzag representation with thr
 Schemdraw is a visual reference, not a Python runtime dependency. Symbols are implemented as SVG assets within the Mermaid plugin.
 
 When a reference conflicts with an approved contract, record the discrepancy. Do not silently redefine the contract.
+
+## Default symbols and variants
+
+The unqualified `resistor`, `diode`, `capacitor`, `source`, and `ground` symbol keys select the conventional forms defined in the shape catalog.
+
+The resistor default uses the IEEE zigzag. The diode default is an ordinary junction diode. The capacitor default is nonpolarized with straight plates. The source default is a plain source circle. The ground default is the three-bar ground symbol.
+
+Alternative representations require explicit shape keys. Shape selection does not change electrical connectivity.
+
+The shape catalog may contain symbols that the current circuit notation cannot yet express. Catalog availability does not imply parser, renderer, or electrical-model support.

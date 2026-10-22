@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="groundChassis" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <line id="stem" x1="60" y1="0" x2="60" y2="60"/>
+    <line id="bar" x1="30" y1="60" x2="90" y2="60"/>
+    <line id="hatch-left" x1="30" y1="60" x2="0" y2="90"/>
+    <line id="hatch-middle" x1="60" y1="60" x2="30" y2="90"/>
+    <line id="hatch-right" x1="90" y1="60" x2="60" y2="90"/>
+  </g>
+</svg>
