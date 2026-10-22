@@ -2,6 +2,8 @@
 // Coordinates are in each shape's own viewBox. Shapes with no terminals
 // attach to their net at `anchor`.
 
+import catalog from './shapes.json' with { type: 'json' };
+
 export type Point = readonly [x: number, y: number];
 
 export interface ShapeEntry {
@@ -12,23 +14,28 @@ export interface ShapeEntry {
   readonly anchor?: Point;
 }
 
-export const shapes = {
-  pmos: { file: 'pmos.svg', width: 120, height: 120, terminals: { G: [0, 60], S: [90, 0], D: [90, 120] } },
-  nmos: { file: 'nmos.svg', width: 120, height: 120, terminals: { G: [0, 60], D: [90, 0], S: [90, 120] } },
-  pmosBlk: { file: 'pmos4.svg', width: 120, height: 120, terminals: { G: [0, 60], S: [90, 0], D: [90, 120], B: [120, 60] } },
-  nmosBlk: { file: 'nmos4.svg', width: 120, height: 120, terminals: { G: [0, 60], D: [90, 0], S: [90, 120], B: [120, 60] } },
-  resistor: { file: 'resistor.svg', width: 120, height: 120, terminals: { A: [0, 60], B: [120, 60] } },
-  capacitor: { file: 'capacitor.svg', width: 120, height: 120, terminals: { A: [0, 60], B: [120, 60] } },
-  diode: { file: 'diode.svg', width: 120, height: 120, terminals: { A: [0, 60], K: [120, 60] } },
-  voltageSource: { file: 'vsource.svg', width: 120, height: 120, terminals: { P: [60, 0], N: [60, 120] } },
-  currentSource: { file: 'isource.svg', width: 120, height: 120, terminals: { P: [60, 0], N: [60, 120] } },
-  inverter: { file: 'inverter.svg', width: 120, height: 120, terminals: { I: [0, 60], O: [120, 60] } },
-  buffer: { file: 'buffer.svg', width: 120, height: 120, terminals: { I: [0, 60], O: [120, 60] } },
-  supplyNet: { file: 'vdd.svg', width: 120, height: 120, terminals: {}, anchor: [60, 120] },
-  ground: { file: 'ground.svg', width: 120, height: 120, terminals: {}, anchor: [60, 0] },
-  pinIn: { file: 'pin-in.svg', width: 240, height: 120, terminals: {}, anchor: [240, 60] },
-  pinOut: { file: 'pin-out.svg', width: 240, height: 120, terminals: {}, anchor: [0, 60] },
-  pinInOut: { file: 'pin-io.svg', width: 240, height: 120, terminals: {}, anchor: [0, 60] },
-} as const satisfies Record<string, ShapeEntry>;
+type CatalogEntry<T> = {
+  readonly [K in keyof T]: K extends 'terminals'
+    ? { readonly [Terminal in keyof T[K]]: Point }
+    : K extends 'anchor' ? Point : T[K];
+};
+
+type ShapeCatalog = {
+  readonly [K in keyof typeof catalog]: CatalogEntry<(typeof catalog)[K]>;
+};
+
+function assertPoints(value: typeof catalog): asserts value is typeof catalog & ShapeCatalog {
+  for (const entry of Object.values(value)) {
+    const shape: { terminals: Record<string, number[]>; anchor?: number[] } = entry;
+    for (const point of [...Object.values(shape.terminals), ...(shape.anchor ? [shape.anchor] : [])]) {
+      if (point.length !== 2 || !point.every(Number.isFinite)) {
+        throw new Error('Shape coordinates must contain two finite numbers.');
+      }
+    }
+  }
+}
+
+assertPoints(catalog);
+export const shapes: ShapeCatalog = catalog satisfies Record<string, ShapeEntry>;
 
 export type ShapeType = keyof typeof shapes;

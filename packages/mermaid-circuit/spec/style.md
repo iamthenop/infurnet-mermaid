@@ -71,6 +71,7 @@ The following internal symbol details are exempt:
 - Third ground bar.
 - Current-source arrow.
 - Four-terminal transistor bulk arrows.
+- Resistor zigzag body bends; its terminals and straight lead endpoints remain on snap points.
 
 ## Terminal positioning conventions
 
@@ -86,4 +87,16 @@ Exact per-symbol coordinates belong to `shapes/shapes.json` when the catalog is 
 
 The intended [shape library](../shapes/) supplies SVG symbols. `shapes/shapes.json` is the authoritative shape metadata catalog when present; `shapes/INDEX.md` is its human-readable reference. These catalog artifacts are not created by this specification work.
 
-The existing resistor SVG and TypeScript index describe a horizontal resistor. Their correction to match the vertical-resistor requirement remains deferred; this specification does not claim that the current asset conforms.
+`shapes/shapes.json` is the maintained shape metadata authority. `shapes/index.ts` exposes that metadata to TypeScript consumers without maintaining a second coordinate inventory.
+
+## Rendering reference
+
+Schemdraw's [Basic Electrical Elements](https://schemdraw.readthedocs.io/en/stable/elements/electrical.html) catalog is the primary visual reference for electrical schematic symbols.
+
+Applicable IEEE standards govern standardized terminology and symbols. `notation.md` governs electrical semantics. This specification governs approved drawing conventions. Schemdraw informs visual details not otherwise fixed by those authorities.
+
+The standard resistor uses Schemdraw's IEEE-style zigzag representation with three peaks on each side. The IEC rectangular representation is not the default.
+
+Schemdraw is a visual reference, not a Python runtime dependency. Symbols are implemented as SVG assets within the Mermaid plugin.
+
+When a reference conflicts with an approved contract, record the discrepancy. Do not silently redefine the contract.
