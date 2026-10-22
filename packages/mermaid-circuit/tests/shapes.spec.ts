@@ -93,7 +93,8 @@ describe('shape catalog', () => {
       ['vsource.svg', 'source-controlled-v.svg'].includes(shape.file) ? ['plus-h', 'plus-v', 'minus']
         : shape.file === 'ground.svg' ? ['bar-3']
           : ['isource.svg', 'source-controlled-i.svg'].includes(shape.file) ? ['arrow', 'arrow-head']
-            : ['resistor.svg', 'resistor-var.svg'].includes(shape.file) ? ['body'] : ['bulk-arrow'],
+            : shape.file === 'resistor-var.svg' ? ['body', 'adjustment', 'adjustment-head']
+              : shape.file === 'resistor.svg' ? ['body'] : ['bulk-arrow'],
     );
     for (const { name, attrs } of elements(svg, 'line|polyline|polygon|circle')) {
       if (exempt.has(attrs.id!)) continue;
@@ -162,30 +163,43 @@ describe('shape catalog', () => {
     }
   });
 
-  it('uses a vertical zigzag resistor with straight leads', () => {
+  it('uses a horizontal zigzag resistor with straight leads', () => {
     const svg = readSvg(shapes.resistor.file);
-    expect(shapes.resistor.terminals).toEqual({ A: [60, 0], B: [60, 120] });
+    expect(shapes.resistor.terminals).toEqual({ A: [0, 60], B: [120, 60] });
     expect(svg).not.toMatch(/<rect\b/u);
     const body = points(elements(svg, 'polyline').find((element) => element.attrs.id === 'body')!.attrs.points!);
     expect(body).toHaveLength(8);
-    expect(body[0]![0]).toBe(60);
-    expect(body.at(-1)![0]).toBe(60);
+    expect(body[0]![1]).toBe(60);
+    expect(body.at(-1)![1]).toBe(60);
     const interior = body.slice(1, -1);
-    expect(interior.filter(([x]) => x < 60)).toHaveLength(3);
-    expect(interior.filter(([x]) => x > 60)).toHaveLength(3);
-    expect(new Set(interior.filter(([x]) => x < 60).map(([x]) => x)).size).toBe(1);
-    expect(new Set(interior.filter(([x]) => x > 60).map(([x]) => x)).size).toBe(1);
-    const pitch = interior[1]![1] - interior[0]![1];
+    expect(interior.filter(([, y]) => y < 60)).toHaveLength(3);
+    expect(interior.filter(([, y]) => y > 60)).toHaveLength(3);
+    expect(new Set(interior.filter(([, y]) => y < 60).map(([, y]) => y)).size).toBe(1);
+    expect(new Set(interior.filter(([, y]) => y > 60).map(([, y]) => y)).size).toBe(1);
+    const pitch = interior[1]![0] - interior[0]![0];
     for (let index = 1; index < interior.length; index++) {
-      expect(interior[index]![1] - interior[index - 1]![1]).toBe(pitch);
+      expect(interior[index]![0] - interior[index - 1]![0]).toBe(pitch);
     }
     for (let index = 1; index < interior.length; index++) {
-      expect((interior[index]![0] - 60) * (interior[index - 1]![0] - 60)).toBeLessThan(0);
+      expect((interior[index]![1] - 60) * (interior[index - 1]![1] - 60)).toBeLessThan(0);
     }
-    for (let index = 1; index < body.length; index++) expect(body[index]![1]).toBeGreaterThan(body[index - 1]![1]);
+    for (let index = 1; index < body.length; index++) expect(body[index]![0]).toBeGreaterThan(body[index - 1]![0]);
     const leads = elements(svg, 'line').map(({ attrs }) => attrs);
-    expect(leads.some((lead) => Number(lead.x1) === 60 && Number(lead.y1) === 0 && Number(lead.x2) === body[0]![0] && Number(lead.y2) === body[0]![1])).toBe(true);
-    expect(leads.some((lead) => Number(lead.x1) === body.at(-1)![0] && Number(lead.y1) === body.at(-1)![1] && Number(lead.x2) === 60 && Number(lead.y2) === 120)).toBe(true);
+    expect(leads.some((lead) => Number(lead.x1) === 0 && Number(lead.y1) === 60 && Number(lead.x2) === body[0]![0] && Number(lead.y2) === body[0]![1])).toBe(true);
+    expect(leads.some((lead) => Number(lead.x1) === body.at(-1)![0] && Number(lead.y1) === body.at(-1)![1] && Number(lead.x2) === 120 && Number(lead.y2) === 60)).toBe(true);
+    const variable = readSvg(shapes.resistorVar.file);
+    const variableBody = points(elements(variable, 'polyline').find(({ attrs }) => attrs.id === 'body')!.attrs.points!);
+    expect(variableBody).toEqual(body);
+    const arrow = elements(variable, 'line').find(({ attrs }) => attrs.id === 'adjustment')!.attrs;
+    const dx = Number(arrow.x2) - Number(arrow.x1);
+    const dy = Number(arrow.y2) - Number(arrow.y1);
+    expect(dx).toBeGreaterThan(0);
+    expect(dy).toBeLessThan(0);
+    for (let index = 2; index < variableBody.length - 1; index++) {
+      const [x1, y1] = variableBody[index - 1]!;
+      const [x2, y2] = variableBody[index]!;
+      if (y2 < y1) expect(dx * (y2 - y1) - dy * (x2 - x1)).toBe(0);
+    }
   });
 
   it('preserves MOSFET gate, source, drain, bulk and polarity presentation', () => {
