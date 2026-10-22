@@ -52,15 +52,22 @@ const snap = (span: number) => span === 240
   : [0, 30, 40, 60, 80, 90, 120];
 
 const variants = {
-  fets: 'jfet jfetN jfetP jfetNCircle jfetPCircle hemt hemtUnsplit hemtNoArrow nmosDiode pmosDiode nmosCircle pmosCircle analogNFet analogPFet analogBiasedFet analogNFetBulk analogPFetBulk analogBiasedFetBulk analogPFetNoArrow analogBiasedFetNoArrow analogNFetCenteredGate analogPFetCenteredGate analogBiasedFetCenteredGate nfet2 pfet2 jfetN2 jfetP2 nmos2Diode pmos2Diode nmos2Circle pmos2Circle'.split(' '),
-  resistors: 'resistorIEC resistorVar resistorVarIEC potentiometer potentiometerIEC photoresistor photoresistorIEC rshunt fuse fuseUs fuseIEC thermistor'.split(' '),
+  fets: 'jfet jfetN jfetP jfetNCircle jfetPCircle hemt hemtUnsplit nmosDiode pmosDiode nmosCircle pmosCircle analogNFet analogPFet analogBiasedFet analogNFetBulk analogPFetBulk analogBiasedFetBulk analogPFetNoArrow analogBiasedFetNoArrow analogNFetCenteredGate analogPFetCenteredGate analogBiasedFetCenteredGate nfet2 pfet2 jfetN2 jfetP2 nmos2Diode pmos2Diode nmos2Circle pmos2Circle'.split(' '),
+  resistors: 'resistorIEC resistorVar resistorVarIEC potentiometer potentiometerIEC photoresistor photoresistorIEC fuse fuseUs fuseIEC thermistor'.split(' '),
   diodes: 'diodeFilled schottky diodeTunnel diodeShockley zener diodeTVS varactor led led2 photodiode diac triac scr'.split(' '),
   capacitors: 'capacitorPolar capacitor2 capacitor2Polar capacitorVar capacitorTrim'.split(' '),
-  sources: 'source sourceSin sourcePulse sourceSquare sourceTriangle sourceRamp sourceControlled sourceControlledI sourceControlledV batteryCell battery batteryDouble solar'.split(' '),
+  sources: 'source sourceSin sourcePulse sourceSquare sourceTriangle sourceRamp sourceControlled sourceControlledI sourceControlledV batteryCell battery solar'.split(' '),
   grounds: 'groundSignal groundChassis vss'.split(' '),
 };
 
+const deferredVariants = ['hemtNoArrow', 'rshunt', 'batteryDouble'] as const;
+
 describe('shape catalog', () => {
+  it('keeps the approved inventory complete and deferred variants absent', () => {
+    expect(Object.values(variants).flat()).toHaveLength(74);
+    expect(Object.keys(shapes)).toHaveLength(90);
+    for (const key of deferredVariants) expect(Object.keys(shapes)).not.toContain(key);
+  });
   it.each(Object.entries(variants))('contains every approved %s variant', (_family, keys) => {
     expect(Object.keys(shapes)).toEqual(expect.arrayContaining(keys));
   });
@@ -410,6 +417,42 @@ describe('shape catalog', () => {
         const [tip, base] = pathPoints(arrows[0]!);
         expect(Math.sign(tip![1] - base![1])).toBe(key === 'jfetN2' || pMos ? -1 : 1);
       }
+    }
+  });
+
+  it('preserves the parameterized analog FET marker and terminal contracts', () => {
+    const bulk = shapes.analogBiasedFetBulk;
+    expect(bulk.file).toBe('analog-biased-fet-bulk.svg');
+    expect(bulk.terminals).toEqual({ G: [0, 80], D: [90, 0], S: [90, 120], B: [120, 60] });
+    const bulkSvg = readSvg(bulk.file);
+    const dots = elements(bulkSvg, 'circle');
+    expect(dots).toHaveLength(1);
+    expect(dots[0]!.attrs.id).toBe('bulk-dot');
+    expect(dots[0]!.attrs.fill).toBe('#000');
+    expect(['cx', 'cy', 'r'].map((name) => Number(dots[0]!.attrs[name]))).toEqual([73.2, 60.8, 3.6]);
+    const contact = referencePaths('analogBiasedFetBulk').find((attrs) => attrs.id === 'bulk-contact')!;
+    expect(pathPoints(contact)).toEqual([[90, 60.8], [66, 60.8]]);
+    const sourceDot = elements(readSvg(shapes.analogBiasedFet.file), 'circle')[0]!.attrs;
+    expect(Number(sourceDot.cy)).toBe(84.8);
+    expect(Number(dots[0]!.attrs.cy)).not.toBe(Number(sourceDot.cy));
+    for (const [key, original, file] of [
+      ['analogPFetNoArrow', 'analogPFet', 'analog-pfet-no-arrow.svg'],
+      ['analogBiasedFetNoArrow', 'analogBiasedFet', 'analog-biased-fet-no-arrow.svg'],
+    ] as const) {
+      expect(shapes[key].file).toBe(file);
+      expect(shapes[key].terminals).toEqual(original === 'analogPFet'
+        ? { G: [0, 40], S: [90, 0], D: [90, 120] }
+        : { G: [0, 80], D: [90, 0], S: [90, 120] });
+      const svg = readSvg(shapes[key].file);
+      expect(elements(svg, 'circle|polygon')).toHaveLength(0);
+      expect(referencePaths(key).filter((attrs) => attrs.fill === '#000')).toHaveLength(0);
+      const retained = referencePaths(original).filter((attrs) => original !== 'analogPFet'
+        || !['reference-1', 'reference-2'].includes(attrs.id!));
+      expect(referencePaths(key).map((attrs) => attrs.d)).toEqual(retained.map((attrs) => attrs.d));
+    }
+    const unchangedBody = referencePaths('analogBiasedFet');
+    for (const path of unchangedBody) {
+      expect(referencePaths('analogBiasedFetBulk').find((attrs) => attrs.id === path.id)?.d).toBe(path.d);
     }
   });
 

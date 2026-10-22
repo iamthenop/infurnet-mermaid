@@ -1419,5 +1419,66 @@
         40
       ]
     }
+  },
+  "analogPFetNoArrow": {
+    "file": "analog-pfet-no-arrow.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "G": [
+        0,
+        40
+      ],
+      "S": [
+        90,
+        0
+      ],
+      "D": [
+        90,
+        120
+      ]
+    }
+  },
+  "analogBiasedFetNoArrow": {
+    "file": "analog-biased-fet-no-arrow.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "G": [
+        0,
+        80
+      ],
+      "D": [
+        90,
+        0
+      ],
+      "S": [
+        90,
+        120
+      ]
+    }
+  },
+  "analogBiasedFetBulk": {
+    "file": "analog-biased-fet-bulk.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "G": [
+        0,
+        80
+      ],
+      "D": [
+        90,
+        0
+      ],
+      "S": [
+        90,
+        120
+      ],
+      "B": [
+        120,
+        60
+      ]
+    }
   }
 }
