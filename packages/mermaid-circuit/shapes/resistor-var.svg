@@ -6,7 +6,7 @@
     <line id="lead-a" x1="0" y1="60" x2="30" y2="60"/>
     <polyline id="body" points="30,60 35,40 45,80 55,40 65,80 75,40 85,80 90,60"/>
     <line id="lead-b" x1="90" y1="60" x2="120" y2="60"/>
-    <line id="adjustment" x1="55" y1="100" x2="75" y2="20"/>
-    <polygon id="adjustment-head" points="75,20 68,31 76,33" fill="#000"/>
+    <line id="adjustment" x1="45" y1="100" x2="69.971667" y2="27.86"/>
+    <polygon id="adjustment-head" points="73.603333,17.368889 74.33,30.542222 65.613333,25.177778" fill="#000"/>
   </g>
 </svg>

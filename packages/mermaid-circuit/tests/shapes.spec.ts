@@ -195,11 +195,25 @@ describe('shape catalog', () => {
     const dy = Number(arrow.y2) - Number(arrow.y1);
     expect(dx).toBeGreaterThan(0);
     expect(dy).toBeLessThan(0);
-    for (let index = 2; index < variableBody.length - 1; index++) {
+    const intersections: { segment: number; fraction: number }[] = [];
+    for (let index = 1; index < variableBody.length; index++) {
       const [x1, y1] = variableBody[index - 1]!;
       const [x2, y2] = variableBody[index]!;
-      if (y2 < y1) expect(dx * (y2 - y1) - dy * (x2 - x1)).toBe(0);
+      const sx = x2 - x1;
+      const sy = y2 - y1;
+      const determinant = dx * sy - dy * sx;
+      if (Math.abs(determinant) < 1e-9) continue;
+      const ox = x1 - Number(arrow.x1);
+      const oy = y1 - Number(arrow.y1);
+      const alongArrow = (ox * sy - oy * sx) / determinant;
+      const alongBody = (ox * dy - oy * dx) / determinant;
+      if (alongArrow >= 0 && alongArrow <= 1 && alongBody >= 0 && alongBody <= 1) {
+        intersections.push({ segment: index - 1, fraction: alongBody });
+      }
     }
+    expect(intersections).toHaveLength(1);
+    expect(intersections[0]!.segment).toBe(3);
+    expect(intersections[0]!.fraction).toBeCloseTo(0.451616, 4);
   });
 
   it('preserves MOSFET gate, source, drain, bulk and polarity presentation', () => {
