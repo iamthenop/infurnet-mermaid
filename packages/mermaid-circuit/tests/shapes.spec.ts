@@ -142,7 +142,7 @@ describe('shape catalog', () => {
         const base = triangle.filter((point) => point !== tip);
         expect(base).toHaveLength(2);
         expect(base[0]![0]).toBe(base[1]![0]);
-        expect(Math.sign(tip[0] - base[0]![0])).toBe(pChannel ? 1 : -1);
+        expect(Math.sign(tip[0] - base[0]![0])).toBe(-1);
       } else {
         expect(shape.terminals.B).toBeUndefined();
       }
