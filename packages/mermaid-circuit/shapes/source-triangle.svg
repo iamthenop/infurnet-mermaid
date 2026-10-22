@@ -25,8 +25,8 @@ SOFTWARE.
 -->
 <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
   <g id="sourceTriangle" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <circle cx="60" cy="60" r="20" id="reference-0" stroke="#000" fill="none" stroke-width="2" />
-    <path d="M 0 60 L 40 60 L 40 60 M 80 60 L 80 60 L 120 60" id="reference-1" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-    <path d="M 56 50 L 68 60 L 56 70" id="reference-2" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <circle cx="60" cy="60" r="24" id="reference-0" stroke="#000" fill="none" stroke-width="2" />
+    <path d="M 0 60 L 36 60 L 36 60 M 84 60 L 84 60 L 120 60" id="reference-1" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M 55.2 48 L 69.6 60 L 55.2 72" id="reference-2" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
   </g>
 </svg>

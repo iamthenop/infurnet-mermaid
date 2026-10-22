@@ -25,12 +25,12 @@ SOFTWARE.
 -->
 <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
   <g id="pmos" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <circle cx="44.4" cy="60" r="5.6" id="gate-bubble" stroke="#000" fill="none" stroke-width="2" />
-    <path d="M 90 24 L 90 44 L 58 44 L 58 76 L 90 76 L 90 96" id="reference-1" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-    <path d="M 50 44 L 50 76" id="reference-2" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-    <path d="M 38.8 60 L 24.4 60" id="reference-3" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-    <line id="gate-extension" x1="0" y1="60" x2="24.4" y2="60"/>
-    <line id="upper-extension" x1="90" y1="0" x2="90" y2="24"/>
-    <line id="lower-extension" x1="90" y1="96" x2="90" y2="120"/>
+    <circle cx="35.28" cy="60" r="6.72" id="gate-bubble" stroke="#000" fill="none" stroke-width="2" />
+    <path d="M 90 16.8 L 90 40.8 L 51.6 40.8 L 51.6 79.2 L 90 79.2 L 90 103.2" id="reference-1" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M 42 40.8 L 42 79.2" id="reference-2" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M 28.56 60 L 11.28 60" id="reference-3" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <line id="gate-extension" x1="0" y1="60" x2="11.28" y2="60"/>
+    <line id="upper-extension" x1="90" y1="0" x2="90" y2="16.8"/>
+    <line id="lower-extension" x1="90" y1="103.2" x2="90" y2="120"/>
   </g>
 </svg>

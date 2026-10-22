@@ -25,7 +25,7 @@ SOFTWARE.
 -->
 <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
   <g id="thermistor" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M 0 60 L 40 60 L 40 50 L 80 50 L 80 70 L 40 70 L 40 60 M 80 60 L 120 60" id="reference-0" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-    <path d="M 40 78 L 48 78 L 80 42" id="reference-1" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M 0 60 L 36 60 L 36 48 L 84 48 L 84 72 L 36 72 L 36 60 M 84 60 L 120 60" id="reference-0" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M 36 81.6 L 45.6 81.6 L 84 38.4" id="reference-1" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
   </g>
 </svg>

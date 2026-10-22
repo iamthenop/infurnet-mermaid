@@ -25,8 +25,8 @@ SOFTWARE.
 -->
 <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
   <g id="sourceControlledI" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M 0 60 L 40 60 L 60 40 L 80 60 L 60 80 L 40 60 M 80 60 L 120 60" id="reference-0" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-    <path d="M 50 60 L 60 60" id="reference-1" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-    <path d="M 67.777778 60 L 60 63 L 60 57 Z" id="reference-2" stroke="#000" fill="#000" stroke-linecap="butt" stroke-linejoin="miter" />
+    <path d="M 0 60 L 36 60 L 60 36 L 84 60 L 60 84 L 36 60 M 84 60 L 120 60" id="reference-0" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M 48 60 L 60 60" id="reference-1" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M 69.333334 60 L 60 63.6 L 60 56.4 Z" id="reference-2" stroke="#000" fill="#000" stroke-linecap="butt" stroke-linejoin="miter" />
   </g>
 </svg>

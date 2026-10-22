@@ -25,21 +25,21 @@ SOFTWARE.
 -->
 <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
   <g id="pmosCircle" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <circle id="reference-0" cx="76" cy="56" r="28" stroke="#000" fill="none" stroke-width="2" />
-    <path id="reference-1" d="M 68 42 L 68 46" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-    <path id="reference-2" d="M 68 54 L 68 58" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-    <path id="reference-3" d="M 68 66 L 68 70" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-    <path id="reference-4" d="M 80 44 L 80 16" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-    <path id="reference-5" d="M 68 44 L 80 44" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-    <path id="reference-6" d="M 80 96 L 80 68" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-    <path id="reference-7" d="M 68 68 L 80 68" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-    <path id="reference-8" d="M 40 40 L 60 40" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-    <path id="reference-9" d="M 60 40 L 60 72" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-    <path id="reference-10" d="M 68 56 L 72 56" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-    <path id="reference-11" d="M 77.333334 56 L 72 60 L 72 52 Z" stroke="#000" fill="#000" stroke-linecap="butt" stroke-linejoin="miter" />
-    <path id="reference-12" d="M 80 56 L 80 44" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-    <line id="gate-extension" x1="0" y1="40" x2="40" y2="40" />
-    <line id="upper-extension" x1="80" y1="0" x2="80" y2="16" />
-    <line id="lower-extension" x1="80" y1="96" x2="80" y2="120" />
+    <circle id="reference-0" cx="75.2" cy="59.2" r="33.6" stroke="#000" fill="none" stroke-width="2" />
+    <path id="reference-1" d="M 65.6 42.4 L 65.6 47.2" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="reference-2" d="M 65.6 56.8 L 65.6 61.6" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="reference-3" d="M 65.6 71.2 L 65.6 76" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="reference-4" d="M 80 44.8 L 80 11.2" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="reference-5" d="M 65.6 44.8 L 80 44.8" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="reference-6" d="M 80 107.2 L 80 73.6" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="reference-7" d="M 65.6 73.6 L 80 73.6" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="reference-8" d="M 32 40 L 56 40" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="reference-9" d="M 56 40 L 56 78.4" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="reference-10" d="M 65.6 59.2 L 70.4 59.2" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="reference-11" d="M 76.800001 59.2 L 70.4 64 L 70.4 54.4 Z" stroke="#000" fill="#000" stroke-linecap="butt" stroke-linejoin="miter" />
+    <path id="reference-12" d="M 80 59.2 L 80 44.8" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <line id="gate-extension" x1="0" y1="40" x2="32" y2="40" />
+    <line id="upper-extension" x1="80" y1="0" x2="80" y2="11.2" />
+    <line id="lower-extension" x1="80" y1="107.2" x2="80" y2="120" />
   </g>
 </svg>

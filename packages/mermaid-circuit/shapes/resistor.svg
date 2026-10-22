@@ -25,6 +25,6 @@ SOFTWARE.
 -->
 <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
   <g id="resistor" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M 0 60 L 40 60 L 43.333333 50 L 50 70 L 56.666667 50 L 63.333333 70 L 70 50 L 76.666667 70 L 80 60 L 120 60" id="reference-0" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M 0 60 L 36 60 L 40 48 L 48 72 L 56 48 L 64 72 L 72 48 L 80 72 L 84 60 L 120 60" id="reference-0" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
   </g>
 </svg>

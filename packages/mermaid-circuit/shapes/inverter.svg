@@ -8,9 +8,9 @@
      width="120" height="120" viewBox="0 0 120 120">
   <g id="inverter" fill="none" stroke="#000"
      stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <line id="lead-i" x1="0" y1="60" x2="30" y2="60"/>
-    <polygon id="body" points="30,30 30,90 80,60"/>
-    <circle id="bubble" cx="85" cy="60" r="5" fill="#fff"/>
-    <line id="lead-o" x1="90" y1="60" x2="120" y2="60"/>
+    <line id="lead-i" x1="0" y1="60" x2="24" y2="60"/>
+    <polygon id="body" points="24,24 24,96 84,60"/>
+    <circle id="bubble" cx="90" cy="60" r="6" fill="#fff"/>
+    <line id="lead-o" x1="96" y1="60" x2="120" y2="60"/>
   </g>
 </svg>

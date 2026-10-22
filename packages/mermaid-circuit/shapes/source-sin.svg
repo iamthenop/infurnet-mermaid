@@ -25,8 +25,8 @@ SOFTWARE.
 -->
 <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
   <g id="sourceSin" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <circle cx="60" cy="60" r="20" id="reference-0" stroke="#000" fill="none" stroke-width="2" />
-    <path d="M 0 60 L 40 60 L 40 60 M 80 60 L 80 60 L 120 60" id="reference-1" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-    <path d="M 60 70 L 62.07 69.166667 L 64 68.333333 L 65.656667 67.5 L 66.927778 66.666667 L 67.727778 65.833333 L 68 65 L 67.727778 64.166667 L 66.927778 63.333333 L 65.656667 62.5 L 64 61.666667 L 62.07 60.833333 L 60 60 L 57.93 59.166667 L 56 58.333333 L 54.343333 57.5 L 53.072222 56.666667 L 52.272222 55.833333 L 52 55 L 52.272222 54.166667 L 53.072222 53.333333 L 54.343333 52.5 L 56 51.666667 L 57.93 50.833333 L 60 50" id="reference-2" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <circle cx="60" cy="60" r="24" id="reference-0" stroke="#000" fill="none" stroke-width="2" />
+    <path d="M 0 60 L 36 60 L 36 60 M 84 60 L 84 60 L 120 60" id="reference-1" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M 60 72 L 62.484 71 L 64.8 70 L 66.788 69 L 68.313334 68 L 69.273334 67 L 69.6 66 L 69.273334 65 L 68.313334 64 L 66.788 63 L 64.8 62 L 62.484 61 L 60 60 L 57.516 59 L 55.2 58 L 53.212 57 L 51.686666 56 L 50.726666 55 L 50.4 54 L 50.726666 53 L 51.686666 52 L 53.212 51 L 55.2 50 L 57.516 49 L 60 48" id="reference-2" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
   </g>
 </svg>
