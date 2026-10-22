@@ -25,14 +25,14 @@ SOFTWARE.
 -->
 <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
   <g id="nmosBlk" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M 90 15 L 90 40 L 50 40 L 50 80 L 90 80 L 90 105" id="reference-0" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-    <path d="M 40 40 L 40 80" id="reference-1" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-    <path d="M 40 60 L 8 60" id="reference-2" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-    <path d="M 90 60 L 65 60" id="reference-3" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-    <path d="M 53.333333 60 L 65 66 L 65 54 Z" id="bulk-arrow" stroke="#000" fill="#000" stroke-linecap="butt" stroke-linejoin="miter" />
-    <line id="gate-extension" x1="0" y1="60" x2="8" y2="60"/>
-    <line id="upper-extension" x1="90" y1="0" x2="90" y2="15"/>
-    <line id="lower-extension" x1="90" y1="105" x2="90" y2="120"/>
+    <path d="M 90 24 L 90 44 L 58 44 L 58 76 L 90 76 L 90 96" id="reference-0" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M 50 44 L 50 76" id="reference-1" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M 50 60 L 24.4 60" id="reference-2" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M 90 60 L 70 60" id="reference-3" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M 60.666666 60 L 70 64.8 L 70 55.2 Z" id="bulk-arrow" stroke="#000" fill="#000" stroke-linecap="butt" stroke-linejoin="miter" />
+    <line id="gate-extension" x1="0" y1="60" x2="24.4" y2="60"/>
+    <line id="upper-extension" x1="90" y1="0" x2="90" y2="24"/>
+    <line id="lower-extension" x1="90" y1="96" x2="90" y2="120"/>
     <line id="bulk-extension" x1="90" y1="60" x2="120" y2="60"/>
   </g>
 </svg>
