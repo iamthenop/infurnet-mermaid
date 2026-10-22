@@ -25,12 +25,12 @@ SOFTWARE.
 -->
 <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
   <g id="jfetN" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path id="reference-0" d="M 90 16 L 90 36 L 66 36 L 66 29.6 L 66 66.4 L 66 60 L 90 60 L 90 80" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-    <path id="reference-1" d="M 66 60 L 46 60" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-    <path id="reference-2" d="M 61.2 60 L 63.6 60" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-    <path id="reference-3" d="M 54.266666 60 L 63.6 64.8 L 63.6 55.2 Z" stroke="#000" fill="#000" stroke-linecap="butt" stroke-linejoin="miter" />
-    <line id="gate-extension" x1="0" y1="60" x2="46" y2="60" />
-    <line id="upper-extension" x1="90" y1="0" x2="90" y2="16" />
-    <line id="lower-extension" x1="90" y1="80" x2="90" y2="120" />
+    <path id="reference-0" d="M 80 36 L 80 56 L 56 56 L 56 49.6 L 56 86.4 L 56 80 L 80 80 L 80 100" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="reference-1" d="M 56 80 L 36 80" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="reference-2" d="M 51.2 80 L 53.6 80" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="reference-3" d="M 44.266666 80 L 53.6 84.8 L 53.6 75.2 Z" stroke="#000" fill="#000" stroke-linecap="butt" stroke-linejoin="miter" />
+    <line id="gate-extension" x1="0" y1="80" x2="36" y2="80" />
+    <line id="upper-extension" x1="80" y1="0" x2="80" y2="36" />
+    <line id="lower-extension" x1="80" y1="100" x2="80" y2="120" />
   </g>
 </svg>

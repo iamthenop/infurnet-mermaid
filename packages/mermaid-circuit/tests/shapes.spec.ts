@@ -263,6 +263,9 @@ describe('shape catalog', () => {
   });
 
   it('distinguishes FET polarity, enclosure, diode and channel variants', () => {
+    for (const key of ['jfet', 'jfetN', 'jfetP', 'jfetNCircle', 'jfetPCircle'] as const) {
+      expect(shapes[key].terminals).toEqual(shapes.nmosDiode.terminals);
+    }
     for (const [n, p] of [['jfetN', 'jfetP'], ['jfetNCircle', 'jfetPCircle'], ['nmosDiode', 'pmosDiode'], ['nmosCircle', 'pmosCircle']] as const) {
       const arrowDirection = (key: ShapeType) => {
         const arrow = referencePaths(key).find((attrs) => attrs.fill === '#000')!;
