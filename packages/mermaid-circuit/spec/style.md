@@ -21,6 +21,8 @@ The expression *supply rail* describes graphical placement, not an electrical ob
 
 ## Symbols
 
+Rules 1–7 describe the default CMOS MOSFET representations: `nmos`, `pmos`, `nmosBlk`, and `pmosBlk`. Other FET variants retain their own approved symbol geometry and terminal mappings in `shapes/shapes.json`.
+
 1. A transistor gate appears on the left.
 2. PMOS sources appear at the top.
 3. NMOS sources appear at the bottom.
@@ -28,7 +30,7 @@ The expression *supply rail* describes graphical placement, not an electrical ob
 5. Four-terminal MOSFETs expose the bulk terminal.
 6. A bubble at the gate marks PMOS.
 7. NMOS has no gate bubble.
-8. Resistors and sources are drawn vertically.
+8. The default IEEE zigzag resistor is drawn horizontally. Source-symbol orientation follows the selected shape and its terminal coordinates in `shapes/shapes.json`. The existing `voltageSource` and `currentSource` symbols have vertical terminals; generic, waveform, controlled-source, and battery variants may use horizontal terminals.
 9. A voltage source has its positive terminal at the top.
 10. Symbols use black strokes with a nominal width of 2 units.
 11. Terminals lie on established snap points.
@@ -63,31 +65,30 @@ Snap points are defined at these fractions of a 120-unit span:
 | 120 units | 0, 30, 40, 60, 80, 90, 120 |
 | 240 units | 0, 30, 40, 60, 80, 90, 120, 150, 160, 180, 200, 210, 240 |
 
-Every terminal, line endpoint, and line bend lies on a snap point. Circles conform when their centers or edges lie on snap points.
+External electrical terminals, symbol attachment anchors, and routed wire endpoints and bends use the approved snap positions.
 
-The following internal symbol details are exempt:
+Internal SVG symbol geometry follows the approved visual reference. Body contours, circles, arrows, polarity marks, zigzags, and other internal strokes are not required to fall on snap points. Internal geometry must remain within its assigned pane.
 
-- Voltage-source polarity marks.
-- Third ground bar.
-- Current-source arrow.
-- Four-terminal transistor bulk arrows.
-- Resistor zigzag body bends; its terminals and straight lead endpoints remain on snap points.
+The distinction between symbol geometry and external attachment points does not change electrical connectivity.
 
 ## Terminal positioning conventions
 
 | Family | Terminal locations |
 | --- | --- |
 | Two-terminal vertical shapes | Top center and bottom center |
-| Transistors | Gate at left center; source and drain at x=90 on upper and lower edges; optional bulk at right center |
+| Default CMOS MOSFETs | Gate at left center; source and drain at x=90 on the upper and lower edges; optional bulk at right center |
+| Other FET variants | Use the individual shape's named terminal coordinates in `shapes/shapes.json` |
 | Logic gates | Input at left center; output at right center |
 
-Exact per-symbol coordinates belong to `shapes/shapes.json` when the catalog is implemented. This document does not create another coordinate registry.
+Exact per-symbol coordinates are recorded in `shapes/shapes.json`. This specification does not establish another coordinate registry.
 
 ## Shape references
 
-The intended [shape library](../shapes/) supplies SVG symbols. `shapes/shapes.json` is the authoritative shape metadata catalog when present; `shapes/INDEX.md` is its human-readable reference. These catalog artifacts are not created by this specification work.
+SVG assets live in the [shape library](../shapes/).
 
-`shapes/shapes.json` is the maintained shape metadata authority. `shapes/index.ts` exposes that metadata to TypeScript consumers without maintaining a second coordinate inventory.
+`shapes/shapes.json` is the maintained authority for SVG filenames, pane dimensions, named terminal coordinates, and attachment anchors.
+
+`shapes/index.ts` exposes the catalog to TypeScript consumers without maintaining a second coordinate inventory.
 
 ## Rendering reference
 
