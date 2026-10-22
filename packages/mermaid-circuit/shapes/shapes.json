@@ -735,7 +735,7 @@
     }
   },
   "jfetNCircle": {
-    "file": "jfet-ncircle.svg",
+    "file": "jfet-n-circle.svg",
     "width": 120,
     "height": 120,
     "terminals": {
@@ -754,7 +754,7 @@
     }
   },
   "jfetPCircle": {
-    "file": "jfet-pcircle.svg",
+    "file": "jfet-p-circle.svg",
     "width": 120,
     "height": 120,
     "terminals": {
