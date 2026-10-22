@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-Adapted from https://schemdraw.readthedocs.io/en/stable/_images/electrical_160_0.svg
-Uniform scaling and horizontal reflection; external leads extend to snap points.
+Adapted from https://schemdraw.readthedocs.io/en/stable/_images/electrical_172_0.svg
+Uniform scaling; external leads extend to snap points.
 
 Copyright (c) 2014-2026 Collin J. Delker
 
@@ -25,11 +25,20 @@ SOFTWARE.
 -->
 <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
   <g id="nmos" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M 90 15 L 90 40 L 50 40 L 50 80 L 90 80 L 90 105" id="reference-0" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-    <path d="M 40 40 L 40 80" id="reference-1" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-    <path d="M 40 60 L 8 60" id="reference-2" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-    <line id="gate-extension" x1="0" y1="60" x2="8" y2="60"/>
-    <line id="upper-extension" x1="90" y1="0" x2="90" y2="15"/>
-    <line id="lower-extension" x1="90" y1="105" x2="90" y2="120"/>
+    <path id="reference-0" d="M 65 42.5 L 65 47.5" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="reference-1" d="M 65 57.5 L 65 62.5" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="reference-2" d="M 65 72.5 L 65 77.5" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="reference-3" d="M 80 45 L 80 10" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="reference-4" d="M 65 45 L 80 45" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="reference-5" d="M 80 110 L 80 75" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="reference-6" d="M 65 75 L 80 75" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="reference-7" d="M 30 80 L 55 80" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="reference-8" d="M 55 80 L 55 40" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="reference-9" d="M 75 60 L 80 60" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="reference-10" d="M 68.333333 60 L 75 55 L 75 65 Z" stroke="#000" fill="#000" stroke-linecap="butt" stroke-linejoin="miter" />
+    <path id="reference-11" d="M 80 60 L 80 75" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <line id="gate-extension" x1="0" y1="80" x2="30" y2="80" />
+    <line id="upper-extension" x1="80" y1="0" x2="80" y2="10" />
+    <line id="lower-extension" x1="80" y1="110" x2="80" y2="120" />
   </g>
 </svg>

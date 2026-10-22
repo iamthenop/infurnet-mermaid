@@ -242,10 +242,10 @@ describe('shape catalog', () => {
       const svg = readSvg(shape.file);
       const pChannel = key.startsWith('p');
       const bulk = key.endsWith('Blk');
-      expect(shape.terminals.G).toEqual([0, 60]);
-      expect(shape.terminals.S).toEqual([90, pChannel ? 0 : 120]);
-      expect(shape.terminals.D).toEqual([90, pChannel ? 120 : 0]);
-      expect(svg.includes('id="gate-bubble"')).toBe(pChannel);
+      expect(shape.terminals.G).toEqual([0, bulk ? 60 : pChannel ? 40 : 80]);
+      expect(shape.terminals.S).toEqual([bulk ? 90 : 80, pChannel ? 0 : 120]);
+      expect(shape.terminals.D).toEqual([bulk ? 90 : 80, pChannel ? 120 : 0]);
+      expect(svg.includes('id="gate-bubble"')).toBe(pChannel && bulk);
       const arrow = elements(svg, 'path').find((element) => element.attrs.id === 'bulk-arrow');
       expect(Boolean(arrow)).toBe(bulk);
       if (bulk) {
@@ -263,7 +263,7 @@ describe('shape catalog', () => {
   });
 
   it('distinguishes FET polarity, enclosure, diode and channel variants', () => {
-    for (const [n, p] of [['jfetN', 'jfetP'], ['jfetNCircle', 'jfetPCircle'], ['nmosDiode', 'pmosDiode'], ['nmosCircle', 'pmosCircle']] as const) {
+    for (const [n, p] of [['nmos', 'pmos'], ['jfetN', 'jfetP'], ['jfetNCircle', 'jfetPCircle'], ['nmosDiode', 'pmosDiode'], ['nmosCircle', 'pmosCircle']] as const) {
       const arrowDirection = (key: ShapeType) => {
         const arrow = referencePaths(key).find((attrs) => attrs.fill === '#000')!;
         const [tip, base] = pathPoints(arrow);
