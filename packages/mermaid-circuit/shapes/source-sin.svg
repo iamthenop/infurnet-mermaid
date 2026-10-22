@@ -1,9 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+Adapted from https://schemdraw.readthedocs.io/en/stable/_images/electrical_73_0.svg
+Uniform coordinate scaling, pane placement, and terminal lead extensions.
+
+Copyright (c) 2014-2026 Collin J. Delker
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+-->
 <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
   <g id="sourceSin" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <line id="lead-p" x1="0" y1="60" x2="40" y2="60"/>
-    <line id="lead-n" x1="80" y1="60" x2="120" y2="60"/>
-    <circle id="body" cx="60" cy="60" r="20"/>
-    <path id="waveform" d="M48 60 C52 47 56 47 60 60 C64 73 68 73 72 60"/>
+    <circle cx="60" cy="60" r="20" id="reference-0" stroke="#000" fill="none" stroke-width="2" />
+    <path d="M 0 60 L 40 60 L 40 60 M 80 60 L 80 60 L 120 60" id="reference-1" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M 60 70 L 62.07 69.166667 L 64 68.333333 L 65.656667 67.5 L 66.927778 66.666667 L 67.727778 65.833333 L 68 65 L 67.727778 64.166667 L 66.927778 63.333333 L 65.656667 62.5 L 64 61.666667 L 62.07 60.833333 L 60 60 L 57.93 59.166667 L 56 58.333333 L 54.343333 57.5 L 53.072222 56.666667 L 52.272222 55.833333 L 52 55 L 52.272222 54.166667 L 53.072222 53.333333 L 54.343333 52.5 L 56 51.666667 L 57.93 50.833333 L 60 50" id="reference-2" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
   </g>
 </svg>

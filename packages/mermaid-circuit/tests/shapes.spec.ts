@@ -21,6 +21,32 @@ const points = (value: string): Point[] => value.trim().split(/\s+/u).map((pair)
 });
 const elements = (svg: string, names: string) => [...svg.matchAll(new RegExp(`<(${names})\\b[^>]*>`, 'gu'))]
   .map((match) => ({ name: match[1]!, attrs: attributes(match[0]) }));
+const pathSubpaths = (value: string): Point[][] => {
+  const tokens = value.match(/[MLAaZz]|[-+]?(?:\d*\.\d+|\d+\.?\d*)(?:[eE][-+]?\d+)?/gu)!;
+  const paths: Point[][] = [];
+  let command = '', index = 0;
+  let current: Point = [0, 0];
+  while (index < tokens.length) {
+    if (/^[MLAaZz]$/u.test(tokens[index]!)) command = tokens[index++]!;
+    if (command === 'Z' || command === 'z') {
+      paths.at(-1)!.push(paths.at(-1)![0]!);
+      command = '';
+      continue;
+    }
+    expect(['M', 'L', 'A', 'a']).toContain(command);
+    const count = command === 'A' || command === 'a' ? 7 : 2;
+    const values = tokens.slice(index, index + count).map(Number);
+    expect(values).toHaveLength(count);
+    index += count;
+    const end: Point = [values.at(-2)!, values.at(-1)!];
+    current = command === 'a' ? [current[0] + end[0], current[1] + end[1]] : end;
+    if (command === 'M') paths.push([]);
+    paths.at(-1)!.push(current);
+  }
+  return paths;
+};
+const pathPoints = (attrs: Record<string, string>) => pathSubpaths(attrs.d!).flat();
+const referencePaths = (key: ShapeType) => elements(readSvg(shapes[key].file), 'path').map(({ attrs }) => attrs);
 const snap = (span: number) => span === 240
   ? [0, 30, 40, 60, 80, 90, 120, 150, 160, 180, 200, 210, 240]
   : [0, 30, 40, 60, 80, 90, 120];
@@ -78,6 +104,9 @@ describe('shape catalog', () => {
         : points(attrs.points!);
       lineEnds.push(vertices[0]!, vertices.at(-1)!);
     }
+    for (const { attrs } of elements(svg, 'path')) {
+      for (const subpath of pathSubpaths(attrs.d!)) lineEnds.push(subpath[0]!, subpath.at(-1)!);
+    }
     for (const point of [...Object.values(shape.terminals), ...(shape.anchor ? [shape.anchor] : [])]) {
       expect(point).toHaveLength(2);
       expect(snap(shape.width)).toContain(point[0]);
@@ -101,13 +130,7 @@ describe('shape catalog', () => {
         expect(Number(attrs.height)).toBeGreaterThan(0);
         vertices = [[x, y], [x + Number(attrs.width), y + Number(attrs.height)]];
       } else if (name === 'path') {
-        expect(attrs.d).toMatch(/^[MQC\d.,\s-]+$/u);
-        const coordinates = attrs.d!.match(/-?\d+(?:\.\d+)?/gu)!.map(Number);
-        expect(coordinates.length % 2).toBe(0);
-        vertices = [];
-        for (let index = 0; index < coordinates.length; index += 2) {
-          vertices.push([coordinates[index]!, coordinates[index + 1]!]);
-        }
+        vertices = pathPoints(attrs);
       } else {
         vertices = name === 'line'
           ? [[Number(attrs.x1), Number(attrs.y1)], [Number(attrs.x2), Number(attrs.y2)]]
@@ -141,79 +164,67 @@ describe('shape catalog', () => {
     }
   });
 
-  it('distinguishes controlled sources without making them notation types', () => {
-    for (const key of ['sourceControlled', 'sourceControlledI', 'sourceControlledV'] as const) {
-      const svg = readSvg(shapes[key].file);
-      expect(elements(svg, 'polygon').find(({ attrs }) => attrs.id === 'body')).toBeDefined();
-      expect(svg.includes('id="arrow"')).toBe(key === 'sourceControlledI');
-      expect(svg.includes('id="plus-h"')).toBe(key === 'sourceControlledV');
-      expect(svg.includes('id="minus"')).toBe(key === 'sourceControlledV');
+  it('preserves the reference controlled-source marks and terminal polarity', () => {
+    expect(referencePaths('sourceControlled')).toHaveLength(1);
+    const current = referencePaths('sourceControlledI');
+    const voltage = referencePaths('sourceControlledV');
+    expect(current).toHaveLength(3);
+    expect(voltage).toHaveLength(4);
+    expect(current[2]!.fill).toBe('#000');
+    for (const key of ['sourceControlledI', 'sourceControlledV'] as const) {
+      expect(shapes[key].terminals.P).toEqual([120, 60]);
+      expect(shapes[key].terminals.N).toEqual([0, 60]);
       expect(notation).not.toContain(`:::${key}`);
     }
+    const tip = pathPoints(current[2]!)[0]!;
+    expect(tip[0]).toBeGreaterThan(pathPoints(current[2]!)[1]![0]);
+    expect(pathPoints(voltage[2]!).every(([x]) => x > 60)).toBe(true);
     expect(elements(readSvg(shapes.source.file), 'circle')).toHaveLength(1);
   });
 
-  it('keeps expanded resistor and source templates horizontal', () => {
+  it('keeps expanded resistor and source attachments horizontal', () => {
     const keys = ['resistorIEC', 'resistorVar', 'resistorVarIEC', 'fuse', 'fuseUs', 'fuseIEC',
       'thermistor', 'source', 'sourceSin', 'sourceSquare', 'sourceTriangle', 'sourceRamp',
       'sourceControlled', 'sourceControlledI', 'sourceControlledV', 'batteryCell', 'battery'] as const;
     for (const key of keys) {
-      const terminals = Object.values(shapes[key].terminals);
+      const terminals = Object.values(shapes[key].terminals).sort((a, b) => a[0] - b[0]);
       expect(terminals, key).toEqual([[0, 60], [120, 60]]);
     }
-    const minus = elements(readSvg(shapes.sourceControlledV.file), 'line')
-      .find(({ attrs }) => attrs.id === 'minus')!.attrs;
-    expect(minus.y1).toBe(minus.y2);
-    expect(minus.x1).not.toBe(minus.x2);
     for (const key of ['resistorVar', 'resistorVarIEC'] as const) {
-      const arrow = elements(readSvg(shapes[key].file), 'polygon')
-        .find(({ attrs }) => attrs.id === 'adjustment-head');
-      expect(arrow?.attrs.fill).toBe('#000');
+      expect(referencePaths(key)[2]!.fill).toBe('#000');
     }
   });
 
-  it('uses a horizontal zigzag resistor with straight leads', () => {
-    const svg = readSvg(shapes.resistor.file);
+  it('preserves the reference resistor body and adjustment-arrow crossing', () => {
+    const full = pathPoints(referencePaths('resistor')[0]!);
     expect(shapes.resistor.terminals).toEqual({ A: [0, 60], B: [120, 60] });
-    expect(svg).not.toMatch(/<rect\b/u);
-    const body = points(elements(svg, 'polyline').find((element) => element.attrs.id === 'body')!.attrs.points!);
+    expect(full[0]).toEqual(shapes.resistor.terminals.A);
+    expect(full.at(-1)).toEqual(shapes.resistor.terminals.B);
+    const body = full.slice(1, -1);
     expect(body).toHaveLength(8);
     expect(body[0]![1]).toBe(60);
     expect(body.at(-1)![1]).toBe(60);
     const interior = body.slice(1, -1);
     expect(interior.filter(([, y]) => y < 60)).toHaveLength(3);
     expect(interior.filter(([, y]) => y > 60)).toHaveLength(3);
-    expect(new Set(interior.filter(([, y]) => y < 60).map(([, y]) => y)).size).toBe(1);
-    expect(new Set(interior.filter(([, y]) => y > 60).map(([, y]) => y)).size).toBe(1);
+    expect(new Set(interior.map(([, y]) => y)).size).toBe(2);
     const pitch = interior[1]![0] - interior[0]![0];
     for (let index = 1; index < interior.length; index++) {
       expect(interior[index]![0] - interior[index - 1]![0]).toBeCloseTo(pitch, 5);
-    }
-    for (let index = 1; index < interior.length; index++) {
       expect((interior[index]![1] - 60) * (interior[index - 1]![1] - 60)).toBeLessThan(0);
     }
-    for (let index = 1; index < body.length; index++) expect(body[index]![0]).toBeGreaterThan(body[index - 1]![0]);
-    const leads = elements(svg, 'line').map(({ attrs }) => attrs);
-    expect(leads.some((lead) => Number(lead.x1) === 0 && Number(lead.y1) === 60 && Number(lead.x2) === body[0]![0] && Number(lead.y2) === body[0]![1])).toBe(true);
-    expect(leads.some((lead) => Number(lead.x1) === body.at(-1)![0] && Number(lead.y1) === body.at(-1)![1] && Number(lead.x2) === 120 && Number(lead.y2) === 60)).toBe(true);
-    const variable = readSvg(shapes.resistorVar.file);
-    const variableBody = points(elements(variable, 'polyline').find(({ attrs }) => attrs.id === 'body')!.attrs.points!);
-    expect(variableBody).toEqual(body);
-    const arrow = elements(variable, 'line').find(({ attrs }) => attrs.id === 'adjustment')!.attrs;
-    const dx = Number(arrow.x2) - Number(arrow.x1);
-    const dy = Number(arrow.y2) - Number(arrow.y1);
-    expect(dx).toBeGreaterThan(0);
-    expect(dy).toBeLessThan(0);
+    const variable = referencePaths('resistorVar');
+    expect(pathPoints(variable[0]!)).toEqual(full);
+    const [start, end] = pathPoints(variable[1]!);
+    const dx = end![0] - start![0], dy = end![1] - start![1];
     const intersections: { segment: number; fraction: number }[] = [];
-    for (let index = 1; index < variableBody.length; index++) {
-      const [x1, y1] = variableBody[index - 1]!;
-      const [x2, y2] = variableBody[index]!;
-      const sx = x2 - x1;
-      const sy = y2 - y1;
+    for (let index = 1; index < body.length; index++) {
+      const [x1, y1] = body[index - 1]!;
+      const [x2, y2] = body[index]!;
+      const sx = x2 - x1, sy = y2 - y1;
       const determinant = dx * sy - dy * sx;
       if (Math.abs(determinant) < 1e-9) continue;
-      const ox = x1 - Number(arrow.x1);
-      const oy = y1 - Number(arrow.y1);
+      const ox = x1 - start![0], oy = y1 - start![1];
       const alongArrow = (ox * sy - oy * sx) / determinant;
       const alongBody = (ox * dy - oy * dx) / determinant;
       if (alongArrow >= 0 && alongArrow <= 1 && alongBody >= 0 && alongBody <= 1) {
@@ -251,39 +262,34 @@ describe('shape catalog', () => {
     }
   });
 
-  it('keeps waveform marks clear of source outlines', () => {
+  it('keeps reference waveform marks clear of source outlines', () => {
     for (const key of ['sourceSin', 'sourceSquare', 'sourceTriangle', 'sourceRamp'] as const) {
-      const svg = readSvg(shapes[key].file);
-      const outline = elements(svg, 'circle')[0]!.attrs;
-      const mark = elements(svg, 'polyline|path').find(({ attrs }) => attrs.id === 'waveform')!.attrs;
-      const values = (mark.points ?? mark.d)!.match(/-?\d+(?:\.\d+)?/gu)!.map(Number);
-      for (let index = 0; index < values.length; index += 2) {
-        expect(Math.hypot(values[index]! - Number(outline.cx), values[index + 1]! - Number(outline.cy)))
+      const outline = elements(readSvg(shapes[key].file), 'circle')[0]!.attrs;
+      for (const [x, y] of pathPoints(referencePaths(key)[1]!)) {
+        expect(Math.hypot(x - Number(outline.cx), y - Number(outline.cy)))
           .toBeLessThanOrEqual(Number(outline.r) - 4);
       }
     }
   });
 
-  it('uses closely spaced capacitor and battery plates with conventional proportions', () => {
-    const plates = elements(readSvg(shapes.capacitor.file), 'line')
-      .filter(({ attrs }) => attrs.id!.startsWith('plate-')).map(({ attrs }) => attrs);
-    const height = Number(plates[0]!.y2) - Number(plates[0]!.y1);
-    const gap = Number(plates[1]!.x1) - Number(plates[0]!.x1);
-    expect(gap / height).toBeGreaterThan(0.25);
-    expect(gap / height).toBeLessThan(0.45);
+  it('preserves reference capacitor and battery plate spacing', () => {
+    const verticals = (key: ShapeType) => referencePaths(key).flatMap((attrs) => pathSubpaths(attrs.d!))
+      .filter((points) => points.length === 2 && points[0]![0] === points[1]![0] && points[0]![1] !== points[1]![1]);
+    const capacitor = verticals('capacitor');
+    expect(capacitor).toHaveLength(2);
+    const height = Math.abs(capacitor[0]![1]![1] - capacitor[0]![0]![1]);
+    expect((capacitor[1]![0]![0] - capacitor[0]![0]![0]) / height).toBeCloseTo(0.36, 4);
     for (const key of ['batteryCell', 'battery'] as const) {
-      const bars = elements(readSvg(shapes[key].file), 'line')
-        .filter(({ attrs }) => attrs.id!.includes('plate')).map(({ attrs }) => attrs);
+      const bars = verticals(key);
       expect(bars).toHaveLength(key === 'batteryCell' ? 2 : 4);
-      const pitch = Number(bars[1]!.x1) - Number(bars[0]!.x1);
+      const pitch = bars[1]![0]![0] - bars[0]![0]![0];
       for (let index = 0; index < bars.length; index++) {
-        const bar = bars[index]!;
-        expect(bar.x1).toBe(bar.x2);
-        expect((Number(bar.y1) + Number(bar.y2)) / 2).toBe(60);
-        if (index > 0) expect(Number(bar.x1) - Number(bars[index - 1]!.x1)).toBe(pitch);
+        const [start, end] = bars[index]!;
+        expect((start![1] + end![1]) / 2).toBe(60);
+        if (index > 0) expect(start![0] - bars[index - 1]![0]![0]).toBeCloseTo(pitch, 5);
         if (index % 2 === 1) {
-          const positive = bars[index - 1]!;
-          expect(Number(bar.y2) - Number(bar.y1)).toBe((Number(positive.y2) - Number(positive.y1)) / 2);
+          const [positiveStart, positiveEnd] = bars[index - 1]!;
+          expect(Math.abs(end![1] - start![1])).toBe(Math.abs(positiveEnd![1] - positiveStart![1]) / 2);
         }
       }
     }

@@ -1,10 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+Adapted from https://schemdraw.readthedocs.io/en/stable/_images/electrical_21_0.svg
+Uniform coordinate scaling, pane placement, and terminal lead extensions.
+
+Copyright (c) 2014-2026 Collin J. Delker
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+-->
 <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
   <g id="fuseUs" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <line id="lead-a" x1="0" y1="60" x2="40" y2="60"/>
-    <line id="lead-b" x1="80" y1="60" x2="120" y2="60"/>
-    <path id="body" d="M40 60 C50 72 70 48 80 60"/>
-    <circle id="contact-a" cx="40" cy="60" r="3" fill="#fff"/>
-    <circle id="contact-b" cx="80" cy="60" r="3" fill="#fff"/>
+    <path d="M 0 60 L 42.4 60 L 43.118889 58.721111 L 43.836667 57.463333 L 44.555556 56.247778 L 45.273333 55.093333 L 45.992222 54.018889 L 46.71 53.043333 L 47.428889 52.182222 L 48.146667 51.448889 L 48.865556 50.855556 L 49.583333 50.413333 L 50.302222 50.127778 L 51.02 50.005556 L 51.738889 50.046667 L 52.456667 50.251111 L 53.175556 50.615556 L 53.893333 51.134444 L 54.612222 51.797778 L 55.331111 52.596667 L 56.048889 53.517778 L 56.767778 54.544444 L 57.485556 55.661111 L 58.204444 56.848889 L 58.922222 58.088889 L 59.641111 59.358889 L 60.358889 60.641111 L 61.077778 61.911111 L 61.795556 63.151111 L 62.514444 64.338889 L 63.232222 65.455556 L 63.951111 66.482222 L 64.668889 67.403333 L 65.387778 68.202222 L 66.106667 68.865556 L 66.824444 69.384444 L 67.543333 69.748889 L 68.261111 69.953333 L 68.98 69.994444 L 69.697778 69.872222 L 70.416667 69.586667 L 71.134444 69.144444 L 71.853333 68.551111 L 72.571111 67.817778 L 73.29 66.956667 L 74.007778 65.981111 L 74.726667 64.906667 L 75.444444 63.752222 L 76.163333 62.536667 L 76.881111 61.278889 L 77.6 60 L 120 60" id="reference-0" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M 32.8 60 M 87.2 60" id="reference-1" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <circle cx="37.6" cy="60" r="4.8" id="reference-2" stroke="#000" fill="white" stroke-width="2" />
+    <circle cx="82.4" cy="60" r="4.8" id="reference-3" stroke="#000" fill="white" stroke-width="2" />
   </g>
 </svg>
