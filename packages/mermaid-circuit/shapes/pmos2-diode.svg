@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Adapted from https://schemdraw.readthedocs.io/en/stable/_images/electrical_198_0.svg
+Uniform scale 1.6; external leads meet catalog snap points.
+
+Copyright (c) 2014-2026 Collin J. Delker
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="pmos2Diode" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polygon id="reference-0" points="54.4,25.6 64,30.4 64,20.8" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="reference-1" d="M 0 40 L 11.2 40 L 44.8 40 L 44.8 54.4 M 73.6 54.4 L 73.6 40 L 107.2 40 L 120 40" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="reference-2" d="M 42.4 54.4 L 47.2 54.4" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="reference-3" d="M 56.8 54.4 L 61.6 54.4" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="reference-4" d="M 71.2 54.4 L 76 54.4" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="reference-5" d="M 40 88 L 40 64" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="reference-6" d="M 40 64 L 78.4 64" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="reference-7" d="M 59.2 54.4 L 59.2 49.6" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="reference-8" d="M 59.2 43.2 L 64 49.6 L 54.4 49.6 Z" stroke="#000" fill="#000" stroke-linecap="butt" stroke-linejoin="miter" />
+    <path id="reference-9" d="M 59.2 40 L 44.8 40" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="reference-10" d="M 44.8 40 L 44.8 25.6" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="reference-11" d="M 44.8 25.6 L 54.4 25.6" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="reference-12" d="M 54.4 30.4 L 54.4 20.8" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="reference-13" d="M 64 25.6 L 73.6 25.6" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="reference-14" d="M 73.6 25.6 L 73.6 40" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="gate-extension" d="M 40 88 L 40 120" />
+  </g>
+</svg>

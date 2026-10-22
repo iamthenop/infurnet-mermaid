@@ -885,5 +885,539 @@
         120
       ]
     }
+  },
+  "potentiometer": {
+    "file": "potentiometer.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "A": [
+        0,
+        60
+      ],
+      "B": [
+        120,
+        60
+      ],
+      "W": [
+        60,
+        0
+      ]
+    }
+  },
+  "potentiometerIEC": {
+    "file": "potentiometer-iec.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "A": [
+        0,
+        60
+      ],
+      "B": [
+        120,
+        60
+      ],
+      "W": [
+        60,
+        0
+      ]
+    }
+  },
+  "photoresistor": {
+    "file": "photoresistor.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "A": [
+        0,
+        60
+      ],
+      "B": [
+        120,
+        60
+      ]
+    }
+  },
+  "photoresistorIEC": {
+    "file": "photoresistor-iec.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "A": [
+        0,
+        60
+      ],
+      "B": [
+        120,
+        60
+      ]
+    }
+  },
+  "led": {
+    "file": "led.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "A": [
+        0,
+        60
+      ],
+      "K": [
+        120,
+        60
+      ]
+    }
+  },
+  "led2": {
+    "file": "led2.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "A": [
+        0,
+        60
+      ],
+      "K": [
+        120,
+        60
+      ]
+    }
+  },
+  "photodiode": {
+    "file": "photodiode.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "A": [
+        0,
+        60
+      ],
+      "K": [
+        120,
+        60
+      ]
+    }
+  },
+  "diac": {
+    "file": "diac.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "A": [
+        0,
+        60
+      ],
+      "B": [
+        120,
+        60
+      ]
+    }
+  },
+  "triac": {
+    "file": "triac.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "A1": [
+        120,
+        60
+      ],
+      "A2": [
+        0,
+        60
+      ],
+      "G": [
+        120,
+        30
+      ]
+    }
+  },
+  "capacitorPolar": {
+    "file": "capacitor-polar.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "A": [
+        0,
+        60
+      ],
+      "B": [
+        120,
+        60
+      ]
+    }
+  },
+  "capacitor2Polar": {
+    "file": "capacitor2-polar.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "A": [
+        0,
+        60
+      ],
+      "B": [
+        120,
+        60
+      ]
+    }
+  },
+  "capacitorTrim": {
+    "file": "capacitor-trim.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "A": [
+        0,
+        60
+      ],
+      "B": [
+        120,
+        60
+      ]
+    }
+  },
+  "sourcePulse": {
+    "file": "source-pulse.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "P": [
+        0,
+        60
+      ],
+      "N": [
+        120,
+        60
+      ]
+    }
+  },
+  "solar": {
+    "file": "solar.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "P": [
+        120,
+        60
+      ],
+      "N": [
+        0,
+        60
+      ]
+    }
+  },
+  "analogNFet": {
+    "file": "analog-nfet.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "G": [
+        0,
+        80
+      ],
+      "D": [
+        90,
+        0
+      ],
+      "S": [
+        90,
+        120
+      ]
+    }
+  },
+  "analogPFet": {
+    "file": "analog-pfet.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "G": [
+        0,
+        40
+      ],
+      "S": [
+        90,
+        0
+      ],
+      "D": [
+        90,
+        120
+      ]
+    }
+  },
+  "analogBiasedFet": {
+    "file": "analog-biased-fet.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "G": [
+        0,
+        80
+      ],
+      "D": [
+        90,
+        0
+      ],
+      "S": [
+        90,
+        120
+      ]
+    }
+  },
+  "analogNFetBulk": {
+    "file": "analog-nfet-bulk.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "G": [
+        0,
+        80
+      ],
+      "D": [
+        90,
+        0
+      ],
+      "S": [
+        90,
+        120
+      ],
+      "B": [
+        120,
+        60
+      ]
+    }
+  },
+  "analogPFetBulk": {
+    "file": "analog-pfet-bulk.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "G": [
+        0,
+        40
+      ],
+      "S": [
+        90,
+        0
+      ],
+      "D": [
+        90,
+        120
+      ],
+      "B": [
+        120,
+        60
+      ]
+    }
+  },
+  "analogNFetCenteredGate": {
+    "file": "analog-nfet-centered-gate.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "G": [
+        0,
+        60
+      ],
+      "D": [
+        90,
+        0
+      ],
+      "S": [
+        90,
+        120
+      ]
+    }
+  },
+  "analogPFetCenteredGate": {
+    "file": "analog-pfet-centered-gate.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "G": [
+        0,
+        60
+      ],
+      "S": [
+        90,
+        0
+      ],
+      "D": [
+        90,
+        120
+      ]
+    }
+  },
+  "analogBiasedFetCenteredGate": {
+    "file": "analog-biased-fet-centered-gate.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "G": [
+        0,
+        60
+      ],
+      "D": [
+        90,
+        0
+      ],
+      "S": [
+        90,
+        120
+      ]
+    }
+  },
+  "nfet2": {
+    "file": "nfet2.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "G": [
+        60,
+        0
+      ],
+      "D": [
+        0,
+        90
+      ],
+      "S": [
+        120,
+        90
+      ]
+    }
+  },
+  "pfet2": {
+    "file": "pfet2.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "G": [
+        60,
+        0
+      ],
+      "D": [
+        0,
+        90
+      ],
+      "S": [
+        120,
+        90
+      ]
+    }
+  },
+  "jfetN2": {
+    "file": "jfet-n2.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "G": [
+        80,
+        0
+      ],
+      "D": [
+        0,
+        90
+      ],
+      "S": [
+        120,
+        90
+      ]
+    }
+  },
+  "jfetP2": {
+    "file": "jfet-p2.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "G": [
+        80,
+        0
+      ],
+      "D": [
+        0,
+        90
+      ],
+      "S": [
+        120,
+        90
+      ]
+    }
+  },
+  "nmos2Diode": {
+    "file": "nmos2-diode.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "G": [
+        80,
+        120
+      ],
+      "D": [
+        0,
+        40
+      ],
+      "S": [
+        120,
+        40
+      ]
+    }
+  },
+  "pmos2Diode": {
+    "file": "pmos2-diode.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "G": [
+        40,
+        120
+      ],
+      "S": [
+        0,
+        40
+      ],
+      "D": [
+        120,
+        40
+      ]
+    }
+  },
+  "nmos2Circle": {
+    "file": "nmos2-circle.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "G": [
+        80,
+        120
+      ],
+      "D": [
+        0,
+        40
+      ],
+      "S": [
+        120,
+        40
+      ]
+    }
+  },
+  "pmos2Circle": {
+    "file": "pmos2-circle.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "G": [
+        40,
+        120
+      ],
+      "S": [
+        0,
+        40
+      ],
+      "D": [
+        120,
+        40
+      ]
+    }
   }
 }

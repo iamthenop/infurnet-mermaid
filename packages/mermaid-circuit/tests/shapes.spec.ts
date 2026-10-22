@@ -299,6 +299,142 @@ describe('shape catalog', () => {
     }
   });
 
+  it('preserves potentiometer wipers and light-sensitive resistor indicators', () => {
+    for (const [key, ordinary] of [['potentiometer', 'resistor'], ['potentiometerIEC', 'resistorIEC']] as const) {
+      expect(referencePaths(key)[0]!.d).toBe(referencePaths(ordinary)[0]!.d);
+      expect(shapes[key].terminals.W).toEqual([60, 0]);
+      const arrow = referencePaths(key).find((attrs) => attrs.fill === '#000')!;
+      const [tip, base] = pathPoints(arrow);
+      expect(tip![0]).toBe(60);
+      expect(tip![1]).toBeGreaterThan(base![1]);
+    }
+    for (const [key, ordinary] of [['photoresistor', 'resistor'], ['photoresistorIEC', 'resistorIEC']] as const) {
+      expect(referencePaths(key)[0]!.d).toBe(referencePaths(ordinary)[0]!.d);
+      const arrows = referencePaths(key).filter((attrs) => attrs.fill === '#000');
+      expect(arrows).toHaveLength(2);
+      for (const arrow of arrows) {
+        const [tip, base] = pathPoints(arrow);
+        expect(tip![1]).toBeGreaterThan(base![1]);
+      }
+    }
+  });
+
+  it('distinguishes emitting, receiving and bidirectional diode variants', () => {
+    for (const key of ['led', 'led2', 'photodiode'] as const) {
+      const arrows = referencePaths(key).filter((attrs) => attrs.fill === '#000');
+      expect(arrows).toHaveLength(2);
+      for (const arrow of arrows) {
+        const [tip, first, second] = pathPoints(arrow);
+        const base: Point = [(first![0] + second![0]) / 2, (first![1] + second![1]) / 2];
+        const towardBody = (tip![0] - base[0]) * (60 - base[0]) + (tip![1] - base[1]) * (60 - base[1]);
+        expect(towardBody > 0).toBe(key === 'photodiode');
+      }
+    }
+    for (const key of ['diac', 'triac'] as const) {
+      const triangles = elements(readSvg(shapes[key].file), 'polygon');
+      expect(triangles).toHaveLength(2);
+      expect(points(triangles[0]!.attrs.points!).every(([, y]) => y >= 60)).toBe(true);
+      expect(points(triangles[1]!.attrs.points!).every(([, y]) => y <= 60)).toBe(true);
+    }
+    expect(shapes.triac.terminals.A1).toEqual([120, 60]);
+    expect(shapes.triac.terminals.A2).toEqual([0, 60]);
+    expect(shapes.triac.terminals.G).toEqual([120, 30]);
+  });
+
+  it('retains capacitor polarity and trim marks without changing the defaults', () => {
+    for (const [key, ordinary] of [['capacitorPolar', 'capacitor'], ['capacitor2Polar', 'capacitor2']] as const) {
+      const paths = referencePaths(key);
+      const original = referencePaths(ordinary);
+      expect(paths).toHaveLength(original.length);
+      for (const [index, path] of paths.entries()) {
+        const tokens = path.d!.split(' ');
+        const expected = original[index]!.d!.split(' ');
+        expect(tokens).toHaveLength(expected.length);
+        for (const [position, token] of tokens.entries()) {
+          if (Number.isFinite(Number(token))) expect(Number(token)).toBeCloseTo(Number(expected[position]), 5);
+          else expect(token).toBe(expected[position]);
+        }
+      }
+      const svg = readSvg(shapes[key].file);
+      const mark = elements(svg, 'text').find(({ attrs }) => attrs.id === 'polarity-mark')!;
+      expect(mark).toBeDefined();
+      expect(Number(mark.attrs.x)).toBeLessThan(60);
+      expect(Number(mark.attrs.y)).toBeLessThan(60);
+      expect(svg).toMatch(/<tspan\b[^>]*>\+<\/tspan>/u);
+      expect(readSvg(shapes[ordinary].file)).not.toContain('polarity-mark');
+    }
+    const trim = referencePaths('capacitorTrim');
+    expect(trim).toHaveLength(3);
+    expect(trim[0]!.d).toBe(referencePaths('capacitor')[0]!.d);
+    const [shaftStart, shaftEnd] = pathPoints(trim[1]!);
+    const [barStart, barEnd] = pathPoints(trim[2]!);
+    const dot = (shaftEnd![0] - shaftStart![0]) * (barEnd![0] - barStart![0])
+      + (shaftEnd![1] - shaftStart![1]) * (barEnd![1] - barStart![1]);
+    expect(Math.abs(dot)).toBeLessThan(0.1);
+  });
+
+  it('preserves analog FET source, bulk and centered-gate distinctions', () => {
+    for (const key of ['analogNFet', 'analogPFet', 'analogNFetBulk', 'analogPFetBulk', 'analogNFetCenteredGate', 'analogPFetCenteredGate'] as const) {
+      const shape: ShapeEntry = shapes[key];
+      const arrow = referencePaths(key).find((attrs) => attrs.fill === '#000')!;
+      const [tip, base] = pathPoints(arrow);
+      const pChannel = key.startsWith('analogPFet');
+      const bulk = key.endsWith('Bulk');
+      expect(Math.sign(tip![0] - base![0])).toBe(pChannel === bulk ? 1 : -1);
+      expect(shapes[key].terminals.S![1]).toBe(pChannel ? 0 : 120);
+      expect(shapes[key].terminals.G![1]).toBe(key.endsWith('CenteredGate') ? 60 : pChannel ? 40 : 80);
+      if (bulk) expect(shape.terminals.B).toEqual([120, 60]);
+    }
+    for (const key of ['analogBiasedFet', 'analogBiasedFetCenteredGate'] as const) {
+      const circles = elements(readSvg(shapes[key].file), 'circle');
+      expect(circles).toHaveLength(1);
+      expect(circles[0]!.attrs.fill).toBe('#000');
+      expect(shapes[key].terminals.S).toEqual([90, 120]);
+      expect(shapes[key].terminals.G![1]).toBe(key.endsWith('CenteredGate') ? 60 : 80);
+    }
+  });
+
+  it('retains extended-lead FET placement and variant markings', () => {
+    for (const key of ['nfet2', 'pfet2', 'jfetN2', 'jfetP2', 'nmos2Diode', 'pmos2Diode', 'nmos2Circle', 'pmos2Circle'] as const) {
+      const mos = key.startsWith('nmos2') || key.startsWith('pmos2');
+      const pMos = key.startsWith('pmos2');
+      const svg = readSvg(shapes[key].file);
+      expect(shapes[key].terminals.S).toEqual([pMos ? 0 : 120, mos ? 40 : 90]);
+      expect(shapes[key].terminals.D).toEqual([pMos ? 120 : 0, mos ? 40 : 90]);
+      expect(shapes[key].terminals.G![1]).toBe(mos ? 120 : 0);
+      expect(elements(svg, 'circle')).toHaveLength(key === 'pfet2' || key.endsWith('Circle') ? 1 : 0);
+      expect(elements(svg, 'polygon')).toHaveLength(key.endsWith('Diode') ? 1 : 0);
+      const arrows = referencePaths(key).filter((attrs) => attrs.fill === '#000');
+      expect(arrows).toHaveLength(key === 'nfet2' || key === 'pfet2' ? 0 : 1);
+      if (arrows.length) {
+        const [tip, base] = pathPoints(arrows[0]!);
+        expect(Math.sign(tip![1] - base![1])).toBe(key === 'jfetN2' || pMos ? -1 : 1);
+      }
+    }
+  });
+
+  it('preserves pulse and solar source indicators', () => {
+    for (const key of ['sourcePulse', 'solar'] as const) {
+      const outline = elements(readSvg(shapes[key].file), 'circle')[0]!.attrs;
+      expect([Number(outline.cx), Number(outline.cy), Number(outline.r)]).toEqual([60, 60, 24]);
+      expect(shapes[key].terminals).toEqual(key === 'solar'
+        ? { P: [120, 60], N: [0, 60] }
+        : { P: [0, 60], N: [120, 60] });
+    }
+    expect(pathPoints(referencePaths('sourcePulse')[1]!)).toHaveLength(6);
+    const [shortPlate, longPlate] = referencePaths('solar').slice(1, 3).map(pathPoints);
+    expect(longPlate![0]![0]).toBeGreaterThan(shortPlate![0]![0]);
+    expect(Math.abs(longPlate![1]![1] - longPlate![0]![1]))
+      .toBeGreaterThan(Math.abs(shortPlate![1]![1] - shortPlate![0]![1]));
+    const arrows = referencePaths('solar').filter((attrs) => attrs.fill === '#000');
+    expect(arrows).toHaveLength(2);
+    for (const arrow of arrows) {
+      const [tip, base] = pathPoints(arrow);
+      expect(tip![0]).toBeLessThan(base![0]);
+      expect(tip![1]).toBeGreaterThan(base![1]);
+    }
+  });
+
   it('preserves reference capacitor and battery plate spacing', () => {
     const verticals = (key: ShapeType) => referencePaths(key).flatMap((attrs) => pathSubpaths(attrs.d!))
       .filter((points) => points.length === 2 && points[0]![0] === points[1]![0] && points[0]![1] !== points[1]![1]);
