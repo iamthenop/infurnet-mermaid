@@ -71,6 +71,7 @@ The following internal symbol details are exempt:
 - Third ground bar.
 - Current-source arrow.
 - Four-terminal transistor bulk arrows.
+- Resistor zigzag body bends; its terminals and straight lead endpoints remain on snap points.
 
 ## Terminal positioning conventions
 
@@ -94,7 +95,7 @@ Schemdraw's [Basic Electrical Elements](https://schemdraw.readthedocs.io/en/stab
 
 Applicable IEEE standards govern standardized terminology and symbols. `notation.md` governs electrical semantics. This specification governs approved drawing conventions. Schemdraw informs visual details not otherwise fixed by those authorities.
 
-The standard resistor uses Schemdraw's IEEE-style zigzag representation. The IEC rectangular representation is not the default.
+The standard resistor uses Schemdraw's IEEE-style zigzag representation with three peaks on each side. The IEC rectangular representation is not the default.
 
 Schemdraw is a visual reference, not a Python runtime dependency. Symbols are implemented as SVG assets within the Mermaid plugin.
 

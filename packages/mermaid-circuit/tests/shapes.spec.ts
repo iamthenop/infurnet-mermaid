@@ -77,7 +77,7 @@ describe('shape catalog', () => {
       shape.file === 'vsource.svg' ? ['plus-h', 'plus-v', 'minus']
         : shape.file === 'ground.svg' ? ['bar-3']
           : shape.file === 'isource.svg' ? ['arrow', 'arrow-head']
-            : ['bulk-arrow'],
+            : shape.file === 'resistor.svg' ? ['body'] : ['bulk-arrow'],
     );
     for (const { name, attrs } of elements(svg, 'line|polyline|polygon|circle')) {
       if (exempt.has(attrs.id!)) continue;
@@ -102,12 +102,18 @@ describe('shape catalog', () => {
     expect(shapes.resistor.terminals).toEqual({ A: [60, 0], B: [60, 120] });
     expect(svg).not.toMatch(/<rect\b/u);
     const body = points(elements(svg, 'polyline').find((element) => element.attrs.id === 'body')!.attrs.points!);
-    expect(body.length).toBeGreaterThanOrEqual(5);
+    expect(body).toHaveLength(8);
     expect(body[0]![0]).toBe(60);
     expect(body.at(-1)![0]).toBe(60);
     const interior = body.slice(1, -1);
-    expect(interior.some(([x]) => x < 60)).toBe(true);
-    expect(interior.some(([x]) => x > 60)).toBe(true);
+    expect(interior.filter(([x]) => x < 60)).toHaveLength(3);
+    expect(interior.filter(([x]) => x > 60)).toHaveLength(3);
+    expect(new Set(interior.filter(([x]) => x < 60).map(([x]) => x)).size).toBe(1);
+    expect(new Set(interior.filter(([x]) => x > 60).map(([x]) => x)).size).toBe(1);
+    const pitch = interior[1]![1] - interior[0]![1];
+    for (let index = 1; index < interior.length; index++) {
+      expect(interior[index]![1] - interior[index - 1]![1]).toBe(pitch);
+    }
     for (let index = 1; index < interior.length; index++) {
       expect((interior[index]![0] - 60) * (interior[index - 1]![0] - 60)).toBeLessThan(0);
     }

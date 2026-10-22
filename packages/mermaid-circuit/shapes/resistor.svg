@@ -9,7 +9,7 @@
   <g id="resistor" fill="none" stroke="#000"
      stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     <line id="lead-a" x1="60" y1="0" x2="60" y2="30"/>
-    <polyline id="body" points="60,30 80,40 40,60 80,80 60,90"/>
+    <polyline id="body" points="60,30 80,35 40,45 80,55 40,65 80,75 40,85 60,90"/>
     <line id="lead-b" x1="60" y1="90" x2="60" y2="120"/>
   </g>
 </svg>
