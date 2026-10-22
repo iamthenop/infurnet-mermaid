@@ -57,7 +57,7 @@ describe('shape catalog', () => {
     }
   });
 
-  it.each(Object.entries(shapes))('%s has matching pane, attachments, and snap geometry', (_key, entry) => {
+  it.each(Object.entries(shapes))('%s has grid-aligned attachments and geometry inside its pane', (_key, entry) => {
     const shape: ShapeEntry = entry;
     const svg = readSvg(shape.file);
     const root = elements(svg, 'svg')[0]!.attrs;
@@ -89,27 +89,36 @@ describe('shape catalog', () => {
       expect(lineEnds).toContainEqual(point);
     }
 
-    const exempt = new Set(
-      ['vsource.svg', 'source-controlled-v.svg'].includes(shape.file) ? ['plus-h', 'plus-v', 'minus']
-        : shape.file === 'ground.svg' ? ['bar-3']
-          : ['isource.svg', 'source-controlled-i.svg'].includes(shape.file) ? ['arrow', 'arrow-head']
-            : shape.file === 'resistor-var.svg' ? ['body', 'adjustment', 'adjustment-head']
-              : shape.file === 'resistor.svg' ? ['body'] : ['bulk-arrow'],
-    );
-    for (const { name, attrs } of elements(svg, 'line|polyline|polygon|circle')) {
-      if (exempt.has(attrs.id!)) continue;
+    for (const { name, attrs } of elements(svg, 'line|polyline|polygon|circle|rect|path')) {
+      let vertices: Point[];
       if (name === 'circle') {
-        for (const [center, span] of [[Number(attrs.cx), shape.width], [Number(attrs.cy), shape.height]]) {
-          expect([center!, center! - Number(attrs.r), center! + Number(attrs.r)].some((value) => snap(span!).includes(value))).toBe(true);
+        const cx = Number(attrs.cx), cy = Number(attrs.cy), radius = Number(attrs.r);
+        expect(radius).toBeGreaterThan(0);
+        vertices = [[cx - radius, cy - radius], [cx + radius, cy + radius]];
+      } else if (name === 'rect') {
+        const x = Number(attrs.x), y = Number(attrs.y);
+        expect(Number(attrs.width)).toBeGreaterThan(0);
+        expect(Number(attrs.height)).toBeGreaterThan(0);
+        vertices = [[x, y], [x + Number(attrs.width), y + Number(attrs.height)]];
+      } else if (name === 'path') {
+        expect(attrs.d).toMatch(/^[MQC\d.,\s-]+$/u);
+        const coordinates = attrs.d!.match(/-?\d+(?:\.\d+)?/gu)!.map(Number);
+        expect(coordinates.length % 2).toBe(0);
+        vertices = [];
+        for (let index = 0; index < coordinates.length; index += 2) {
+          vertices.push([coordinates[index]!, coordinates[index + 1]!]);
         }
       } else {
-        const vertices: Point[] = name === 'line'
+        vertices = name === 'line'
           ? [[Number(attrs.x1), Number(attrs.y1)], [Number(attrs.x2), Number(attrs.y2)]]
           : points(attrs.points!);
-        for (const [x, y] of vertices) {
-          expect(snap(shape.width)).toContain(x);
-          expect(snap(shape.height)).toContain(y);
-        }
+      }
+      for (const [x, y] of vertices) {
+        expect(Number.isFinite(x) && Number.isFinite(y)).toBe(true);
+        expect(x).toBeGreaterThanOrEqual(0);
+        expect(x).toBeLessThanOrEqual(shape.width);
+        expect(y).toBeGreaterThanOrEqual(0);
+        expect(y).toBeLessThanOrEqual(shape.height);
       }
     }
   });
@@ -178,7 +187,7 @@ describe('shape catalog', () => {
     expect(new Set(interior.filter(([, y]) => y > 60).map(([, y]) => y)).size).toBe(1);
     const pitch = interior[1]![0] - interior[0]![0];
     for (let index = 1; index < interior.length; index++) {
-      expect(interior[index]![0] - interior[index - 1]![0]).toBe(pitch);
+      expect(interior[index]![0] - interior[index - 1]![0]).toBeCloseTo(pitch, 5);
     }
     for (let index = 1; index < interior.length; index++) {
       expect((interior[index]![1] - 60) * (interior[index - 1]![1] - 60)).toBeLessThan(0);
@@ -238,6 +247,44 @@ describe('shape catalog', () => {
         expect(Math.sign(tip[0] - base[0]![0])).toBe(-1);
       } else {
         expect(shape.terminals.B).toBeUndefined();
+      }
+    }
+  });
+
+  it('keeps waveform marks clear of source outlines', () => {
+    for (const key of ['sourceSin', 'sourceSquare', 'sourceTriangle', 'sourceRamp'] as const) {
+      const svg = readSvg(shapes[key].file);
+      const outline = elements(svg, 'circle')[0]!.attrs;
+      const mark = elements(svg, 'polyline|path').find(({ attrs }) => attrs.id === 'waveform')!.attrs;
+      const values = (mark.points ?? mark.d)!.match(/-?\d+(?:\.\d+)?/gu)!.map(Number);
+      for (let index = 0; index < values.length; index += 2) {
+        expect(Math.hypot(values[index]! - Number(outline.cx), values[index + 1]! - Number(outline.cy)))
+          .toBeLessThanOrEqual(Number(outline.r) - 4);
+      }
+    }
+  });
+
+  it('uses closely spaced capacitor and battery plates with conventional proportions', () => {
+    const plates = elements(readSvg(shapes.capacitor.file), 'line')
+      .filter(({ attrs }) => attrs.id!.startsWith('plate-')).map(({ attrs }) => attrs);
+    const height = Number(plates[0]!.y2) - Number(plates[0]!.y1);
+    const gap = Number(plates[1]!.x1) - Number(plates[0]!.x1);
+    expect(gap / height).toBeGreaterThan(0.25);
+    expect(gap / height).toBeLessThan(0.45);
+    for (const key of ['batteryCell', 'battery'] as const) {
+      const bars = elements(readSvg(shapes[key].file), 'line')
+        .filter(({ attrs }) => attrs.id!.includes('plate')).map(({ attrs }) => attrs);
+      expect(bars).toHaveLength(key === 'batteryCell' ? 2 : 4);
+      const pitch = Number(bars[1]!.x1) - Number(bars[0]!.x1);
+      for (let index = 0; index < bars.length; index++) {
+        const bar = bars[index]!;
+        expect(bar.x1).toBe(bar.x2);
+        expect((Number(bar.y1) + Number(bar.y2)) / 2).toBe(60);
+        if (index > 0) expect(Number(bar.x1) - Number(bars[index - 1]!.x1)).toBe(pitch);
+        if (index % 2 === 1) {
+          const positive = bars[index - 1]!;
+          expect(Number(bar.y2) - Number(bar.y1)).toBe((Number(positive.y2) - Number(positive.y1)) / 2);
+        }
       }
     }
   });

@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg"
-     width="120" height="120" viewBox="0 0 120 120">
-  <g id="resistor" fill="none" stroke="#000"
-     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <line id="lead-a" x1="0" y1="60" x2="30" y2="60"/>
-    <polyline id="body" points="30,60 35,40 45,80 55,40 65,80 75,40 85,80 90,60"/>
-    <line id="lead-b" x1="90" y1="60" x2="120" y2="60"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="resistor" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <line id="lead-a" x1="0" y1="60" x2="40" y2="60"/>
+    <line id="lead-b" x1="80" y1="60" x2="120" y2="60"/>
+    <polyline id="body" points="40,60 43.333333,50 50,70 56.666667,50 63.333333,70 70,50 76.666667,70 80,60"/>
   </g>
 </svg>

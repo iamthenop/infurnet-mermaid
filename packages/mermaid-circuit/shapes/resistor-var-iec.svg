@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
   <g id="resistorVarIEC" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <line id="lead-a" x1="0" y1="60" x2="30" y2="60"/>
-    <line id="lead-b" x1="90" y1="60" x2="120" y2="60"/>
-    <rect id="body" x="30" y="40" width="60" height="40"/>
-    <line id="adjustment" x1="30" y1="90" x2="90" y2="30"/>
-    <polygon id="adjustment-head" points="90,30 80,30 90,40" fill="#000"/>
+    <line id="lead-a" x1="0" y1="60" x2="40" y2="60"/>
+    <line id="lead-b" x1="80" y1="60" x2="120" y2="60"/>
+    <rect id="body" x="40" y="50" width="40" height="20"/>
+    <line id="adjustment" x1="46.666667" y1="80" x2="69.14" y2="43.48"/>
+    <polygon id="adjustment-head" points="72.168889,38.558889 71.865556,45.156667 66.415556,41.803333" fill="#000"/>
   </g>
 </svg>

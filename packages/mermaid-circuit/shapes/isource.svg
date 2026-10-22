@@ -1,17 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-  isource: current source, positive terminal on top, arrow toward P.
-  Pane 1:1.
-  Terminals P (60, 0), N (60, 120).
--->
-<svg xmlns="http://www.w3.org/2000/svg"
-     width="120" height="120" viewBox="0 0 120 120">
-  <g id="isource" fill="none" stroke="#000"
-     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <line id="lead-p" x1="60" y1="0" x2="60" y2="30"/>
-    <circle id="body" cx="60" cy="60" r="30"/>
-    <line id="arrow" x1="60" y1="85" x2="60" y2="38"/>
-    <polyline id="arrow-head" points="52,48 60,38 68,48"/>
-    <line id="lead-n" x1="60" y1="90" x2="60" y2="120"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="currentSource" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <line id="lead-p" x1="60" y1="0" x2="60" y2="40"/>
+    <line id="lead-n" x1="60" y1="80" x2="60" y2="120"/>
+    <circle id="body" cx="60" cy="60" r="20"/>
+    <line id="arrow" x1="60" y1="72" x2="60" y2="54"/>
+    <polygon id="arrow-head" points="60,48 63,54 57,54" fill="#000"/>
   </g>
 </svg>

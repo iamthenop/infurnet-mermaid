@@ -1,18 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-  vsource: voltage source, positive terminal on top.
-  Pane 1:1.
-  Terminals P (60, 0), N (60, 120).
--->
-<svg xmlns="http://www.w3.org/2000/svg"
-     width="120" height="120" viewBox="0 0 120 120">
-  <g id="vsource" fill="none" stroke="#000"
-     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <line id="lead-p" x1="60" y1="0" x2="60" y2="30"/>
-    <circle id="body" cx="60" cy="60" r="30"/>
-    <line id="plus-h" x1="52" y1="45" x2="68" y2="45"/>
-    <line id="plus-v" x1="60" y1="37" x2="60" y2="53"/>
-    <line id="minus" x1="52" y1="80" x2="68" y2="80"/>
-    <line id="lead-n" x1="60" y1="90" x2="60" y2="120"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="voltageSource" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <line id="lead-p" x1="60" y1="0" x2="60" y2="40"/>
+    <line id="lead-n" x1="60" y1="80" x2="60" y2="120"/>
+    <circle id="body" cx="60" cy="60" r="20"/>
+    <line id="plus-h" x1="56" y1="50" x2="64" y2="50"/>
+    <line id="plus-v" x1="60" y1="46" x2="60" y2="54"/>
+    <line id="minus" x1="56" y1="70" x2="64" y2="70"/>
   </g>
 </svg>

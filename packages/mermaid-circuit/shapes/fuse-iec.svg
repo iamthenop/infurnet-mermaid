@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
   <g id="fuseIEC" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <line id="lead-a" x1="0" y1="60" x2="30" y2="60"/>
-    <line id="lead-b" x1="90" y1="60" x2="120" y2="60"/>
-    <rect id="body" x="30" y="40" width="60" height="40"/>
-    <line id="cap-top" x1="40" y1="80" x2="40" y2="40"/>
-    <line id="cap-bottom" x1="80" y1="80" x2="80" y2="40"/>
+    <line id="lead-a" x1="0" y1="60" x2="40" y2="60"/>
+    <line id="lead-b" x1="80" y1="60" x2="120" y2="60"/>
+    <rect id="body" x="40" y="50" width="40" height="20"/>
+    <line id="cap-a" x1="47" y1="50" x2="47" y2="70"/>
+    <line id="cap-b" x1="73" y1="50" x2="73" y2="70"/>
   </g>
 </svg>

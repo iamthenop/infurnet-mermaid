@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
   <g id="jfet" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <polyline id="gate" points="0,60 30,60 30,80 60,80"/>
-    <line id="channel" x1="60" y1="30" x2="60" y2="90"/>
-    <polyline id="drain" points="90,0 90,30 60,30"/>
-    <polyline id="source" points="60,90 90,90 90,120"/>
+    <polyline id="gate" points="0,60 30,60 30,85 60,85"/>
+    <line id="channel" x1="60" y1="25" x2="60" y2="95"/>
+    <polyline id="drain" points="90,0 90,35 60,35"/>
+    <polyline id="source" points="60,85 90,85 90,120"/>
   </g>
 </svg>

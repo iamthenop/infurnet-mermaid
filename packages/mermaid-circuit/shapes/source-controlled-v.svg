@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg"
-     width="120" height="120" viewBox="0 0 120 120">
-  <g id="sourceControlledV" fill="none" stroke="#000"
-     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <line id="lead-p" x1="0" y1="60" x2="30" y2="60"/>
-    <polygon id="body" points="30,60 60,30 90,60 60,90"/>
-    <line id="plus-h" x1="45" y1="68" x2="45" y2="52"/>
-    <line id="plus-v" x1="37" y1="60" x2="53" y2="60"/>
-    <line id="minus" x1="74" y1="60" x2="86" y2="60"/>
-    <line id="lead-n" x1="90" y1="60" x2="120" y2="60"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="sourceControlledV" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <line id="lead-p" x1="0" y1="60" x2="40" y2="60"/>
+    <line id="lead-n" x1="80" y1="60" x2="120" y2="60"/>
+    <polygon id="body" points="60,40 80,60 60,80 40,60"/>
+    <line id="plus-h" x1="46" y1="60" x2="54" y2="60"/>
+    <line id="plus-v" x1="50" y1="56" x2="50" y2="64"/>
+    <line id="minus" x1="67" y1="60" x2="73" y2="60"/>
   </g>
 </svg>

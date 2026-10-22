@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
   <g id="diodeTVS" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <line id="lead-a" x1="0" y1="60" x2="30" y2="60"/>
-    <line id="lead-k" x1="90" y1="60" x2="120" y2="60"/>
-    <polygon id="body-a" points="30,40 30,80 60,60"/>
-    <polygon id="body-k" points="90,40 90,80 60,60"/>
-    <polyline id="bar" points="80,30 60,30 60,90 40,90"/>
+    <line id="lead-a" x1="0" y1="60" x2="44" y2="60"/>
+    <line id="lead-k" x1="76" y1="60" x2="120" y2="60"/>
+    <polygon id="body-a" points="44,48 44,72 60,60"/>
+    <polygon id="body-k" points="76,48 76,72 60,60"/>
+    <polyline id="bar" points="66,48 60,48 60,72 54,72"/>
   </g>
 </svg>

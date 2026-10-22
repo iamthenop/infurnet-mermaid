@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
   <g id="sourceSquare" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <line id="lead-p" x1="0" y1="60" x2="30" y2="60"/>
-    <circle id="body" cx="60" cy="60" r="30"/>
-    <polyline id="waveform" points="40,80 40,40 60,40 60,80 80,80 80,40"/>
-    <line id="lead-n" x1="90" y1="60" x2="120" y2="60"/>
+    <line id="lead-p" x1="0" y1="60" x2="40" y2="60"/>
+    <line id="lead-n" x1="80" y1="60" x2="120" y2="60"/>
+    <circle id="body" cx="60" cy="60" r="20"/>
+    <polyline id="waveform" points="60,50 68,50 68,60 52,60 52,70 60,70"/>
   </g>
 </svg>

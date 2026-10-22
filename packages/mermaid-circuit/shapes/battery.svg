@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
   <g id="battery" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <line id="lead-p" x1="0" y1="60" x2="30" y2="60"/>
-    <line id="positive-plate-1" x1="30" y1="90" x2="30" y2="30"/>
-    <line id="negative-plate-1" x1="40" y1="80" x2="40" y2="40"/>
-    <line id="positive-plate-2" x1="80" y1="90" x2="80" y2="30"/>
-    <line id="negative-plate-2" x1="90" y1="80" x2="90" y2="40"/>
-    <line id="lead-n" x1="90" y1="60" x2="120" y2="60"/>
+    <line id="lead-p" x1="0" y1="60" x2="48" y2="60"/>
+    <line id="lead-n" x1="72" y1="60" x2="120" y2="60"/>
+    <line id="positive-plate-1" x1="48" y1="45" x2="48" y2="75"/>
+    <line id="negative-plate-1" x1="56" y1="52.5" x2="56" y2="67.5"/>
+    <line id="positive-plate-2" x1="64" y1="45" x2="64" y2="75"/>
+    <line id="negative-plate-2" x1="72" y1="52.5" x2="72" y2="67.5"/>
   </g>
 </svg>

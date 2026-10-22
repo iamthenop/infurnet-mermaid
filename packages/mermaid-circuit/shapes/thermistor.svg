@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
   <g id="thermistor" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <line id="lead-a" x1="0" y1="60" x2="30" y2="60"/>
-    <line id="lead-b" x1="90" y1="60" x2="120" y2="60"/>
-    <rect id="body" x="30" y="40" width="60" height="40"/>
-    <polyline id="temperature-mark" points="30,90 30,80 90,30"/>
+    <line id="lead-a" x1="0" y1="60" x2="40" y2="60"/>
+    <line id="lead-b" x1="80" y1="60" x2="120" y2="60"/>
+    <rect id="body" x="40" y="50" width="40" height="20"/>
+    <polyline id="temperature-mark" points="40,78 48,78 80,42"/>
   </g>
 </svg>
