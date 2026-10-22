@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Adapted from https://schemdraw.readthedocs.io/en/stable/_images/electrical_165_0.svg
+Uniform scaling; horizontal reflection; external leads extend to snap points.
+
+Copyright (c) 2014-2026 Collin J. Delker
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="jfetN" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path id="reference-0" d="M 90 5 L 90 30 L 60 30 L 60 22 L 60 68 L 60 60 L 90 60 L 90 85" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="reference-1" d="M 60 60 L 35 60" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="reference-2" d="M 54 60 L 57 60" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="reference-3" d="M 45.333333 60 L 57 66 L 57 54 Z" stroke="#000" fill="#000" stroke-linecap="butt" stroke-linejoin="miter" />
+    <line id="gate-extension" x1="0" y1="60" x2="35" y2="60" />
+    <line id="upper-extension" x1="90" y1="0" x2="90" y2="5" />
+    <line id="lower-extension" x1="90" y1="85" x2="90" y2="120" />
+  </g>
+</svg>

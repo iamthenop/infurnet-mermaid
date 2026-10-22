@@ -262,6 +262,30 @@ describe('shape catalog', () => {
     }
   });
 
+  it('distinguishes FET polarity, enclosure, diode and channel variants', () => {
+    for (const [n, p] of [['jfetN', 'jfetP'], ['jfetNCircle', 'jfetPCircle'], ['nmosDiode', 'pmosDiode'], ['nmosCircle', 'pmosCircle']] as const) {
+      const arrowDirection = (key: ShapeType) => {
+        const arrow = referencePaths(key).find((attrs) => attrs.fill === '#000')!;
+        const [tip, base] = pathPoints(arrow);
+        return Math.sign(tip![0] - base![0]);
+      };
+      expect(arrowDirection(n)).toBe(-1);
+      expect(arrowDirection(p)).toBe(1);
+      for (const key of [n, p]) {
+        const svg = readSvg(shapes[key].file);
+        expect(elements(svg, 'circle')).toHaveLength(key.endsWith('Circle') ? 1 : 0);
+        expect(elements(svg, 'polygon')).toHaveLength(key.endsWith('Diode') ? 1 : 0);
+        expect(shapes[key].terminals.S![1]).toBe(key.startsWith('pmos') ? 0 : 120);
+      }
+    }
+    expect(pathSubpaths(referencePaths('hemt')[0]!.d!)).toHaveLength(5);
+    expect(pathSubpaths(referencePaths('hemtUnsplit')[0]!.d!)).toHaveLength(3);
+    for (const key of ['hemt', 'hemtUnsplit'] as const) {
+      expect(shapes[key].terminals.S).toEqual([90, 0]);
+      expect(referencePaths(key).filter((attrs) => attrs.fill === '#000')).toHaveLength(1);
+    }
+  });
+
   it('keeps reference waveform marks clear of source outlines', () => {
     for (const key of ['sourceSin', 'sourceSquare', 'sourceTriangle', 'sourceRamp'] as const) {
       const outline = elements(readSvg(shapes[key].file), 'circle')[0]!.attrs;
