@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
   <g id="fuse" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <line id="conductor" x1="60" y1="0" x2="60" y2="120"/>
-    <rect id="body" x="40" y="30" width="40" height="60"/>
+    <line id="conductor" x1="0" y1="60" x2="120" y2="60"/>
+    <rect id="body" x="30" y="40" width="60" height="40"/>
   </g>
 </svg>

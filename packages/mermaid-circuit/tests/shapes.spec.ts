@@ -143,6 +143,25 @@ describe('shape catalog', () => {
     expect(elements(readSvg(shapes.source.file), 'circle')).toHaveLength(1);
   });
 
+  it('keeps expanded resistor and source templates horizontal', () => {
+    const keys = ['resistorIEC', 'resistorVar', 'resistorVarIEC', 'fuse', 'fuseUs', 'fuseIEC',
+      'thermistor', 'source', 'sourceSin', 'sourceSquare', 'sourceTriangle', 'sourceRamp',
+      'sourceControlled', 'sourceControlledI', 'sourceControlledV', 'batteryCell', 'battery'] as const;
+    for (const key of keys) {
+      const terminals = Object.values(shapes[key].terminals);
+      expect(terminals, key).toEqual([[0, 60], [120, 60]]);
+    }
+    const minus = elements(readSvg(shapes.sourceControlledV.file), 'line')
+      .find(({ attrs }) => attrs.id === 'minus')!.attrs;
+    expect(minus.y1).toBe(minus.y2);
+    expect(minus.x1).not.toBe(minus.x2);
+    for (const key of ['resistorVar', 'resistorVarIEC'] as const) {
+      const arrow = elements(readSvg(shapes[key].file), 'polygon')
+        .find(({ attrs }) => attrs.id === 'adjustment-head');
+      expect(arrow?.attrs.fill).toBe('#000');
+    }
+  });
+
   it('uses a vertical zigzag resistor with straight leads', () => {
     const svg = readSvg(shapes.resistor.file);
     expect(shapes.resistor.terminals).toEqual({ A: [60, 0], B: [60, 120] });
