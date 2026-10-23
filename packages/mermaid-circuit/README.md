@@ -42,6 +42,22 @@ The existing renderer checks the accepted model and sizes Mermaid's supplied SVG
 
 The JSON shape catalog supplies mode eligibility and fixed terminal names. It is included with the compiled package; no Python or parser-generator runtime is required. Optional diagram styles are omitted because the renderer draws no marks.
 
+## Drawing foundation
+
+The TypeScript modules in `src/drawing/` provide point transforms, bounds, and SVG primitives. They adapt selected geometry and SVG operations from Schemdraw. Source links and credit appear in [ACKNOWLEDGEMENTS.md](ACKNOWLEDGEMENTS.md); the package's [MIT license](LICENSE) includes the upstream notice.
+
+Transforms apply a local offset, scale, rotation, then global translation. SVG coordinates increase rightward and downward, so positive angles rotate clockwise. The same matrix transforms terminal points and symbol artwork.
+
+The SVG serializer emits line, polyline, path, circle, and text elements with escaped values. It preserves supplied coordinates and element order. It produces fragments for an SVG parent, not a separate document.
+
+`node scripts/build-shape-assets.mjs` reads the catalog and copies each registered SVG into an ignored TypeScript module. Both build and unit-test commands run this step. The compiled module ships under `dist/generated/`, so symbol lookup needs no file or network access at runtime.
+
+The 103 source SVGs retain their artwork and license notices. `shapes/shapes.json` remains the authority for dimensions, terminals, anchors, and mode metadata. The nine IC templates remain outside the bundle.
+
+`resolveSymbol` returns SVG content, pane dimensions, transformed attachment points, and the matching SVG matrix. `resolveTerminal` checks a named terminal. Catalog lookup does not make a shape authorable in circuit notation.
+
+The generated module is derived data; it must not be edited or committed. These drawing tools are not yet connected to Mermaid's renderer, which still returns an empty SVG. Device placement, wire routing, and visible circuit drawing remain unimplemented.
+
 ## Local consumption
 
 Use Node.js 24.22.1. From the repository root:

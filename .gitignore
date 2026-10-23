@@ -9,3 +9,4 @@ coverage/
 .venv/
 test-results/
 playwright-report/
+packages/mermaid-circuit/src/generated/symbol-assets.ts
