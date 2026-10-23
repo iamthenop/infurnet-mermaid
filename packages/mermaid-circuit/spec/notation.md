@@ -9,10 +9,32 @@ The notation is a deliberately restricted Mermaid flowchart-like syntax. Compati
 A diagram begins with:
 
 ```text
-circuitDiagram
+circuitDiagram D
+```
+
+```text
+circuitDiagram A
 ```
 
 Devices and nets are declared as nodes. Every electrical connection joins a net to one named device terminal. Device types and terminal names are defined here; visual geometry does not establish electrical connectivity.
+
+### Diagram modes
+
+A circuit diagram declares a representation mode.
+
+`circuitDiagram D` selects digital logic representation.
+
+`circuitDiagram A` selects electrical/device-level representation.
+
+Digital logic symbols are eligible in `D`. Electrical device-level symbols are eligible in `A`. Shared shapes are eligible in both modes.
+
+Shape eligibility is recorded in `shapes/shapes.json` using `allowedModes`.
+
+Mode eligibility does not make a catalog-only shape authorable. A shape must also have an approved notation type and terminal contract.
+
+Electrical connectivity is defined by nets and named device terminals in either mode. Rendering does not establish connectivity.
+
+The current header-only implementation does not parse the new mode declarations. Mode parsing, eligibility enforcement, and rendering are subsequent implementation work.
 
 ## Object types
 
@@ -84,7 +106,7 @@ When implemented, `shapes/shapes.json` owns SVG filenames, pane dimensions, term
 
 ## Syntax rules
 
-1. The first statement is `circuitDiagram`.
+1. The intended first statement is `circuitDiagram D` or `circuitDiagram A`.
 2. Blank lines and lines beginning with `%%` are ignored.
 3. Node identifiers contain letters and digits and are unique within the diagram.
 4. A node declaration uses Mermaid-style brackets followed by `:::type`.
@@ -117,8 +139,10 @@ Junctions are not authorable circuit objects. The circuit model establishes shar
 
 ## NAND2 reference
 
+Its transistor-level representation uses electrical-device shapes despite implementing a digital logic function.
+
 ```text
-circuitDiagram
+circuitDiagram A
 
     A(["A"]):::pinIn
     B(["B"]):::pinIn
