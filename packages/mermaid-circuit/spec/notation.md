@@ -1,6 +1,6 @@
 # Notation for circuit diagrams
 
-This specification records the approved syntax and electrical semantics of `circuitDiagram`. It does not claim that circuit parsing or rendering is implemented. The NAND2 example below is a specification fixture, not an acceptance requirement for the header-only scaffold.
+This specification records the approved syntax and electrical semantics of `circuitDiagram`. The parser implements the 17 authorable object types, diagram modes, typed subgraphs, and fixed-terminal connections described here. The NAND2 example is a parser acceptance fixture. Layout, wiring, dynamic ICs, and device rendering remain unimplemented.
 
 The notation is a deliberately restricted Mermaid flowchart-like syntax. Compatibility with the complete Mermaid flowchart grammar is not promised. Geometry and presentation are governed by [Drawing style](style.md).
 
@@ -36,7 +36,7 @@ Every stage and block inherits its diagram mode. Subgraphs cannot make an otherw
 
 Electrical connectivity is defined by nets and named device terminals in either mode. Rendering does not establish connectivity.
 
-The current header-only implementation does not parse the new mode declarations. Mode parsing, eligibility enforcement, and rendering are subsequent implementation work.
+The parser records the diagram mode and enforces registered-shape eligibility for authorable types. Layout and rendering remain subsequent implementation work.
 
 ## Object types
 
@@ -104,7 +104,7 @@ These references preserve the existing asset filenames in the [shape library](..
 | `pinOut` | `pin-out.svg` |
 | `pinInOut` | `pin-io.svg` |
 
-When implemented, `shapes/shapes.json` owns SVG filenames, pane dimensions, terminal coordinates, and label anchors. This specification does not define a coordinate registry.
+`shapes/shapes.json` owns SVG filenames, pane dimensions, terminal coordinates, and label anchors. This specification does not define a coordinate registry.
 
 ## Circuit structure
 
@@ -210,7 +210,7 @@ The ordering of multiple pins on one side, unconnected pin declarations, physica
 
 The `ic` device representation is not yet included in the closed authorable object-type table. Dynamic IC parsing and rendering are not implemented.
 
-Typed subgraph parsing, dynamic IC construction, and their rendering are not implemented by the current header-only plugin.
+Typed subgraph parsing and structural validation are implemented. Dynamic IC construction and schematic rendering remain unimplemented.
 
 ## Connection syntax
 

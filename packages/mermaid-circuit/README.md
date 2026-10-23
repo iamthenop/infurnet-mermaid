@@ -1,20 +1,31 @@
 # mermaid-circuit
 
-An external Mermaid diagram scaffold with identifier `circuitDiagram`. The package is private and has not been published.
+An external Mermaid diagram parser with identifier `circuitDiagram`. The package is private and has not been published.
 
 ## Implemented behavior
 
-Only this header-only fixture is supported:
+The parser accepts `circuitDiagram D` and `circuitDiagram A`, followed by declarations and connections from the closed 17-type vocabulary in [the notation specification](spec/notation.md).
 
 ```text
-circuitDiagram
+circuitDiagram D
+A(["A"]):::pinIn
+Y(["Y"]):::pinOut
+subgraph stage logic
+    U1["U1"]:::inverter
+end
+A ---|I| U1
+U1 ---|O| Y
 ```
 
-Blank lines and Mermaid `%%` comments are accepted. Other statements fail parsing. The result is an empty, valid SVG; no components, electrical connectivity, placement, or wires are implemented.
+Blank lines and Mermaid `%%` comments are accepted. The parser validates mode eligibility, declaration brackets, object identity, device terminals, symmetric connections, and typed stage/block membership. Optional device parameters remain uninterpreted label content. Catalog-only shapes and dynamic ICs are not authorable. The full 103-shape catalog is not an authorable device vocabulary.
 
-The public default export conforms to Mermaid's `ExternalDiagramDefinition`. Its detector checks the complete declaration token and its asynchronous loader imports the implementation only when requested. The parser records successful header validation in the database; the renderer checks that model and sizes Mermaid's supplied SVG. Mermaid 12.2.0 uses a database object, so `clear()` resets all scaffold state before parsing. Failed parses also clear that state.
+The parsed model records devices, nets, normalized terminal-to-net connections, ordered stages, blocks, and the declared mode. Three-terminal MOSFETs record their implicit bulk-to-source relationship; four-terminal variants expose B. Stage membership creates no electrical connections.
 
-Existing SVG assets and `shapes/index.ts` are preserved but are not used by the scaffold. The old circuit-prefixed source stubs, parser stub, test stub, and specifications remain outside the active implementation. The specifications are placeholders, not supported syntax or drawing contracts. Optional diagram styles are omitted because the scaffold draws no marks.
+The public default export conforms to Mermaid's `ExternalDiagramDefinition`. Its detector checks the complete declaration token and its asynchronous loader imports the implementation only when requested. Each parse clears the database before validation and stores a complete model only on success. A failed parse leaves no accepted model, and independent databases remain isolated.
+
+The existing renderer checks the accepted model and sizes Mermaid's supplied SVG. It still produces an empty SVG. Layout, wire routing, junction drawing, dynamic ICs, and device rendering are unimplemented. The specifications distinguish implemented notation from approved future drawing and IC requirements.
+
+The JSON shape catalog supplies mode eligibility and fixed terminal names. It is included with the compiled package; no Python or parser-generator runtime is required. Optional diagram styles are omitted because the renderer draws no marks.
 
 ## Local consumption
 
@@ -39,11 +50,11 @@ import circuitDiagram from 'mermaid-circuit';
 
 await mermaid.registerExternalDiagrams([circuitDiagram]);
 mermaid.initialize({ startOnLoad: false });
-const { svg } = await mermaid.render('circuit-example', 'circuitDiagram');
+const { svg } = await mermaid.render('circuit-example', 'circuitDiagram D');
 document.getElementById('output')!.innerHTML = svg;
 ```
 
-Mermaid remains a peer dependency; the library does not bundle a second copy. Integration is tested against 12.2.0 with Mermaid's default strict security mode. Sandbox iframe rendering is not supported by this scaffold. Hosts such as GitHub Markdown and Mermaid Live Editor do not support the custom type unless they load and register this package.
+Mermaid remains a peer dependency; the library does not bundle a second copy. Integration is tested against 12.2.0 with Mermaid's default strict security mode. Sandbox iframe rendering is not supported by this package. Hosts such as GitHub Markdown and Mermaid Live Editor do not support the custom type unless they load and register this package.
 
 ## Browser example and tests
 
@@ -53,7 +64,7 @@ From the repository root:
 npm run dev --workspace mermaid-circuit
 ```
 
-Open the local URL printed by Vite. The page registers the compiled package, loads `examples/basic.mmd`, and displays the returned SVG with a completion status. An empty diagram is expected.
+Open the local URL printed by Vite. The page registers the compiled package, loads `examples/basic.mmd`, and displays the returned SVG with a completion status. The fixture parses a connected inverter circuit; its SVG is empty because graphical rendering is not implemented.
 
 ```sh
 npm run typecheck --workspace mermaid-circuit
@@ -63,4 +74,4 @@ npx playwright install chromium
 npm run test:browser --workspace mermaid-circuit
 ```
 
-Unit tests cover detection, lazy loading, definition interfaces, unsupported input, and database reset and isolation. Browser tests use Vite and Playwright Chromium to register the compiled package with real Mermaid, inspect valid empty SVG output, reject unsupported notation, and render again after failure. See the [root README](../../README.md) for `.venv/` runtime activation and CI commands.
+Unit tests cover detection, lazy loading, parser and definition interfaces, all 17 notation types, mode eligibility, structural membership, normalized connections, NAND2 topology, invalid input, and database reset and isolation. Browser tests use Vite and Playwright Chromium to register the compiled package with real Mermaid, inspect valid empty SVG output, reject unsupported notation, and render again after failure. See the [root README](../../README.md) for `.venv/` runtime activation and CI commands.

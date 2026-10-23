@@ -1,1 +1,9 @@
-circuitDiagram
+circuitDiagram D
+
+A(["A"]):::pinIn
+Y(["Y"]):::pinOut
+subgraph stage logic
+    U1["U1"]:::inverter
+end
+A ---|I| U1
+U1 ---|O| Y

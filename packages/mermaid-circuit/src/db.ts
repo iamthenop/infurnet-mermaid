@@ -1,18 +1,20 @@
+import type { CircuitModel } from './circuitTypes.js';
+
 export class ScaffoldDb {
-  private parsed = false;
+  private model: CircuitModel | undefined;
 
   clear(): void {
-    this.parsed = false;
+    this.model = undefined;
   }
 
-  acceptHeader(): void {
-    this.parsed = true;
+  setModel(model: CircuitModel): void {
+    this.model = model;
   }
 
-  getModel(): Readonly<{ kind: 'empty' }> {
-    if (!this.parsed) {
+  getModel(): CircuitModel {
+    if (!this.model) {
       throw new Error('circuitDiagram must be parsed successfully before rendering.');
     }
-    return { kind: 'empty' };
+    return this.model;
   }
 }
