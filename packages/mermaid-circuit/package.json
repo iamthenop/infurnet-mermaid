@@ -2,6 +2,7 @@
   "name": "mermaid-circuit",
   "version": "0.0.0",
   "private": true,
+  "license": "MIT",
   "description": "Circuit notation parser and validated model with empty SVG rendering for Mermaid",
   "type": "module",
   "main": "./dist/index.js",

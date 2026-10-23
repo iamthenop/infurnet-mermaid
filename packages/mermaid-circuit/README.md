@@ -44,7 +44,9 @@ The JSON shape catalog supplies mode eligibility and fixed terminal names. It is
 
 ## Drawing foundation
 
-The TypeScript modules in `src/drawing/` provide point transforms, bounds, and SVG primitives. They adapt selected geometry and SVG operations from Schemdraw. Source links and credit appear in [ACKNOWLEDGEMENTS.md](ACKNOWLEDGEMENTS.md); the package's [MIT license](LICENSE) includes the upstream notice.
+The TypeScript modules in `src/drawing/` provide point transforms, bounds, and SVG primitives. They adapt selected geometry and SVG operations from Schemdraw.
+
+Source links, credit, and the upstream notice appear in [ACKNOWLEDGEMENTS.md](ACKNOWLEDGEMENTS.md). The package uses the [MIT license](LICENSE).
 
 Transforms apply a local offset, scale, rotation, then global translation. SVG coordinates increase rightward and downward, so positive angles rotate clockwise. The same matrix transforms terminal points and symbol artwork.
 
