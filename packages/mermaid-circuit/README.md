@@ -30,7 +30,9 @@ R2["R2"]:::resistor
 R1 ---|B:A| R2
 ```
 
-This connects `R1.B` to `R2.A`; `R2 ---|A:B| R1` is equivalent. The parser normalizes direct connections into terminal-to-net relationships, creating an internal net without a visible label when no explicit net exists. Shared terminal endpoints form one net, while different terminals preserve separate series nets. An intersecting named net supplies the net identity; a connection that would merge two named nets is rejected. Repeated equivalent connections are deduplicated.
+This connects `R1.B` to `R2.A`; `R2 ---|A:B| R1` is equivalent. The parser normalizes direct connections into terminal-to-net relationships, creating an internal net without a visible label when no explicit net exists.
+
+Shared terminal endpoints form one net, while different terminals preserve separate series nets. An intersecting named net supplies the net identity; a connection that would merge two named nets is rejected. Repeated equivalent connections are deduplicated.
 
 The parsed model records devices, nets, normalized terminal-to-net connections, ordered stages, blocks, and the declared mode. Three-terminal MOSFETs record their implicit bulk-to-source relationship; four-terminal variants expose B. Stage membership creates no electrical connections.
 
