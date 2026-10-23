@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Adapted from https://schemdraw.readthedocs.io/en/stable/_images/intcircuits_4_0.svg
+Native geometry and aspect ratio retained; static labels use system sans-serif.
+Unregistered visual template; labels do not establish electrical terminal contracts.
+
+Copyright (c) 2014-2026 Collin J. Delker
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="160.4" height="185.6" viewBox="-26.2 -181 160.4 185.6">
+  <g fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polygon points="0,-0 108,-0 108,-176.4 0,-176.4 " stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <polygon points="0,-18 0,-39.6 -21.6,-39.6 -21.6,-18 " stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <polygon points="108,-18 108,-39.6 129.6,-39.6 129.6,-18 " stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <polygon points="0,-57.6 0,-79.2 -21.6,-79.2 -21.6,-57.6 " stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <polygon points="108,-57.6 108,-79.2 129.6,-79.2 129.6,-57.6 " stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <polygon points="0,-97.2 0,-118.8 -21.6,-118.8 -21.6,-97.2 " stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <polygon points="108,-97.2 108,-118.8 129.6,-118.8 129.6,-97.2 " stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <polygon points="0,-136.8 0,-158.4 -21.6,-158.4 -21.6,-136.8 " stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <polygon points="108,-136.8 108,-158.4 129.6,-158.4 129.6,-136.8 " stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M 43.199999999999996,-176.4 L 43.222,-175.708 L 43.289,-175.019 L 43.399,-174.335 L 43.553,-173.661 L 43.75,-172.997 L 43.989,-172.347 L 44.27,-171.714 L 44.59,-171.1 L 44.949,-170.508 L 45.345,-169.94 L 45.776,-169.399 L 46.242,-168.887 L 46.739,-168.405 L 47.266,-167.956 L 47.821,-167.542 L 48.401,-167.164 L 49.005,-166.825 L 49.628,-166.524 L 50.27,-166.265 L 50.927,-166.046 L 51.597,-165.871 L 52.276,-165.738 L 52.963,-165.65 L 53.654,-165.606 L 54.346,-165.606 L 55.037,-165.65 L 55.724,-165.738 L 56.403,-165.871 L 57.073,-166.046 L 57.73,-166.265 L 58.372,-166.524 L 58.995,-166.825 L 59.599,-167.164 L 60.179,-167.542 L 60.734,-167.956 L 61.261,-168.405 L 61.758,-168.887 L 62.224,-169.399 L 62.655,-169.94 L 63.051,-170.508 L 63.41,-171.1 L 63.73,-171.714 L 64.011,-172.347 L 64.25,-172.997 L 64.447,-173.661 L 64.601,-174.335 L 64.711,-175.019 L 64.778,-175.708 L 64.8,-176.4" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <text stroke="none" x="-10.799999999999999" y="-38.8" dominant-baseline="central" fill="#000" font-size="10" font-family="sans-serif" text-anchor="middle">
+      <tspan x="-10.799999999999999" dy="10">4</tspan>
+    </text>
+    <text stroke="none" x="118.8" y="-38.8" dominant-baseline="central" fill="#000" font-size="10" font-family="sans-serif" text-anchor="middle">
+      <tspan x="118.8" dy="10">5</tspan>
+    </text>
+    <text stroke="none" x="-10.799999999999999" y="-78.4" dominant-baseline="central" fill="#000" font-size="10" font-family="sans-serif" text-anchor="middle">
+      <tspan x="-10.799999999999999" dy="10">3</tspan>
+    </text>
+    <text stroke="none" x="118.8" y="-78.4" dominant-baseline="central" fill="#000" font-size="10" font-family="sans-serif" text-anchor="middle">
+      <tspan x="118.8" dy="10">6</tspan>
+    </text>
+    <text stroke="none" x="-10.799999999999999" y="-118.0" dominant-baseline="central" fill="#000" font-size="10" font-family="sans-serif" text-anchor="middle">
+      <tspan x="-10.799999999999999" dy="10">2</tspan>
+    </text>
+    <text stroke="none" x="118.8" y="-118.0" dominant-baseline="central" fill="#000" font-size="10" font-family="sans-serif" text-anchor="middle">
+      <tspan x="118.8" dy="10">7</tspan>
+    </text>
+    <text stroke="none" x="-10.799999999999999" y="-157.6" dominant-baseline="central" fill="#000" font-size="10" font-family="sans-serif" text-anchor="middle">
+      <tspan x="-10.799999999999999" dy="10">1</tspan>
+    </text>
+    <text stroke="none" x="118.8" y="-157.6" dominant-baseline="central" fill="#000" font-size="10" font-family="sans-serif" text-anchor="middle">
+      <tspan x="118.8" dy="10">8</tspan>
+    </text>
+  </g>
+</svg>

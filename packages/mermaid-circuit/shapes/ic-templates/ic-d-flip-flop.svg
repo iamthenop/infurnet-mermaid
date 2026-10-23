@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Adapted from https://schemdraw.readthedocs.io/en/stable/_images/intcircuits_6_0.svg
+Native geometry and aspect ratio retained; static labels use system sans-serif.
+Unregistered visual template; labels do not establish electrical terminal contracts.
+
+Copyright (c) 2014-2026 Collin J. Delker
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="166.94" height="117.2" viewBox="-45.34 -112.6 166.94 117.2">
+  <g fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 0.0,-0.0 L 72,-0 L 72,-108 L 0,-108 L 0,-0" stroke="#000" fill="none" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M 0.0,-90.0 L -18,-90" stroke="#000" fill="none" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M 0.0,-18.0 L -18,-18" stroke="#000" fill="none" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M 0.0,-24.3 L 12.6,-18 L 0,-11.7" stroke="#000" fill="none" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M 72.0,-90.0 L 90,-90" stroke="#000" fill="none" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M 72.0,-18.0 L 90,-18" stroke="#000" fill="none" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round" />
+    <text stroke="none" x="5.3999999999999995" y="-104.0" dominant-baseline="central" fill="#000" font-size="14" font-family="sans-serif" text-anchor="start">
+      <tspan x="5.3999999999999995" dy="14">D</tspan>
+    </text>
+    <text stroke="none" x="66.60000000000001" y="-104.0" dominant-baseline="central" fill="#000" font-size="14" font-family="sans-serif" text-anchor="end">
+      <tspan x="66.60000000000001" dy="14">Q</tspan>
+    </text>
+    <text stroke="none" x="66.60000000000001" y="-32.0" dominant-baseline="central" fill="#000" font-size="14" font-family="sans-serif" text-anchor="end">
+      <tspan x="66.60000000000001" dy="14">
+        <tspan text-decoration="overline">Q</tspan>
+      </tspan>
+    </text>
+    <text stroke="none" x="-21.599999999999998" y="-100.0" dominant-baseline="central" fill="#000" font-size="10" font-family="sans-serif" text-anchor="end">
+      <tspan x="-21.599999999999998" dy="10">D</tspan>
+    </text>
+    <text stroke="none" x="93.60000000000001" y="-100.0" dominant-baseline="central" fill="#000" font-size="10" font-family="sans-serif" text-anchor="start">
+      <tspan x="93.60000000000001" dy="10">Q</tspan>
+    </text>
+    <text stroke="none" x="93.60000000000001" y="-28.0" dominant-baseline="central" fill="#000" font-size="10" font-family="sans-serif" text-anchor="start">
+      <tspan x="93.60000000000001" dy="10">Qbar</tspan>
+    </text>
+    <text stroke="none" x="-21.599999999999998" y="-28.0" dominant-baseline="central" fill="#000" font-size="10" font-family="sans-serif" text-anchor="end">
+      <tspan x="-21.599999999999998" dy="10">CLK</tspan>
+    </text>
+  </g>
+</svg>
