@@ -76,6 +76,18 @@ Wires use orthogonal routing. Junction markers are placed according to the [junc
 6. A ground-reference name appears below its ground bars.
 7. Internal net names appear above their wires, near the left end.
 
+### Terminal labels
+
+A connection label identifies the named terminal of its device endpoint.
+
+The terminal label is drawn adjacent to the device attachment point, rather than at the midpoint of the connecting wire.
+
+Terminal-label placement is independent of the written order of the net and device endpoints.
+
+For an IC, the side qualifier selects the body side. The terminal label remains associated with the named IC pin.
+
+Terminal labels do not define electrical connectivity. Their identities are governed by [Connection syntax](notation.md#connection-syntax).
+
 ## Panes and snap points
 
 Standard shapes, including pin flags, occupy a 120 × 120 pane.
