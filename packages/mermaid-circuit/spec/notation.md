@@ -26,11 +26,13 @@ A circuit diagram declares a representation mode.
 
 `circuitDiagram A` selects electrical/device-level representation.
 
-Digital logic symbols are eligible in `D`. Electrical device-level symbols are eligible in `A`. Shared shapes are eligible in both modes.
+Registered digital logic symbols are eligible in `D`. Registered electrical device-level symbols are eligible in `A`. Shared shapes are eligible in both modes.
 
 Shape eligibility is recorded in `shapes/shapes.json` using `allowedModes`.
 
 Mode eligibility does not make a catalog-only shape authorable. A shape must also have an approved notation type and terminal contract.
+
+Every stage and block inherits its diagram mode. Subgraphs cannot make an otherwise illegal device legal. Dynamic IC eligibility must be associated with the eventual IC definition, rather than the generic visual template.
 
 Electrical connectivity is defined by nets and named device terminals in either mode. Rendering does not establish connectivity.
 
@@ -104,6 +106,110 @@ These references preserve the existing asset filenames in the [shape library](..
 
 When implemented, `shapes/shapes.json` owns SVG filenames, pane dimensions, terminal coordinates, and label anchors. This specification does not define a coordinate registry.
 
+## Circuit structure
+
+### Stage
+
+A `stage` is a typed subgraph that groups devices for ordering and placement.
+
+A stage does not define electrical connectivity. Device terminals remain connected through named nets.
+
+### Block
+
+A `block` is a typed subgraph that groups related stages into a larger circuit section.
+
+A block does not create an electrical interface, a reusable device type, or a new connectivity domain.
+
+### Integrated circuit
+
+An `ic` is a device representation with dynamically defined pins.
+
+An IC is not a subgraph. Its pins form its external electrical interface. Its internal circuitry is not implied by the shape.
+
+An IC may belong to a stage like any other device.
+
+### Typed subgraph declarations
+
+The intended declarations are:
+
+```text
+subgraph stage stageName
+    ...
+end
+```
+
+```text
+subgraph block blockName
+    ...
+end
+```
+
+`stage` and `block` are structural keywords. There is no initial `module` subgraph type.
+
+The following is an intended structural example, not an implemented parser fixture:
+
+```text
+circuitDiagram D
+
+subgraph block datapath
+    subgraph stage inputLogic
+        direction LR
+        U1["U1"]:::inverter
+        U2["U2"]:::buffer
+    end
+
+    subgraph stage outputLogic
+        direction LR
+        U3["U3"]:::and
+    end
+end
+```
+
+This example illustrates structural membership only. It does not authorize the new logic gates in the currently closed object-type table. The existing 17-type vocabulary remains unchanged.
+
+### Membership and hierarchy
+
+1. A stage contains devices.
+2. A block groups stages.
+3. A stage may appear at diagram level or inside a block.
+4. Stages do not contain other stages or blocks.
+5. Blocks do not contain other blocks.
+6. Nets remain declared outside subgraphs.
+7. Each device belongs to at most one explicit stage.
+8. Subgraph membership does not establish electrical connectivity.
+9. All subgraphs inherit the enclosing diagram's `D` or `A` mode.
+10. A subgraph cannot override diagram-mode eligibility.
+
+These rules define the initial two-level grouping model, not reusable modules or arbitrary hierarchical circuits. Devices outside all explicit stages retain the implicit final-stage behavior defined in the [syntax rules](#syntax-rules).
+
+A block groups its child stages. It does not introduce an electrical ordering rule.
+
+### Integrated circuit pins
+
+1. An IC has a unique device identifier.
+2. An IC has a visual body and a collection of named electrical pins.
+3. IC pins are defined dynamically for the particular device.
+4. Each pin has a name and a placement side.
+5. Placement sides are `T`, `B`, `L`, and `R`.
+6. The same IC may have multiple pins on any side.
+7. Pin names identify electrical terminals independently of their positions.
+8. A pin-side declaration does not connect a pin to a net.
+9. Electrical connections continue to use the established net-to-terminal model.
+10. An IC may represent an analog or digital component; eligibility is not inferred from its outline.
+
+| Side | Meaning |
+| --- | --- |
+| `T` | Top |
+| `B` | Bottom |
+| `L` | Left |
+| `R` | Right |
+
+The owner's `ic:(T, B, L, R)--pin` concept establishes the four-sided pin-assignment model.
+
+The exact authorable syntax, ordering of multiple pins on one side, pin numbering, and connection between an IC definition and its instances remain to be specified. The illustrative pin-assignment concept is not a parser grammar. `ic` is not yet part of the closed authorable object-type table.
+
+Typed subgraph parsing, dynamic IC construction, and their rendering are not implemented by the current header-only plugin.
+
 ## Syntax rules
 
 1. The intended first statement is `circuitDiagram D` or `circuitDiagram A`.
@@ -119,15 +225,14 @@ When implemented, `shapes/shapes.json` owns SVG filenames, pane dimensions, term
 11. Connections use `net ---|terminal| device`.
 12. A device terminal connects to one net.
 13. Nets connect to device terminals, not directly to other nets.
-14. A stage is declared with `subgraph stageName` and terminated with `end`.
+14. Subgraphs use the [typed declarations](#typed-subgraph-declarations) and terminate with `end`.
 15. Stage names use camelCase.
-16. Stages do not nest.
-17. Only devices belong inside stages.
-18. Stages stack vertically in declaration order.
-19. `direction LR` places stage devices side by side and is the default.
-20. `direction TB` stacks stage devices vertically.
-21. Devices declared outside all stages occupy a final stage.
-22. There are no notation-level style declarations.
+16. Subgraphs follow the [membership and hierarchy rules](#membership-and-hierarchy).
+17. Stages stack vertically in declaration order.
+18. `direction LR` places stage devices side by side and is the default.
+19. `direction TB` stacks stage devices vertically.
+20. Devices declared outside all explicit stages occupy an implicit final stage.
+21. There are no notation-level style declarations.
 
 ## Bulk semantics
 
@@ -151,13 +256,13 @@ circuitDiagram A
     VSS{{"VSS"}}:::ground
     n01(("n01")):::net
 
-    subgraph pullUp
+    subgraph stage pullUp
         direction LR
         PMOS0["PMOS0"]:::pmos
         PMOS1["PMOS1"]:::pmos
     end
 
-    subgraph pullDown
+    subgraph stage pullDown
         direction TB
         NMOS0["NMOS0"]:::nmos
         NMOS1["NMOS1"]:::nmos

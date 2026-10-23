@@ -10,7 +10,7 @@ These are approved drawing requirements, not a claim that schematic rendering is
 2. PMOS devices sit above NMOS devices in the same stage.
 3. Signals flow from left to right.
 4. Inputs appear on the left and outputs on the right.
-5. Each stage is enclosed by a dashed frame labelled with its name.
+5. Stage frames follow the [stage presentation](#stage-presentation) convention.
 6. Signals stay outside stage frames except for branches crossing the borders to reach device terminals.
 7. Input signals split at junctions outside stage frames.
 8. The first gate driven by an input is aligned horizontally with that input pin.
@@ -18,6 +18,20 @@ These are approved drawing requirements, not a claim that schematic rendering is
 10. Additional gate connections branch from the corresponding input line using orthogonal routing.
 
 The expression *supply rail* describes graphical placement, not an electrical object type. Stage ordering, membership, and direction declarations are defined in [the syntax rules](notation.md#syntax-rules).
+
+## Subgraph presentation
+
+Structural membership and diagram-mode inheritance are defined in [Circuit structure](notation.md#circuit-structure).
+
+### Stage presentation
+
+Each stage is enclosed by a dashed frame labelled with its name. Stage placement remains governed by its declared direction, as defined in the [syntax rules](notation.md#syntax-rules).
+
+### Block presentation
+
+A block visually groups its contained stages. A block does not draw new electrical connections or alter existing wire topology.
+
+The precise block-border styling, padding, and treatment of routes crossing its boundary remain for the placement and rendering implementation.
 
 ## Symbols
 
@@ -37,6 +51,16 @@ Rules 1–7 describe the default CMOS MOSFET representations: `nmos`, `pmos`, `n
 12. Wires join terminal coordinates without unintended jogs.
 
 Bulk connectivity is governed by [bulk semantics](notation.md#bulk-semantics), not by symbol positioning.
+
+## Integrated circuit presentation
+
+An IC body is a single device shape. Its displayed dimensions depend on its pin arrangement. Pin attachments are positioned along the selected body sides, and pin labels identify the corresponding named terminals. Pin identity and placement sides are defined in [Integrated circuit pins](notation.md#integrated-circuit-pins).
+
+Internal IC circuitry is not rendered merely because an IC body is present.
+
+The nine existing [IC templates](../shapes/ic-templates/) provide visual references. The templates do not establish pin ordering, package numbering, or electrical connectivity.
+
+Dynamic ICs do not inherit the fixed 120 × 120 symbol-pane requirement. The exact resizing, spacing, pin ordering, and routing methodology remains future work. Dynamic IC rendering is not implemented by the current header-only plugin.
 
 ## Routing and junction presentation
 

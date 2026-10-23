@@ -274,7 +274,9 @@ describe('shape catalog', () => {
     expect(svg).toContain('https://schemdraw.readthedocs.io/en/stable/_images/logic_');
     expect(svg).toContain('Copyright (c) 2014-2026 Collin J. Delker');
     expect(svg).not.toMatch(/<(?:text|tspan|use)\b|(?:href|font-family)=/u);
-    expect(notation).not.toContain(`:::${key}`);
+    const authorableTypes = [...notation.matchAll(/^\| `([^`]+)` \| (Device|Net) \| ([^|]+) \|$/gmu)]
+      .map((match) => match[1]);
+    expect(authorableTypes).not.toContain(key);
   });
 
   it.each(Object.entries(shapes))('%s has grid-aligned attachments and geometry inside its pane', (_key, entry) => {
