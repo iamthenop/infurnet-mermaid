@@ -78,13 +78,21 @@ Wires use orthogonal routing. Junction markers are placed according to the [junc
 
 ### Terminal labels
 
-A connection label identifies the named terminal of its device endpoint.
+A named-net connection label identifies the named terminal of its device endpoint.
 
 The terminal label is drawn adjacent to the device attachment point, rather than at the midpoint of the connecting wire.
 
 Terminal-label placement is independent of the written order of the net and device endpoints.
 
 For an IC, the side qualifier selects the body side. The terminal label remains associated with the named IC pin.
+
+A direct device connection carries two terminal names. Each name is drawn beside its corresponding device attachment.
+
+The first terminal name belongs to the left textual endpoint. The second belongs to the right textual endpoint.
+
+Reversing the written connection does not change its electrical relationship.
+
+Implicit nets do not receive visible net-name labels.
 
 Terminal labels do not define electrical connectivity. Their identities are governed by [Connection syntax](notation.md#connection-syntax).
 

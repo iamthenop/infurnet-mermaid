@@ -38,7 +38,7 @@ it('registers the compiled package and renders successive empty diagrams in Chro
       } catch (error) {
         rejection = String(error);
       }
-      const second = await renderFixture('second-render', 'circuitDiagram A\n%% comment\nR["R"]:::resistor');
+      const second = await renderFixture('second-render', 'circuitDiagram A\n%% comment\nR["R"]:::resistor\nR2["R2"]:::resistor\nR ---|B:A| R2');
       const inspect = (svg: string) => {
         const doc = new DOMParser().parseFromString(svg, 'image/svg+xml');
         return {

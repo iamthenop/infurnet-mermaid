@@ -1,13 +1,20 @@
 /// <reference types="vite/client" />
 import { describe, expect, it } from 'vitest';
 import { parseCircuit } from '../src/parser/circuitParser.js';
-import { deviceTypes, netTypes } from '../src/circuitTypes.js';
+import { deviceTypes, netTypes, type CircuitModel } from '../src/circuitTypes.js';
 import { ScaffoldDb } from '../src/db.js';
 import { createParser } from '../src/parser.js';
 import notation from '../spec/notation.md?raw';
 
 const digital = 'circuitDiagram D\nA(["A"]):::pinIn\nY(["Y"]):::pinOut\nU1["U1"]:::inverter';
 const electrical = 'circuitDiagram A\nN(("N")):::net\nM["M"]:::nmos';
+const resistors = 'circuitDiagram A\nR1["R1"]:::resistor\nR2["R2"]:::resistor\nR3["R3"]:::resistor';
+
+function topology(model: CircuitModel): string[][] {
+  return [...new Set(model.connections.map(({ net }) => net))].map((net) => model.connections
+    .filter((connection) => connection.net === net)
+    .map(({ device, terminal }) => `${device}.${terminal}`).sort()).sort();
+}
 
 describe('circuit parser', () => {
   it.each(['D', 'A'])('parses an empty %s circuit', (mode) => {
@@ -50,6 +57,117 @@ describe('circuit parser', () => {
     const model = parseCircuit(`circuitDiagram D\nA ---|I| U1\nU2 ---|I| A\nU1[one]:::buffer\nU2[two]:::inverter\nA((same)):::net\nB((same)):::net`);
     expect(model.connections.map((edge) => edge.net)).toEqual(['A', 'A']);
     expect(model.nets.map((net) => net.id)).toEqual(['A', 'B']);
+  });
+
+  it('normalizes direct, reversed, repeated and explicit resistor connections equivalently', () => {
+    const direct = parseCircuit(`${resistors}\nR1 ---|B:A| R2`);
+    const reversed = parseCircuit(`${resistors}\nR2 ---|A:B| R1\nR1 ---|B:A| R2\nR1 ---|B:A| R2`);
+    const explicit = parseCircuit(`${resistors}\nn1(("n1")):::net\nR1 ---|B| n1\nn1 ---|A| R2`);
+    expect(topology(direct)).toEqual([['R1.B', 'R2.A']]);
+    expect(topology(reversed)).toEqual(topology(direct));
+    expect(topology(explicit)).toEqual(topology(direct));
+    expect(direct.nets).toHaveLength(1);
+    expect(reversed.nets).toEqual(direct.nets);
+    expect(reversed.connections).toHaveLength(2);
+    const net = direct.nets[0]!;
+    expect(net).toMatchObject({ type: 'net', label: '', implicit: true });
+    expect(net.id).not.toMatch(/^[A-Za-z0-9]+$/u);
+    expect(() => parseCircuit(`${resistors}\n${net.id}(("collision")):::net`)).toThrow('Unsupported');
+    expect(parseCircuit(`${resistors}\nR1 ---|B:A| R2`)).toEqual(direct);
+    expect(explicit.nets).toEqual([{ id: 'n1', type: 'net', label: 'n1' }]);
+  });
+
+  it.each([
+    ['series', 'R1 ---|B:A| R2\nR2 ---|B:A| R3', [['R1.B', 'R2.A'], ['R2.B', 'R3.A']]],
+    ['branch', 'R1 ---|B:A| R2\nR1 ---|B:A| R3', [['R1.B', 'R2.A', 'R3.A']]],
+    ['cycle', 'R1 ---|B:A| R2\nR2 ---|A:A| R3\nR3 ---|A:B| R1', [['R1.B', 'R2.A', 'R3.A']]],
+  ] as const)('preserves %s topology independently of statement order', (_, links, expected) => {
+    const model = parseCircuit(`${resistors}\n${links}`);
+    const reordered = parseCircuit(`${resistors}\n${links.split('\n').reverse().join('\n')}`);
+    expect(topology(model)).toEqual(expected);
+    expect(topology(reordered)).toEqual(expected);
+    expect(model.nets).toHaveLength(expected.length);
+    expect(new Set(model.nets.map(({ id }) => id)).size).toBe(expected.length);
+    expect(reordered.nets).toEqual(model.nets);
+  });
+
+  it('resolves forward device references', () => {
+    const model = parseCircuit('circuitDiagram A\nR1 ---|B:A| R2\nR2["R2"]:::resistor\nR1["R1"]:::resistor');
+    expect(topology(model)).toEqual([['R1.B', 'R2.A']]);
+  });
+
+  it.each([
+    [0, 1, 2], [0, 2, 1], [1, 0, 2], [1, 2, 0], [2, 0, 1], [2, 1, 0],
+  ])('reconciles named nets and rejects conflicts in statement order %j,%j,%j', (...order) => {
+    const declarations = `${resistors}\nn1(("same")):::net\nn2(("same")):::net`;
+    const links = ['R1 ---|B:A| R2', 'R1 ---|B| n1', 'n1 ---|A| R2'];
+    const model = parseCircuit(`${declarations}\n${order.map((i) => links[i]).join('\n')}`);
+    expect(topology(model)).toEqual([['R1.B', 'R2.A']]);
+    expect(model.connections).toHaveLength(2);
+    expect(model.connections.every(({ net }) => net === 'n1')).toBe(true);
+    expect(model.nets).toEqual([
+      { id: 'n1', type: 'net', label: 'same' }, { id: 'n2', type: 'net', label: 'same' },
+    ]);
+    links[2] = 'n2 ---|A| R2';
+    const conflict = `${declarations}\n${order.map((i) => links[i]).join('\n')}`;
+    expect(() => parseCircuit(conflict)).toThrow(/Line 9:.*(?:conflicts|already connected)/u);
+  });
+
+  it('reconciles a named net across joined groups and subsequent connections', () => {
+    const model = parseCircuit(`${resistors}\nR4["R4"]:::resistor\nn1(("n1")):::net
+R3 ---|A:A| R4
+R4 ---|A| n1
+R1 ---|B:A| R2
+R2 ---|A:A| R3
+R4 ---|A:B| R1`);
+    expect(topology(model)).toEqual([['R1.B', 'R2.A', 'R3.A', 'R4.A']]);
+    expect(model.connections.every(({ net }) => net === 'n1')).toBe(true);
+    expect(model.nets).toEqual([{ id: 'n1', type: 'net', label: 'n1' }]);
+  });
+
+  it('connects digital devices across stages without changing membership', () => {
+    const model = parseCircuit(`circuitDiagram D
+subgraph stage first
+  U1["U1"]:::inverter
+end
+subgraph stage second
+  U2["U2"]:::buffer
+end
+U1 ---|O:I| U2`);
+    expect(topology(model)).toEqual([['U1.O', 'U2.I']]);
+    expect(model.nets).toHaveLength(1);
+    expect(model.devices.map(({ stage }) => stage)).toEqual([0, 1]);
+    expect(model.stages.map(({ devices }) => devices)).toEqual([['U1'], ['U2']]);
+    expect(model.mode).toBe('D');
+  });
+
+  it.each([
+    ['Missing ---|B:A| R2', 'undeclared'], ['R1 ---|B:A| Missing', 'undeclared'],
+    ['R1 ---|X:A| R2', 'Unknown terminal'], ['R1 ---|B:X| R2', 'Unknown terminal'],
+    ['n1 ---|B:A| R2', 'two distinct devices'], ['R1 ---|B:A| n1', 'two distinct devices'],
+    ['n1 ---|B:A| n2', 'two distinct devices'], ['R1 ---|B:A| R1', 'two distinct devices'],
+    ['R1 ---|:A| R2', 'Unsupported'], ['R1 ---|B:| R2', 'Unsupported'],
+    ['R1 ---|B:A:B| R2', 'Unsupported'], ['R1 ---|B,A| R2', 'Unsupported'],
+    ['R1 ---|B/A| R2', 'Unsupported'], ['R1 --- R2', 'Unsupported'],
+    ['L:R1 ---|B:A| R2', 'Unsupported'], ['R1 ---|B:A| R:R2', 'Unsupported'],
+  ])('rejects direct shorthand %s', (link, message) => {
+    expect(() => parseCircuit(`${resistors}\nn1(("n1")):::net\nn2(("n2")):::net\n${link}`))
+      .toThrow(new RegExp(`Line 7: .*${message}`, 'u'));
+  });
+
+  it('clears a failed normalization and isolates recovered implicit nets', () => {
+    const db = new ScaffoldDb(), other = new ScaffoldDb(), parser = createParser(db);
+    parser.parse(`${resistors}\nR1 ---|B:A| R2`);
+    const previous = db.getModel();
+    createParser(other).parse(digital);
+    expect(() => parser.parse(`${resistors}\nn1(("n1")):::net\nn2(("n2")):::net\nR1 ---|B| n1\nR2 ---|A| n2\nR1 ---|B:A| R2`))
+      .toThrow('conflicts');
+    expect(() => db.getModel()).toThrow('parsed successfully');
+    expect(topology(previous)).toEqual([['R1.B', 'R2.A']]);
+    parser.parse(`${resistors}\nR2 ---|B:A| R3`);
+    expect(topology(db.getModel())).toEqual([['R2.B', 'R3.A']]);
+    expect(db.getModel().nets).toHaveLength(1);
+    expect(other.getModel()).toEqual(parseCircuit(digital));
   });
 
   it('records blocks, stage order, membership, directions and the implicit final stage', () => {

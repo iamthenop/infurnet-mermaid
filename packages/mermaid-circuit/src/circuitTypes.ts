@@ -21,6 +21,7 @@ export interface Net {
   readonly id: string;
   readonly type: NetType;
   readonly label: string;
+  readonly implicit?: true;
 }
 
 export interface Connection {
