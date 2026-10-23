@@ -48,7 +48,7 @@ export function parseCircuit(text: string): CircuitModel {
   const stages: PendingStage[] = [], blocks: PendingBlock[] = [], scopes: Scope[] = [];
   const nodes = new Map<string, Device | Net>();
   const deviceIds = new Set<string>();
-  const pending: { left: string; right: string; terminal: string; line: number }[] = [];
+  const pending: { left: string; right: string; terminal: string; secondTerminal: string | undefined; line: number }[] = [];
   const outside: number[] = [];
 
   for (const { text, line } of statements.slice(1)) {
@@ -81,9 +81,9 @@ export function parseCircuit(text: string): CircuitModel {
       stages[scope.index]!.direction = direction[1] as Direction;
       continue;
     }
-    const connection = text.match(/^([A-Za-z0-9]+)\s*---\|([A-Za-z0-9]+)\|\s*([A-Za-z0-9]+)$/u);
+    const connection = text.match(/^([A-Za-z0-9]+)\s*---\|([A-Za-z0-9]+)(?::([A-Za-z0-9]+))?\|\s*([A-Za-z0-9]+)$/u);
     if (connection) {
-      pending.push({ left: connection[1]!, terminal: connection[2]!, right: connection[3]!, line });
+      pending.push({ left: connection[1]!, terminal: connection[2]!, secondTerminal: connection[3], right: connection[4]!, line });
       continue;
     }
     const node = text.match(/^([A-Za-z0-9]+)\s*(.*?)\s*:::([A-Za-z0-9]+)$/u);
@@ -129,18 +129,64 @@ export function parseCircuit(text: string): CircuitModel {
     });
     stages.push({ name: null, implicit: true, order: index, direction: 'LR', mode, block: null, devices: ids });
   }
-  const assignments = new Map<string, string>();
-  for (const { left, right, terminal, line } of pending) {
-    if (!nodes.has(left) || !nodes.has(right)) fail(line, `Connection references an undeclared object: ${left}, ${right}.`);
-    if (deviceIds.has(left) === deviceIds.has(right)) fail(line, 'A connection requires one device and one net.');
-    const device = nodes.get(deviceIds.has(left) ? left : right) as Device;
-    const net = deviceIds.has(left) ? right : left;
-    if (!device.terminals.includes(terminal)) fail(line, `Unknown terminal "${terminal}" on device "${device.id}".`);
-    const key = `${device.id}:${terminal}`;
-    const previous = assignments.get(key);
-    if (previous !== undefined && previous !== net) fail(line, `Terminal "${key}" is already connected to net "${previous}".`);
-    if (previous === undefined) connections.push({ device: device.id, terminal, net });
-    assignments.set(key, net);
+  const parents = new Map<string, string>();
+  const namedNets = new Map<string, string>();
+  const endpoints = new Map<string, { device: string; terminal: string }>();
+  function root(key: string): string {
+    let current = key;
+    while (parents.get(current)! !== current) {
+      const parent = parents.get(current)!;
+      parents.set(current, parents.get(parent)!);
+      current = parent;
+    }
+    return current;
   }
+  function endpoint(id: string, terminal: string, line: number): string {
+    const device = nodes.get(id) as Device;
+    if (!device.terminals.includes(terminal)) fail(line, `Unknown terminal "${terminal}" on device "${id}".`);
+    const key = `${id}:${terminal}`;
+    if (!parents.has(key)) {
+      parents.set(key, key);
+      endpoints.set(key, { device: id, terminal });
+    }
+    return root(key);
+  }
+  for (const { left, right, terminal, secondTerminal, line } of pending) {
+    if (!nodes.has(left) || !nodes.has(right)) fail(line, `Connection references an undeclared object: ${left}, ${right}.`);
+    if (secondTerminal !== undefined) {
+      if (!deviceIds.has(left) || !deviceIds.has(right) || left === right) {
+        fail(line, 'A direct connection requires two distinct devices.');
+      }
+      const first = endpoint(left, terminal, line), second = endpoint(right, secondTerminal, line);
+      const firstNet = namedNets.get(first), secondNet = namedNets.get(second);
+      if (firstNet !== undefined && secondNet !== undefined && firstNet !== secondNet) {
+        fail(line, `Direct connection conflicts with named nets "${firstNet}" and "${secondNet}".`);
+      }
+      const canonical = first < second ? first : second;
+      parents.set(first, canonical);
+      parents.set(second, canonical);
+      const net = firstNet ?? secondNet;
+      if (net !== undefined) namedNets.set(canonical, net);
+      continue;
+    }
+    if (deviceIds.has(left) === deviceIds.has(right)) fail(line, 'A connection requires one device and one net.');
+    const device = deviceIds.has(left) ? left : right;
+    const net = deviceIds.has(left) ? right : left;
+    const key = endpoint(device, terminal, line);
+    const previous = namedNets.get(key);
+    if (previous !== undefined && previous !== net) fail(line, `Terminal "${key}" is already connected to net "${previous}".`);
+    namedNets.set(key, net);
+  }
+  const implicit = new Map<string, Net>();
+  for (const [key, endpoint] of endpoints) {
+    const group = root(key);
+    let net = namedNets.get(group);
+    if (net === undefined) {
+      net = `@implicit:${group}`;
+      implicit.set(net, { id: net, type: 'net', label: '', implicit: true });
+    }
+    connections.push({ ...endpoint, net });
+  }
+  nets.push(...[...implicit.values()].sort((a, b) => a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
   return { mode, devices, nets, connections, stages, blocks };
 }
