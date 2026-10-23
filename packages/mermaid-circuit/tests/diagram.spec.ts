@@ -4,33 +4,33 @@ import { createDiagram } from '../src/diagram-definition.js';
 import { ScaffoldDb } from '../src/db.js';
 import { createParser } from '../src/parser.js';
 
-describe('header-only diagram', () => {
+describe('circuit diagram parser', () => {
   it('loads Mermaid-compatible interfaces', async () => {
     const { id, diagram } = await circuitDiagram.loader();
     expect(id).toBe('circuitDiagram');
     expect(diagram.db.clear).toBeTypeOf('function');
     expect(diagram.parser.parse).toBeTypeOf('function');
     expect(diagram.renderer.draw).toBeTypeOf('function');
-    expect(() => diagram.parser.parse('circuitDiagram')).not.toThrow();
+    expect(() => diagram.parser.parse('circuitDiagram D')).not.toThrow();
   });
 
-  it.each(['circuitDiagram', '\n%% comment\ncircuitDiagram\n', 'circuitDiagram\n%% ignored\n', 'circuitDiagram %% comment\n'])('accepts %j', (text) => {
+  it.each(['circuitDiagram D', '\n%% comment\ncircuitDiagram D\n', 'circuitDiagram D\n%% ignored\n', 'circuitDiagram D %% comment\n'])('accepts %j', (text) => {
     const db = new ScaffoldDb();
     createParser(db).parse(text);
-    expect(db.getModel()).toEqual({ kind: 'empty' });
+    expect(db.getModel()).toEqual(expect.objectContaining({ mode: 'D', devices: [], nets: [] }));
   });
 
-  it.each(['', 'flowchart', 'circuitDiagramExtra', 'circuitDiagram R1', 'circuitDiagram\nR1 resistor', 'circuitDiagram\ncircuitDiagram'])('rejects unsupported input %j', (text) => {
-    expect(() => createDiagram().parser.parse(text)).toThrow(/header|Unsupported circuit statement/u);
+  it.each(['', 'flowchart', 'circuitDiagramExtra', 'circuitDiagram R1', 'circuitDiagram D\nR1 resistor', 'circuitDiagram D\ncircuitDiagram'])('rejects unsupported input %j', (text) => {
+    expect(() => createDiagram().parser.parse(text)).toThrow(/Expected|Unsupported circuit statement/u);
   });
 
   it('clears successful parse state after rejection and on explicit reset', () => {
     const db = new ScaffoldDb();
     const parser = createParser(db);
-    parser.parse('circuitDiagram');
-    expect(() => parser.parse('circuitDiagram\nA --> B')).toThrow('line 2');
+    parser.parse('circuitDiagram D');
+    expect(() => parser.parse('circuitDiagram D\nA --> B')).toThrow('Line 2');
     expect(() => db.getModel()).toThrow('parsed successfully');
-    parser.parse('circuitDiagram');
+    parser.parse('circuitDiagram D');
     db.clear();
     expect(() => db.getModel()).toThrow('parsed successfully');
   });
@@ -38,8 +38,8 @@ describe('header-only diagram', () => {
   it('keeps independently created databases isolated', () => {
     const first = new ScaffoldDb();
     const second = new ScaffoldDb();
-    createParser(first).parse('circuitDiagram');
+    createParser(first).parse('circuitDiagram D');
     expect(() => second.getModel()).toThrow();
-    expect(first.getModel()).toEqual({ kind: 'empty' });
+    expect(first.getModel()).toEqual(expect.objectContaining({ mode: 'D', devices: [], nets: [] }));
   });
 });

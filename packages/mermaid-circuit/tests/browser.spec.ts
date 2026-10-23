@@ -25,19 +25,20 @@ it('registers the compiled package and renders successive empty diagrams in Chro
   page.on('pageerror', (error) => errors.push(error.message));
   try {
     await page.goto(server!.resolvedUrls!.local[0]!);
-    await page.waitForFunction(() => document.getElementById('status')?.textContent === 'Rendered header-only fixture.');
+    await page.waitForFunction(() => document.getElementById('status')?.textContent === 'Circuit parsed successfully; graphical rendering is not implemented.');
     expect(await page.locator('#output svg').count()).toBe(1);
     await page.addScriptTag({ type: 'module', content: "import { renderFixture } from '/main.ts'; window.renderFixture = renderFixture;" });
+    await page.waitForFunction(() => typeof (window as unknown as { renderFixture?: unknown }).renderFixture === 'function');
     const result = await page.evaluate(async () => {
       const { renderFixture } = window as unknown as { renderFixture: typeof import('../examples/browser/main.js')['renderFixture'] };
-      const first = await renderFixture('first-render');
+      const first = await renderFixture('first-render', 'circuitDiagram D\nA(("A")):::net\nU["U"]:::inverter\nA ---|I| U');
       let rejection = '';
       try {
-        await renderFixture('invalid-render', 'circuitDiagram\nR1 resistor');
+        await renderFixture('invalid-render', 'circuitDiagram D\nR1 resistor');
       } catch (error) {
         rejection = String(error);
       }
-      const second = await renderFixture('second-render', 'circuitDiagram\n%% comment');
+      const second = await renderFixture('second-render', 'circuitDiagram A\n%% comment\nR["R"]:::resistor');
       const inspect = (svg: string) => {
         const doc = new DOMParser().parseFromString(svg, 'image/svg+xml');
         return {

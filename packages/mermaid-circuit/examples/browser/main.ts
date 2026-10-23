@@ -4,7 +4,7 @@ import circuitDiagram from 'mermaid-circuit';
 await mermaid.registerExternalDiagrams([circuitDiagram]);
 mermaid.initialize({ startOnLoad: false });
 
-export async function renderFixture(id: string, text = 'circuitDiagram') {
+export async function renderFixture(id: string, text = 'circuitDiagram D') {
   return mermaid.render(id, text);
 }
 
@@ -14,4 +14,4 @@ const fixture = await fetch(new URL('../basic.mmd', import.meta.url)).then((resp
 });
 const { svg } = await renderFixture('circuit-example', fixture);
 document.getElementById('output')!.innerHTML = svg;
-document.getElementById('status')!.textContent = 'Rendered header-only fixture.';
+document.getElementById('status')!.textContent = 'Circuit parsed successfully; graphical rendering is not implemented.';

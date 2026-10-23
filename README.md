@@ -2,7 +2,7 @@
 
 Independently maintained Mermaid extensions, customizations, and plugins. Each npm workspace under `packages/` owns its implementation, public entry point, tests, examples, and documentation.
 
-The first package, [mermaid-circuit](packages/mermaid-circuit/README.md), implements a header-only `circuitDiagram` scaffold. Electrical notation and schematic rendering are future work.
+The first package, [mermaid-circuit](packages/mermaid-circuit/README.md), implements circuit notation parsing and structural/electrical validation for `circuitDiagram D` and `circuitDiagram A`. Layout, wiring, dynamic ICs, and device rendering remain future work; the renderer produces an empty SVG.
 
 ## Develop and validate
 
@@ -38,7 +38,7 @@ Packages use the [public Mermaid API](https://mermaid.js.org/config/setup/mermai
 | Icon pack | `mermaid.registerIconPacks()` |
 | Layout loader | `mermaid.registerLayoutLoaders()` |
 
-Only the circuit external-diagram scaffold is implemented here. There is no repository-specific registration wrapper.
+Only the circuit external-diagram integration is implemented here. There is no repository-specific registration wrapper.
 
 After building, a consuming ESM application can register it:
 
@@ -48,7 +48,7 @@ import circuitDiagram from 'mermaid-circuit';
 
 await mermaid.registerExternalDiagrams([circuitDiagram]);
 mermaid.initialize({ startOnLoad: false });
-const { svg } = await mermaid.render('circuit-example', 'circuitDiagram');
+const { svg } = await mermaid.render('circuit-example', 'circuitDiagram D');
 document.getElementById('output')!.innerHTML = svg;
 ```
 
