@@ -193,8 +193,8 @@ A block groups its child stages. It does not introduce an electrical ordering ru
 5. Placement sides are `T`, `B`, `L`, and `R`.
 6. The same IC may have multiple pins on any side.
 7. Pin names identify electrical terminals independently of their positions.
-8. A pin-side declaration does not connect a pin to a net.
-9. Electrical connections continue to use the established net-to-terminal model.
+8. A connection to an IC identifies the named terminal and its placement side using the connection syntax defined in [Connection syntax](#connection-syntax).
+9. The connection joins the named terminal to a net. The side qualifier controls only that terminal's placement.
 10. An IC may represent an analog or digital component; eligibility is not inferred from its outline.
 
 | Side | Meaning |
@@ -204,11 +204,130 @@ A block groups its child stages. It does not introduce an electrical ordering ru
 | `L` | Left |
 | `R` | Right |
 
-The owner's `ic:(T, B, L, R)--pin` concept establishes the four-sided pin-assignment model.
+The approved connection notation provides side assignment for connected IC pins. A separate pin-placement declaration is not required for those pins.
 
-The exact authorable syntax, ordering of multiple pins on one side, pin numbering, and connection between an IC definition and its instances remain to be specified. The illustrative pin-assignment concept is not a parser grammar. `ic` is not yet part of the closed authorable object-type table.
+The ordering of multiple pins on one side, unconnected pin declarations, physical package numbering, IC definition and instance syntax, and automatic body sizing remain future design work.
+
+The `ic` device representation is not yet included in the closed authorable object-type table. Dynamic IC parsing and rendering are not implemented.
 
 Typed subgraph parsing, dynamic IC construction, and their rendering are not implemented by the current header-only plugin.
+
+## Connection syntax
+
+Each connection joins exactly one net to one named device terminal.
+
+The net and device may appear in either order.
+
+```text
+net ---|terminal| device
+device ---|terminal| net
+```
+
+The label between vertical bars identifies the terminal belonging to the device endpoint.
+
+Reversing the written endpoints does not change electrical connectivity.
+
+Connection order does not imply signal direction, voltage polarity, current direction, or power flow.
+
+The following connections are electrically equivalent:
+
+```text
+A ---|I| U1
+U1 ---|I| A
+```
+
+Connections between two devices or between two nets remain prohibited. Shared connections are represented through named nets.
+
+For fixed-terminal devices, the terminal label must match a terminal defined by the device's notation contract.
+
+### IC pin connections
+
+An IC connection uses the same net-to-terminal notation as other devices.
+
+The IC endpoint additionally identifies the side on which the named terminal appears.
+
+```text
+net ---|pinName| side:device
+side:device ---|pinName| net
+```
+
+The permitted side identifiers are:
+
+| Identifier | Side |
+| --- | --- |
+| `T` | Top |
+| `B` | Bottom |
+| `L` | Left |
+| `R` | Right |
+
+The side identifier is written directly before the IC device identifier, separated by one colon.
+
+The side qualifier is part of the connection endpoint notation. It is not part of the device identifier or terminal name.
+
+A connected IC pin has its name, electrical connection, and placement side established by one connection statement.
+
+For example:
+
+```text
+A ---|IN1| L:U1
+L:U1 ---|IN1| A
+```
+
+Both statements describe terminal `IN1` on the left side of IC `U1`, connected to net `A`.
+
+No separate pin-placement statement is required for that connection.
+
+The IC's named terminals form its electrical interface. Pin placement does not independently establish additional connectivity.
+
+### Symmetric fixed-terminal example
+
+The following is an intended notation example:
+
+```text
+circuitDiagram D
+
+A(["A"]):::pinIn
+Y(["Y"]):::pinOut
+
+subgraph stage logic
+    U1["U1"]:::inverter
+end
+
+A  ---|I| U1
+U1 ---|O| Y
+```
+
+This demonstrates that a device may appear on the left side of a connection. Both `I` and `O` remain the existing inverter terminals. No new electrical connection type is introduced.
+
+### Dynamic IC connection example
+
+```text
+circuitDiagram D
+
+A(["A"]):::pinIn
+B(["B"]):::pinIn
+Y(["Y"]):::pinOut
+
+VDD{{"VDD"}}:::supplyNet
+VSS{{"VSS"}}:::ground
+
+subgraph stage logic
+    U1["U1"]:::ic
+end
+
+A    ---|IN1| L:U1
+L:U1 ---|IN2| B
+R:U1 ---|OUT| Y
+
+VDD  ---|VCC| T:U1
+B:U1 ---|GND| VSS
+```
+
+This example illustrates the approved connection notation for a future dynamic IC device. The `ic` type is not yet authorable by the current parser.
+
+The five named terminals belong to the IC instance. Their sides are specified by their connection endpoints. Electrical connectivity is established by the corresponding nets.
+
+The example does not establish physical package pin numbers, ordering among multiple pins on one side, or IC internal behavior.
 
 ## Syntax rules
 
@@ -222,7 +341,7 @@ Typed subgraph parsing, dynamic IC construction, and their rendering are not imp
 8. Input, output, and bidirectional pins use `([...])` syntax.
 9. Labels preserve the author's device or net name.
 10. Optional device parameters appear below the instance name, separated by `<br/>` in the label. The notation does not interpret parameter values.
-11. Connections use `net ---|terminal| device`.
+11. Connections follow the [connection syntax](#connection-syntax). The net and device endpoints may appear in either order.
 12. A device terminal connects to one net.
 13. Nets connect to device terminals, not directly to other nets.
 14. Subgraphs use the [typed declarations](#typed-subgraph-declarations) and terminate with `end`.
