@@ -65,6 +65,124 @@ const digitalAdditions = ['and', 'nand', 'or', 'nor', 'xor', 'xnor', 'notNot', '
   'tristate', 'schmitt', 'schmittNot', 'schmittAnd', 'schmittNand'] as const;
 const sharedShapes = ['pinIn', 'pinOut', 'pinInOut', 'supplyNet', 'ground', 'groundSignal', 'groundChassis', 'vss'];
 
+const icTemplates = import.meta.glob<string>('../shapes/ic-templates/*.svg', { eager: true, query: '?raw', import: 'default' });
+const templateNames = ['ic-generic', 'ic-multiplexer', 'ic-demultiplexer', 'ic-dip',
+  'ic-d-flip-flop', 'ic-jk-flip-flop', 'ic-voltage-regulator', 'ic-555', 'ic-seven-segment'];
+const templateSvg = (name: string) => icTemplates[`../shapes/ic-templates/${name}.svg`]!;
+
+describe('unregistered IC visual templates', () => {
+  it('keeps exactly the nine approved templates separate from the registered catalog', () => {
+    expect(Object.keys(icTemplates).sort()).toEqual(templateNames.map((name) => `../shapes/ic-templates/${name}.svg`).sort());
+    expect(Object.keys(shapes)).toHaveLength(103);
+    for (const entry of Object.values(shapes)) expect(entry.file).not.toContain('ic-');
+  });
+
+  it.each(templateNames)('%s is a self-contained SVG with bounded artwork and provenance', (name) => {
+    const svg = templateSvg(name);
+    expect(svg).toContain('https://schemdraw.readthedocs.io/en/stable/_images/intcircuits_');
+    expect(svg).toContain('Copyright (c) 2014-2026 Collin J. Delker');
+    expect(svg).toContain('Permission is hereby granted, free of charge');
+    expect(svg).toContain('THE SOFTWARE IS PROVIDED "AS IS"');
+    const markup = svg.replace(/<!--[\s\S]*?-->/gu, '').replace(/<\?xml[^?]*\?>/gu, '');
+    expect(markup).not.toMatch(/\b(?:href|on\w+)\s*=|url\s*\(|@import|<!DOCTYPE|<!ENTITY/iu);
+    const stack: string[] = [];
+    let roots = 0;
+    for (const match of markup.matchAll(/<(\/?)([\w:-]+)\b([^>]*)>/gu)) {
+      const [, closing, tag, rest] = match;
+      expect(['svg', 'g', 'path', 'polygon', 'circle', 'text', 'tspan']).toContain(tag);
+      if (closing) expect(stack.pop()).toBe(tag);
+      else {
+        if (!stack.length) { expect(tag).toBe('svg'); roots++; }
+        if (!rest!.trimEnd().endsWith('/')) stack.push(tag!);
+      }
+    }
+    expect(roots).toBe(1);
+    expect(stack).toEqual([]);
+    const root = elements(svg, 'svg')[0]!.attrs;
+    expect(root.xmlns).toBe('http://www.w3.org/2000/svg');
+    const box = root.viewBox!.split(/\s+/u).map(Number);
+    expect(box).toHaveLength(4);
+    expect(box.every(Number.isFinite)).toBe(true);
+    const [x, y, width, height] = box as [number, number, number, number];
+    expect(width).toBeGreaterThan(0);
+    expect(height).toBeGreaterThan(0);
+    expect([Number(root.width), Number(root.height)]).toEqual([width, height]);
+    expect(width).not.toBe(height);
+    expect(elements(svg, 'g')[0]!.attrs['stroke-width']).toBe('2');
+    const inside = ([px, py]: Point, margin = 0) => {
+      expect(Number.isFinite(px) && Number.isFinite(py)).toBe(true);
+      expect(px - margin).toBeGreaterThanOrEqual(x);
+      expect(py - margin).toBeGreaterThanOrEqual(y);
+      expect(px + margin).toBeLessThanOrEqual(x + width);
+      expect(py + margin).toBeLessThanOrEqual(y + height);
+    };
+    for (const { name: tag, attrs } of elements(svg, 'path|polygon|circle|text')) {
+      expect(attrs.transform).toBeUndefined();
+      if (tag === 'text') {
+        expect(attrs['font-family']).toBe('sans-serif');
+        expect(attrs.stroke).toBe('none');
+        inside([Number(attrs.x), Number(attrs.y)]);
+      } else {
+        expect(attrs.stroke).toBe('#000');
+        const margin = Number(attrs['stroke-width'] ?? 2) / 2;
+        if (tag === 'circle') {
+          const cx = Number(attrs.cx), cy = Number(attrs.cy), r = Number(attrs.r);
+          expect(r).toBeGreaterThan(0);
+          inside([cx - r, cy - r], margin);
+          inside([cx + r, cy + r], margin);
+        } else {
+          const vertices = tag === 'path' ? pathPoints(attrs) : points(attrs.points!);
+          expect(vertices.length).toBeGreaterThan(1);
+          for (const point of vertices) inside(point, margin);
+        }
+      }
+    }
+  });
+
+  it('preserves body, package, clock, label and display distinctions', () => {
+    const paths = (name: string) => elements(templateSvg(name), 'path').map(({ attrs }) => pathPoints(attrs));
+    expect(paths('ic-generic').map((path) => path.map(([x, y]) => [x + 0, y + 0])))
+      .toEqual([[[0, 0], [90, 0], [90, -108], [0, -108], [0, 0]]]);
+    expect(elements(templateSvg('ic-generic'), 'text|circle|polygon')).toHaveLength(0);
+    const mux = paths('ic-multiplexer'), demux = paths('ic-demultiplexer');
+    expect(mux).toHaveLength(6);
+    expect(demux).toHaveLength(6);
+    for (const [index, path] of mux.entries()) {
+      for (const [vertex, [x, y]] of path.entries()) {
+        expect(demux[index]![vertex]![0]).toBeCloseTo(90 - x, 5);
+        expect(demux[index]![vertex]![1]).toBeCloseTo(y, 5);
+      }
+    }
+    const dip = templateSvg('ic-dip');
+    expect(elements(dip, 'polygon')).toHaveLength(9);
+    const notch = paths('ic-dip')[0]!;
+    expect(notch.length).toBeGreaterThan(20);
+    expect(notch[0]![1]).toBe(notch.at(-1)![1]);
+    expect(notch.some(([, y]) => y > notch[0]![1])).toBe(true);
+    const labels = (name: string) => [...templateSvg(name).matchAll(/<tspan\b[^>]*>([^<]+)<\/tspan>/gu)].map((match) => match[1]);
+    for (const [name, inputLabels, clockY] of [
+      ['ic-d-flip-flop', ['D', 'Q', 'Qbar', 'CLK'], -18],
+      ['ic-jk-flip-flop', ['J', 'K', 'Q', 'Qbar', 'CLK'], -54],
+    ] as const) {
+      expect(labels(name)).toEqual(expect.arrayContaining([...inputLabels]));
+      const clock = paths(name).find((path) => path.length === 3)!;
+      for (const [index, point] of [[0, clockY - 6.3], [12.6, clockY], [0, clockY + 6.3]].entries()) {
+        expect(clock[index]![0]).toBeCloseTo(point[0]!);
+        expect(clock[index]![1]).toBeCloseTo(point[1]!);
+      }
+      expect(templateSvg(name)).toContain('text-decoration="overline"');
+    }
+    expect(paths('ic-voltage-regulator')).toHaveLength(4);
+    expect(labels('ic-voltage-regulator')).toEqual(expect.arrayContaining(['in', 'out', 'gnd']));
+    expect(paths('ic-555')).toHaveLength(9);
+    expect(labels('ic-555')).toEqual(expect.arrayContaining(['555', 'TRG', 'THR', 'DIS', 'CTL', 'OUT', 'RST', 'Vcc', 'GND']));
+    const segments = elements(templateSvg('ic-seven-segment'), 'polygon');
+    expect(segments).toHaveLength(7);
+    expect(new Set(segments.map(({ attrs }) => attrs.points)).size).toBe(7);
+    for (const { attrs } of segments) expect(points(attrs.points!)).toHaveLength(6);
+  });
+});
+
 describe('shape catalog', () => {
   it('keeps the approved inventory complete and deferred variants absent', () => {
     expect(Object.values(variants).flat()).toHaveLength(74);

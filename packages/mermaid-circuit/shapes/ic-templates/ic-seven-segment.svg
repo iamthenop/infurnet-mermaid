@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Adapted from https://schemdraw.readthedocs.io/en/stable/_images/intcircuits_3_0.svg
+Native geometry and aspect ratio retained; static labels use system sans-serif.
+Unregistered visual template; labels do not establish electrical terminal contracts.
+
+Copyright (c) 2014-2026 Collin J. Delker
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="135.2" height="200" viewBox="-22.6 -195.4 135.2 200">
+  <g fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polygon points="40.337,-149.4 46.675,-154.8 85.555,-154.8 90.017,-149.4 83.679,-144 44.799,-144 " stroke="#000" fill="red" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round" />
+    <polygon points="83.175,-97.56 89.513,-102.96 96.264,-141.84 91.802,-147.24 85.464,-141.84 78.713,-102.96 " stroke="#000" fill="red" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round" />
+    <polygon points="73.798,-43.56 80.136,-48.96 86.887,-87.84 82.425,-93.24 76.087,-87.84 69.336,-48.96 " stroke="#000" fill="red" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round" />
+    <polygon points="21.583,-41.4 27.921,-46.8 66.801,-46.8 71.263,-41.4 64.925,-36 26.045,-36 " stroke="#000" fill="red" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round" />
+    <polygon points="19.798,-43.56 26.136,-48.96 32.887,-87.84 28.425,-93.24 22.087,-87.84 15.336,-48.96 " stroke="#000" fill="red" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round" />
+    <polygon points="29.175,-97.56 35.513,-102.96 42.264,-141.84 37.802,-147.24 31.464,-141.84 24.713,-102.96 " stroke="#000" fill="red" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round" />
+    <polygon points="30.96,-95.4 37.298,-100.8 76.178,-100.8 80.64,-95.4 74.302,-90 35.422,-90 " stroke="#000" fill="red" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M 0.0,-0.0 L 108,-0 L 108,-190.8 L 0,-190.8 L 0,-0" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M 0.0,-160.2 L -18,-160.2" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M 0.0,-138.6 L -18,-138.6" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M 0.0,-117.0 L -18,-117" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M 0.0,-95.39999999999999 L -18,-95.4" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M 0.0,-73.8 L -18,-73.8" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M 0.0,-52.2 L -18,-52.2" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M 0.0,-30.6 L -18,-30.6" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <text stroke="none" x="68.64978181717623" y="-166.95999999999998" dominant-baseline="ideographic" fill="#000" font-size="10" font-family="sans-serif" text-anchor="middle">
+      <tspan x="68.64978181717623" dy="10">a</tspan>
+    </text>
+    <text stroke="none" x="59.272780223161995" y="-112.96" dominant-baseline="ideographic" fill="#000" font-size="10" font-family="sans-serif" text-anchor="middle">
+      <tspan x="59.272780223161995" dy="10">g</tspan>
+    </text>
+    <text stroke="none" x="49.895778629147756" y="-58.959999999999994" dominant-baseline="ideographic" fill="#000" font-size="10" font-family="sans-serif" text-anchor="middle">
+      <tspan x="49.895778629147756" dy="10">d</tspan>
+    </text>
+    <text stroke="none" x="95.04850079700711" y="-132.39999999999998" dominant-baseline="central" fill="#000" font-size="10" font-family="sans-serif" text-anchor="start">
+      <tspan x="95.04850079700711" dy="10">b</tspan>
+    </text>
+    <text stroke="none" x="85.67149920299288" y="-78.39999999999999" dominant-baseline="central" fill="#000" font-size="10" font-family="sans-serif" text-anchor="start">
+      <tspan x="85.67149920299288" dy="10">c</tspan>
+    </text>
+    <text stroke="none" x="16.55149920299288" y="-78.39999999999999" dominant-baseline="central" fill="#000" font-size="10" font-family="sans-serif" text-anchor="end">
+      <tspan x="16.55149920299288" dy="10">e</tspan>
+    </text>
+    <text stroke="none" x="25.928500797007118" y="-132.39999999999998" dominant-baseline="central" fill="#000" font-size="10" font-family="sans-serif" text-anchor="end">
+      <tspan x="25.928500797007118" dy="10">f</tspan>
+    </text>
+    <text stroke="none" x="-2.6999999999999997" y="-173.89999999999998" dominant-baseline="ideographic" fill="#000" font-size="11" font-family="sans-serif" text-anchor="end">
+      <tspan x="-2.6999999999999997" dy="11">a</tspan>
+    </text>
+    <text stroke="none" x="-2.6999999999999997" y="-152.3" dominant-baseline="ideographic" fill="#000" font-size="11" font-family="sans-serif" text-anchor="end">
+      <tspan x="-2.6999999999999997" dy="11">b</tspan>
+    </text>
+    <text stroke="none" x="-2.6999999999999997" y="-130.7" dominant-baseline="ideographic" fill="#000" font-size="11" font-family="sans-serif" text-anchor="end">
+      <tspan x="-2.6999999999999997" dy="11">c</tspan>
+    </text>
+    <text stroke="none" x="-2.6999999999999997" y="-109.10000000000001" dominant-baseline="ideographic" fill="#000" font-size="11" font-family="sans-serif" text-anchor="end">
+      <tspan x="-2.6999999999999997" dy="11">d</tspan>
+    </text>
+    <text stroke="none" x="-2.6999999999999997" y="-87.5" dominant-baseline="ideographic" fill="#000" font-size="11" font-family="sans-serif" text-anchor="end">
+      <tspan x="-2.6999999999999997" dy="11">e</tspan>
+    </text>
+    <text stroke="none" x="-2.6999999999999997" y="-65.9" dominant-baseline="ideographic" fill="#000" font-size="11" font-family="sans-serif" text-anchor="end">
+      <tspan x="-2.6999999999999997" dy="11">f</tspan>
+    </text>
+    <text stroke="none" x="-2.6999999999999997" y="-44.300000000000004" dominant-baseline="ideographic" fill="#000" font-size="11" font-family="sans-serif" text-anchor="end">
+      <tspan x="-2.6999999999999997" dy="11">g</tspan>
+    </text>
+  </g>
+</svg>

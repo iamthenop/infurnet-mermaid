@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Adapted from https://schemdraw.readthedocs.io/en/stable/_images/intcircuits_8_0.svg
+Native geometry and aspect ratio retained; static labels use system sans-serif.
+Unregistered visual template; labels do not establish electrical terminal contracts.
+
+Copyright (c) 2014-2026 Collin J. Delker
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="256.04" height="288.4" viewBox="-65.02 -234.2 256.04 288.4">
+  <g fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 0.0,-0.0 L 126,-0 L 126,-180 L 0,-180 L 0,-0" stroke="#000" fill="none" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M 0.0,-36.0 L -36,-36" stroke="#000" fill="none" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M 0.0,-90.0 L -36,-90" stroke="#000" fill="none" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M 0.0,-144.0 L -36,-144" stroke="#000" fill="none" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M 126.0,-63.0 L 162,-63" stroke="#000" fill="none" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M 126.0,-117.0 L 162,-117" stroke="#000" fill="none" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M 36.0,-180.0 L 36,-216" stroke="#000" fill="none" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M 90.0,-180.0 L 90,-216" stroke="#000" fill="none" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M 63.0,-0.0 L 63,36" stroke="#000" fill="none" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round" />
+    <text stroke="none" x="-2.6999999999999997" y="-49.699999999999996" dominant-baseline="ideographic" fill="#000" font-size="11" font-family="sans-serif" text-anchor="end">
+      <tspan x="-2.6999999999999997" dy="11">2</tspan>
+    </text>
+    <text stroke="none" x="5.3999999999999995" y="-50.0" dominant-baseline="central" fill="#000" font-size="14" font-family="sans-serif" text-anchor="start">
+      <tspan x="5.3999999999999995" dy="14">TRG</tspan>
+    </text>
+    <text stroke="none" x="-2.6999999999999997" y="-103.7" dominant-baseline="ideographic" fill="#000" font-size="11" font-family="sans-serif" text-anchor="end">
+      <tspan x="-2.6999999999999997" dy="11">6</tspan>
+    </text>
+    <text stroke="none" x="5.3999999999999995" y="-104.0" dominant-baseline="central" fill="#000" font-size="14" font-family="sans-serif" text-anchor="start">
+      <tspan x="5.3999999999999995" dy="14">THR</tspan>
+    </text>
+    <text stroke="none" x="-2.6999999999999997" y="-157.70000000000002" dominant-baseline="ideographic" fill="#000" font-size="11" font-family="sans-serif" text-anchor="end">
+      <tspan x="-2.6999999999999997" dy="11">7</tspan>
+    </text>
+    <text stroke="none" x="5.3999999999999995" y="-158.0" dominant-baseline="central" fill="#000" font-size="14" font-family="sans-serif" text-anchor="start">
+      <tspan x="5.3999999999999995" dy="14">DIS</tspan>
+    </text>
+    <text stroke="none" x="128.70000000000002" y="-76.7" dominant-baseline="ideographic" fill="#000" font-size="11" font-family="sans-serif" text-anchor="start">
+      <tspan x="128.70000000000002" dy="11">5</tspan>
+    </text>
+    <text stroke="none" x="120.60000000000001" y="-77.0" dominant-baseline="central" fill="#000" font-size="14" font-family="sans-serif" text-anchor="end">
+      <tspan x="120.60000000000001" dy="14">CTL</tspan>
+    </text>
+    <text stroke="none" x="128.70000000000002" y="-130.7" dominant-baseline="ideographic" fill="#000" font-size="11" font-family="sans-serif" text-anchor="start">
+      <tspan x="128.70000000000002" dy="11">3</tspan>
+    </text>
+    <text stroke="none" x="120.60000000000001" y="-131.0" dominant-baseline="central" fill="#000" font-size="14" font-family="sans-serif" text-anchor="end">
+      <tspan x="120.60000000000001" dy="14">OUT</tspan>
+    </text>
+    <text stroke="none" x="38.699999999999996" y="-193.70000000000002" dominant-baseline="ideographic" fill="#000" font-size="11" font-family="sans-serif" text-anchor="start">
+      <tspan x="38.699999999999996" dy="11">4</tspan>
+    </text>
+    <text stroke="none" x="36.0" y="-188.6" dominant-baseline="hanging" fill="#000" font-size="14" font-family="sans-serif" text-anchor="middle">
+      <tspan x="36.0" dy="14">RST</tspan>
+    </text>
+    <text stroke="none" x="92.7" y="-193.70000000000002" dominant-baseline="ideographic" fill="#000" font-size="11" font-family="sans-serif" text-anchor="start">
+      <tspan x="92.7" dy="11">8</tspan>
+    </text>
+    <text stroke="none" x="90.0" y="-188.6" dominant-baseline="hanging" fill="#000" font-size="14" font-family="sans-serif" text-anchor="middle">
+      <tspan x="90.0" dy="14">Vcc</tspan>
+    </text>
+    <text stroke="none" x="65.7" y="-8.3" dominant-baseline="hanging" fill="#000" font-size="11" font-family="sans-serif" text-anchor="start">
+      <tspan x="65.7" dy="11">1</tspan>
+    </text>
+    <text stroke="none" x="63.0" y="-19.4" dominant-baseline="ideographic" fill="#000" font-size="14" font-family="sans-serif" text-anchor="middle">
+      <tspan x="63.0" dy="14">GND</tspan>
+    </text>
+    <text stroke="none" x="36.0" y="-229.6" dominant-baseline="ideographic" fill="#000" font-size="10" font-family="sans-serif" text-anchor="middle">
+      <tspan x="36.0" dy="10">RST</tspan>
+    </text>
+    <text stroke="none" x="-39.6" y="-154.0" dominant-baseline="central" fill="#000" font-size="10" font-family="sans-serif" text-anchor="end">
+      <tspan x="-39.6" dy="10">DIS</tspan>
+    </text>
+    <text stroke="none" x="90.0" y="-229.6" dominant-baseline="ideographic" fill="#000" font-size="10" font-family="sans-serif" text-anchor="middle">
+      <tspan x="90.0" dy="10">Vcc</tspan>
+    </text>
+    <text stroke="none" x="-39.6" y="-100.0" dominant-baseline="central" fill="#000" font-size="10" font-family="sans-serif" text-anchor="end">
+      <tspan x="-39.6" dy="10">THR</tspan>
+    </text>
+    <text stroke="none" x="-39.6" y="-46.0" dominant-baseline="central" fill="#000" font-size="10" font-family="sans-serif" text-anchor="end">
+      <tspan x="-39.6" dy="10">TRG</tspan>
+    </text>
+    <text stroke="none" x="165.6" y="-73.0" dominant-baseline="central" fill="#000" font-size="10" font-family="sans-serif" text-anchor="start">
+      <tspan x="165.6" dy="10">CTL</tspan>
+    </text>
+    <text stroke="none" x="165.6" y="-127.0" dominant-baseline="central" fill="#000" font-size="10" font-family="sans-serif" text-anchor="start">
+      <tspan x="165.6" dy="10">OUT</tspan>
+    </text>
+    <text stroke="none" x="63.0" y="29.6" dominant-baseline="hanging" fill="#000" font-size="10" font-family="sans-serif" text-anchor="middle">
+      <tspan x="63.0" dy="10">GND</tspan>
+    </text>
+    <text stroke="none" x="66.60000000000001" y="-107.60000000000001" dominant-baseline="central" fill="#000" font-size="14.0" font-family="sans-serif" text-anchor="middle">
+      <tspan x="66.60000000000001" dy="14.0">555</tspan>
+    </text>
+  </g>
+</svg>
