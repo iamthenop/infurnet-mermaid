@@ -8,7 +8,7 @@
      width="120" height="120" viewBox="0 0 120 120">
   <g id="pin-in" fill="none" stroke="#000"
      stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <polygon id="body" points="6,24 96,24 114,60 96,96 6,96"/>
-    <line id="stem" x1="114" y1="60" x2="120" y2="60"/>
+    <polygon id="body" points="44,42 104,42 116,60 104,78 44,78"/>
+    <line id="stem" x1="116" y1="60" x2="120" y2="60"/>
   </g>
 </svg>
