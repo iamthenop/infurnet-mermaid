@@ -153,7 +153,7 @@ Browser tests register the compiled package with real Mermaid and compare render
 
 The nine `.mmd` sources and matching `.svg` outputs live in [`examples/fixtures/`](examples/fixtures/). They cover a single device, series, parallel, shared input, CMOS inverter, explicit LR rotation, NAND2, three-input CMOS NOR, and two-input CMOS XOR. Open the SVG files directly in a browser to inspect them.
 
-The XOR fixture includes both input inverters and uses twelve transistors. Its output is high when exactly one input is high.
+The XOR fixture includes both input inverters and uses twelve transistors. The `inputInverters` block sits to the left of the `xorCore` block. Its output is high when exactly one input is high.
 
 Regeneration requires Node.js 24.22.1, this workspace's installed npm dependencies, and Playwright's installed Chromium. Use the repository's existing `.venv` runtime and browser cache. From the repository root:
 

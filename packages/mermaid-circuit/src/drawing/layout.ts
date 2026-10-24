@@ -301,6 +301,33 @@ export function layoutCircuit(model: CircuitModel): CircuitLayout {
     for (let later = index; later < stages.length; later++) stages[later] = { ...stages[later], bounds: translateBounds(stages[later].bounds, [0, gap]) };
   }
   if (stages.length) cursorY = stages.at(-1)!.bounds.maxY + padding + gap;
+  const blockColumns = model.blocks.filter((block) => block.stages.length > 0);
+  const blockPadding = blockColumns.length > 1 ? gap : padding;
+  if (blockColumns.length > 1) {
+    const top = Math.min(...stages.map((stage) => stage.bounds.minY)) - blockPadding;
+    let left = internalX - padding, bottom = top;
+    const translateStage = (index: number, dx: number, dy: number) => {
+      for (const id of model.stages[index].devices) {
+        const device = placed.get(id)!;
+        if (device.region === 'internal') placed.set(id, { ...device,
+          ...place(device.symbol, [device.position[0] + dx, device.position[1] + dy], device.rotation) });
+      }
+      stages[index] = { ...stages[index], bounds: translateBounds(stages[index].bounds, [dx, dy]) };
+    };
+    for (const block of blockColumns) {
+      const box = enclose(block.stages.map((index) => stages[index].bounds), blockPadding);
+      for (const index of block.stages) translateStage(index, left - box.minX, top - box.minY);
+      bottom = Math.max(bottom, top + box.maxY - box.minY);
+      left += box.maxX - box.minX + pitch;
+    }
+    const ungrouped = stages.filter((stage) => stage.block === null);
+    if (ungrouped.length) {
+      const box = enclose(ungrouped.map((stage) => stage.bounds));
+      const dx = (internalX - padding + left - pitch) / 2 - (box.minX + box.maxX) / 2;
+      for (const stage of ungrouped) translateStage(stage.stage, dx, bottom + gap - box.minY);
+    }
+    cursorY = Math.max(...stages.map((stage) => stage.bounds.maxY)) + blockPadding + gap;
+  }
   const nonemptyStages = stages.filter((stage) => stage.groups.length > 0);
   const conductionXs = [...placed.values()].filter((device) => isCmos(deviceById.get(device.id)!) && device.rotation === 0)
     .flatMap((device) => [device.terminals.D[0], device.terminals.S[0]]);
@@ -346,7 +373,7 @@ export function layoutCircuit(model: CircuitModel): CircuitLayout {
   groundNets.forEach((net, index) => placedNets.set(net.id, { ...place('ground', [groundNets.length === 1
     ? powerCenterX - resolveSymbol('ground').anchor![0] : internalX + index * pitch, bottomY]), id: net.id, region: 'bottom' }));
   const blocks = model.blocks.map((block, index) => ({ block: index, stages: [...block.stages],
-    bounds: block.stages.length ? enclose(block.stages.map((stage) => stages[stage].bounds), padding) : null }));
+    bounds: block.stages.length ? enclose(block.stages.map((stage) => stages[stage].bounds), blockPadding) : null }));
   const boxes = [...placed.values(), ...placedNets.values()].map((symbol) => symbol.bounds)
     .concat(stages.map((stage) => stage.bounds), blocks.flatMap((block) => block.bounds ? [block.bounds] : []));
   return { devices: model.devices.map((device) => placed.get(device.id)!), nets: model.nets.flatMap((net) => placedNets.has(net.id) ? [placedNets.get(net.id)!] : []),

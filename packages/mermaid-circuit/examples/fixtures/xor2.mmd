@@ -11,40 +11,44 @@ circuitDiagram A
     nHigh(("nHigh")):::net
     nLow(("nLow")):::net
 
-    subgraph stage invertA
-        direction TB
-        PA["PA"]:::pmos
-        NA["NA"]:::nmos
+    subgraph block inputInverters
+        subgraph stage invertA
+            direction TB
+            PA["PA"]:::pmos
+            NA["NA"]:::nmos
+        end
+
+        subgraph stage invertB
+            direction TB
+            PB["PB"]:::pmos
+            NB["NB"]:::nmos
+        end
     end
 
-    subgraph stage invertB
-        direction TB
-        PB["PB"]:::pmos
-        NB["NB"]:::nmos
-    end
+    subgraph block xorCore
+        subgraph stage pullUpInputs
+            direction LR
+            P0["P0"]:::pmos
+            P1["P1"]:::pmos
+        end
 
-    subgraph stage pullUpInputs
-        direction LR
-        P0["P0"]:::pmos
-        P1["P1"]:::pmos
-    end
+        subgraph stage pullUpComplements
+            direction LR
+            P2["P2"]:::pmos
+            P3["P3"]:::pmos
+        end
 
-    subgraph stage pullUpComplements
-        direction LR
-        P2["P2"]:::pmos
-        P3["P3"]:::pmos
-    end
+        subgraph stage pullDownHigh
+            direction TB
+            N0["N0"]:::nmos
+            N1["N1"]:::nmos
+        end
 
-    subgraph stage pullDownHigh
-        direction TB
-        N0["N0"]:::nmos
-        N1["N1"]:::nmos
-    end
-
-    subgraph stage pullDownLow
-        direction TB
-        N2["N2"]:::nmos
-        N3["N3"]:::nmos
+        subgraph stage pullDownLow
+            direction TB
+            N2["N2"]:::nmos
+            N3["N3"]:::nmos
+        end
     end
 
     A ---|G| PA

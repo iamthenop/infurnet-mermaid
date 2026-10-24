@@ -25,7 +25,9 @@ The expression *supply rail* describes graphical placement, not an electrical ob
 
 Placement produces geometry separate from the electrical model. It preserves device and terminal identities, net assignments, and structural membership.
 
-Stages appear vertically in declaration order, with the implicit final stage last. Blocks retain their stage membership and bounds for frame drawing.
+With multiple nonempty blocks, use columns aligned at the top, preserving declaration order from left to right and down their stages. Ungrouped stages follow below this row, with the implicit final stage last.
+
+Without multiple nonempty blocks, stages retain one vertical sequence. Block placement preserves stage membership and electrical connectivity.
 
 Stages in the same vertical diagram sequence share a horizontal centerline. Stages retain their individual widths and internal device arrangements.
 
@@ -86,6 +88,8 @@ Each stage is enclosed by a dashed frame labelled with its name. Its bounds foll
 A block visually groups its contained stages. A block does not draw new electrical connections or alter existing wire topology.
 
 The layout result contains block bounds. The renderer draws those bounds as grouping frames without changing route connectivity.
+
+Reserve space between adjacent block frames for interconnecting wires and input bends. Split junctions remain outside stages.
 
 ## Symbols
 

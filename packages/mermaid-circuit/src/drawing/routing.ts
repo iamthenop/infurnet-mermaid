@@ -127,6 +127,7 @@ export function routeCircuit(model: CircuitModel, layout: CircuitLayout): Circui
   if (layout.unplacedNetIds.length) throw new Error(`Unsupported pinInOut placement: ${layout.unplacedNetIds.join(', ')}.`);
   const panes = [...layout.devices, ...layout.nets];
   const frames = [...layout.stages.map((stage) => stage.bounds), ...layout.blocks.flatMap((block) => block.bounds ? [block.bounds] : [])];
+  const sideBySideBlocks = layout.blocks.filter((block) => block.bounds).length > 1;
   const entries = model.nets.map((net) => {
     const attachments = model.connections.filter((c) => c.net === net.id).map((c) => {
       const placed = layout.devices.find((d) => d.id === c.device);
@@ -297,7 +298,9 @@ export function routeCircuit(model: CircuitModel, layout: CircuitLayout): Circui
         if (goals.has(index)) { end = current.state; break; }
         for (const next of neighbors[index]) {
           const segment = { a: p, b: points[next] }, nextDirection = horizontal(segment) ? 1 : 2;
-          if (branchColumn !== undefined && !horizontal(segment) && !near(p[0], branchColumn)) continue;
+          if (branchColumn !== undefined && !horizontal(segment) && !near(p[0], branchColumn)
+            && (!sideBySideBlocks || frames.some((frame) => p[0] > frame.minX && p[0] < frame.maxX
+              && Math.max(segment.a[1], segment.b[1]) > frame.minY && Math.min(segment.a[1], segment.b[1]) < frame.maxY))) continue;
           if (overlap(segment, endpoint.stub)) continue;
           if (otherSegments.some((s) => overlap(segment, s) || collinearTouch(segment, s) || (() => {
             const cross = intersection(segment, s);

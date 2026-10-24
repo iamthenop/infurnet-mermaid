@@ -447,6 +447,27 @@ B ---|G| M2`));
     geometry(layout);
   });
 
+  it('places the XOR inverter block left of the core and reduces total height', () => {
+    const model = parseCircuit(xor), layout = layoutCircuit(model);
+    const stacked = layoutCircuit({ ...model, blocks: [], stages: model.stages.map((stage) => ({ ...stage, block: null })) });
+    const [inverters, core] = layout.blocks;
+    expect(model.blocks.map((block) => block.name)).toEqual(['inputInverters', 'xorCore']);
+    expect(inverters.stages).toEqual([0, 1]);
+    expect(core.stages).toEqual([2, 3, 4, 5]);
+    expect(inverters.bounds!.maxX).toBeLessThan(core.bounds!.minX);
+    expect(layout.bounds.maxY - layout.bounds.minY).toBeLessThan(stacked.bounds.maxY - stacked.bounds.minY);
+    for (const stage of layout.stages) {
+      const dx = stage.bounds.minX - stacked.stages[stage.stage].bounds.minX;
+      const dy = stage.bounds.minY - stacked.stages[stage.stage].bounds.minY;
+      for (const id of model.stages[stage.stage].devices) {
+        const before = device(stacked, id), after = device(layout, id);
+        expect(after.rotation).toBe(before.rotation);
+        expectPoint(after.position, [before.position[0] + dx, before.position[1] + dy]);
+      }
+    }
+    geometry(layout);
+  });
+
   it('preserves stage order, block membership and the implicit final stage', () => {
     const model = circuit(`${declaration('Loose')}
 subgraph block first
@@ -466,9 +487,11 @@ end`);
     expect(layout.stages.map((item) => item.block)).toEqual([0, 0, 1, null]);
     expect(layout.blocks.map((item) => item.stages)).toEqual([[0, 1], [2]]);
     expect(layout.devices.map((item) => [item.id, item.stage])).toEqual([['Loose', 3], ['R1', 1], ['R2', 2]]);
-    for (let index = 1; index < layout.stages.length; index++) {
-      expect(layout.stages[index - 1].bounds.maxY).toBeLessThan(layout.stages[index].bounds.minY);
-    }
+    const [first, second] = layout.blocks;
+    expect(first.bounds!.maxX).toBeLessThan(second.bounds!.minX);
+    expect(first.bounds!.minY).toBe(second.bounds!.minY);
+    expect(layout.stages[0].bounds.maxY).toBeLessThan(layout.stages[1].bounds.minY);
+    expect(layout.stages[3].bounds.minY).toBeGreaterThan(Math.max(first.bounds!.maxY, second.bounds!.maxY));
     geometry(layout);
   });
 
