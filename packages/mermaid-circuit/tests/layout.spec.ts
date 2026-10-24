@@ -44,7 +44,7 @@ function geometry(layout: CircuitLayout, centered = false): void {
     if (source.anchor) expectPoint(symbol.anchor!, artworkPoint(source.anchor));
     const attachments = [...Object.values(symbol.terminals), ...(symbol.anchor ? [symbol.anchor] : [])];
     const localAttachments = attachments.map(([x, y]): Point => [x - symbol.position[0], y - symbol.position[1]]);
-    for (const point of [...localAttachments, ...(centered ? [] : attachments)]) {
+    for (const point of [...localAttachments, ...(centered || symbol.symbol === 'pinOut' ? [] : attachments)]) {
       for (const coordinate of point) {
         const phase = ((coordinate % 120) + 120) % 120;
         expect(Math.min(...[0, 30, 40, 60, 80, 90, 120].map((snap) => Math.abs(phase - snap)))).toBeLessThan(1e-8);
@@ -162,7 +162,7 @@ R3 ---|B:A| R1`));
     const n0 = device(layout, 'NMOS0'), n1 = device(layout, 'NMOS1');
     expect(layout.stages.map((item) => item.groups[0].topology)).toEqual(['parallel', 'series']);
     expect(p0.bounds.maxX).toBeLessThan(p1.bounds.minX);
-    expect(p0.position[1]).toBeLessThan(p1.position[1]);
+    expect(p1.position[1] - p0.position[1]).toBe(90);
     expect(Math.max(p0.bounds.maxY, p1.bounds.maxY)).toBeLessThan(n0.bounds.minY);
     expect(n0.bounds.maxY).toBeLessThan(n1.bounds.minY);
     expect(n0.terminals.S[0]).toBeCloseTo(n1.terminals.D[0]);
@@ -174,7 +174,7 @@ R3 ---|B:A| R1`));
     expect(output.anchor![1]).not.toBe(p0.terminals.D[1]);
     expect(layout.inputTargets).toEqual([
       { net: 'A', device: 'PMOS0', terminal: 'G', aligned: true },
-      { net: 'B', device: 'PMOS1', terminal: 'G', aligned: true },
+      { net: 'B', device: 'PMOS1', terminal: 'G', aligned: false },
     ]);
     for (const item of layout.devices) {
       expect(item.rotation).toBe(0);

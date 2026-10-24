@@ -110,7 +110,8 @@ it.each([false, true])('branches upper inputs first on the left (reversed declar
     const terminal = layout.devices.find((d) => d.id === target.device)!.terminals[target.terminal];
     const straight = route.segments.filter((s) => same([s.a[0], input[1]], s.a) && same([s.b[0], input[1]], s.b));
     const length = straight.reduce((sum, s) => sum + Math.abs(s.b[0] - s.a[0]), 0);
-    expect(length).toBeCloseTo(terminal[0] - input[0]);
+    if (target.aligned) expect(length).toBeCloseTo(terminal[0] - input[0]);
+    else expect(route.segments.some((s) => Math.abs(s.a[1] - s.b[1]) > 0)).toBe(true);
     expect(route.junctions.length).toBeGreaterThan(0);
     for (const p of route.junctions) expect(layout.stages.some(({ bounds: b }) => p[0] >= b.minX && p[0] <= b.maxX && p[1] >= b.minY && p[1] <= b.maxY)).toBe(false);
   }

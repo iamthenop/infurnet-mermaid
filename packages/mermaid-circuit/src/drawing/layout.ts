@@ -235,10 +235,11 @@ export function layoutCircuit(model: CircuitModel): CircuitLayout {
       const rows = new Map(group.devices.map((device, index) => ({ device, index }))
         .sort((a, b) => firstInput(a.device) - firstInput(b.device) || a.index - b.index)
         .map(({ device }, row) => [device.id, row]));
+      const staggerPitch = group.topology === 'parallel' && group.devices.every(isPmos) ? pitch / 2 : pitch;
       const offsets: Point[] = [];
       group.devices.forEach((device, index) => {
         let x = direction === 'LR' ? index * pitch : 0;
-        let y = direction === 'TB' ? index * pitch : stagger ? rows.get(device.id)! * pitch : 0;
+        let y = direction === 'TB' ? index * pitch : stagger ? rows.get(device.id)! * staggerPitch : 0;
         if (index > 0 && group.topology === 'series') {
           const link = shared(group.devices[index - 1], device);
           if (link.length === 1) {
