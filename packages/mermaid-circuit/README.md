@@ -38,7 +38,7 @@ The parsed model records devices, nets, normalized terminal-to-net connections, 
 
 The public default export conforms to Mermaid's `ExternalDiagramDefinition`. Its detector checks the complete declaration token and its asynchronous loader imports the implementation only when requested. Each parse clears the database before validation and stores a complete model only on success. A failed parse leaves no accepted model, and independent databases remain isolated.
 
-The existing renderer checks the accepted model and sizes Mermaid's supplied SVG. It still produces an empty SVG. Layout, wire routing, junction drawing, dynamic ICs, and device rendering are unimplemented. The specifications distinguish implemented notation from approved future drawing and IC requirements.
+The existing renderer checks the accepted model and sizes Mermaid's supplied SVG, which is still empty. Placement is implemented in a separate internal module. Wire routing, junction drawing, dynamic ICs, and final circuit SVG rendering remain unimplemented.
 
 The JSON shape catalog supplies mode eligibility and fixed terminal names. It is included with the compiled package; no Python or parser-generator runtime is required. Optional diagram styles are omitted because the renderer draws no marks.
 
@@ -58,7 +58,27 @@ The 103 source SVGs retain their artwork and license notices. `shapes/shapes.jso
 
 `resolveSymbol` returns SVG content, pane dimensions, transformed attachment points, and the matching SVG matrix. `resolveTerminal` checks a named terminal. Catalog lookup does not make a shape authorable in circuit notation.
 
-The generated module is derived data; it must not be edited or committed. These drawing tools are not yet connected to Mermaid's renderer, which still returns an empty SVG. Device placement, wire routing, and visible circuit drawing remain unimplemented.
+The generated module is derived data; it must not be edited or committed. These drawing tools are not yet connected to Mermaid's renderer, which still returns an empty SVG.
+
+## Circuit placement
+
+`src/drawing/layout.ts` places devices and supported peripheral symbols from a validated model. Its result holds positions, transforms, named anchors, and bounds for stages, blocks, and the whole drawing. The model remains unchanged; the module adds no public package export.
+
+Omitting a stage direction selects `auto`, including in the implicit final stage. Explicit `direction LR` and `direction TB` remain available. The [placement rules](spec/style.md#placement-and-rotation) govern arrangement, orientation, and peripheral ordering.
+
+The engine recognizes simple conduction-series chains joined by generic nets with two terminal connections, excluding shared gate inputs. Parallel groups span the same two conduction nets. The NAND2 fixture places its PMOS pull-up group across the stage and its NMOS pull-down chain vertically.
+
+Eligible devices rotate by multiples of 90 degrees to align terminals, using one transform for artwork and named attachments. Automatic CMOS placement keeps the catalog orientation; explicit directions can rotate it. Inputs prefer alignment with their top-left recipient, and LR devices can descend to support separate input rows.
+
+Cycles, branched conduction networks, disconnected devices, and logic signal paths use declaration order where no supported topology rule applies, subject to the CMOS placement convention. Mixed chains also fall back when neither traversal keeps every PMOS above every NMOS. The result identifies stages using the fallback arrangement.
+
+Recognized groups remain separate; this release does not optimize a combined series-parallel network as a whole. Input ordering can prevent direct alignment; the result records whether alignment was achieved.
+
+`pinInOut` remains unplaced because its side is undecided. Generic nets have no independent visible symbol.
+
+Voltage sources retain their stage identity in the top region; stage bounds enclose internal devices. Empty stages retain space, and blocks without stages have no bounds.
+
+The result supplies anchors for a later router. Wire paths, junctions, crossings, labels, frames, and final circuit SVG rendering remain unimplemented.
 
 ## Local consumption
 

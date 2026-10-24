@@ -1,6 +1,8 @@
 # Notation for circuit diagrams
 
-This specification records the approved syntax and electrical semantics of `circuitDiagram`. The parser implements the 17 authorable object types, diagram modes, typed subgraphs, and fixed-terminal connections described here. The NAND2 example is a parser acceptance fixture. Layout, wiring, dynamic ICs, and device rendering remain unimplemented.
+This specification records the approved syntax and electrical semantics of `circuitDiagram`. The parser implements the 17 authorable object types, diagram modes, typed subgraphs, and fixed-terminal connections described here.
+
+The NAND2 example is a parser and placement acceptance fixture. Placement is implemented separately from the electrical model. Wire routing, dynamic ICs, and device rendering remain unimplemented.
 
 The notation is a deliberately restricted Mermaid flowchart-like syntax. Compatibility with the complete Mermaid flowchart grammar is not promised. Geometry and presentation are governed by [Drawing style](style.md).
 
@@ -36,7 +38,7 @@ Every stage and block inherits its diagram mode. Subgraphs cannot make an otherw
 
 Electrical connectivity is defined by nets and named device terminals in either mode. Rendering does not establish connectivity.
 
-The parser records the diagram mode and enforces registered-shape eligibility for authorable types. Layout and rendering remain subsequent implementation work.
+The parser records the diagram mode and enforces registered-shape eligibility for authorable types. Placement follows the [drawing specification](style.md#placement-and-rotation). Wire routing and rendering remain subsequent implementation work.
 
 ## Object types
 
@@ -464,9 +466,9 @@ The example does not establish physical package pin numbers, ordering among mult
 14. Subgraphs use the [typed declarations](#typed-subgraph-declarations) and terminate with `end`.
 15. Stage names use camelCase.
 16. Subgraphs follow the [membership and hierarchy rules](#membership-and-hierarchy).
-17. Stages stack vertically in declaration order.
-18. `direction LR` places stage devices side by side and is the default.
-19. `direction TB` stacks stage devices vertically.
+17. Stages retain declaration order. Their visual arrangement follows the [drawing specification](style.md#placement-and-rotation).
+18. An omitted stage direction records `auto`, including for the implicit final stage. Automatic placement follows the [drawing specification](style.md#placement-and-rotation).
+19. Explicit direction syntax accepts `direction LR` and `direction TB`. There is no `direction auto` statement; omit the statement to select automatic placement.
 20. Devices declared outside all explicit stages occupy an implicit final stage.
 21. There are no notation-level style declarations.
 

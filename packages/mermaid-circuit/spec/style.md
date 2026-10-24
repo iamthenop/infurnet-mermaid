@@ -13,11 +13,49 @@ These are approved drawing requirements, not a claim that schematic rendering is
 5. Stage frames follow the [stage presentation](#stage-presentation) convention.
 6. Signals stay outside stage frames except for branches crossing the borders to reach device terminals.
 7. Input signals split at junctions outside stage frames.
-8. The first gate driven by an input is aligned horizontally with that input pin.
-9. In a left-to-right stage, each successive device sits lower than the device to its left.
+8. The first recipient of an input is the top-left recipient. Align its terminal horizontally with the input pin when possible while preserving input declaration order.
+9. In a left-to-right stage, successive devices may sit lower as they move right to support input alignment.
 10. Additional gate connections branch from the corresponding input line using orthogonal routing.
 
 The expression *supply rail* describes graphical placement, not an electrical object type. Stage ordering, membership, and direction declarations are defined in [the syntax rules](notation.md#syntax-rules).
+
+## Placement and rotation
+
+Placement produces geometry separate from the electrical model. It preserves device and terminal identities, net assignments, and structural membership.
+
+Stages appear vertically in declaration order, with the implicit final stage last. Blocks retain their stage membership and bounds for later frame drawing.
+
+| Stage direction | Device arrangement |
+| --- | --- |
+| `auto` | Recognized conduction-series chains run top to bottom; devices across the same two conduction nets run left to right |
+| `LR` | Devices run left to right in declaration order |
+| `TB` | Devices run top to bottom |
+
+Explicit direction takes precedence over automatic arrangement. Shared MOSFET gates do not establish a conduction-series relationship. Sharing only one net does not establish a parallel group.
+
+Device orientation is independent of arrangement direction. Placement may use right-angle rotations to align connected terminals, applying the same transform to artwork and named attachments.
+
+Keep the default orientation when rotation offers no supported alignment advantage. For series chains, align consecutive attachments where the symbol geometry permits.
+
+Automatic placement prefers the [default CMOS orientations](#symbols), including for four-terminal variants. Explicit directions may rotate those symbols when terminal alignment improves. Rotation does not exchange source and drain identities.
+
+| Object | Region | Order |
+| --- | --- | --- |
+| `voltageSource` | Top | Left to right in declaration order |
+| `supplyNet` | Separate top supply region | Declaration order |
+| `ground` | Bottom | Left to right in declaration order |
+| `pinIn` | Left | Top to bottom in declaration order |
+| `pinOut` | Right | Top to bottom in declaration order |
+
+Voltage sources retain their stage identity when placed in the top region. Position does not connect a voltage source to a supply net.
+
+Ordinary named and implicit nets have no independent symbol placement. The side for `pinInOut` remains undecided.
+
+Input fan-out uses the [orientation priorities](#orientation). Return positioned input and recipient anchors for later orthogonal branching. Placement does not draw branches or guarantee crossing-free routes.
+
+Placement must be deterministic and prevent symbol panes from overlapping. Retain the [pane and snap conventions](#panes-and-snap-points). Spacing remains an internal implementation detail.
+
+Use declaration order when the placement rules do not distinguish objects. Connection-statement order and generated net identifiers do not determine visual order.
 
 ## Subgraph presentation
 
@@ -25,13 +63,13 @@ Structural membership and diagram-mode inheritance are defined in [Circuit struc
 
 ### Stage presentation
 
-Each stage is enclosed by a dashed frame labelled with its name. Stage placement remains governed by its declared direction, as defined in the [syntax rules](notation.md#syntax-rules).
+Each stage is enclosed by a dashed frame labelled with its name. Its bounds follow [placement and rotation](#placement-and-rotation). Frame drawing remains unimplemented.
 
 ### Block presentation
 
 A block visually groups its contained stages. A block does not draw new electrical connections or alter existing wire topology.
 
-The precise block-border styling, padding, and treatment of routes crossing its boundary remain for the placement and rendering implementation.
+The layout result contains block bounds. Precise block-border styling and treatment of routes crossing its boundary remain for routing and rendering.
 
 ## Symbols
 

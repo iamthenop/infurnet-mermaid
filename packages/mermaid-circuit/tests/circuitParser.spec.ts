@@ -189,9 +189,9 @@ end`);
     expect(model.blocks).toEqual([{ name: 'datapath', mode: 'D', stages: [0, 1] }]);
     expect(model.stages).toEqual([
       { name: 'first', implicit: false, order: 0, mode: 'D', direction: 'TB', block: 0, devices: ['U1'] },
-      { name: 'second', implicit: false, order: 1, mode: 'D', direction: 'LR', block: 0, devices: ['U2'] },
+      { name: 'second', implicit: false, order: 1, mode: 'D', direction: 'auto', block: 0, devices: ['U2'] },
       { name: 'third', implicit: false, order: 2, mode: 'D', direction: 'LR', block: null, devices: ['U3'] },
-      { name: null, implicit: true, order: 3, mode: 'D', direction: 'LR', block: null, devices: ['Loose'] },
+      { name: null, implicit: true, order: 3, mode: 'D', direction: 'auto', block: null, devices: ['Loose'] },
     ]);
     expect(model.devices.map((device) => device.stage)).toEqual([3, 0, 1, 2]);
     expect(model.connections).toEqual([]);
@@ -254,6 +254,7 @@ end`);
     ['circuitDiagram D\ndirection LR', 'inside a stage'],
     ['circuitDiagram D\nsubgraph block first\ndirection TB', 'inside a stage'],
     ['circuitDiagram D\nsubgraph stage first\ndirection RL\nend', 'Unsupported'],
+    ['circuitDiagram D\nsubgraph stage first\ndirection auto\nend', 'Unsupported'],
     ['circuitDiagram D\nsubgraph stage first\ncircuitDiagram A\nend', 'Unsupported'],
     ['circuitDiagram D\nsubgraph stage first\nM["M"]:::nmos\nend', 'not eligible'],
   ])('rejects %j', (text, message) => {

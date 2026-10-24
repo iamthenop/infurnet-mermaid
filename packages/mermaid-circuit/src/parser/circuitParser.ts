@@ -64,7 +64,7 @@ export function parseCircuit(text: string): CircuitModel {
         if (scope?.kind === 'stage') fail(line, 'Stages cannot contain subgraphs.');
         if (!/^[a-z][A-Za-z0-9]*$/u.test(name)) fail(line, 'Stage names must use camelCase.');
         const index = stages.length;
-        stages.push({ name, implicit: false, order: index, direction: 'LR', mode,
+        stages.push({ name, implicit: false, order: index, direction: 'auto', mode,
           block: scope?.index ?? null, devices: [] });
         if (scope) blocks[scope.index]!.stages.push(index);
         scopes.push({ kind, index, line });
@@ -127,7 +127,7 @@ export function parseCircuit(text: string): CircuitModel {
       devices[position] = { ...device, stage: index };
       return device.id;
     });
-    stages.push({ name: null, implicit: true, order: index, direction: 'LR', mode, block: null, devices: ids });
+    stages.push({ name: null, implicit: true, order: index, direction: 'auto', mode, block: null, devices: ids });
   }
   const parents = new Map<string, string>();
   const namedNets = new Map<string, string>();

@@ -1,4 +1,4 @@
-export type Direction = 'LR' | 'TB';
+export type Direction = 'auto' | 'LR' | 'TB';
 export type CircuitMode = 'D' | 'A';
 
 export const deviceTypes = ['pmos', 'nmos', 'pmosBlk', 'nmosBlk', 'resistor', 'capacitor',
