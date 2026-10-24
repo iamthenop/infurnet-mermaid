@@ -92,7 +92,9 @@ function place(symbol: SymbolId, position: Point, rotation: Rotation = 0): Place
 
 export function layoutCircuit(model: CircuitModel): CircuitLayout {
   const pane = resolveSymbol('resistor').width, gap = pane / 2, padding = pane / 4, pitch = pane + gap;
-  const internalX = pane + gap * 2;
+  const sharedInputs = model.nets.filter((net) => net.type === 'pinIn'
+    && model.connections.filter((connection) => connection.net === net.id).length > 1).length;
+  const internalX = pane + gap * 2 + Math.max(0, sharedInputs - 2) * gap;
   const deviceById = new Map(model.devices.map((device) => [device.id, device]));
   const declaration = new Map(model.devices.map((device, index) => [device.id, index]));
   const netById = new Map(model.nets.map((net) => [net.id, net]));

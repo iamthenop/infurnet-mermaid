@@ -1,0 +1,44 @@
+circuitDiagram A
+
+    A(["A"]):::pinIn
+    B(["B"]):::pinIn
+    C(["C"]):::pinIn
+    OUT(["OUT"]):::pinOut
+    VDD{{"VDD"}}:::supplyNet
+    VSS{{"VSS"}}:::ground
+    p01(("p01")):::net
+    p12(("p12")):::net
+
+    subgraph stage pullUp
+        direction TB
+        PMOS0["PMOS0"]:::pmos
+        PMOS1["PMOS1"]:::pmos
+        PMOS2["PMOS2"]:::pmos
+    end
+
+    subgraph stage pullDown
+        direction LR
+        NMOS0["NMOS0"]:::nmos
+        NMOS1["NMOS1"]:::nmos
+        NMOS2["NMOS2"]:::nmos
+    end
+
+    A ---|G| PMOS0
+    B ---|G| PMOS1
+    C ---|G| PMOS2
+    VDD ---|S| PMOS0
+    p01 ---|D| PMOS0
+    p01 ---|S| PMOS1
+    p12 ---|D| PMOS1
+    p12 ---|S| PMOS2
+    OUT ---|D| PMOS2
+
+    A ---|G| NMOS0
+    B ---|G| NMOS1
+    C ---|G| NMOS2
+    OUT ---|D| NMOS0
+    OUT ---|D| NMOS1
+    OUT ---|D| NMOS2
+    VSS ---|S| NMOS0
+    VSS ---|S| NMOS1
+    VSS ---|S| NMOS2
