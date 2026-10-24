@@ -228,7 +228,7 @@ export function layoutCircuit(model: CircuitModel): CircuitLayout {
           group = reversed; plan = reversePlan;
         }
       }
-      const stagger = direction === 'LR' && group.topology !== 'series' && group.devices.some((device) =>
+      const stagger = direction === 'LR' && group.devices.some((device) =>
         device.terminals.some((terminal) => netById.get(netAt(device, terminal) ?? '')?.type === 'pinIn'));
       const firstInput = (device: Device) => Math.min(...device.terminals.map((terminal) =>
         inputOrder.get(netAt(device, terminal) ?? '') ?? model.nets.length));
@@ -245,7 +245,7 @@ export function layoutCircuit(model: CircuitModel): CircuitLayout {
             const previous = local(group.devices[index - 1], plan.rotations[index - 1]).terminals[link[0].left];
             const current = local(device, plan.rotations[index]).terminals[link[0].right];
             if (direction === 'TB') x = offsets[index - 1][0] + previous[0] - current[0];
-            else y = offsets[index - 1][1] + previous[1] - current[1];
+            else if (!stagger) y = offsets[index - 1][1] + previous[1] - current[1];
           }
         }
         offsets.push([Math.round(x), Math.round(y)]);

@@ -53,6 +53,8 @@ Ordinary named and implicit nets have no independent symbol placement. The side 
 
 Input fan-out uses the [orientation priorities](#orientation). Return positioned input and recipient anchors for later orthogonal branching. Placement does not draw branches or guarantee crossing-free routes.
 
+In an explicitly left-to-right stage, recognized series devices remain eligible for descending placement when required for input fan-out. Conduction-terminal alignment must not defeat that placement rule. Routing remains responsible for connecting separated terminals.
+
 Placement must be deterministic and prevent symbol panes from overlapping. Retain the [pane and snap conventions](#panes-and-snap-points). Spacing remains an internal implementation detail.
 
 Use declaration order when the placement rules do not distinguish objects. Connection-statement order and generated net identifiers do not determine visual order.

@@ -265,16 +265,29 @@ N((N)):::net`));
     geometry(layout);
   });
 
-  it('aligns a shared input with the top-left recipient and descends across LR', () => {
-    const layout = layoutCircuit(circuit(`A([A]):::pinIn
+  it.each(['unrecognized', 'series'])('aligns a shared input and descends across an LR %s group', (topology) => {
+    const model = circuit(`A([A]):::pinIn
 ${stage(`${declaration('M1', 'nmos')}\n${declaration('M2', 'nmos')}`, 'LR')}
+${topology === 'series' ? 'M1 ---|S:D| M2' : ''}
 A ---|G| M2
-A ---|G| M1`));
+A ---|G| M1`);
+    const original = structuredClone(model), layout = layoutCircuit(model);
     const [first, second] = layout.devices;
+    expect(layout.stages[0].groups[0].topology).toBe(topology);
     expect(first.position[0]).toBeLessThan(second.position[0]);
     expect(first.position[1]).toBeLessThan(second.position[1]);
     expectPoint(layout.nets[0].anchor!, [layout.nets[0].anchor![0], first.terminals.G[1]]);
     expect(layout.inputTargets).toEqual([{ net: 'A', device: 'M1', terminal: 'G', aligned: true }]);
+    expect(model.connections.filter((item) => item.terminal === 'G').map((item) => item.net)).toEqual(['A', 'A']);
+    if (topology === 'series') {
+      const netAt = (id: string, terminal: string) => model.connections.find((item) => item.device === id && item.terminal === terminal)!.net;
+      expect(netAt('M1', 'S')).toBe(netAt('M2', 'D'));
+      expect(first.rotation).not.toBe(0);
+      expect(second.rotation).not.toBe(0);
+      expect(first.terminals.S[1]).toBeLessThan(second.terminals.D[1]);
+    }
+    expect(layoutCircuit(model)).toEqual(layout);
+    expect(model).toEqual(original);
     geometry(layout);
   });
 
