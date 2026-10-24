@@ -52,7 +52,8 @@ function geometry(layout: CircuitLayout, centered = false): void {
     }
     for (const other of symbols.slice(index + 1)) {
       const xOverlap = Math.min(symbol.bounds.maxX, other.bounds.maxX) - Math.max(symbol.bounds.minX, other.bounds.minX);
-      const yOverlap = Math.min(symbol.bounds.maxY, other.bounds.maxY) - Math.max(symbol.bounds.minY, other.bounds.minY);
+      const inset = (item: typeof symbol) => item.symbol === 'pinIn' ? item.height / 8 : 0;
+      const yOverlap = Math.min(symbol.bounds.maxY - inset(symbol), other.bounds.maxY - inset(other)) - Math.max(symbol.bounds.minY + inset(symbol), other.bounds.minY + inset(other));
       expect(xOverlap <= 0 || yOverlap <= 0).toBe(true);
     }
   }
@@ -174,7 +175,7 @@ R3 ---|B:A| R1`));
     expect(output.anchor![1]).not.toBe(p0.terminals.D[1]);
     expect(layout.inputTargets).toEqual([
       { net: 'A', device: 'PMOS0', terminal: 'G', aligned: true },
-      { net: 'B', device: 'PMOS1', terminal: 'G', aligned: false },
+      { net: 'B', device: 'PMOS1', terminal: 'G', aligned: true },
     ]);
     for (const item of layout.devices) {
       expect(item.rotation).toBe(0);
@@ -424,7 +425,7 @@ ${members}
 A ---|G| M1
 B ---|G| M2`));
     expect(layout.nets.map((item) => item.id)).toEqual(['B', 'A']);
-    expect(layout.nets[0].bounds.maxY).toBeLessThan(layout.nets[1].bounds.minY);
+    expect(layout.nets[1].anchor![1] - layout.nets[0].anchor![1]).toBeGreaterThanOrEqual(90);
     expect(layout.inputTargets.find((item) => item.net === 'B')!.aligned).toBe(true);
     expect(layout.inputTargets.find((item) => item.net === 'A')!.aligned).toBe(arrangement === 'LR');
     if (arrangement === 'LR') expect(device(layout, 'M1').position[0]).toBeLessThan(device(layout, 'M2').position[0]);

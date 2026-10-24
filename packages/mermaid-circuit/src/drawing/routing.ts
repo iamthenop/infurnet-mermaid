@@ -153,6 +153,28 @@ export function routeCircuit(model: CircuitModel, layout: CircuitLayout): Circui
     return Number(!!a.net.implicit) - Number(!!b.net.implicit);
   });
   const stubs = entries.flatMap((entry) => entry.endpoints.length > 1 ? entry.endpoints.map((endpoint) => ({ net: entry.net.id, endpoint })) : []);
+  const straightInputs = entries.filter((entry) => entry.net.type === 'pinIn' && entry.endpoints.length > 1
+    && horizontal(entry.endpoints[1].stub) && near(entry.endpoints[0].point[1], entry.endpoints[1].point[1]))
+    .map((entry) => ({ net: entry.net.id, segment: { a: entry.endpoints[0].point, b: entry.endpoints[1].point } }));
+  for (const { net, endpoint } of stubs) {
+    const crowdsInput = (stub: WireSegment) => straightInputs.some((input) => {
+      const cross = input.net === net ? undefined : intersection(stub, input.segment);
+      return cross && distance(cross, stub.b) < 8;
+    });
+    if (!crowdsInput(endpoint.stub)) continue;
+    const axis = horizontal(endpoint.stub) ? 0 : 1, direction = Math.sign(endpoint.stub.b[axis] - endpoint.point[axis]);
+    for (let length = 40; length <= 60; length += 10) {
+      const b: Point = axis === 0 ? [endpoint.point[0] + direction * length, endpoint.point[1]] : [endpoint.point[0], endpoint.point[1] + direction * length];
+      const phase = ((b[axis] % 120) + 120) % 120;
+      if (![0, 30, 40, 60, 80, 90, 120].some((snap) => near(snap, phase))) continue;
+      const stub = { a: endpoint.point, b };
+      if (crowdsInput(stub) || frames.some((frame) => crowdsFrame(stub, frame))
+        || panes.some((pane) => pane.id !== (endpoint.device ?? net) && blocks(stub, pane.bounds))
+        || stubs.some((other) => other.net !== net && (overlap(stub, other.endpoint.stub) || collinearTouch(stub, other.endpoint.stub) || intersection(stub, other.endpoint.stub)))) continue;
+      endpoint.stub = stub;
+      break;
+    }
+  }
   for (const { net, endpoint } of stubs) {
     const conflicts = (stub: WireSegment) => stubs.some((other) => other.net !== net
       && (overlap(stub, other.endpoint.stub) || collinearTouch(stub, other.endpoint.stub) || intersection(stub, other.endpoint.stub)));

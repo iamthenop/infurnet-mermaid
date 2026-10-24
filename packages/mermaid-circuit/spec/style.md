@@ -59,7 +59,9 @@ Input fan-out uses the [orientation priorities](#orientation). Return positioned
 
 In an explicitly left-to-right stage, recognized series devices remain eligible for descending placement when required for input fan-out. Conduction-terminal alignment must not defeat that placement rule. Routing remains responsible for connecting separated terminals.
 
-Placement must be deterministic and prevent symbol panes from overlapping. Retain the [pane and snap conventions](#panes-and-snap-points). Spacing remains an internal implementation detail.
+Placement must be deterministic. Symbol panes must remain separate, except compact input pins may share unused margins to align with their first recipients. Their visible flags and labels must remain separate.
+
+Retain the [pane and snap conventions](#panes-and-snap-points). Spacing remains an internal implementation detail.
 
 Exact stage and output centering takes precedence over global snap alignment. Placement may use fractional grid offsets when required. Symbol-local terminal coordinates remain authoritative, and all transformed attachments must retain their exact positions. Routing must respect those positions.
 

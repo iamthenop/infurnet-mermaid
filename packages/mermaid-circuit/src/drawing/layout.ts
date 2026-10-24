@@ -301,7 +301,7 @@ export function layoutCircuit(model: CircuitModel): CircuitLayout {
       const first = recipients[0], anchor = resolveSymbol(type).anchor!;
       const y = type === 'pinOut' && outputCenterY !== undefined
         ? outputCenterY + (index - (nets.length - 1) / 2) * pitch - anchor[1]
-        : Math.max(0, Math.round(first?.point[1] ?? gap + anchor[1]) - anchor[1], previousBottom + gap);
+        : Math.max(0, Math.round(first?.point[1] ?? gap + anchor[1]) - anchor[1], previousBottom + (type === 'pinIn' ? pitch / 2 - pane : gap));
       const symbol: PlacedNet = { ...place(type, [type === 'pinIn' ? 0 : occupiedRight + gap, y]), id: net.id, region: type === 'pinIn' ? 'left' : 'right' };
       placedNets.set(net.id, symbol); previousBottom = symbol.bounds.maxY;
       if (type === 'pinIn' && first) inputTargets.push({ net: net.id, device: first.device, terminal: first.terminal,
