@@ -169,6 +169,16 @@ export function routeCircuit(model: CircuitModel, layout: CircuitLayout): Circui
     for (const offset of [0, 30, 40, 60, 80, 90]) ys.add(y + offset);
   const distinct = (values: Set<number>) => [...values].sort((a, b) => a - b).filter((value, i, sorted) => !i || !near(value, sorted[i - 1]));
   const xValues = distinct(xs), yValues = distinct(ys);
+  const sharedInputs = entries.filter((entry) => entry.net.type === 'pinIn' && entry.endpoints.length > 2)
+    .sort((a, b) => a.endpoints[0].point[1] - b.endpoints[0].point[1]);
+  const branchColumns = new Map<string, number>();
+  if (sharedInputs.length) {
+    const left = Math.max(...sharedInputs.map((entry) => entry.endpoints[0].stub.b[0])) + 8;
+    const right = Math.min(...layout.stages.map((stage) => stage.bounds.minX)) - 8;
+    const columns = xValues.filter((x) => x >= left && x <= right).slice(-sharedInputs.length);
+    if (columns.length < sharedInputs.length) throw new Error('Cannot route shared inputs in top-to-bottom branch order outside stage frames.');
+    sharedInputs.forEach((entry, index) => branchColumns.set(entry.net.id, columns[index]));
+  }
   const width = xValues.length;
   const points: Point[] = yValues.flatMap((y) => xValues.map((x): Point => [x, y]));
   const neighbors = points.map((p, index) => [index % width ? index - 1 : -1, index % width < width - 1 ? index + 1 : -1, index - width, index + width]
@@ -180,8 +190,10 @@ export function routeCircuit(model: CircuitModel, layout: CircuitLayout): Circui
     const otherSegments = [...completed.flatMap((n) => n.segments), ...entries.filter((entry) => entry.net.id !== net.id)
       .flatMap((entry) => entry.endpoints.length > 1 ? entry.endpoints.map((e) => e.stub) : [])];
     for (const endpoint of endpoints.slice(1)) {
+      const branchColumn = segments.length > 1 ? branchColumns.get(net.id) : undefined;
       const start = points.findIndex((p) => equal(p, endpoint.stub.b));
       const goals = new Set(points.flatMap((p, index) => (segments.length === 1 ? equal(p, segments[0].b) : segments.some((s) => on(p, s)))
+        && (branchColumn === undefined || near(p[0], branchColumn))
         && !(net.type === 'pinIn' && segments.length > 1 && layout.stages.some((stage) => inside(p, stage.bounds))) ? [index] : []));
       const costs = new Float64Array(points.length * 3).fill(Infinity), previous = new Int32Array(points.length * 3).fill(-1);
       const queue = new Queue();
@@ -196,6 +208,7 @@ export function routeCircuit(model: CircuitModel, layout: CircuitLayout): Circui
         if (goals.has(index)) { end = current.state; break; }
         for (const next of neighbors[index]) {
           const segment = { a: p, b: points[next] }, nextDirection = horizontal(segment) ? 1 : 2;
+          if (branchColumn !== undefined && !horizontal(segment) && !near(p[0], branchColumn)) continue;
           if (overlap(segment, endpoint.stub)) continue;
           if (otherSegments.some((s) => overlap(segment, s) || collinearTouch(segment, s) || (() => {
             const cross = intersection(segment, s);

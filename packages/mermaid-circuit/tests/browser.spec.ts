@@ -95,6 +95,12 @@ it.each(Object.entries(sources))('renders the catalog, routes, labels, and frame
     expect(actual.paths).toEqual(net.segments.map((s) => `M ${s.a.join(' ')} L ${s.b.join(' ')}`));
     expect(actual.junctions).toEqual(net.junctions);
   }
+  const inputBranches = layout.nets.filter((n) => model.nets.find((item) => item.id === n.id)!.type === 'pinIn')
+    .sort((a, b) => a.anchor![1] - b.anchor![1])
+    .map((n) => inspected.wires.find((wire) => wire.net === n.id)!.junctions).filter((points) => points.length);
+  for (let i = 1; i < inputBranches.length; i++) {
+    expect(Math.max(...inputBranches[i - 1].map((p) => p[0]))).toBeLessThan(Math.min(...inputBranches[i].map((p) => p[0])));
+  }
   expect(inspected.crossings).toEqual(routes.crossings.map((c) => ({ over: c.over, under: c.under, gap: '7' })));
   expect(inspected.frames).toEqual([
     ...layout.blocks.flatMap((b) => b.bounds ? [{ kind: 'block', index: b.block, bounds: b.bounds, dash: null }] : []),

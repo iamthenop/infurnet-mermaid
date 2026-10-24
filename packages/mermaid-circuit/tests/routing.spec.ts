@@ -84,8 +84,16 @@ R2 ---|A| Y`);
   else expect(layout.nets.find((n) => n.id === 'Y')!.anchor![1]).toBe(255);
 });
 
-it('branches shared inputs outside frames and keeps the first feasible connection straight', () => {
-  const model = parseCircuit(fixtures['../examples/fixtures/nand2.mmd']), layout = layoutCircuit(model), routes = routeCircuit(model, layout);
+it.each([false, true])('branches upper inputs first on the left (reversed declarations: %s)', (reverse) => {
+  const source = fixtures['../examples/fixtures/nand2.mmd'];
+  const model = parseCircuit(source), layout = layoutCircuit(model);
+  const routes = routeCircuit(reverse ? { ...model, nets: [...model.nets].reverse() } : model, layout);
+  const shared = layout.nets.filter((n) => routes.nets.find((r) => r.net === n.id)!.junctions.length && model.nets.find((item) => item.id === n.id)!.type === 'pinIn').sort((a, b) => a.anchor![1] - b.anchor![1]);
+  for (let i = 1; i < shared.length; i++) {
+    const upper = routes.nets.find((n) => n.net === shared[i - 1].id)!.junctions;
+    const lower = routes.nets.find((n) => n.net === shared[i].id)!.junctions;
+    expect(Math.max(...upper.map((p) => p[0]))).toBeLessThan(Math.min(...lower.map((p) => p[0])));
+  }
   expect(routes.crossings.length).toBeGreaterThan(0);
   for (const target of layout.inputTargets) {
     const route = routes.nets.find((n) => n.net === target.net)!;
