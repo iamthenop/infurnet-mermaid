@@ -9,13 +9,16 @@ export interface TransformOptions {
   readonly scale?: number | Point;
   readonly rotation?: number;
   readonly translation?: Point;
+  readonly reflectHorizontal?: boolean;
+  readonly reflectVertical?: boolean;
 }
 
 export class Transform {
   readonly matrix: Matrix;
 
-  constructor({ localOffset = [0, 0], scale = 1, rotation = 0, translation = [0, 0] }: TransformOptions = {}) {
-    const [sx, sy] = typeof scale === 'number' ? [scale, scale] : scale;
+  constructor({ localOffset = [0, 0], scale = 1, rotation = 0, translation = [0, 0], reflectHorizontal = false, reflectVertical = false }: TransformOptions = {}) {
+    const factors = typeof scale === 'number' ? [scale, scale] : scale;
+    const sx = factors[0] * (reflectHorizontal ? -1 : 1), sy = factors[1] * (reflectVertical ? -1 : 1);
     const radians = rotation * Math.PI / 180;
     const cos = Math.cos(radians), sin = Math.sin(radians);
     const a = sx * cos, b = sx * sin, c = -sy * sin, d = sy * cos;

@@ -43,9 +43,23 @@ Explicit direction takes precedence over automatic arrangement. Shared MOSFET ga
 
 In mode `D`, an explicit `LR` stage lays out acyclic logic in dependency columns derived from output-to-input net assignments. Gates without in-stage predecessors start in the first column; each dependent gate sits one column beyond its deepest predecessor.
 
-Gates in the same column stack in declaration order. Center each column vertically against the tallest column, preserving exact transformed attachments. Cyclic stages retain the existing declaration-order fallback; dependency placement does not change stage membership or electrical connectivity.
+Digital LR placement uses dependency layers and crossing minimization. Devices at the same dependency depth may share a column. Declaration order resolves otherwise equivalent placements.
+
+Evaluate a deterministic barycenter sweep in both layer directions, ordering gates by the average position of their connected neighbors. Compare the resulting placement with declaration order using actual routes. Accept changes only when the routing-quality priorities below improve.
+
+Center each column vertically against the tallest column, preserving exact transformed attachments. Cyclic stages retain the existing declaration-order fallback. Dependency placement does not change stage membership or electrical connectivity.
 
 Device orientation is independent of arrangement direction. Placement may use right-angle rotations to align connected terminals, applying the same transform to artwork and named attachments.
+
+Symbol orientation includes rotation and reflection. A reflected symbol retains every named terminal's electrical identity. Automatic vertical reflection is permitted for digital logic gates when it reduces crossings or routing complexity.
+
+Apply local reflection before rotation and translation, using the same transform for artwork, terminals, anchors, and bounds.
+
+The horizontal option negates X, and the vertical option negates Y, in local coordinates.
+
+Automatic selection may reverse digital gates vertically. CMOS orientations remain unchanged.
+
+Compare valid orientation candidates by crossings, bends, routed length, and then straight input connections, in that order. Prefer the default orientation when these scores are equal. Electrical connectivity and stage constraints must remain valid for every accepted candidate.
 
 Keep the default orientation when rotation offers no supported alignment advantage. For series chains, align consecutive attachments where the symbol geometry permits.
 
@@ -76,6 +90,12 @@ In an explicitly left-to-right stage, recognized series devices remain eligible 
 Placement must be deterministic. Symbol panes must remain separate, except compact input pins may share unused margins to align with their first recipients. Their visible flags and labels must remain separate.
 
 Retain the [pane and snap conventions](#panes-and-snap-points). Spacing remains an internal implementation detail.
+
+The routing grid has a 10-unit pitch. Intermediate routing tracks and bends use the grid wherever they are not exact terminal attachments. Actual transformed terminal coordinates take precedence over the routing grid.
+
+An off-grid terminal may use a short local orthogonal attachment to reach a usable grid track. Never move its anchor to fit the grid. Report a routing conflict if exact attachment, obstacle clearance, or net separation cannot be preserved.
+
+Automatic placement and routing must not introduce new electrical connections or conceal missing connections.
 
 Exact stage and output centering takes precedence over global snap alignment. Placement may use fractional grid offsets when required. Symbol-local terminal coordinates remain authoritative, and all transformed attachments must retain their exact positions. Routing must respect those positions.
 

@@ -52,7 +52,9 @@ The TypeScript modules in `src/drawing/` provide point transforms, bounds, and S
 
 Source links, credit, and the upstream notice appear in [ACKNOWLEDGEMENTS.md](ACKNOWLEDGEMENTS.md). The package uses the [MIT license](LICENSE).
 
-Transforms apply a local offset, scale, rotation, then global translation. SVG coordinates increase rightward and downward, so positive angles rotate clockwise. The same matrix transforms terminal points and symbol artwork.
+Transforms apply a local offset, scale and optional reflection, rotation, then global translation. SVG coordinates increase rightward and downward, so positive angles rotate clockwise. The same matrix transforms terminal points, anchors, bounds, and symbol artwork.
+
+Horizontal reflection reverses local X; vertical reflection reverses local Y. Reflection preserves terminal names and their net assignments, and leaves the source SVG unchanged.
 
 The SVG serializer emits line, polyline, path, circle, and text elements with escaped values. It preserves supplied coordinates and element order. It produces fragments for an SVG parent, not a separate document.
 
@@ -74,7 +76,13 @@ The engine recognizes simple conduction-series chains joined by generic nets wit
 
 Parallel groups span the same two conduction nets. The NAND2 fixture places its PMOS pull-up group across the stage and its NMOS pull-down chain vertically.
 
-Eligible devices rotate by multiples of 90 degrees to align terminals, using one transform for artwork and named attachments. Automatic CMOS placement keeps the catalog orientation; explicit directions can rotate it. Inputs prefer alignment with their top-left recipient, and LR devices can descend to support separate input rows.
+Eligible devices rotate by multiples of 90 degrees to align terminals, using one transform for artwork and named attachments. Automatic CMOS placement keeps the catalog orientation; explicit directions can rotate it. Inputs prefer alignment with their top-left recipient, and analog LR devices can descend to support separate input rows.
+
+Digital LR stages use dependency columns. Four alternating barycenter sweeps evaluate row ordering using actual routing results, retaining declaration order on ties.
+
+Digital gates also evaluate vertical reflection, comparing crossings, bends, wire length, and straight input connections. Equal scores retain the default orientation. This deterministic search flips one gate at a time and does not guarantee a global optimum.
+
+Horizontal reflection is available in the transform layer but is not selected automatically. Automatic reflection does not apply to CMOS transistors.
 
 Cycles, branched conduction networks, disconnected devices, and logic signal paths use declaration order where no supported topology rule applies, subject to the CMOS placement convention. Mixed chains also fall back when neither traversal keeps every PMOS above every NMOS. The result identifies stages using the fallback arrangement.
 
@@ -90,6 +98,8 @@ Voltage sources retain their stage identity in the top region; stage bounds encl
 
 Sectional routes also record separate physical components and their named endpoints. Centering offsets are preserved, including 15-unit translations.
 
+Intermediate routing tracks use a 10-unit grid. Exact transformed attachments remain authoritative: a terminal at 255 stays at 255. Short local orthogonal segments join off-grid attachments to usable grid tracks.
+
 Routes avoid symbol panes and keep parallel runs at least 20 units from stage and block borders. Shared inputs reach their upper-left recipient first and branch outside stage frames. Junction dots mark shared-net branches; white gaps distinguish independent crossings on the white drawing background.
 
 The renderer embeds the approved artwork and draws routes from that same routing result. Device parameters split at `<br/>` into additional text lines. Labels use SVG text nodes, and generated implicit-net identifiers remain invisible.
@@ -99,6 +109,16 @@ The renderer embeds the approved artwork and draws routes from that same routing
 Routing uses a finite search area around the placed circuit and does not globally optimize the drawing. Dense or obstructed diagrams can fail even when a different routing strategy might succeed.
 
 Cross-section implicit nets require an explicit net declaration to provide a boundary label. The existing placement fallback remains available when its connections can be routed faithfully.
+
+## Layout-engine evaluation
+
+R4 evaluated ELK.js 0.12.0 and Dagre 3.1.1 on the four-NAND XOR, transistor XOR, CMOS inverter, NAND2, and NOR3 models. Both candidates produced deterministic coordinates across three repeated runs. The [PR #13 comparison](https://github.com/iamthenop/infurnet-mermaid/pull/13) distinguishes graph estimates from complete plugin-rendered results.
+
+ELK's evaluation used fixed terminal ports and orthogonal routes; Dagre's endpoints lay on node boundaries and required adaptation. Both represented stage and block membership. Preserving the package's CMOS and sectional drawing conventions requires additional integration work.
+
+Temporary adapters also produced candidate schematics through the registered Mermaid plugin, including an ELK XOR using native routes. Adapter failures are not evidence that a candidate engine cannot handle the circuit. Graph bounds and edge metrics are not interchangeable with measurements of a complete schematic.
+
+No external layout library has been adopted or added to the package dependencies. Engine selection remains with the repository owner after visual review of the candidates. The independent reflection, layered-ordering, and grid-routing changes use the existing engine.
 
 ## Local consumption
 

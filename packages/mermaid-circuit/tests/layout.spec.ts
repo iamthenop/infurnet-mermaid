@@ -5,7 +5,8 @@ import nor from '../examples/fixtures/nor3.mmd?raw';
 import xor from '../examples/fixtures/xor2.mmd?raw';
 import xorNand from '../examples/fixtures/xor-nand4.mmd?raw';
 import { layoutCircuit, type CircuitLayout, type PlacedDevice } from '../src/drawing/layout.js';
-import type { Bounds, Point } from '../src/drawing/geometry.js';
+import { Transform, type Bounds, type Point } from '../src/drawing/geometry.js';
+import { routeCircuit, routingQuality } from '../src/drawing/routing.js';
 import { resolveSymbol } from '../src/drawing/symbols.js';
 import { parseCircuit } from '../src/parser/circuitParser.js';
 
@@ -137,7 +138,36 @@ U2 ---|O:I| U3`);
     expect(device(layout, 'U1').position[0]).toBeLessThan(device(layout, 'U2').position[0]);
     expect(device(layout, 'U2').position[0]).toBeLessThan(device(layout, 'U3').position[0]);
     expect(new Set(layout.devices.map((placed) => placed.position[1])).size).toBe(1);
+    expect(layout.devices.every((placed) => !placed.reflected)).toBe(true);
     geometry(layout);
+  });
+
+  it('uses a barycenter sweep to untangle same-depth digital gates', () => {
+    const model = parseCircuit(`circuitDiagram D
+${stage(['U1', 'U2', 'V2', 'V1'].map((id) => declaration(id, 'buffer')).join('\n'), 'LR')}
+U1 ---|O:I| V1
+U2 ---|O:I| V2`);
+    const layout = layoutCircuit(model);
+    expect(device(layout, 'V1').position[0]).toBe(device(layout, 'V2').position[0]);
+    expect(device(layout, 'U1').position[1]).toBeLessThan(device(layout, 'U2').position[1]);
+    expect(device(layout, 'V1').position[1]).toBeLessThan(device(layout, 'V2').position[1]);
+    expect(routeCircuit(model, layout).crossings).toHaveLength(0);
+    expect(layoutCircuit(model)).toEqual(layout);
+    geometry(layout);
+  });
+
+  it('reflects NAND inputs only when routed quality improves, retaining electrical identities', () => {
+    const model = parseCircuit(xorNand), before = structuredClone(model), layout = layoutCircuit(model);
+    expect(layout.devices.filter((placed) => placed.reflected).map((placed) => placed.id)).toEqual(['N3']);
+    const mirrored = device(layout, 'N3');
+    expect(mirrored.terminals.I1[1]).toBeGreaterThan(mirrored.terminals.I2[1]);
+    expect(mirrored.terminals.O[0]).toBe(mirrored.bounds.maxX);
+    const transform = new Transform({ translation: mirrored.position });
+    const unmirrored = { ...mirrored, ...resolveSymbol('nand', transform), id: mirrored.id, transform, reflected: false };
+    const baseline = { ...layout, devices: layout.devices.map((placed) => placed.id === 'N3' ? unmirrored : placed) };
+    expect(routingQuality(routeCircuit(model, layout))[0]).toBeLessThan(routingQuality(routeCircuit(model, baseline))[0]);
+    expect(model).toEqual(before);
+    expect(layoutCircuit(model)).toEqual(layout);
   });
 
   it('retains digital LR declaration fallback when dependencies contain feedback', () => {
@@ -238,6 +268,7 @@ R3 ---|B:A| R1`));
 
   it.each([['NAND2', nand], ['NOR3', nor], ['XOR2', xor]])('centers power and staggers parallel devices consistently in %s', (_name, source) => {
     const layout = layoutCircuit(parseCircuit(source));
+    expect(layout.devices.every((placed) => !placed.reflected)).toBe(true);
     for (const section of layout.sections ?? [{ block: undefined, stages: layout.stages.map((stage) => stage.stage) }]) {
       const xs = layout.devices.filter((device) => section.stages.includes(device.stage)).flatMap((device) => [device.terminals.D[0], device.terminals.S[0]]);
       const center = (Math.min(...xs) + Math.max(...xs)) / 2;

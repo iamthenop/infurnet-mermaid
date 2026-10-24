@@ -55,7 +55,7 @@ it.each(Object.entries(sources))('renders the catalog, routes, labels, and frame
       const matrix = group.transform.baseVal.consolidate()!.matrix;
       const source = new DOMParser().parseFromString(symbol.svg, 'image/svg+xml');
       const geometry = (root: ParentNode) => [...root.querySelectorAll('path,polyline,polygon,line,circle,ellipse,rect')].map((n) => [n.localName, ...['d', 'points', 'x', 'y', 'x1', 'y1', 'x2', 'y2', 'cx', 'cy', 'r', 'rx', 'ry', 'width', 'height'].map((a) => n.getAttribute(a))]);
-      return { id: symbol.id, transform: group.getAttribute('transform'), geometry: geometry(group), original: geometry(source),
+      return { id: symbol.id, transform: group.getAttribute('transform'), reflected: matrix.a * matrix.d - matrix.b * matrix.c < 0, geometry: geometry(group), original: geometry(source),
         points: symbol.points.map(([x, y]) => { const p = new DOMPoint(x, y).matrixTransform(matrix); return [p.x, p.y]; }) };
     });
     const wires = routes.nets.map((net) => {
@@ -88,9 +88,17 @@ it.each(Object.entries(sources))('renders the catalog, routes, labels, and frame
     const actual = inspected.artwork[i];
     expect(actual.geometry).toEqual(actual.original);
     expect(actual.transform).toBe(placed.svgTransform);
+    expect(actual.reflected).toBe(placed.reflected);
     for (const [j, p] of [...Object.values(placed.terminals), ...(placed.anchor ? [placed.anchor] : [])].entries()) {
       expect(actual.points[j][0]).toBeCloseTo(p[0], 7); expect(actual.points[j][1]).toBeCloseTo(p[1], 7);
     }
+  }
+  if (name === 'xor-nand4') {
+    expect(inspected.artwork.filter((symbol) => symbol.reflected).map((symbol) => symbol.id)).toEqual(['N3']);
+    const inputs = layout.devices.find((device) => device.id === 'N3')!.terminals;
+    expect(inputs.I1[1]).toBeGreaterThan(inputs.I2[1]);
+    expect(routes.nets.find((net) => net.net === 'B')!.attachments).toContainEqual({ device: 'N3', terminal: 'I1', point: inputs.I1 });
+    expect(routes.nets.find((net) => net.net === 'n1')!.attachments).toContainEqual({ device: 'N3', terminal: 'I2', point: inputs.I2 });
   }
   for (const net of routes.nets) {
     const actual = inspected.wires.find((n) => n.net === net.net)!;

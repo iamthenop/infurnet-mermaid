@@ -1,6 +1,7 @@
 import type { CircuitModel, Device, Direction, NetType } from '../circuitTypes.js';
 import { Transform, bounds, translateBounds, type Bounds, type Point } from './geometry.js';
 import { resolveSymbol, type SymbolId } from './symbols.js';
+import { routeCircuit, routingQuality } from './routing.js';
 
 export type Rotation = 0 | 90 | 180 | 270;
 type Arrangement = Exclude<Direction, 'auto'>;
@@ -10,6 +11,7 @@ interface PlacedGeometry {
   readonly symbol: SymbolId;
   readonly position: Point;
   readonly rotation: Rotation;
+  readonly reflected: boolean;
   readonly width: number;
   readonly height: number;
   readonly bounds: Bounds;
@@ -86,21 +88,67 @@ function enclose(boxes: readonly Bounds[], padding = 0): Bounds {
   return { minX: box.minX - padding, minY: box.minY - padding, maxX: box.maxX + padding, maxY: box.maxY + padding };
 }
 
-function place(symbol: SymbolId, position: Point, rotation: Rotation = 0): PlacedGeometry {
+function place(symbol: SymbolId, position: Point, rotation: Rotation = 0, reflected = false): PlacedGeometry {
   const { width, height } = resolveSymbol(symbol);
-  const transform = new Transform({ rotation, localOffset: [-width / 2, -height / 2],
+  const transform = new Transform({ rotation, reflectVertical: reflected, localOffset: [-width / 2, -height / 2],
     translation: [position[0] + width / 2, position[1] + height / 2] });
   const resolved = resolveSymbol(symbol, transform);
-  return { symbol, position, rotation, width, height, transform, svgTransform: resolved.svgTransform,
+  return { symbol, position, rotation, reflected, width, height, transform, svgTransform: resolved.svgTransform,
     terminals: resolved.terminals, ...('anchor' in resolved ? { anchor: resolved.anchor } : {}),
     bounds: { minX: position[0], minY: position[1], maxX: position[0] + width, maxY: position[1] + height } };
 }
 
 export function layoutCircuit(model: CircuitModel): CircuitLayout {
-  return model.blocks.filter((block) => block.stages.length).length > 1 ? layoutSections(model) : layoutConnected(model, new Map(), model.blocks.some((block) => block.stages.length > 0));
+  const build = (sweep: boolean) => model.blocks.filter((block) => block.stages.length).length > 1 ? layoutSections(model, sweep)
+    : layoutConnected(model, new Map(), model.blocks.some((block) => block.stages.length > 0), sweep);
+  const baseline = build(false);
+  if (model.mode !== 'D' || !model.devices.length) return baseline;
+  let failure: Error | undefined;
+  const quality = (layout: CircuitLayout): readonly number[] | undefined => {
+    try {
+      const routes = routeCircuit(model, layout);
+      const detours = layout.inputTargets.filter((target) => {
+        const device = layout.devices.find((device) => device.id === target.device)!;
+        const terminal = device.terminals[target.terminal];
+        const input = layout.nets.find((net) => net.id === target.net && (net.block === undefined || net.block === model.stages[device.stage].block))!.anchor!;
+        if (Math.abs(input[1] - terminal[1]) > 1e-7) return true;
+        const length = routes.nets.find((net) => net.net === target.net)!.segments.filter((segment) =>
+          Math.abs(segment.a[1] - input[1]) < 1e-7 && Math.abs(segment.b[1] - input[1]) < 1e-7)
+          .reduce((sum, segment) => sum + Math.max(0, Math.min(Math.max(segment.a[0], segment.b[0]), Math.max(input[0], terminal[0]))
+            - Math.max(Math.min(segment.a[0], segment.b[0]), Math.min(input[0], terminal[0]))), 0);
+        return length < Math.abs(input[0] - terminal[0]) - 1e-7;
+      }).length;
+      return [...routingQuality(routes), detours, layout.devices.filter((device) => device.reflected).length];
+    }
+    catch (error) {
+      if (!(error instanceof Error) || !/^(Cannot route|Ambiguous connection|Net .* escapes)/u.test(error.message)) throw error;
+      failure ??= error; return undefined;
+    }
+  };
+  const better = (a: readonly number[], b: readonly number[] | undefined) => !b || a.some((value, index) => value < b[index] - 1e-7 && a.slice(0, index).every((prior, i) => Math.abs(prior - b[i]) < 1e-7));
+  let best = baseline, score = quality(best);
+  for (const initial of [baseline, build(true)]) {
+    let candidate = initial, candidateScore = quality(candidate);
+    for (let pass = 0; pass < candidate.devices.length; pass++) {
+      let changed = false;
+      for (const device of candidate.devices) {
+        if (!['inverter', 'buffer', 'nand'].includes(device.symbol)) continue;
+        const mirrored = { ...device, ...place(device.symbol, device.position, device.rotation, !device.reflected) };
+        const trial = { ...candidate, devices: candidate.devices.map((item) => item.id === device.id ? mirrored : item),
+          inputTargets: candidate.inputTargets.map((target) => target.device !== device.id ? target : { ...target,
+            aligned: Math.abs(mirrored.terminals[target.terminal][1] - candidate.nets.find((net) => net.id === target.net && (net.block === undefined || net.block === model.stages[device.stage].block))!.anchor![1]) < 1e-7 }) };
+        const next = quality(trial);
+        if (next && better(next, candidateScore)) { candidate = trial; candidateScore = next; changed = true; }
+      }
+      if (!changed) break;
+    }
+    if (candidateScore && better(candidateScore, score)) { best = candidate; score = candidateScore; }
+  }
+  if (!score) throw failure!;
+  return best;
 }
 
-function layoutConnected(model: CircuitModel, appearances: ReadonlyMap<string, NetType> = new Map(), branches = false): CircuitLayout {
+function layoutConnected(model: CircuitModel, appearances: ReadonlyMap<string, NetType> = new Map(), branches = false, sweep = false): CircuitLayout {
   const netType = (id: string) => appearances.get(id) ?? model.nets.find((net) => net.id === id)?.type;
   const pane = resolveSymbol('resistor').width, gap = pane / 2, padding = pane / 4, pitch = pane + gap;
   const sharedInputs = model.nets.filter((net) => netType(net.id) === 'pinIn'
@@ -278,6 +326,18 @@ function layoutConnected(model: CircuitModel, appearances: ReadonlyMap<string, N
         }
         if (levels.size === group.devices.length) {
           const columns = [...new Set(levels.values())].map((level) => group.devices.filter((device) => levels.get(device.id) === level));
+          if (sweep) for (let pass = 0; pass < 4; pass++) {
+            const ordered = pass % 2 ? [...columns].reverse() : columns;
+            for (const column of ordered) {
+              const row = (device: Device) => { const peers = columns.find((items) => items.includes(device))!; return peers.indexOf(device) - (peers.length - 1) / 2; };
+              const center = (device: Device) => {
+                const neighbors = group.devices.filter((other) => pass % 2 ? predecessors.get(other.id)!.includes(device.id) : predecessors.get(device.id)!.includes(other.id));
+                return neighbors.length ? neighbors.reduce((sum, other) => sum + row(other), 0) / neighbors.length : row(device);
+              };
+              const centers = new Map(column.map((device) => [device.id, center(device)]));
+              column.sort((a, b) => centers.get(a.id)! - centers.get(b.id)! || declaration.get(a.id)! - declaration.get(b.id)!);
+            }
+          }
           const rows = Math.max(...columns.map((column) => column.length));
           group.devices.forEach((device, index) => {
             const level = levels.get(device.id)!, column = columns.find((column) => levels.get(column[0].id) === level)!;
@@ -453,7 +513,7 @@ function layoutConnected(model: CircuitModel, appearances: ReadonlyMap<string, N
     unplacedNetIds: model.nets.filter((net) => net.type === 'pinInOut').map((net) => net.id), fallbackStages };
 }
 
-function layoutSections(model: CircuitModel): CircuitLayout {
+function layoutSections(model: CircuitModel, sweep = false): CircuitLayout {
   const scopes = model.blocks.flatMap((block, index) => block.stages.length ? [{ block: index as number | null, stages: block.stages }] : []);
   const ungrouped = model.stages.flatMap((stage, index) => stage.block === null ? [index] : []);
   if (ungrouped.length) scopes.push({ block: null, stages: ungrouped });
@@ -473,7 +533,7 @@ function layoutSections(model: CircuitModel): CircuitLayout {
     }
     const localModel: CircuitModel = { ...model, devices: devices.map((device) => ({ ...device, stage: scope.stages.indexOf(device.stage) })),
       connections, nets, blocks: [], stages: scope.stages.map((index, order) => ({ ...model.stages[index], block: null, order })) };
-    const layout = layoutConnected(localModel, appearances, scope.block !== null);
+    const layout = layoutConnected(localModel, appearances, scope.block !== null, sweep);
     const symbols: PlacedNet[] = layout.nets.map((net) => ({ ...net, ...(scope.block !== null ? { block: scope.block } : {}),
       occurrence: `${scopeIndex}:${net.id}:${net.symbol}`, role: appearances.has(net.id) && model.nets.find((item) => item.id === net.id)!.type !== 'pinIn'
         ? 'boundary'

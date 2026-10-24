@@ -21,6 +21,11 @@ function connectivity(model: CircuitModel, layout: CircuitLayout, routes: Circui
     const graph = new Map<string, Set<string>>();
     for (const segment of net.segments) {
       expect(Math.min(Math.abs(segment.a[0] - segment.b[0]), Math.abs(segment.a[1] - segment.b[1]))).toBeLessThan(1e-7);
+      if ([segment.a, segment.b].some((point) => point.some((value) => Math.abs(value / 10 - Math.round(value / 10)) > 1e-7))) {
+        const distance = (a: Point, b: Point) => Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]);
+        expect(net.attachments.some((attachment) => distance(segment.a, attachment.point) <= 70 && distance(segment.b, attachment.point) <= 70),
+          `Off-grid route must remain local to an exact attachment on ${net.net}`).toBe(true);
+      }
       for (const [a, b] of [[segment.a, segment.b], [segment.b, segment.a]]) {
         if (!graph.has(key(a))) graph.set(key(a), new Set());
         graph.get(key(a))!.add(key(b));

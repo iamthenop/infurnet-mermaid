@@ -62,6 +62,26 @@ describe('drawing geometry', () => {
     expect(box).toEqual({ minX: -1, minY: 2, maxX: 3, maxY: 4 });
   });
 
+  it.each([
+    [true, false, 0, [4, 14]], [false, true, 0, [16, 26]],
+    [true, true, 90, [4, 14]], [false, true, 90, [4, 26]],
+  ] as const)('composes reflection X=%s Y=%s with rotation %s', (reflectHorizontal, reflectVertical, rotation, expected) => {
+    const transform = new Transform({ localOffset: [-1, -2], scale: [2, 3], rotation, translation: [10, 20], reflectHorizontal, reflectVertical });
+    expectPoint(transform.apply([4, 0]), expected);
+    const points = transform.applyAll([[0, 0], [120, 0], [120, 120], [0, 120]]);
+    expect(transformBounds({ minX: 0, minY: 0, maxX: 120, maxY: 120 }, transform)).toEqual(bounds(points));
+  });
+
+  it.each(['nand', 'pinIn'] as const)('reflects %s artwork, terminals and anchors together', (id) => {
+    const transform = new Transform({ localOffset: [-60, -60], reflectVertical: true, translation: [60, 60] });
+    const original = resolveSymbol(id), reflected = resolveSymbol(id, transform);
+    expect(reflected.svg).toBe(original.svg);
+    expect(reflected.svgTransform).toBe('matrix(1 0 0 -1 0 120)');
+    expect(Object.keys(reflected.terminals)).toEqual(Object.keys(original.terminals));
+    for (const [terminal, [x, y]] of Object.entries(original.terminals)) expect(reflected.terminals[terminal]).toEqual([x, 120 - y]);
+    if (original.anchor) expect(reflected.anchor).toEqual([original.anchor[0], 120 - original.anchor[1]]);
+  });
+
   it('uses all four corners when rotating a bounding box', () => {
     const result = transformBounds({ minX: 0, minY: 0, maxX: 2, maxY: 1 }, new Transform({ rotation: 45 }));
     expectPoint([result.minX, result.minY], [-Math.SQRT1_2, 0]);

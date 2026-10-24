@@ -4,6 +4,7 @@ import type { CircuitLayout } from './layout.js';
 
 export interface WireSegment { readonly a: Point; readonly b: Point }
 export interface Attachment { readonly device?: string; readonly terminal?: string; readonly occurrence?: string; readonly point: Point }
+interface LeadAttachment extends Attachment { stub: WireSegment; lead?: WireSegment[] }
 export interface RoutedComponent {
   readonly block: number | null;
   readonly attachments: readonly Attachment[];
@@ -24,6 +25,8 @@ export interface CircuitRouting {
 
 const epsilon = 1e-7;
 const frameClearance = 20;
+const gridPitch = 10;
+const snap = (value: number) => Math.round(value / gridPitch) * gridPitch;
 const near = (a: number, b: number) => Math.abs(a - b) < epsilon;
 const equal = (a: Point, b: Point) => near(a[0], b[0]) && near(a[1], b[1]);
 const horizontal = (s: WireSegment) => near(s.a[1], s.b[1]);
@@ -31,6 +34,22 @@ const distance = (a: Point, b: Point) => Math.abs(a[0] - b[0]) + Math.abs(a[1] -
 const inside = (p: Point, b: Bounds) => p[0] >= b.minX && p[0] <= b.maxX && p[1] >= b.minY && p[1] <= b.maxY;
 const on = (p: Point, s: WireSegment) => Math.abs(distance(s.a, p) + distance(p, s.b) - distance(s.a, s.b)) < epsilon
   && (horizontal(s) ? near(p[1], s.a[1]) : near(p[0], s.a[0]));
+
+export function routingQuality(routing: CircuitRouting): readonly [number, number, number] {
+  let bends = 0, length = 0;
+  for (const net of routing.nets) for (const component of net.components) {
+    const vertices = new Map<string, boolean[]>();
+    for (const segment of component.segments) {
+      length += distance(segment.a, segment.b);
+      for (const point of [segment.a, segment.b]) {
+        const key = point.map((value) => value.toFixed(7)).join(',');
+        vertices.set(key, [...vertices.get(key) ?? [], horizontal(segment)]);
+      }
+    }
+    bends += [...vertices.values()].filter((directions) => directions.length === 2 && directions[0] !== directions[1]).length;
+  }
+  return [routing.crossings.length, bends, length];
+}
 
 function intersection(a: WireSegment, b: WireSegment): Point | undefined {
   if (horizontal(a) === horizontal(b)) return undefined;
@@ -191,7 +210,7 @@ function routeConnected(model: CircuitModel, layout: CircuitLayout, limit?: Boun
         || model.devices.find((d) => d.id === a.device)!.terminals.indexOf(a.terminal) - model.devices.find((d) => d.id === b.device)!.terminals.indexOf(b.terminal));
       const target = layout.inputTargets.find((t) => t.net === net.id);
       if (target) attachments.sort((a, b) => Number(b.device === target.device && b.terminal === target.terminal) - Number(a.device === target.device && a.terminal === target.terminal));
-      const endpoints: (Attachment & { stub: WireSegment })[] = attachments;
+      const endpoints: LeadAttachment[] = attachments;
       for (const placed of [...symbols].reverse()) if (placed.anchor) endpoints.unshift({ point: placed.anchor, occurrence: placed.occurrence, stub: { a: placed.anchor, b: escape(placed.anchor, placed.bounds) } });
       if (symbols.length > 1) {
         const outgoing = endpoints.splice(1, symbols.length - 1);
@@ -217,8 +236,7 @@ function routeConnected(model: CircuitModel, layout: CircuitLayout, limit?: Boun
     const direction = Math.sign(endpoint.stub.b[1] - endpoint.point[1]);
     const edge = direction < 0 ? frame.minY : frame.maxY;
     if (Math.abs(edge - endpoint.point[1]) > 30 + epsilon) continue;
-    const candidates = [-120, 0, 120].flatMap((period) => [0, 30, 40, 60, 80, 90]
-      .map((offset) => Math.floor(edge / 120) * 120 + period + offset))
+    const candidates = Array.from({ length: 25 }, (_, index) => snap(edge) + (index - 12) * gridPitch)
       .filter((value) => (value - edge) * direction >= frameClearance)
       .sort((a, b) => Math.abs(a - edge) - Math.abs(b - edge));
     endpoint.stub = { a: endpoint.point, b: [endpoint.point[0], candidates[0]] };
@@ -236,8 +254,6 @@ function routeConnected(model: CircuitModel, layout: CircuitLayout, limit?: Boun
     const axis = horizontal(endpoint.stub) ? 0 : 1, direction = Math.sign(endpoint.stub.b[axis] - endpoint.point[axis]);
     for (let length = 40; length <= 60; length += 10) {
       const b: Point = axis === 0 ? [endpoint.point[0] + direction * length, endpoint.point[1]] : [endpoint.point[0], endpoint.point[1] + direction * length];
-      const phase = ((b[axis] % 120) + 120) % 120;
-      if (![0, 30, 40, 60, 80, 90, 120].some((snap) => near(snap, phase))) continue;
       const stub = { a: endpoint.point, b };
       if (crowdsInput(stub) || frames.some((frame) => crowdsFrame(stub, frame))
         || panes.some((pane) => pane.id !== (endpoint.device ?? net) && blocks(stub, pane.bounds))
@@ -251,8 +267,7 @@ function routeConnected(model: CircuitModel, layout: CircuitLayout, limit?: Boun
       && (overlap(stub, other.endpoint.stub) || collinearTouch(stub, other.endpoint.stub) || intersection(stub, other.endpoint.stub)));
     if (!conflicts(endpoint.stub)) continue;
     const axis = horizontal(endpoint.stub) ? 0 : 1, origin = endpoint.point[axis];
-    const candidates = [-120, 0, 120].flatMap((period) => [0, 30, 40, 60, 80, 90]
-      .map((offset) => Math.floor(origin / 120) * 120 + period + offset))
+    const candidates = Array.from({ length: 25 }, (_, index) => snap(origin) + (index - 12) * gridPitch)
       .filter((value) => Math.abs(value - origin) > 6 && Math.abs(value - origin) < 30
         && Math.sign(value - origin) === Math.sign(endpoint.stub.b[axis] - origin))
       .sort((a, b) => Math.abs(b - origin) - Math.abs(a - origin));
@@ -266,11 +281,11 @@ function routeConnected(model: CircuitModel, layout: CircuitLayout, limit?: Boun
   function addRail(entry: typeof entries[number], endpoints: typeof entries[number]['endpoints'], top: boolean): void {
     const edge = top ? Math.min(...endpoints.map((endpoint) => endpoint.point[1])) : Math.max(...endpoints.map((endpoint) => endpoint.point[1]));
     const output = layout.nets.some((net) => net.id === entry.net.id && net.symbol === 'pinOut') ? entry.endpoints.find((endpoint) => !endpoint.device)?.point : undefined;
-    const y = output && (top ? output[1] <= edge - 60 : output[1] >= edge + 60) ? output[1] : edge + (top ? -60 : 60);
+    const y = snap(output && (top ? output[1] <= edge - 60 : output[1] >= edge + 60) ? output[1] : edge + (top ? -60 : 60));
     for (const endpoint of endpoints) endpoint.stub = { a: endpoint.point, b: [endpoint.point[0], y] };
     const segment: WireSegment = {
-      a: [Math.min(...endpoints.map((endpoint) => endpoint.point[0])), y],
-      b: [Math.max(...endpoints.map((endpoint) => endpoint.point[0])), y],
+      a: [Math.min(...endpoints.map((endpoint) => snap(endpoint.point[0]))), y],
+      b: [Math.max(...endpoints.map((endpoint) => snap(endpoint.point[0]))), y],
     };
     if (panes.some((pane) => blocks(segment, pane.bounds))
       || endpoints.some((endpoint) => panes.some((pane) => pane.id !== endpoint.device && blocks(endpoint.stub, pane.bounds)))
@@ -305,14 +320,32 @@ function routeConnected(model: CircuitModel, layout: CircuitLayout, limit?: Boun
       addRail(entry, entry.endpoints.filter((endpoint) => ids.includes(endpoint.device!) && endpoint.terminal === terminal), terminal === 'D');
     }
   }
+  for (const entry of entries) for (const endpoint of entry.endpoints) {
+    const axis = horizontal(endpoint.stub) ? 0 : 1, other = 1 - axis;
+    const direction = Math.sign(endpoint.stub.b[axis] - endpoint.point[axis]);
+    const end = endpoint.stub.b.map((value, index) => index === axis
+      ? (direction > 0 ? Math.ceil(value / gridPitch) : Math.floor(value / gridPitch)) * gridPitch : snap(value)) as unknown as Point;
+    const lengths = [distance(endpoint.point, endpoint.stub.b), 30, 40, 50, 60].filter((length) => length <= 60);
+    let lead: WireSegment[] | undefined;
+    for (const length of lengths) {
+      const bridge = [...endpoint.point] as [number, number];
+      bridge[axis] = (direction > 0 ? Math.ceil((bridge[axis] + length) / gridPitch) : Math.floor((bridge[axis] - length) / gridPitch)) * gridPitch;
+      const track = [...bridge] as [number, number]; track[other] = end[other];
+      const finish = buses.some((bus) => bus.endpoints.includes(endpoint)) ? end : track;
+      const candidate = simplify([endpoint.point, bridge, track, finish]);
+      if (candidate.some((segment) => panes.some((pane) => !(equal(segment.a, endpoint.point)
+        && (endpoint.device ? pane.id === endpoint.device : pane.anchor && equal(pane.anchor, endpoint.point))) && blocks(segment, pane.bounds))
+        || frames.some((frame) => crowdsFrame(segment, frame)))) continue;
+      lead = candidate; break;
+    }
+    if (!lead?.length) throw new Error(`Cannot route net ${entry.net.id}: attachment ${endpoint.device ?? entry.net.id}.${endpoint.terminal ?? 'anchor'} cannot reach the routing grid.`);
+    endpoint.lead = lead; endpoint.stub = lead.at(-1)!;
+  }
   const xs = new Set<number>(), ys = new Set<number>();
   const add = (p: Point) => { xs.add(p[0]); ys.add(p[1]); };
-  for (const entry of entries) for (const endpoint of entry.endpoints) { add(endpoint.point); add(endpoint.stub.b); }
-  for (const pane of panes) { add([pane.bounds.minX - 30, pane.bounds.minY - 30]); add([pane.bounds.maxX + 30, pane.bounds.maxY + 30]); }
-  for (let x = Math.floor((layout.bounds.minX - 120) / 120) * 120; x <= layout.bounds.maxX + 120; x += 120)
-    for (const offset of [0, 30, 40, 60, 80, 90]) xs.add(x + offset);
-  for (let y = Math.floor((layout.bounds.minY - 120) / 120) * 120; y <= layout.bounds.maxY + 120; y += 120)
-    for (const offset of [0, 30, 40, 60, 80, 90]) ys.add(y + offset);
+  for (const entry of entries) for (const endpoint of entry.endpoints) add(endpoint.stub.b);
+  for (let x = Math.floor((layout.bounds.minX - 120) / gridPitch) * gridPitch; x <= layout.bounds.maxX + 120; x += gridPitch) xs.add(x);
+  for (let y = Math.floor((layout.bounds.minY - 120) / gridPitch) * gridPitch; y <= layout.bounds.maxY + 120; y += gridPitch) ys.add(y);
   const distinct = (values: Set<number>) => [...values].sort((a, b) => a - b).filter((value, i, sorted) => !i || !near(value, sorted[i - 1]));
   const xValues = distinct(xs), yValues = distinct(ys);
   const sharedInputs = entries.filter((entry) => isInput(entry.net.id) && entry.endpoints.length > 2)
@@ -347,13 +380,13 @@ function routeConnected(model: CircuitModel, layout: CircuitLayout, limit?: Boun
     const netBuses = buses.filter((bus) => bus.net === net.id);
     const units = [
       ...netBuses.map((bus) => ({ stub: { a: bus.segment.a, b: bus.segment.a }, device: undefined as string | undefined, terminal: undefined as string | undefined,
-        segments: [bus.segment, ...bus.endpoints.map((endpoint) => endpoint.stub)] })),
+        segments: [bus.segment, ...bus.endpoints.flatMap((endpoint) => endpoint.lead!)] })),
       ...endpoints.filter((endpoint) => !netBuses.some((bus) => bus.endpoints.includes(endpoint)))
-        .map((endpoint) => ({ ...endpoint, segments: [endpoint.stub] })),
+        .map((endpoint) => ({ ...endpoint, segments: endpoint.lead! })),
     ];
     const segments: WireSegment[] = endpoints.length > 1 ? [...units[0].segments] : [];
     const otherSegments = [...completed.flatMap((n) => n.segments), ...entries.filter((other) => other !== entry)
-      .flatMap((other) => other.endpoints.length > 1 ? other.endpoints.map((e) => e.stub) : []),
+      .flatMap((other) => other.endpoints.length > 1 ? other.endpoints.flatMap((e) => e.lead!) : []),
       ...buses.filter((bus) => bus.net !== net.id).map((bus) => bus.segment)];
     for (const endpoint of units.slice(1)) {
       const branchColumn = segments.length > 1 ? branchColumns.get(entry) : undefined;
@@ -378,6 +411,11 @@ function routeConnected(model: CircuitModel, layout: CircuitLayout, limit?: Boun
             && (!sideBySideBlocks || frames.some((frame) => p[0] > frame.minX && p[0] < frame.maxX
               && Math.max(segment.a[1], segment.b[1]) > frame.minY && Math.min(segment.a[1], segment.b[1]) < frame.maxY))) continue;
           if (overlap(segment, endpoint.stub)) continue;
+          if (segments.some((wire) => [wire.a, wire.b].some((point) => point.some((value) => !near(value, snap(value))))
+            && (overlap(segment, wire) || (() => {
+              const cross = intersection(segment, wire);
+              return cross && cross.some((value) => !near(value, snap(value)));
+            })()))) continue;
           if (otherSegments.some((s) => overlap(segment, s) || collinearTouch(segment, s) || (() => {
             const cross = intersection(segment, s);
             return cross && (distance(cross, s.a) < 8 || distance(cross, s.b) < 8 || direction !== nextDirection && on(p, s));
