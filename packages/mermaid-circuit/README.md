@@ -78,9 +78,11 @@ Parallel groups span the same two conduction nets. The NAND2 fixture places its 
 
 Eligible devices rotate by multiples of 90 degrees to align terminals, using one transform for artwork and named attachments. Automatic CMOS placement keeps the catalog orientation; explicit directions can rotate it. Inputs prefer alignment with their top-left recipient, and analog LR devices can descend to support separate input rows.
 
-Digital LR stages use dependency columns. Four alternating barycenter sweeps evaluate row ordering using actual routing results, retaining declaration order on ties.
+Digital LR stages use dependency columns. Four alternating barycenter sweeps evaluate row ordering from topology and transformed terminal geometry, retaining declaration order on ties.
 
-Digital gates also evaluate vertical reflection, comparing crossings, bends, wire length, and straight input connections. Equal scores retain the default orientation. This deterministic search flips one gate at a time and does not guarantee a global optimum.
+Digital gates also evaluate vertical reflection using straight driver-to-input segments to estimate crossings, bend requirements, and Manhattan length. Straight input alignment and default orientation resolve ties. This deterministic search flips one gate at a time and does not guarantee a global optimum.
+
+Placement does not call the router or require a feasible route. The renderer routes the selected geometry once; a routing conflict rejects the render without changing the electrical model. Geometric estimates are not measurements of final wires.
 
 Horizontal reflection is available in the transform layer but is not selected automatically. Automatic reflection does not apply to CMOS transistors.
 
@@ -108,15 +110,19 @@ The renderer embeds the approved artwork and draws routes from that same routing
 
 Routing uses a finite search area around the placed circuit and does not globally optimize the drawing. Dense or obstructed diagrams can fail even when a different routing strategy might succeed.
 
+The search visits the existing grid using a distance lower bound to prioritize progress toward its targets. Obstacle checks for neighboring grid points are computed on demand and reused within the route. Connection targets are found directly along existing segments instead of scanning the entire grid.
+
 Cross-section implicit nets require an explicit net declaration to provide a boundary label. The existing placement fallback remains available when its connections can be routed faithfully.
 
 ## Layout-engine evaluation
 
-R4 evaluated ELK.js 0.12.0 and Dagre 3.1.1 on the four-NAND XOR, transistor XOR, CMOS inverter, NAND2, and NOR3 models. Both candidates produced deterministic coordinates across three repeated runs. The [PR #13 comparison](https://github.com/iamthenop/infurnet-mermaid/pull/13) distinguishes graph estimates from complete plugin-rendered results.
+R4-R1 reproduced the ELK.js 0.12.0 and Dagre 3.1.1 comparison on the four-NAND XOR, transistor XOR, CMOS inverter, NAND2, and NOR3 models. Both candidates produced identical graph coordinates across three repeated runs. The [PR #13 evaluation report](https://github.com/iamthenop/infurnet-mermaid/pull/13) supplies measured results, executable adapters, commands, and integration gaps.
 
 ELK's evaluation used fixed terminal ports and orthogonal routes; Dagre's endpoints lay on node boundaries and required adaptation. Both represented stage and block membership. Preserving the package's CMOS and sectional drawing conventions requires additional integration work.
 
-Temporary adapters also produced candidate schematics through the registered Mermaid plugin, including an ELK XOR using native routes. Adapter failures are not evidence that a candidate engine cannot handle the circuit. Graph bounds and edge metrics are not interchangeable with measurements of a complete schematic.
+The report separates graph-only coordinates, adapter output rendered through Mermaid, and normal production plugin output. Reproduced adapter examples include an ELK XOR using native routes and Dagre placements using the current router. Temporary adapter output is not a production fixture, and its failures do not establish engine limitations.
+
+Graph bounds and edge metrics are not interchangeable with measurements of a complete schematic. The native ELK adapter does not yet enforce all grid, centering, or frame-clearance rules. Neither candidate has been integrated with every approved CMOS and sectional drawing convention.
 
 No external layout library has been adopted or added to the package dependencies. Engine selection remains with the repository owner after visual review of the candidates. The independent reflection, layered-ordering, and grid-routing changes use the existing engine.
 

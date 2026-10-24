@@ -156,7 +156,7 @@ U2 ---|O:I| V2`);
     geometry(layout);
   });
 
-  it('reflects NAND inputs only when routed quality improves, retaining electrical identities', () => {
+  it('reflects NAND inputs from terminal geometry and preserves the zero-crossing XOR', () => {
     const model = parseCircuit(xorNand), before = structuredClone(model), layout = layoutCircuit(model);
     expect(layout.devices.filter((placed) => placed.reflected).map((placed) => placed.id)).toEqual(['N3']);
     const mirrored = device(layout, 'N3');
@@ -165,9 +165,24 @@ U2 ---|O:I| V2`);
     const transform = new Transform({ translation: mirrored.position });
     const unmirrored = { ...mirrored, ...resolveSymbol('nand', transform), id: mirrored.id, transform, reflected: false };
     const baseline = { ...layout, devices: layout.devices.map((placed) => placed.id === 'N3' ? unmirrored : placed) };
-    expect(routingQuality(routeCircuit(model, layout))[0]).toBeLessThan(routingQuality(routeCircuit(model, baseline))[0]);
+    expect(routingQuality(routeCircuit(model, layout))[0]).toBe(0);
+    expect(routingQuality(routeCircuit(model, baseline))[0]).toBeGreaterThan(0);
     expect(model).toEqual(before);
     expect(layoutCircuit(model)).toEqual(layout);
+  });
+
+  it('returns deterministic digital geometry even when routing is unsupported', () => {
+    const model = parseCircuit(`circuitDiagram D
+IO([IO]):::pinInOut
+${stage(declaration('U', 'nand'), 'LR')}
+IO ---|I1| U`), original = structuredClone(model);
+    const layout = layoutCircuit(model);
+    expect(layout.devices.map((device) => device.id)).toEqual(['U']);
+    expect(layout.unplacedNetIds).toEqual(['IO']);
+    expect(layoutCircuit(model)).toEqual(layout);
+    expect(model).toEqual(original);
+    geometry(layout, true);
+    expect(() => routeCircuit(model, layout)).toThrow('Unsupported pinInOut placement: IO');
   });
 
   it('retains digital LR declaration fallback when dependencies contain feedback', () => {

@@ -94,6 +94,8 @@ it.each(Object.entries(sources))('renders the catalog, routes, labels, and frame
     }
   }
   if (name === 'xor-nand4') {
+    expect(inspected.crossings).toHaveLength(0);
+    expect([inspected.width, inspected.height]).toEqual([882, 416]);
     expect(inspected.artwork.filter((symbol) => symbol.reflected).map((symbol) => symbol.id)).toEqual(['N3']);
     const inputs = layout.devices.find((device) => device.id === 'N3')!.terminals;
     expect(inputs.I1[1]).toBeGreaterThan(inputs.I2[1]);
@@ -163,7 +165,7 @@ it('escapes parameter text and recovers after invalid and unsupported renders wi
   const failures = await page.evaluate(async () => {
     const { renderFixture } = window as unknown as { renderFixture: typeof import('../examples/browser/main.js')['renderFixture'] };
     const errors: string[] = [];
-    for (const source of ['circuitDiagram D\nR1 resistor', 'circuitDiagram A\nIO([IO]):::pinInOut', 'circuitDiagram A\nU[U]:::ic']) {
+    for (const source of ['circuitDiagram D\nR1 resistor', 'circuitDiagram A\nIO([IO]):::pinInOut', 'circuitDiagram A\nU[U]:::ic', 'circuitDiagram D\nIO([IO]):::pinInOut\nU[U]:::nand\nIO ---|I1| U']) {
       try { await renderFixture('rejected-circuit', source); errors.push('unexpected success'); } catch (error) { errors.push(String(error)); }
     }
     return errors;
@@ -171,6 +173,7 @@ it('escapes parameter text and recovers after invalid and unsupported renders wi
   expect(failures[0]).toContain('Unsupported circuit statement');
   expect(failures[1]).toContain('Unsupported pinInOut placement');
   expect(failures[2]).toContain('ic');
+  expect(failures[3]).toContain('Unsupported pinInOut placement');
   const clean = await render('after-failure', sources['../examples/fixtures/cmos-inverter.mmd']);
   expect(clean).not.toMatch(/escaped-label|rejected-circuit|x &lt; y/u);
   expect(await page.locator('[data-device]').count()).toBe(2);

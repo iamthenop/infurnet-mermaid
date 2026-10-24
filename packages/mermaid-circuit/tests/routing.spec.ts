@@ -2,13 +2,41 @@
 import { expect, it } from 'vitest';
 import { parseCircuit } from '../src/parser/circuitParser.js';
 import { layoutCircuit, type CircuitLayout } from '../src/drawing/layout.js';
-import { routeCircuit, type CircuitRouting } from '../src/drawing/routing.js';
+import { routeCircuit, type CircuitRouting, type RoutedComponent } from '../src/drawing/routing.js';
 import type { CircuitModel } from '../src/circuitTypes.js';
 import type { Point } from '../src/drawing/geometry.js';
 
 const fixtures = import.meta.glob('../examples/fixtures/*.mmd', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
 const same = (a: Point, b: Point) => Math.hypot(a[0] - b[0], a[1] - b[1]) < 1e-7;
 const key = (p: Point) => p.map((v) => v.toFixed(7)).join(',');
+const onGrid = (p: Point) => p.every((value) => Math.abs(value / 10 - Math.round(value / 10)) < 1e-7);
+
+function attachmentLeads(component: RoutedComponent) {
+  const covered = new Set<number>();
+  const leads = component.attachments.filter((attachment) => !onGrid(attachment.point) && component.segments.length).map((attachment) => {
+    const points = [attachment.point], visited = new Set<number>();
+    let length = 0;
+    while (!onGrid(points.at(-1)!)) {
+      const point = points.at(-1)!;
+      const next = component.segments.flatMap((segment, index) => !visited.has(index) && (same(segment.a, point) || same(segment.b, point)) ? [index] : []);
+      expect(next, `Attachment lead must be continuous and unbranched at ${point}`).toHaveLength(1);
+      const index = next[0], segment = component.segments[index];
+      const end = same(point, segment.a) ? segment.b : segment.a;
+      expect(points.some((p) => same(p, end)), 'Attachment lead must not loop').toBe(false);
+      length += Math.abs(point[0] - end[0]) + Math.abs(point[1] - end[1]);
+      expect(length, 'Attachment lead must reach the grid locally').toBeLessThanOrEqual(70 + 1e-7);
+      points.push(end); visited.add(index); covered.add(index);
+    }
+    const end = points.at(-1)!;
+    expect(component.attachments.some((a) => same(a.point, end)) || component.segments.some((segment) =>
+      onGrid(segment.a) && onGrid(segment.b) && (same(segment.a, end) || same(segment.b, end))), 'Lead must join an ordinary grid track or exact attachment').toBe(true);
+    return { attachment, points };
+  });
+  component.segments.forEach((segment, index) => {
+    expect(onGrid(segment.a) && onGrid(segment.b) || covered.has(index), `Off-grid segment ${segment.a}–${segment.b} must belong to an exact attachment lead`).toBe(true);
+  });
+  return leads;
+}
 
 function connectivity(model: CircuitModel, layout: CircuitLayout, routes: CircuitRouting): void {
   expect(routes.nets.map((n) => n.net).sort()).toEqual(model.nets.map((n) => n.id).sort());
@@ -21,11 +49,6 @@ function connectivity(model: CircuitModel, layout: CircuitLayout, routes: Circui
     const graph = new Map<string, Set<string>>();
     for (const segment of net.segments) {
       expect(Math.min(Math.abs(segment.a[0] - segment.b[0]), Math.abs(segment.a[1] - segment.b[1]))).toBeLessThan(1e-7);
-      if ([segment.a, segment.b].some((point) => point.some((value) => Math.abs(value / 10 - Math.round(value / 10)) > 1e-7))) {
-        const distance = (a: Point, b: Point) => Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]);
-        expect(net.attachments.some((attachment) => distance(segment.a, attachment.point) <= 70 && distance(segment.b, attachment.point) <= 70),
-          `Off-grid route must remain local to an exact attachment on ${net.net}`).toBe(true);
-      }
       for (const [a, b] of [[segment.a, segment.b], [segment.b, segment.a]]) {
         if (!graph.has(key(a))) graph.set(key(a), new Set());
         graph.get(key(a))!.add(key(b));
@@ -47,6 +70,7 @@ function connectivity(model: CircuitModel, layout: CircuitLayout, routes: Circui
     expect(net.components.flatMap((component) => component.attachments)).toEqual(net.attachments);
     expect(net.components.flatMap((component) => component.segments)).toEqual(net.segments);
     for (const component of net.components) {
+      attachmentLeads(component);
       const local = new Map<string, Set<string>>();
       for (const segment of component.segments) for (const [a, b] of [[segment.a, segment.b], [segment.b, segment.a]]) {
         if (!local.has(key(a))) local.set(key(a), new Set());
@@ -171,8 +195,12 @@ R ---|B| Y
 R2 ---|A| Y`);
   const layout = layoutCircuit(model), routes = routeCircuit(model, layout);
   connectivity(model, layout, routes);
-  if (direction === 'TB') expect(layout.devices.find((d) => d.id === 'R2')!.terminals.A[0]).toBe(255);
-  else expect(layout.nets.find((n) => n.id === 'Y')!.anchor![1]).toBe(255);
+  const point = direction === 'TB' ? layout.devices.find((d) => d.id === 'R2')!.terminals.A : layout.nets.find((n) => n.id === 'Y')!.anchor!;
+  expect(point[direction === 'TB' ? 0 : 1]).toBe(255);
+  const lead = attachmentLeads(routes.nets.find((net) => net.net === 'Y')!.components[0]).find((lead) => same(lead.attachment.point, point))!;
+  expect(lead.points[0]).toEqual(point);
+  expect(lead.points.length).toBeGreaterThan(1);
+  expect(onGrid(lead.points.at(-1)!)).toBe(true);
 });
 
 it.each([false, true])('branches upper inputs first on the left (reversed declarations: %s)', (reverse) => {

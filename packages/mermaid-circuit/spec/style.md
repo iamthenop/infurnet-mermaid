@@ -45,7 +45,7 @@ In mode `D`, an explicit `LR` stage lays out acyclic logic in dependency columns
 
 Digital LR placement uses dependency layers and crossing minimization. Devices at the same dependency depth may share a column. Declaration order resolves otherwise equivalent placements.
 
-Evaluate a deterministic barycenter sweep in both layer directions, ordering gates by the average position of their connected neighbors. Compare the resulting placement with declaration order using actual routes. Accept changes only when the routing-quality priorities below improve.
+Evaluate a deterministic barycenter sweep in both layer directions, ordering gates by the average position of their connected neighbors. Compare the resulting placement with declaration order using topology and transformed terminal geometry. Accept changes only when the placement-quality estimates below improve.
 
 Center each column vertically against the tallest column, preserving exact transformed attachments. Cyclic stages retain the existing declaration-order fallback. Dependency placement does not change stage membership or electrical connectivity.
 
@@ -59,7 +59,9 @@ The horizontal option negates X, and the vertical option negates Y, in local coo
 
 Automatic selection may reverse digital gates vertically. CMOS orientations remain unchanged.
 
-Compare valid orientation candidates by crossings, bends, routed length, and then straight input connections, in that order. Prefer the default orientation when these scores are equal. Electrical connectivity and stage constraints must remain valid for every accepted candidate.
+Compare valid orientation candidates by estimated crossings, bends, wire length, and then straight input connections, in that order. Prefer the default orientation when these scores are equal. Electrical connectivity and stage constraints must remain valid for every accepted candidate.
+
+Placement computes geometry independently of routing feasibility and must not invoke full routing to score candidates. Routing consumes the selected layout afterward. A routing conflict fails rendering without invalidating the electrical model or the geometric placement.
 
 Keep the default orientation when rotation offers no supported alignment advantage. For series chains, align consecutive attachments where the symbol geometry permits.
 

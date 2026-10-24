@@ -1,7 +1,6 @@
 import type { CircuitModel, Device, Direction, NetType } from '../circuitTypes.js';
 import { Transform, bounds, translateBounds, type Bounds, type Point } from './geometry.js';
 import { resolveSymbol, type SymbolId } from './symbols.js';
-import { routeCircuit, routingQuality } from './routing.js';
 
 export type Rotation = 0 | 90 | 180 | 270;
 type Arrangement = Exclude<Direction, 'auto'>;
@@ -103,27 +102,37 @@ export function layoutCircuit(model: CircuitModel): CircuitLayout {
     : layoutConnected(model, new Map(), model.blocks.some((block) => block.stages.length > 0), sweep);
   const baseline = build(false);
   if (model.mode !== 'D' || !model.devices.length) return baseline;
-  let failure: Error | undefined;
-  const quality = (layout: CircuitLayout): readonly number[] | undefined => {
-    try {
-      const routes = routeCircuit(model, layout);
-      const detours = layout.inputTargets.filter((target) => {
-        const device = layout.devices.find((device) => device.id === target.device)!;
-        const terminal = device.terminals[target.terminal];
-        const input = layout.nets.find((net) => net.id === target.net && (net.block === undefined || net.block === model.stages[device.stage].block))!.anchor!;
-        if (Math.abs(input[1] - terminal[1]) > 1e-7) return true;
-        const length = routes.nets.find((net) => net.net === target.net)!.segments.filter((segment) =>
-          Math.abs(segment.a[1] - input[1]) < 1e-7 && Math.abs(segment.b[1] - input[1]) < 1e-7)
-          .reduce((sum, segment) => sum + Math.max(0, Math.min(Math.max(segment.a[0], segment.b[0]), Math.max(input[0], terminal[0]))
-            - Math.max(Math.min(segment.a[0], segment.b[0]), Math.min(input[0], terminal[0]))), 0);
-        return length < Math.abs(input[0] - terminal[0]) - 1e-7;
-      }).length;
-      return [...routingQuality(routes), detours, layout.devices.filter((device) => device.reflected).length];
+  const quality = (layout: CircuitLayout): readonly number[] => {
+    const edges: { net: string; a: Point; b: Point }[] = [];
+    const blockOf = (device: PlacedDevice) => layout.sectional ? model.stages[device.stage].block : null;
+    for (const net of model.nets) {
+      const assigned = model.connections.filter((connection) => connection.net === net.id)
+        .map((connection) => ({ ...connection, placed: layout.devices.find((device) => device.id === connection.device)! }));
+      for (const target of assigned.filter((connection) => connection.terminal !== 'O')) {
+        const block = blockOf(target.placed);
+        const drivers = assigned.filter((connection) => connection.terminal === 'O' && blockOf(connection.placed) === block);
+        const inputs = layout.nets.filter((input) => input.id === net.id && input.symbol === 'pinIn' && (input.block ?? null) === block);
+        const local = inputs.filter((input) => input.recipientStage === target.placed.stage);
+        const origins = drivers.length ? drivers.map((driver) => driver.placed.terminals.O)
+          : (local.length ? local : inputs.filter((input) => input.recipientStage === undefined)).map((input) => input.anchor!);
+        for (const a of origins) edges.push({ net: net.id, a, b: target.placed.terminals[target.terminal] });
+      }
+      for (const output of layout.nets.filter((output) => output.id === net.id && output.symbol === 'pinOut')) {
+        for (const driver of assigned.filter((connection) => connection.terminal === 'O' && blockOf(connection.placed) === (output.block ?? null)))
+          edges.push({ net: net.id, a: driver.placed.terminals.O, b: output.anchor! });
+      }
     }
-    catch (error) {
-      if (!(error instanceof Error) || !/^(Cannot route|Ambiguous connection|Net .* escapes)/u.test(error.message)) throw error;
-      failure ??= error; return undefined;
+    let crossings = 0;
+    for (let i = 0; i < edges.length; i++) for (const other of edges.slice(i + 1)) {
+      const edge = edges[i];
+      if (edge.net === other.net) continue;
+      const cross = (a: Point, b: Point, c: Point) => (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]);
+      if (cross(edge.a, edge.b, other.a) * cross(edge.a, edge.b, other.b) < -1e-7
+        && cross(other.a, other.b, edge.a) * cross(other.a, other.b, edge.b) < -1e-7) crossings++;
     }
+    const bends = edges.filter(({ a, b }) => Math.abs(a[0] - b[0]) > 1e-7 && Math.abs(a[1] - b[1]) > 1e-7).length;
+    const length = edges.reduce((sum, { a, b }) => sum + Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]), 0);
+    return [crossings, bends, length, layout.inputTargets.filter((target) => !target.aligned).length, layout.devices.filter((device) => device.reflected).length];
   };
   const better = (a: readonly number[], b: readonly number[] | undefined) => !b || a.some((value, index) => value < b[index] - 1e-7 && a.slice(0, index).every((prior, i) => Math.abs(prior - b[i]) < 1e-7));
   let best = baseline, score = quality(best);
@@ -138,13 +147,12 @@ export function layoutCircuit(model: CircuitModel): CircuitLayout {
           inputTargets: candidate.inputTargets.map((target) => target.device !== device.id ? target : { ...target,
             aligned: Math.abs(mirrored.terminals[target.terminal][1] - candidate.nets.find((net) => net.id === target.net && (net.block === undefined || net.block === model.stages[device.stage].block))!.anchor![1]) < 1e-7 }) };
         const next = quality(trial);
-        if (next && better(next, candidateScore)) { candidate = trial; candidateScore = next; changed = true; }
+        if (better(next, candidateScore)) { candidate = trial; candidateScore = next; changed = true; }
       }
       if (!changed) break;
     }
-    if (candidateScore && better(candidateScore, score)) { best = candidate; score = candidateScore; }
+    if (better(candidateScore, score)) { best = candidate; score = candidateScore; }
   }
-  if (!score) throw failure!;
   return best;
 }
 

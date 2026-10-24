@@ -122,25 +122,28 @@ function split(segments: readonly WireSegment[], attachments: readonly Attachmen
 }
 
 class Queue {
-  private items: { state: number; cost: number }[] = [];
-  push(item: { state: number; cost: number }): void {
+  private items: { state: number; cost: number; priority: number }[] = [];
+  private before(a: { state: number; cost: number; priority: number }, b: { state: number; cost: number; priority: number }): boolean {
+    return a.priority < b.priority || a.priority === b.priority && (a.cost > b.cost || a.cost === b.cost && a.state < b.state);
+  }
+  push(item: { state: number; cost: number; priority: number }): void {
     let i = this.items.length;
     this.items.push(item);
     while (i > 0) {
       const parent = (i - 1) >> 1;
-      if (this.items[parent].cost <= item.cost) break;
+      if (!this.before(item, this.items[parent])) break;
       this.items[i] = this.items[parent]; i = parent;
     }
     this.items[i] = item;
   }
-  pop(): { state: number; cost: number } | undefined {
+  pop(): { state: number; cost: number; priority: number } | undefined {
     const root = this.items[0], last = this.items.pop();
     if (this.items.length && last) {
       let i = 0;
       while (i * 2 + 1 < this.items.length) {
         let child = i * 2 + 1;
-        if (child + 1 < this.items.length && this.items[child + 1].cost < this.items[child].cost) child++;
-        if (last.cost <= this.items[child].cost) break;
+        if (child + 1 < this.items.length && this.before(this.items[child + 1], this.items[child])) child++;
+        if (!this.before(this.items[child], last)) break;
         this.items[i] = this.items[child]; i = child;
       }
       this.items[i] = last;
@@ -368,11 +371,22 @@ function routeConnected(model: CircuitModel, layout: CircuitLayout, limit?: Boun
   }
   const width = xValues.length;
   const points: Point[] = yValues.flatMap((y) => xValues.map((x): Point => [x, y]));
-  const neighbors = points.map((p, index) => [index % width ? index - 1 : -1, index % width < width - 1 ? index + 1 : -1, index - width, index + width]
+  const pointIndex = (p: Point) => {
+    const x = xValues.findIndex((value) => near(value, p[0])), y = yValues.findIndex((value) => near(value, p[1]));
+    return x < 0 || y < 0 ? -1 : y * width + x;
+  };
+  const neighborCache = new Map<number, number[]>();
+  const neighbors = (index: number): number[] => {
+    const cached = neighborCache.get(index);
+    if (cached) return cached;
+    const p = points[index];
+    const adjacent = [index % width ? index - 1 : -1, index % width < width - 1 ? index + 1 : -1, index - width, index + width]
     .filter((next) => next >= 0 && next < points.length && (!limit || inside(p, limit) && inside(points[next], limit)
       && [p, points[next]].every((point) => point[0] >= limit.minX + frameClearance && point[0] <= limit.maxX - frameClearance
         && point[1] >= limit.minY + frameClearance && point[1] <= limit.maxY - frameClearance)) && !equal(p, points[next]) && !panes.some((pane) => blocks({ a: p, b: points[next] }, pane.bounds))
-      && !frames.some((frame) => crowdsFrame({ a: p, b: points[next] }, frame))));
+      && !frames.some((frame) => crowdsFrame({ a: p, b: points[next] }, frame)));
+    neighborCache.set(index, adjacent); return adjacent;
+  };
   const completed: RoutedNet[] = [];
 
   for (const entry of entries) {
@@ -390,14 +404,33 @@ function routeConnected(model: CircuitModel, layout: CircuitLayout, limit?: Boun
       ...buses.filter((bus) => bus.net !== net.id).map((bus) => bus.segment)];
     for (const endpoint of units.slice(1)) {
       const branchColumn = segments.length > 1 ? branchColumns.get(entry) : undefined;
-      const start = points.findIndex((p) => equal(p, endpoint.stub.b));
-      const goals = new Set(points.flatMap((p, index) => (segments.length === 1 ? equal(p, segments[0].b) : segments.some((s) => on(p, s)))
-        && (branchColumn === undefined || near(p[0], branchColumn))
-        && !(isInput(net.id) && segments.length > 1 && layout.stages.some((stage) => inside(p, stage.bounds))) ? [index] : []));
+      const start = pointIndex(endpoint.stub.b);
+      const goals = new Set<number>();
+      const addGoal = (index: number) => {
+        if (index < 0) return;
+        const p = points[index];
+        if ((branchColumn === undefined || near(p[0], branchColumn))
+          && !(isInput(net.id) && segments.length > 1 && layout.stages.some((stage) => inside(p, stage.bounds)))) goals.add(index);
+      };
+      if (segments.length === 1) addGoal(pointIndex(segments[0].b));
+      else for (const segment of segments) {
+        if (horizontal(segment)) {
+          const y = yValues.findIndex((value) => near(value, segment.a[1]));
+          if (y >= 0) xValues.forEach((x, i) => { if (on([x, yValues[y]], segment)) addGoal(y * width + i); });
+        } else {
+          const x = xValues.findIndex((value) => near(value, segment.a[0]));
+          if (x >= 0) yValues.forEach((y, i) => { if (on([xValues[x], y], segment)) addGoal(i * width + x); });
+        }
+      }
       const costs = new Float64Array(points.length * 3).fill(Infinity), previous = new Int32Array(points.length * 3).fill(-1);
+      const targetBounds = [...goals].reduce((box, index) => ({ minX: Math.min(box.minX, points[index][0]), minY: Math.min(box.minY, points[index][1]),
+        maxX: Math.max(box.maxX, points[index][0]), maxY: Math.max(box.maxY, points[index][1]) }), { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity });
+      // Distance to the goal bounds is a lower bound even when obstacles require detours.
+      const remaining = (p: Point) => goals.size ? Math.max(targetBounds.minX - p[0], 0, p[0] - targetBounds.maxX)
+        + Math.max(targetBounds.minY - p[1], 0, p[1] - targetBounds.maxY) : 0;
       const queue = new Queue();
       const initial = start * 3 + (horizontal(endpoint.stub) ? 1 : 2);
-      costs[initial] = 0; queue.push({ state: initial, cost: 0 });
+      costs[initial] = 0; queue.push({ state: initial, cost: 0, priority: remaining(points[start]) });
       let end = -1;
       while (true) {
         const current = queue.pop();
@@ -405,7 +438,7 @@ function routeConnected(model: CircuitModel, layout: CircuitLayout, limit?: Boun
         if (current.cost !== costs[current.state]) continue;
         const index = Math.floor(current.state / 3), direction = current.state % 3, p = points[index];
         if (goals.has(index)) { end = current.state; break; }
-        for (const next of neighbors[index]) {
+        for (const next of neighbors(index)) {
           const segment = { a: p, b: points[next] }, nextDirection = horizontal(segment) ? 1 : 2;
           if (branchColumn !== undefined && !horizontal(segment) && !near(p[0], branchColumn)
             && (!sideBySideBlocks || frames.some((frame) => p[0] > frame.minX && p[0] < frame.maxX
@@ -427,7 +460,7 @@ function routeConnected(model: CircuitModel, layout: CircuitLayout, limit?: Boun
           const state = next * 3 + nextDirection;
           const cost = current.cost + distance(p, points[next]) + (direction !== nextDirection ? 20 : 0)
             + otherSegments.filter((s) => intersection(segment, s)).length * 15;
-          if (cost < costs[state]) { costs[state] = cost; previous[state] = current.state; queue.push({ state, cost }); }
+          if (cost < costs[state]) { costs[state] = cost; previous[state] = current.state; queue.push({ state, cost, priority: cost + remaining(points[next]) }); }
         }
       }
       if (end < 0) throw new Error(`Cannot route net ${net.id} to ${endpoint.device ?? net.id}.${endpoint.terminal ?? 'anchor'} without a false connection or symbol collision.`);
