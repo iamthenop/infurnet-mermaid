@@ -1,0 +1,15 @@
+circuitDiagram A
+A([A]):::pinIn
+B([B]):::pinIn
+Y([Y]):::pinOut
+VDD{{VDD}}:::supplyNet
+subgraph stage chain
+ direction LR
+ M1[M1]:::nmos
+ M2[M2]:::nmos
+end
+A ---|G| M1
+B ---|G| M2
+VDD ---|D| M1
+M1 ---|S:D| M2
+Y ---|S| M2

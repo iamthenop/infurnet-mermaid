@@ -2,7 +2,7 @@
 
 This specification records the approved syntax and electrical semantics of `circuitDiagram`. The parser implements the 17 authorable object types, diagram modes, typed subgraphs, and fixed-terminal connections described here.
 
-The NAND2 example is a parser and placement acceptance fixture. Placement is implemented separately from the electrical model. Wire routing, dynamic ICs, and device rendering remain unimplemented.
+The NAND2 example is a parser, placement, routing, and rendering acceptance fixture. Placement and routing are implemented separately from the electrical model. Dynamic ICs remain unimplemented.
 
 The notation is a deliberately restricted Mermaid flowchart-like syntax. Compatibility with the complete Mermaid flowchart grammar is not promised. Geometry and presentation are governed by [Drawing style](style.md).
 
@@ -38,7 +38,7 @@ Every stage and block inherits its diagram mode. Subgraphs cannot make an otherw
 
 Electrical connectivity is defined by nets and named device terminals in either mode. Rendering does not establish connectivity.
 
-The parser records the diagram mode and enforces registered-shape eligibility for authorable types. Placement follows the [drawing specification](style.md#placement-and-rotation). Wire routing and rendering remain subsequent implementation work.
+The parser records the diagram mode and enforces registered-shape eligibility for authorable types. Placement follows the [drawing specification](style.md#placement-and-rotation). Wire routing and fixed-symbol SVG rendering are implemented.
 
 ## Object types
 
@@ -212,7 +212,7 @@ The ordering of multiple pins on one side, unconnected pin declarations, physica
 
 The `ic` device representation is not yet included in the closed authorable object-type table. Dynamic IC parsing and rendering are not implemented.
 
-Typed subgraph parsing and structural validation are implemented. Dynamic IC construction and schematic rendering remain unimplemented.
+Typed subgraph parsing and structural validation are implemented. Fixed-symbol schematic rendering is implemented; dynamic IC construction remains unimplemented.
 
 ## Connection syntax
 

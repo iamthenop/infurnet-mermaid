@@ -2,7 +2,7 @@
 
 This specification governs how a renderer draws `circuitDiagram`. Circuit syntax, device types, terminal names, and electrical semantics are defined in [Notation for circuit diagrams](notation.md).
 
-These are approved drawing requirements, not a claim that schematic rendering is implemented. They define the established CMOS schematic convention, not a universal placement policy for all analog and digital circuits.
+Fixed-symbol schematic rendering is implemented against these approved drawing requirements. They define the established CMOS schematic convention, not a universal placement policy for all analog and digital circuits.
 
 ## Orientation
 
@@ -23,7 +23,7 @@ The expression *supply rail* describes graphical placement, not an electrical ob
 
 Placement produces geometry separate from the electrical model. It preserves device and terminal identities, net assignments, and structural membership.
 
-Stages appear vertically in declaration order, with the implicit final stage last. Blocks retain their stage membership and bounds for later frame drawing.
+Stages appear vertically in declaration order, with the implicit final stage last. Blocks retain their stage membership and bounds for frame drawing.
 
 Stages in the same vertical diagram sequence share a horizontal centerline. Stages retain their individual widths and internal device arrangements.
 
@@ -55,7 +55,7 @@ Voltage sources retain their stage identity when placed in the top region. Posit
 
 Ordinary named and implicit nets have no independent symbol placement. The side for `pinInOut` remains undecided.
 
-Input fan-out uses the [orientation priorities](#orientation). Return positioned input and recipient anchors for later orthogonal branching. Placement does not draw branches or guarantee crossing-free routes.
+Input fan-out uses the [orientation priorities](#orientation). Return positioned input and recipient anchors for orthogonal branching. Placement does not draw branches or guarantee crossing-free routes.
 
 In an explicitly left-to-right stage, recognized series devices remain eligible for descending placement when required for input fan-out. Conduction-terminal alignment must not defeat that placement rule. Routing remains responsible for connecting separated terminals.
 
@@ -71,13 +71,13 @@ Structural membership and diagram-mode inheritance are defined in [Circuit struc
 
 ### Stage presentation
 
-Each stage is enclosed by a dashed frame labelled with its name. Its bounds follow [placement and rotation](#placement-and-rotation). Frame drawing remains unimplemented.
+Each stage is enclosed by a dashed frame labelled with its name. Its bounds follow [placement and rotation](#placement-and-rotation). Frame drawing is implemented.
 
 ### Block presentation
 
 A block visually groups its contained stages. A block does not draw new electrical connections or alter existing wire topology.
 
-The layout result contains block bounds. Precise block-border styling and treatment of routes crossing its boundary remain for routing and rendering.
+The layout result contains block bounds. The renderer draws those bounds as grouping frames without changing route connectivity.
 
 ## Symbols
 

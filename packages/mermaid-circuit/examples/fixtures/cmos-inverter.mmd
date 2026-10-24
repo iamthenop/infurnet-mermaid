@@ -1,0 +1,16 @@
+circuitDiagram A
+A([A]):::pinIn
+Y([Y]):::pinOut
+VDD{{VDD}}:::supplyNet
+GND{{GND}}:::ground
+subgraph stage inverter
+ direction TB
+ MP[MP]:::pmos
+ MN[MN]:::nmos
+end
+A ---|G| MP
+A ---|G| MN
+VDD ---|S| MP
+Y ---|D| MP
+Y ---|D| MN
+GND ---|S| MN

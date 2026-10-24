@@ -1,0 +1,12 @@
+circuitDiagram A
+VDD{{VDD}}:::supplyNet
+GND{{GND}}:::ground
+subgraph stage series
+ R1[R1]:::resistor
+ R2[R2]:::resistor
+ R3[R3]:::resistor
+end
+VDD ---|A| R1
+R1 ---|B:A| R2
+R2 ---|B:A| R3
+GND ---|B| R3

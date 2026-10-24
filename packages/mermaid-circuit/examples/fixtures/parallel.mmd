@@ -1,0 +1,11 @@
+circuitDiagram A
+VDD{{VDD}}:::supplyNet
+GND{{GND}}:::ground
+subgraph stage parallel
+ R1[R1]:::resistor
+ R2[R2]:::resistor
+end
+VDD ---|A| R1
+VDD ---|A| R2
+GND ---|B| R1
+GND ---|B| R2

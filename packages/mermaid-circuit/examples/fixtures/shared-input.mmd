@@ -1,0 +1,14 @@
+circuitDiagram D
+A([A]):::pinIn
+Y([Y]):::pinOut
+Z([Z]):::pinOut
+subgraph block logic
+ subgraph stage drivers
+  U1[U1]:::inverter
+  U2[U2]:::buffer
+ end
+end
+A ---|I| U1
+A ---|I| U2
+Y ---|O| U1
+Z ---|O| U2
