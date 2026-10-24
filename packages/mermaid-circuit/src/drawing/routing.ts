@@ -170,25 +170,35 @@ function routeConnected(model: CircuitModel, layout: CircuitLayout, limit?: Boun
   const panes = [...layout.devices, ...layout.nets];
   const frames = [...layout.stages.map((stage) => stage.bounds), ...layout.blocks.flatMap((block) => block.bounds ? [block.bounds] : [])];
   const sideBySideBlocks = !!limit || layout.blocks.filter((block) => block.bounds).length > 1;
-  const entries = model.nets.map((net) => {
-    const attachments = model.connections.filter((c) => c.net === net.id).map((c) => {
-      const placed = layout.devices.find((d) => d.id === c.device);
-      const point = placed?.terminals[c.terminal];
-      if (!point || !placed) throw new Error(`Missing attachment for ${c.device}.${c.terminal} on net ${net.id}.`);
-      return { device: c.device, terminal: c.terminal, point, stub: { a: point, b: escape(point, placed.bounds) } };
-    });
-    attachments.sort((a, b) => model.devices.findIndex((d) => d.id === a.device) - model.devices.findIndex((d) => d.id === b.device)
-      || model.devices.find((d) => d.id === a.device)!.terminals.indexOf(a.terminal) - model.devices.find((d) => d.id === b.device)!.terminals.indexOf(b.terminal));
-    const target = layout.inputTargets.find((t) => t.net === net.id);
-    if (target) attachments.sort((a, b) => Number(b.device === target.device && b.terminal === target.terminal) - Number(a.device === target.device && a.terminal === target.terminal));
-    const symbols = layout.nets.filter((n) => n.id === net.id);
-    const endpoints: (Attachment & { stub: WireSegment })[] = attachments;
-    for (const placed of [...symbols].reverse()) if (placed.anchor) endpoints.unshift({ point: placed.anchor, occurrence: placed.occurrence, stub: { a: placed.anchor, b: escape(placed.anchor, placed.bounds) } });
-    if (symbols.length > 1) {
-      const outgoing = endpoints.splice(1, symbols.length - 1);
-      endpoints.push(...outgoing);
+  const entries = model.nets.flatMap((net) => {
+    const occurrences = layout.nets.filter((symbol) => symbol.id === net.id);
+    const groups = occurrences.some((symbol) => symbol.recipientStage !== undefined) ? occurrences.map((symbol) => [symbol]) : [occurrences];
+    for (const connection of model.connections.filter((connection) => connection.net === net.id)) {
+      const stage = layout.devices.find((device) => device.id === connection.device)?.stage;
+      if (groups.filter((symbols) => symbols[0]?.recipientStage === undefined || symbols[0].recipientStage === stage).length !== 1)
+        throw new Error(`Missing or duplicate input occurrence for ${connection.device}.${connection.terminal} on net ${net.id}.`);
     }
-    return { net, endpoints };
+    return groups.map((symbols) => {
+      const recipientStage = symbols[0]?.recipientStage;
+      const attachments = model.connections.filter((c) => c.net === net.id
+        && (recipientStage === undefined || layout.devices.find((device) => device.id === c.device)?.stage === recipientStage)).map((c) => {
+        const placed = layout.devices.find((d) => d.id === c.device);
+        const point = placed?.terminals[c.terminal];
+        if (!point || !placed) throw new Error(`Missing attachment for ${c.device}.${c.terminal} on net ${net.id}.`);
+        return { device: c.device, terminal: c.terminal, point, stub: { a: point, b: escape(point, placed.bounds) } };
+      });
+      attachments.sort((a, b) => model.devices.findIndex((d) => d.id === a.device) - model.devices.findIndex((d) => d.id === b.device)
+        || model.devices.find((d) => d.id === a.device)!.terminals.indexOf(a.terminal) - model.devices.find((d) => d.id === b.device)!.terminals.indexOf(b.terminal));
+      const target = layout.inputTargets.find((t) => t.net === net.id);
+      if (target) attachments.sort((a, b) => Number(b.device === target.device && b.terminal === target.terminal) - Number(a.device === target.device && a.terminal === target.terminal));
+      const endpoints: (Attachment & { stub: WireSegment })[] = attachments;
+      for (const placed of [...symbols].reverse()) if (placed.anchor) endpoints.unshift({ point: placed.anchor, occurrence: placed.occurrence, stub: { a: placed.anchor, b: escape(placed.anchor, placed.bounds) } });
+      if (symbols.length > 1) {
+        const outgoing = endpoints.splice(1, symbols.length - 1);
+        endpoints.push(...outgoing);
+      }
+      return { net, endpoints };
+    });
   }).sort((a, b) => {
     const inputs = Number(isInput(b.net.id)) - Number(isInput(a.net.id));
     if (inputs) return inputs;
@@ -307,7 +317,7 @@ function routeConnected(model: CircuitModel, layout: CircuitLayout, limit?: Boun
   const xValues = distinct(xs), yValues = distinct(ys);
   const sharedInputs = entries.filter((entry) => isInput(entry.net.id) && entry.endpoints.length > 2)
     .sort((a, b) => a.endpoints[0].point[1] - b.endpoints[0].point[1]);
-  const branchColumns = new Map<string, number>();
+  const branchColumns = new Map<typeof entries[number], number>();
   if (sharedInputs.length) {
     const left = Math.max(...sharedInputs.map((entry) => entry.endpoints[0].stub.b[0])) + 8;
     const right = Math.min(...frames.map((frame) => frame.minX)) - frameClearance;
@@ -321,7 +331,7 @@ function routeConnected(model: CircuitModel, layout: CircuitLayout, limit?: Boun
       if (columns.length) break;
     }
     if (columns.length < sharedInputs.length) throw new Error('Cannot route shared inputs in top-to-bottom branch order outside stage frames.');
-    sharedInputs.forEach((entry, index) => branchColumns.set(entry.net.id, columns[index]));
+    sharedInputs.forEach((entry, index) => branchColumns.set(entry, columns[index]));
   }
   const width = xValues.length;
   const points: Point[] = yValues.flatMap((y) => xValues.map((x): Point => [x, y]));
@@ -332,7 +342,8 @@ function routeConnected(model: CircuitModel, layout: CircuitLayout, limit?: Boun
       && !frames.some((frame) => crowdsFrame({ a: p, b: points[next] }, frame))));
   const completed: RoutedNet[] = [];
 
-  for (const { net, endpoints } of entries) {
+  for (const entry of entries) {
+    const { net, endpoints } = entry;
     const netBuses = buses.filter((bus) => bus.net === net.id);
     const units = [
       ...netBuses.map((bus) => ({ stub: { a: bus.segment.a, b: bus.segment.a }, device: undefined as string | undefined, terminal: undefined as string | undefined,
@@ -341,11 +352,11 @@ function routeConnected(model: CircuitModel, layout: CircuitLayout, limit?: Boun
         .map((endpoint) => ({ ...endpoint, segments: [endpoint.stub] })),
     ];
     const segments: WireSegment[] = endpoints.length > 1 ? [...units[0].segments] : [];
-    const otherSegments = [...completed.flatMap((n) => n.segments), ...entries.filter((entry) => entry.net.id !== net.id)
-      .flatMap((entry) => entry.endpoints.length > 1 ? entry.endpoints.map((e) => e.stub) : []),
+    const otherSegments = [...completed.flatMap((n) => n.segments), ...entries.filter((other) => other !== entry)
+      .flatMap((other) => other.endpoints.length > 1 ? other.endpoints.map((e) => e.stub) : []),
       ...buses.filter((bus) => bus.net !== net.id).map((bus) => bus.segment)];
     for (const endpoint of units.slice(1)) {
-      const branchColumn = segments.length > 1 ? branchColumns.get(net.id) : undefined;
+      const branchColumn = segments.length > 1 ? branchColumns.get(entry) : undefined;
       const start = points.findIndex((p) => equal(p, endpoint.stub.b));
       const goals = new Set(points.flatMap((p, index) => (segments.length === 1 ? equal(p, segments[0].b) : segments.some((s) => on(p, s)))
         && (branchColumn === undefined || near(p[0], branchColumn))
@@ -398,7 +409,7 @@ function routeConnected(model: CircuitModel, layout: CircuitLayout, limit?: Boun
   for (let i = 0; i < completed.length; i++) for (const other of completed.slice(i + 1)) {
     for (const a of completed[i].segments) for (const b of other.segments) {
       const point = intersection(a, b);
-      if (overlap(a, b) || collinearTouch(a, b) || point && (distance(point, a.a) < 8 || distance(point, a.b) < 8 || distance(point, b.a) < 8 || distance(point, b.b) < 8))
+      if (point && completed[i].net === other.net || overlap(a, b) || collinearTouch(a, b) || point && (distance(point, a.a) < 8 || distance(point, a.b) < 8 || distance(point, b.a) < 8 || distance(point, b.b) < 8))
         throw new Error(`Ambiguous connection between nets ${completed[i].net} and ${other.net}.`);
       if (point) crossings.push({ point, over: other.net, under: completed[i].net, horizontal: horizontal(b) });
     }

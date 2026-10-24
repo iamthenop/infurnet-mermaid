@@ -474,11 +474,11 @@ B ---|G| M2`));
     expect(device(layout, 'N1').position[1]).toBe(device(layout, 'N3').position[1]);
     for (const id of ['A', 'B']) {
       expect(layout.nets.filter((net) => net.id === id).map((net) => [net.symbol, net.block, net.role]))
-        .toEqual([['pinIn', 0, 'external'], ['pinIn', 1, 'external']]);
+        .toEqual([['pinIn', 0, 'external'], ['pinIn', 1, 'external'], ['pinIn', 1, 'local']]);
     }
     for (const id of ['Abar', 'Bbar']) {
       expect(layout.nets.filter((net) => net.id === id).map((net) => [net.symbol, net.block, net.role]))
-        .toEqual([['pinOut', 0, 'boundary'], ['pinIn', 1, 'boundary']]);
+        .toEqual([['pinOut', 0, 'boundary'], ['pinIn', 1, 'boundary'], ['pinIn', 1, 'local']]);
       expect(model.nets.filter((net) => net.id === id)).toHaveLength(1);
     }
     for (const stage of layout.stages) {

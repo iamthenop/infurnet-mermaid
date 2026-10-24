@@ -30,6 +30,7 @@ export interface PlacedNet extends PlacedGeometry {
   readonly region: 'left' | 'right' | 'top' | 'bottom';
   readonly block?: number;
   readonly occurrence?: string;
+  readonly recipientStage?: number;
   readonly role?: 'boundary' | 'local' | 'external';
 }
 
@@ -457,6 +458,29 @@ function layoutSections(model: CircuitModel): CircuitLayout {
       occurrence: `${scopeIndex}:${net.id}:${net.symbol}`, role: appearances.has(net.id) && model.nets.find((item) => item.id === net.id)!.type !== 'pinIn'
         ? 'boundary'
         : net.symbol === 'supplyNet' || net.symbol === 'ground' ? 'local' : 'external' }));
+    for (const input of [...symbols]) {
+      if (input.symbol !== 'pinIn') continue;
+      const sourceNet = nets.find((net) => net.id === input.id)!;
+      if (sourceNet.type !== 'pinIn' && scopeIndex !== memberships.get(input.id)!.at(-1)) continue;
+      const recipients = localModel.connections.filter((connection) => connection.net === input.id);
+      const receivingStages = [...new Set(recipients.map((connection) => localModel.devices.find((device) => device.id === connection.device)!.stage))].sort((a, b) => a - b);
+      if (receivingStages.length < 2 || recipients.some((connection) => connection.terminal !== 'G')) continue;
+      const copies: PlacedNet[] = [];
+      for (const stage of receivingStages.slice(1)) {
+        const recipient = layout.devices.filter((device) => device.stage === stage && recipients.some((connection) => connection.device === device.id))
+          .sort((a, b) => a.terminals.G[1] - b.terminals.G[1] || a.terminals.G[0] - b.terminals.G[0])[0];
+        const position: Point = [layout.stages[stage].bounds.minX - 180, recipient.terminals.G[1] - resolveSymbol('pinIn').anchor![1]];
+        const repeated = place('pinIn', position);
+        if ([...layout.devices, ...symbols, ...copies].some((symbol) => repeated.bounds.minX < symbol.bounds.maxX && repeated.bounds.maxX > symbol.bounds.minX
+          && repeated.bounds.minY < symbol.bounds.maxY && repeated.bounds.maxY > symbol.bounds.minY))
+          break;
+        copies.push({ ...input, ...repeated, recipientStage: scope.stages[stage], role: 'local', occurrence: `${input.occurrence}:stage:${scope.stages[stage]}` });
+      }
+      if (copies.length === receivingStages.length - 1) {
+        symbols[symbols.indexOf(input)] = { ...input, recipientStage: scope.stages[receivingStages[0]] };
+        symbols.push(...copies);
+      }
+    }
     let outputBottom = -Infinity;
     const outgoing = nets.filter((net) => {
       const members = memberships.get(net.id)!;

@@ -210,6 +210,8 @@ it('rejects unresolved placement and impossible routes explicitly', () => {
   expect(() => routeCircuit(model, corrupt)).toThrow('not on its symbol pane boundary');
   const sectionModel = parseCircuit(fixtures['../examples/fixtures/xor2.mmd']);
   const sectionLayout = layoutCircuit(sectionModel);
+  const missingLocalPin = { ...sectionLayout, nets: sectionLayout.nets.filter((net) => net.id !== 'Abar' || net.role !== 'local') };
+  expect(() => routeCircuit(sectionModel, missingLocalPin)).toThrow('Missing or duplicate input occurrence for N2.G on net Abar');
   expect(() => routeCircuit(sectionModel, { ...sectionLayout, devices: sectionLayout.devices.filter((device) => device.id !== 'N3') }))
     .toThrow('Missing sectional attachment for N3.G on net Bbar');
   const missingEndpoint = { ...sectionLayout, nets: sectionLayout.nets.filter((net) => net.id !== 'Abar' || net.block !== 1) };
@@ -244,14 +246,26 @@ it.each(['A', 'B', 'Abar', 'Bbar', 'VDD', 'VSS'])('matches sectional endpoints b
   const layout = layoutCircuit(model), routes = routeCircuit(model, layout);
   const net = routes.nets.find((net) => net.net === id)!;
   expect(model.nets.filter((net) => net.id === id)).toHaveLength(1);
-  expect(net.components.map((component) => component.block)).toEqual([0, 1]);
+  expect(net.components.map((component) => component.block)).toEqual(['VDD', 'VSS'].includes(id) ? [0, 1] : [0, 1, 1]);
+  if (!['VDD', 'VSS'].includes(id)) for (const component of net.components.filter((component) => component.block === 1)) {
+    const pin = layout.nets.find((pin) => pin.occurrence === component.attachments.find((attachment) => attachment.occurrence)!.occurrence)!;
+    expect(pin.symbol).toBe('pinIn');
+    expect(pin.recipientStage).toBeDefined();
+    for (const attachment of component.attachments.filter((attachment) => attachment.device)) {
+      expect(layout.devices.find((device) => device.id === attachment.device)!.stage).toBe(pin.recipientStage);
+      expect(attachment.point[1]).toBe(pin.anchor![1]);
+    }
+    expect(component.segments.every((segment) => segment.a[1] === segment.b[1])).toBe(true);
+  }
   const endpoints = net.components.map((component) => component.attachments.filter((attachment) => attachment.occurrence));
   for (const appearances of endpoints) {
     expect(appearances.length).toBeGreaterThan(0);
     for (const endpoint of appearances) expect(layout.nets.find((net) => net.occurrence === endpoint.occurrence)!.id).toBe(id);
   }
   const coordinates = net.components.map((component) => new Set(component.segments.flatMap((segment) => [key(segment.a), key(segment.b)])));
-  expect([...coordinates[0]].some((point) => coordinates[1].has(point))).toBe(false);
+  for (let first = 0; first < coordinates.length; first++) for (const other of coordinates.slice(first + 1)) {
+    expect([...coordinates[first]].some((point) => other.has(point))).toBe(false);
+  }
 });
 
 it('keeps equal labels on different sectional nets separate', () => {

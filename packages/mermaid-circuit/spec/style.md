@@ -101,6 +101,8 @@ Draw local wires from device attachments to these pins. Matching endpoints repla
 
 Repeat external inputs as input-facing pins in each receiving section, without outgoing copies. The final receiving block holds the circuit output.
 
+To avoid long crossing buses, a named gate input serving several stages can use a local input-facing pin at each receiving stage. Each pin retains the same net identity and serves only that stage’s attachments. Keep a continuous route if the extra pins would overlap symbols.
+
 Each section displays its connected supply and ground nets locally. A local rail refers to the existing global net; it does not declare another source or net. Power wires remain inside their section and follow the common-rail convention.
 
 Every wire end meets a device attachment, local net symbol, or named boundary pin. Keep local routes inside their section frames, with the established frame clearance. Input splits remain outside stage frames.
