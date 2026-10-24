@@ -257,7 +257,7 @@ it.each(['A', 'B', 'Abar', 'Bbar', 'VDD', 'VSS'])('matches sectional endpoints b
 it('keeps equal labels on different sectional nets separate', () => {
   const source = fixtures['../examples/fixtures/xor2.mmd'];
   const original = parseCircuit(source);
-  const model = parseCircuit(source.replace('Abar(("Abar"))', 'Abar(("shared"))').replace('Bbar(("Bbar"))', 'Bbar(("shared"))'));
+  const model = parseCircuit(source.replace(/(Abar|Bbar)\(\("[^"]*"\)\)/gu, '$1(("shared"))'));
   expect(model.nets.filter((net) => net.label === 'shared').map((net) => net.id)).toEqual(['Abar', 'Bbar']);
   const layout = layoutCircuit(model), routes = routeCircuit(model, layout);
   expect(routes).toEqual(routeCircuit(original, layoutCircuit(original)));

@@ -93,13 +93,13 @@ A block visually groups its contained stages within a visible frame. Its bounds 
 
 With multiple nonempty blocks, use each block as a presentation section. A visual net occurrence is one appearance of an existing net in that section. Electrical identity remains governed by [net semantics](notation.md#diagram-and-connectivity).
 
-Represent cross-block named signals with section-boundary pins. A signal leaving an earlier block uses `pinOut` artwork; entry into a later block uses `pinIn` artwork. These directions describe graphical flow and do not assign electrical driver or receiver roles.
+Represent internal cross-block named signals with section-boundary pins. A signal leaving an earlier block uses `pinOut` artwork; entry into a later block uses `pinIn` artwork. These directions describe graphical flow and do not assign electrical driver or receiver roles.
 
 Each occurrence carries the declared net identifier and displays its label. Repeated pins refer to that same identifier. Matching label text on different identifiers does not join them.
 
 Draw local wires from device attachments to these pins. Matching endpoints replace continuous inter-block wires. Routing records physical components within sections separately from their shared net identity.
 
-Keep external input and output identities. Place external inputs in the first receiving section and external outputs in the last. Add boundary occurrences where those signals continue between sections.
+Repeat external inputs as input-facing pins in each receiving section, without outgoing copies. The final receiving block holds the circuit output.
 
 Each section displays its connected supply and ground nets locally. A local rail refers to the existing global net; it does not declare another source or net. Power wires remain inside their section and follow the common-rail convention.
 

@@ -455,12 +455,12 @@ function layoutSections(model: CircuitModel): CircuitLayout {
     const layout = layoutConnected(localModel, appearances, scope.block !== null);
     const symbols: PlacedNet[] = layout.nets.map((net) => ({ ...net, ...(scope.block !== null ? { block: scope.block } : {}),
       occurrence: `${scopeIndex}:${net.id}:${net.symbol}`, role: appearances.has(net.id) && model.nets.find((item) => item.id === net.id)!.type !== 'pinIn'
-        || appearances.has(net.id) && scopeIndex !== memberships.get(net.id)![0] ? 'boundary'
+        ? 'boundary'
         : net.symbol === 'supplyNet' || net.symbol === 'ground' ? 'local' : 'external' }));
     let outputBottom = -Infinity;
     const outgoing = nets.filter((net) => {
       const members = memberships.get(net.id)!;
-      return members.length > 1 && symbols.some((symbol) => symbol.id === net.id && symbol.symbol === 'pinIn')
+      return net.type !== 'pinIn' && members.length > 1 && symbols.some((symbol) => symbol.id === net.id && symbol.symbol === 'pinIn')
         && (scopeIndex !== members.at(-1) || net.type === 'pinOut');
     });
     const right = Math.max(...layout.stages.map((stage) => stage.bounds.maxX)) + 60;

@@ -159,7 +159,9 @@ The nine `.mmd` sources and matching `.svg` outputs live in [`examples/fixtures/
 
 The XOR fixture has twelve transistors and thirty-six terminal assignments. Its output is high when exactly one input is high.
 
-The `inputInverters` block sits left of `xorCore`, with their vertical midpoints aligned. Each section shows local VDD and VSS rails. Named boundary pins carry A, B, Abar, and Bbar between sections without long inter-block wires.
+The `inputInverters` block sits left of `xorCore`, with their vertical midpoints aligned. Each section shows local VDD and VSS rails.
+
+A and B appear as inputs in both sections. Only ¬A and ¬B leave the inverters through output-facing boundary pins, retaining the net identifiers Abar and Bbar.
 
 The two NMOS series branches sit side by side in the core. All repeated pins and rails retain their original net identifiers. The `.mmd` source remains one electrical circuit using the existing notation.
 
