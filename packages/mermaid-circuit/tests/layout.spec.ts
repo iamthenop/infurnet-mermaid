@@ -171,7 +171,8 @@ R3 ---|B:A| R1`));
     expect((pullUp.minX + pullUp.maxX) / 2).toBe((pullDown.minX + pullDown.maxX) / 2);
     expect(pullUp.maxX - pullUp.minX).toBeGreaterThan(pullDown.maxX - pullDown.minX);
     const output = layout.nets.find((item) => item.id === 'OUT')!;
-    expect(output.anchor![1]).toBe((pullUp.minY + pullDown.maxY) / 2);
+    expect(output.anchor![1]).toBe((p1.terminals.D[1] + n0.terminals.D[1]) / 2);
+    expect(output.anchor![1]).toBe(510);
     expect(output.anchor![1]).not.toBe(p0.terminals.D[1]);
     expect(layout.inputTargets).toEqual([
       { net: 'A', device: 'PMOS0', terminal: 'G', aligned: true },

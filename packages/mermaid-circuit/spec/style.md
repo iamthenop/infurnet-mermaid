@@ -51,6 +51,8 @@ Automatic placement prefers the [default CMOS orientations](#symbols), including
 
 Output pins appear on the right. Their attachment anchors form a vertically centered group relative to the combined region of nonempty stages. Output order follows declaration order. Peripheral power and ground positions do not determine this center.
 
+A single output shared only by unrotated PMOS and NMOS drains aligns with their connecting wire, midway between the lowest PMOS drain and highest NMOS drain. This alignment takes precedence over centering against the full stage region.
+
 Voltage sources retain their stage identity when placed in the top region. Position does not connect a voltage source to a supply net.
 
 Ordinary named and implicit nets have no independent symbol placement. The side for `pinInOut` remains undecided.

@@ -299,8 +299,17 @@ export function layoutCircuit(model: CircuitModel): CircuitLayout {
         .map((terminal) => ({ device: device.id, terminal, point: placed.get(device.id)!.terminals[terminal] })))
         .sort((a, b) => a.point[1] - b.point[1] || a.point[0] - b.point[0] || declaration.get(a.device)! - declaration.get(b.device)!);
       const first = recipients[0], anchor = resolveSymbol(type).anchor!;
-      const y = type === 'pinOut' && outputCenterY !== undefined
-        ? outputCenterY + (index - (nets.length - 1) / 2) * pitch - anchor[1]
+      let outputY = outputCenterY;
+      if (type === 'pinOut' && nets.length === 1 && recipients.every((recipient) => recipient.terminal === 'D'
+        && isCmos(deviceById.get(recipient.device)!) && placed.get(recipient.device)!.rotation === 0)) {
+        const pullUp = recipients.filter((recipient) => isPmos(deviceById.get(recipient.device)!));
+        const pullDown = recipients.filter((recipient) => isNmos(deviceById.get(recipient.device)!));
+        const upper = Math.max(...pullUp.map((recipient) => recipient.point[1]));
+        const lower = Math.min(...pullDown.map((recipient) => recipient.point[1]));
+        if (pullUp.length && pullDown.length && upper < lower) outputY = (upper + lower) / 2;
+      }
+      const y = type === 'pinOut' && outputY !== undefined
+        ? outputY + (index - (nets.length - 1) / 2) * pitch - anchor[1]
         : Math.max(0, Math.round(first?.point[1] ?? gap + anchor[1]) - anchor[1], previousBottom + (type === 'pinIn' ? pitch / 2 - pane : gap));
       const symbol: PlacedNet = { ...place(type, [type === 'pinIn' ? 0 : occupiedRight + gap, y]), id: net.id, region: type === 'pinIn' ? 'left' : 'right' };
       placedNets.set(net.id, symbol); previousBottom = symbol.bounds.maxY;

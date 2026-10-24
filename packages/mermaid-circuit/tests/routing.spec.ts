@@ -104,6 +104,14 @@ it.each([false, true])('branches upper inputs first on the left (reversed declar
     expect(Math.max(...upper.map((p) => p[0]))).toBeLessThan(Math.min(...lower.map((p) => p[0])));
   }
   expect(routes.crossings.length).toBeGreaterThan(0);
+  const output = layout.nets.find((net) => net.id === 'OUT')!.anchor!;
+  const outputRoute = routes.nets.find((net) => net.net === 'OUT')!;
+  expect(outputRoute.junctions.every((point) => point[1] === output[1])).toBe(true);
+  const lastDrainX = Math.max(...outputRoute.attachments.filter((a) => a.device).map((a) => a.point[0]));
+  for (const segment of outputRoute.segments.filter((s) => Math.max(s.a[0], s.b[0]) > lastDrainX)) {
+    expect(segment.a[1]).toBe(output[1]);
+    expect(segment.b[1]).toBe(output[1]);
+  }
   for (const target of layout.inputTargets) {
     const route = routes.nets.find((n) => n.net === target.net)!;
     const input = layout.nets.find((n) => n.id === target.net)!.anchor!;
