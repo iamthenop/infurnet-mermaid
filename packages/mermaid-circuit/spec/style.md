@@ -25,6 +25,8 @@ Placement produces geometry separate from the electrical model. It preserves dev
 
 Stages appear vertically in declaration order, with the implicit final stage last. Blocks retain their stage membership and bounds for later frame drawing.
 
+Stages in the same vertical diagram sequence share a horizontal centerline. Stages retain their individual widths and internal device arrangements.
+
 | Stage direction | Device arrangement |
 | --- | --- |
 | `auto` | Recognized conduction-series chains run top to bottom; devices across the same two conduction nets run left to right |
@@ -47,6 +49,8 @@ Automatic placement prefers the [default CMOS orientations](#symbols), including
 | `pinIn` | Left | Top to bottom in declaration order |
 | `pinOut` | Right | Top to bottom in declaration order |
 
+Output pins appear on the right. Their attachment anchors form a vertically centered group relative to the combined region of nonempty stages. Output order follows declaration order. Peripheral power and ground positions do not determine this center.
+
 Voltage sources retain their stage identity when placed in the top region. Position does not connect a voltage source to a supply net.
 
 Ordinary named and implicit nets have no independent symbol placement. The side for `pinInOut` remains undecided.
@@ -56,6 +60,8 @@ Input fan-out uses the [orientation priorities](#orientation). Return positioned
 In an explicitly left-to-right stage, recognized series devices remain eligible for descending placement when required for input fan-out. Conduction-terminal alignment must not defeat that placement rule. Routing remains responsible for connecting separated terminals.
 
 Placement must be deterministic and prevent symbol panes from overlapping. Retain the [pane and snap conventions](#panes-and-snap-points). Spacing remains an internal implementation detail.
+
+Exact stage and output centering takes precedence over global snap alignment. Placement may use fractional grid offsets when required. Symbol-local terminal coordinates remain authoritative, and all transformed attachments must retain their exact positions. Routing must respect those positions.
 
 Use declaration order when the placement rules do not distinguish objects. Connection-statement order and generated net identifiers do not determine visual order.
 

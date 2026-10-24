@@ -27,7 +27,7 @@ function contains(outer: Bounds, inner: Bounds): void {
   expect(outer.maxY).toBeGreaterThanOrEqual(inner.maxY);
 }
 
-function geometry(layout: CircuitLayout): void {
+function geometry(layout: CircuitLayout, centered = false): void {
   const symbols = [...layout.devices, ...layout.nets];
   for (const [index, symbol] of symbols.entries()) {
     expect([symbol.width, symbol.height]).toEqual([120, 120]);
@@ -42,7 +42,9 @@ function geometry(layout: CircuitLayout): void {
       expectPoint(symbol.terminals[name], artworkPoint(point));
     }
     if (source.anchor) expectPoint(symbol.anchor!, artworkPoint(source.anchor));
-    for (const point of [...Object.values(symbol.terminals), ...(symbol.anchor ? [symbol.anchor] : [])]) {
+    const attachments = [...Object.values(symbol.terminals), ...(symbol.anchor ? [symbol.anchor] : [])];
+    const localAttachments = attachments.map(([x, y]): Point => [x - symbol.position[0], y - symbol.position[1]]);
+    for (const point of [...localAttachments, ...(centered ? [] : attachments)]) {
       for (const coordinate of point) {
         const phase = ((coordinate % 120) + 120) % 120;
         expect(Math.min(...[0, 30, 40, 60, 80, 90, 120].map((snap) => Math.abs(phase - snap)))).toBeLessThan(1e-8);
@@ -164,6 +166,12 @@ R3 ---|B:A| R1`));
     expect(Math.max(p0.bounds.maxY, p1.bounds.maxY)).toBeLessThan(n0.bounds.minY);
     expect(n0.bounds.maxY).toBeLessThan(n1.bounds.minY);
     expect(n0.terminals.S[0]).toBeCloseTo(n1.terminals.D[0]);
+    const [pullUp, pullDown] = layout.stages.map((item) => item.bounds);
+    expect((pullUp.minX + pullUp.maxX) / 2).toBe((pullDown.minX + pullDown.maxX) / 2);
+    expect(pullUp.maxX - pullUp.minX).toBeGreaterThan(pullDown.maxX - pullDown.minX);
+    const output = layout.nets.find((item) => item.id === 'OUT')!;
+    expect(output.anchor![1]).toBe((pullUp.minY + pullDown.maxY) / 2);
+    expect(output.anchor![1]).not.toBe(p0.terminals.D[1]);
     expect(layout.inputTargets).toEqual([
       { net: 'A', device: 'PMOS0', terminal: 'G', aligned: true },
       { net: 'B', device: 'PMOS1', terminal: 'G', aligned: true },
@@ -228,6 +236,122 @@ N ---|S:S| P2`));
 });
 
 describe('peripheral placement, structure and reproducibility', () => {
+  const inverter = `A([A]):::pinIn
+Y([Y]):::pinOut
+VDD{{VDD}}:::supplyNet
+GND{{GND}}:::ground
+${stage(`${declaration('MP', 'pmos')}\n${declaration('MN', 'nmos')}`, 'TB')}
+A ---|G| MP
+A ---|G| MN
+VDD ---|S| MP
+Y ---|D| MP
+Y ---|D| MN
+GND ---|S| MN`;
+
+  it.each([0, 1, 4])('centers inverter output independently of %s added supplies and grounds', (extra) => {
+    const additions = Array.from({ length: extra }, (_, i) => `VDD${i}{{VDD${i}}}:::supplyNet\nGND${i}{{GND${i}}}:::ground`).join('\n');
+    const baseline = layoutCircuit(circuit(inverter)), layout = layoutCircuit(circuit(`${inverter}\n${additions}`));
+    const { minY, maxY } = layout.stages[0].bounds;
+    expect(layout.nets.find((item) => item.id === 'Y')!.anchor![1]).toBe((minY + maxY) / 2);
+    expect(layout.nets.find((item) => item.id === 'Y')!.anchor![1]).not.toBe(device(layout, 'MP').terminals.D[1]);
+    expect(layout.stages).toEqual(baseline.stages);
+    expect(layout.devices).toEqual(baseline.devices);
+    geometry(layout);
+  });
+
+  it('excludes empty and voltage-only stages from the output midpoint', () => {
+    const layout = layoutCircuit(circuit(`subgraph stage emptyBefore\nend
+${inverter}
+subgraph stage power
+${declaration('V1', 'voltageSource')}
+${declaration('V2', 'voltageSource')}
+end
+subgraph stage emptyAfter\nend`));
+    const internal = layout.stages[1].bounds;
+    expect(layout.nets.find((item) => item.id === 'Y')!.anchor![1]).toBe((internal.minY + internal.maxY) / 2);
+    expect(layout.devices.filter((item) => item.region === 'top').map((item) => item.id)).toEqual(['V1', 'V2']);
+    geometry(layout);
+  });
+
+  it.each([2, 3, 6])('centers %s output anchors in declaration order without moving devices', (count) => {
+    const ids = ['Z2', 'A1', 'Y0', 'B3', 'X4', 'C5'].slice(0, count);
+    const baseline = layoutCircuit(circuit(declaration('R')));
+    const layout = layoutCircuit(circuit(`${declaration('R')}\n${ids.map((id) => `${id}([${id}]):::pinOut`).join('\n')}`));
+    const { minY, maxY } = layout.stages[0].bounds, centerY = (minY + maxY) / 2;
+    expect(layout.devices).toEqual(baseline.devices);
+    expect(layout.nets.map((item) => item.id)).toEqual(ids);
+    expect(layout.nets.reduce((sum, item) => sum + item.anchor![1], 0) / count).toBe(centerY);
+    expect((layout.nets[0].anchor![1] + layout.nets.at(-1)!.anchor![1]) / 2).toBe(centerY);
+    for (const [index, item] of layout.nets.entries()) {
+      expect(item.anchor![0]).toBe(layout.nets[0].anchor![0]);
+      expect(item.bounds.minX).toBeGreaterThan(layout.stages[0].bounds.maxX);
+      if (index) expect(layout.nets[index - 1].bounds.maxY).toBeLessThanOrEqual(item.bounds.minY);
+    }
+    if (count === 6) expect(layout.bounds.minY).toBeLessThan(layout.stages[0].bounds.minY);
+    geometry(layout);
+  });
+
+  it.each([false, true])('centers unequal-width stages without changing their arrangements (block: %s)', (inBlock) => {
+    const wide = stage(`${declaration('R1')}\n${declaration('R2')}`, 'LR').replace('network', 'wide');
+    const narrow = stage(declaration('R3')).replace('network', 'narrow');
+    const body = `${wide}\n${narrow}\nsubgraph stage empty\nend`;
+    const layout = layoutCircuit(circuit(inBlock ? `subgraph block group\n${body}\nend` : body));
+    const centerX = (layout.stages[0].bounds.minX + layout.stages[0].bounds.maxX) / 2;
+    for (const item of layout.stages) expect((item.bounds.minX + item.bounds.maxX) / 2).toBe(centerX);
+    for (const [index, source] of [wide, narrow].entries()) {
+      const alone = layoutCircuit(circuit(source)), before = alone.stages[0].bounds, after = layout.stages[index].bounds;
+      expect(after.maxX - after.minX).toBe(before.maxX - before.minX);
+      expect(after.maxY - after.minY).toBe(before.maxY - before.minY);
+      const dx = after.minX - before.minX, dy = after.minY - before.minY;
+      for (const original of alone.devices) {
+        const moved = device(layout, original.id);
+        expectPoint(moved.position, [original.position[0] + dx, original.position[1] + dy]);
+        expect(moved.rotation).toBe(original.rotation);
+        for (const [name, point] of Object.entries(original.terminals)) {
+          expectPoint(moved.terminals[name], [point[0] + dx, point[1] + dy]);
+        }
+      }
+      if (index) expect(layout.stages[index - 1].bounds.maxY).toBeLessThan(after.minY);
+    }
+    expect(layout.stages[0].bounds.maxX - layout.stages[0].bounds.minX)
+      .toBeGreaterThan(layout.stages[1].bounds.maxX - layout.stages[1].bounds.minX);
+    expect(layout.blocks.map((item) => item.stages)).toEqual(inBlock ? [[0, 1, 2]] : []);
+    geometry(layout);
+  });
+
+  it.each(['TB', 'LR'])('preserves exact half-grid centering for a mixed %s stage', (direction) => {
+    const source = `Y([Y]):::pinOut
+${stage(`${declaration('M', 'nmos')}\n${declaration('R')}`, direction).replace('network', 'mixed')}
+${stage(declaration('R2')).replace('network', 'single')}
+M ---|S:A| R
+R ---|B| Y`;
+    const model = circuit(source), original = structuredClone(model), layout = layoutCircuit(model);
+    const [mixed, single] = layout.stages.map((item) => item.bounds);
+    expect((mixed.minX + mixed.maxX) / 2).toBe((single.minX + single.maxX) / 2);
+    const output = layout.nets.find((item) => item.id === 'Y')!;
+    expect(output.anchor![1]).toBe((mixed.minY + single.maxY) / 2);
+    if (direction === 'TB') {
+      const alone = layoutCircuit(circuit(stage(declaration('R2'))));
+      const shift = ((mixed.maxX - mixed.minX) - (single.maxX - single.minX)) / 2;
+      expect(shift).toBe(15);
+      expect(device(layout, 'R2').terminals.A[0]).toBe(device(alone, 'R2').terminals.A[0] + shift);
+      expect(device(layout, 'R2').terminals.A[0]).toBe(255);
+    } else expect(output.anchor![1]).toBe(255);
+    expect(layoutCircuit(model)).toEqual(layout);
+    expect(model).toEqual(original);
+    geometry(layout, true);
+  });
+
+  it.each([false, true])('retains safe output fallback without internal devices (voltage source: %s)', (voltage) => {
+    const body = `Y([Y]):::pinOut\nZ([Z]):::pinOut${voltage ? `\n${declaration('V', 'voltageSource')}\nV ---|P| Y` : ''}`;
+    const baseline = layoutCircuit(circuit(body));
+    const layout = layoutCircuit(circuit(`${body}\nsubgraph stage empty\nend`));
+    expect(layout.devices.every((item) => item.region === 'top')).toBe(true);
+    expect(layout.nets.map((item) => item.anchor![1])).toEqual(baseline.nets.map((item) => item.anchor![1]));
+    expect(layout.nets.every((item) => item.position[1] >= 0)).toBe(true);
+    geometry(layout);
+  });
+
   it('places peripheral categories in declaration order and keeps generic and bidirectional nets unplaced', () => {
     const layout = layoutCircuit(circuit(`${declaration('V2', 'voltageSource')}
 ${declaration('R')}

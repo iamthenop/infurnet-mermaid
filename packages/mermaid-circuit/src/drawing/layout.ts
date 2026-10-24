@@ -1,5 +1,5 @@
 import type { CircuitModel, Device, Direction } from '../circuitTypes.js';
-import { Transform, bounds, type Bounds, type Point } from './geometry.js';
+import { Transform, bounds, translateBounds, type Bounds, type Point } from './geometry.js';
 import { resolveSymbol, type SymbolId } from './symbols.js';
 
 export type Rotation = 0 | 90 | 180 | 270;
@@ -271,18 +271,36 @@ export function layoutCircuit(model: CircuitModel): CircuitLayout {
     cursorY = stageBounds.maxY + padding + gap;
   }
 
+  const stageWidth = Math.max(0, ...stages.map((stage) => stage.bounds.maxX - stage.bounds.minX));
+  const stageCenterX = internalX - padding + stageWidth / 2;
+  for (const [index, stage] of stages.entries()) {
+    const dx = stageCenterX - (stage.bounds.minX + stage.bounds.maxX) / 2;
+    for (const id of model.stages[index].devices) {
+      const device = placed.get(id)!;
+      if (device.region === 'internal') placed.set(id, { ...device,
+        ...place(device.symbol, [device.position[0] + dx, device.position[1]], device.rotation) });
+    }
+    stages[index] = { ...stage, bounds: translateBounds(stage.bounds, [dx, 0]) };
+  }
+  const nonemptyStages = stages.filter((stage) => stage.groups.length > 0);
+  const outputCenterY = nonemptyStages.length ? (Math.min(...nonemptyStages.map((stage) => stage.bounds.minY))
+    + Math.max(...nonemptyStages.map((stage) => stage.bounds.maxY))) / 2 : undefined;
+
   const groundNets = model.nets.filter((net) => net.type === 'ground');
   const occupiedRight = Math.max(internalX + pane, internalX + Math.max(0, groundNets.length - 1) * pitch + pane,
     ...[...placed.values(), ...placedNets.values()].map((symbol) => symbol.bounds.maxX), ...stages.map((stage) => stage.bounds.maxX));
   const inputTargets: { net: string; device: string; terminal: string; aligned: boolean }[] = [];
   for (const type of ['pinIn', 'pinOut'] as const) {
     let previousBottom = -gap;
-    for (const net of model.nets.filter((net) => net.type === type)) {
+    const nets = model.nets.filter((net) => net.type === type);
+    for (const [index, net] of nets.entries()) {
       const recipients = model.devices.flatMap((device) => device.terminals.filter((terminal) => netAt(device, terminal) === net.id)
         .map((terminal) => ({ device: device.id, terminal, point: placed.get(device.id)!.terminals[terminal] })))
         .sort((a, b) => a.point[1] - b.point[1] || a.point[0] - b.point[0] || declaration.get(a.device)! - declaration.get(b.device)!);
       const first = recipients[0], anchor = resolveSymbol(type).anchor!;
-      const y = Math.max(0, Math.round(first?.point[1] ?? gap + anchor[1]) - anchor[1], previousBottom + gap);
+      const y = type === 'pinOut' && outputCenterY !== undefined
+        ? outputCenterY + (index - (nets.length - 1) / 2) * pitch - anchor[1]
+        : Math.max(0, Math.round(first?.point[1] ?? gap + anchor[1]) - anchor[1], previousBottom + gap);
       const symbol: PlacedNet = { ...place(type, [type === 'pinIn' ? 0 : occupiedRight + gap, y]), id: net.id, region: type === 'pinIn' ? 'left' : 'right' };
       placedNets.set(net.id, symbol); previousBottom = symbol.bounds.maxY;
       if (type === 'pinIn' && first) inputTargets.push({ net: net.id, device: first.device, terminal: first.terminal,
