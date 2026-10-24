@@ -357,11 +357,15 @@ it('prunes an implicit route that requires more than five bends', () => {
   const area = { minX: 0, minY: 0, maxX: 260, maxY: 140 };
   const barriers = [
     { bounds: { minX: 60, minY: 0, maxX: 70, maxY: 80 } },
-    { bounds: { minX: 110, minY: 60, maxX: 120, maxY: 140 } },
+    { bounds: { minX: 110, minY: 40, maxX: 120, maxY: 140 } },
     { bounds: { minX: 160, minY: 0, maxX: 170, maxY: 80 } },
   ];
   const route = routeOrdinaryBranch(lead, tree, barriers.slice(0, 1), [], area, [], () => true);
   expect(route).toBeDefined();
+  const extended = routeOrdinaryBranch(lead, tree, barriers.slice(0, 2), [], area, [], () => true);
+  expect(extended).toBeDefined();
+  const horizontal = (s: NonNullable<typeof extended>[number]) => Math.abs(s.a[1] - s.b[1]) < 1e-7;
+  expect(extended!.slice(1).filter((s, i) => horizontal(s) !== horizontal(extended![i])).length).toBe(5);
   expect(routeOrdinaryBranch(lead, tree, barriers, [], area, [], () => true)).toBeUndefined();
 });
 
