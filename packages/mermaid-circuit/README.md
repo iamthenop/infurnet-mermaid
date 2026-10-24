@@ -68,7 +68,7 @@ The generated module is derived data; it must not be edited or committed. The re
 
 ## Circuit placement
 
-`src/drawing/layout.ts` places devices and supported peripheral symbols from a validated model. Its result holds positions, transforms, named anchors, and bounds for stages, blocks, and the whole drawing. The model remains unchanged; the module adds no public package export.
+`src/drawing/layout.ts` places devices and records peripheral preferences from a validated model. Its result holds positions, transforms, named anchors, and bounds for stages, blocks, and the whole drawing. The model remains unchanged; the module adds no public package export.
 
 Omitting a stage direction selects `auto`, including in the implicit final stage. Explicit `direction LR` and `direction TB` remain available. The [placement rules](spec/style.md#placement-and-rotation) govern arrangement, orientation, and peripheral ordering.
 
@@ -76,11 +76,11 @@ The engine recognizes simple conduction-series chains joined by generic nets wit
 
 Parallel groups span the same two conduction nets. The NAND2 fixture places its PMOS pull-up group across the stage and its NMOS pull-down chain vertically.
 
-Eligible devices rotate by multiples of 90 degrees to align terminals, using one transform for artwork and named attachments. Automatic CMOS placement keeps the catalog orientation; explicit directions can rotate it. Inputs prefer alignment with their top-left recipient, and analog LR devices can descend to support separate input rows.
+Eligible devices rotate by multiples of 90 degrees to align terminals, using one transform for artwork and named attachments. Automatic CMOS placement keeps the catalog orientation; explicit directions can rotate it. Final pin positions follow device geometry. Parallel CMOS groups retain their stagger; input alignment does not force other LR groups into descending rows.
 
 Digital LR stages use dependency columns. Four alternating barycenter sweeps evaluate row ordering from topology and transformed terminal geometry, retaining declaration order on ties.
 
-Digital gates also evaluate vertical reflection using straight driver-to-input segments to estimate crossings, bend requirements, and Manhattan length. Straight input alignment and default orientation resolve ties. This deterministic search flips one gate at a time and does not guarantee a global optimum.
+Digital gates evaluate supported right-angle rotations and vertical reflection using driver-to-input geometry, terminal escape directions, estimated bends, crossings and Manhattan length. Default orientation resolves ties. This deterministic search changes one gate at a time and does not guarantee a global optimum.
 
 Placement does not call the router or require a feasible route. The renderer routes the selected geometry once; a routing conflict rejects the render without changing the electrical model. Geometric estimates are not measurements of final wires.
 
@@ -88,9 +88,9 @@ Horizontal reflection is available in the transform layer but is not selected au
 
 Cycles, branched conduction networks, disconnected devices, and logic signal paths use declaration order where no supported topology rule applies, subject to the CMOS placement convention. Mixed chains also fall back when neither traversal keeps every PMOS above every NMOS. The result identifies stages using the fallback arrangement.
 
-Recognized groups remain separate; this release does not optimize a combined series-parallel network as a whole. Input ordering can prevent direct alignment; the result records whether alignment was achieved.
+Recognized groups remain separate; this release does not optimize a combined series-parallel network as a whole. The initial layout records input-alignment preferences; routing may select different pin geometry.
 
-`pinInOut` remains unplaced because its side is undecided. Cross-block named nets use repeated boundary pins under the [sectional drawing rules](spec/style.md#sectional-net-presentation). Other generic nets have no independent visible symbol.
+`pinInOut` remains unplaced because its side is undecided. Cross-block named nets use repeated boundary pins under the [sectional drawing rules](spec/style.md#sectional-net-presentation). Other explicitly named nets may also acquire repeated graphical occurrences when local sharing fails.
 
 Voltage sources retain their stage identity in the top region; stage bounds enclose internal devices. Empty stages retain space, and blocks without stages have no bounds.
 
@@ -102,7 +102,7 @@ Sectional routes also record separate physical components and their named endpoi
 
 Intermediate routing tracks use a 10-unit grid. Exact transformed attachments remain authoritative: a terminal at 255 stays at 255. Short local orthogonal segments join off-grid attachments to usable grid tracks.
 
-Routes avoid symbol panes and keep parallel runs at least 20 units from stage and block borders. Shared inputs reach their upper-left recipient first and branch outside stage frames. Junction dots mark shared-net branches; white gaps distinguish independent crossings on the white drawing background.
+Routes avoid symbol panes. Ordinary wires and common CMOS rails retain frame clearance; pin branches may split inside or outside stages. Junction dots mark shared-net branches; white gaps distinguish independent crossings on the white drawing background.
 
 The renderer embeds the approved artwork and draws routes from that same routing result. Device parameters split at `<br/>` into additional text lines. Labels use SVG text nodes, and generated implicit-net identifiers remain invisible.
 
@@ -110,7 +110,13 @@ The renderer embeds the approved artwork and draws routes from that same routing
 
 Routing uses a finite search area around the placed circuit and does not globally optimize the drawing. Dense or obstructed diagrams can fail even when a different routing strategy might succeed.
 
-The search visits the existing grid using a distance lower bound to prioritize progress toward its targets. Obstacle checks for neighboring grid points are computed on demand and reused within the route. Connection targets are found directly along existing segments instead of scanning the entire grid.
+Pin placement uses a logical 120 × 120 tile without snapping devices to a tile lattice. An existing occurrence may serve a device within 600 horizontal and 480 vertical units, measured between footprint centers. Orthogonally aligned pins require one empty tile between their footprint and a device; diagonal adjacency requires vacant horizontal and vertical neighboring spaces.
+
+For each branch, complexity is its right-angle bends plus unrelated-net crossings. Sharing an existing pin requires a combined maximum of three, with at most two bends and two crossings. Ordinary and new local routes prefer three and may extend to five. Search rejects candidates beyond the budget during traversal. Later routes must not invalidate earlier branch budgets.
+
+Repeated pins reference the same electrical net ID. They provide a conceptual Z-axis connection without drawing a planar wire between occurrences. They are not three-dimensional wires or new electrical terminals. Equal display labels do not join different net IDs. Unnamed implicit nets remain continuously wired.
+
+Input and output flags may rotate by any right angle. Their labels stay upright inside the artwork, and their anchors receive the same transform. The renderer uses the final pins and routes returned together by routing, rather than adding symbols independently. See the [drawing contract](spec/style.md#graphical-pin-placement) for the governing rules.
 
 Cross-section implicit nets require an explicit net declaration to provide a boundary label. The existing placement fallback remains available when its connections can be routed faithfully.
 
@@ -215,6 +221,6 @@ npm run render:fixtures
 
 The command builds the package and starts the existing Vite browser host. Chromium invokes that host's registered plugin through `mermaid.render()` for each source. Only the returned SVG is written, using stable fixture IDs.
 
-Generation fails on any parse, layout, routing, rendering, or empty-output error. All nine renders must succeed before outputs are written. Browser tests compare the tracked SVGs with fresh plugin output and a repeated render.
+Generation fails on any parse, layout, routing, rendering, or empty-output error. All ten renders must succeed before outputs are written. Browser tests compare the tracked SVGs with fresh plugin output and a repeated render.
 
 These SVGs come from the plugin. Reference illustrations show intended appearance; they cannot prove that the plugin works. The owner decides whether the drawings meet the approved design.

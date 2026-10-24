@@ -33,8 +33,8 @@ export const renderer: DiagramDefinition['renderer'] = {
   draw(_text, id, _version, diagram) {
     if (!(diagram.db instanceof ScaffoldDb)) throw new Error('Expected the circuitDiagram scaffold database.');
     const model = diagram.db.getModel();
-    const layout = layoutCircuit(model);
-    const routing = routeCircuit(model, layout);
+    const routing = routeCircuit(model, layoutCircuit(model));
+    const layout = routing.layout;
     const svg = document.getElementById(id);
     if (!svg || svg.namespaceURI !== namespace) throw new Error('Mermaid did not supply an SVG rendering context.');
     const content = element(svg, 'g', { 'data-circuit': 'drawing' });
@@ -90,9 +90,12 @@ export const renderer: DiagramDefinition['renderer'] = {
       const occurrences = layout.nets.filter((item) => item.id === net.id);
       if (occurrences.length) for (const placed of occurrences) {
         const [x, y] = placed.position;
-        const point: Point = placed.symbol === 'pinIn' ? [x + 78, y + 65] : placed.symbol === 'pinOut' ? [x + 42, y + 65]
+        const flag = placed.symbol === 'pinIn' || placed.symbol === 'pinOut';
+        const center = flag ? placed.transform.apply(placed.symbol === 'pinIn' ? [74, 60] : [40, 60]) : undefined;
+        const point: Point = center ? [center[0], center[1] + 5]
           : placed.symbol === 'supplyNet' ? [x + 60, y + 26] : [x + 60, y + 104];
         label(labels, net.label, point, { 'text-anchor': 'middle', 'data-net-label': net.id,
+          ...(flag ? { textLength: Math.min(placed.rotation % 180 ? 28 : 52, net.label.length * 8), lengthAdjust: 'spacingAndGlyphs' } : {}),
           ...(placed.occurrence ? { 'data-occurrence-label': placed.occurrence } : {}) });
       } else {
         const route = routing.nets.find((item) => item.net === net.id)!;

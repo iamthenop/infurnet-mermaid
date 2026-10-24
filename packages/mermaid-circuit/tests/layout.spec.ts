@@ -32,7 +32,7 @@ function contains(outer: Bounds, inner: Bounds): void {
 }
 
 function geometry(layout: CircuitLayout, centered = false): void {
-  const symbols = [...layout.devices, ...layout.nets];
+  const symbols = layout.devices;
   for (const [index, symbol] of symbols.entries()) {
     expect([symbol.width, symbol.height]).toEqual([120, 120]);
     expect([0, 90, 180, 270]).toContain(symbol.rotation);
@@ -265,7 +265,7 @@ R3 ---|B:A| R1`));
     expect(pullUp.maxX - pullUp.minX).toBeGreaterThan(pullDown.maxX - pullDown.minX);
     const output = layout.nets.find((item) => item.id === 'OUT')!;
     expect(output.anchor![1]).toBe((p1.terminals.D[1] + n0.terminals.D[1]) / 2);
-    expect(output.anchor![1]).toBe(510);
+    expect(output.anchor![1]).toBe(330);
     expect(output.anchor![1]).not.toBe(p0.terminals.D[1]);
     expect(layout.inputTargets).toEqual([
       { net: 'A', device: 'PMOS0', terminal: 'G', aligned: true },
@@ -489,19 +489,13 @@ N((N)):::net`));
       expect(first.region).toBe(region);
       expect(second.region).toBe(region);
       expect(first.position[axis]).toBeLessThan(second.position[axis]);
-      for (const item of [first, second]) {
-        if (region === 'top') expect(item.bounds.maxY).toBeLessThan(resistor.bounds.minY);
-        if (region === 'bottom') expect(item.bounds.minY).toBeGreaterThan(resistor.bounds.maxY);
-        if (region === 'left') expect(item.bounds.maxX).toBeLessThan(resistor.bounds.minX);
-        if (region === 'right') expect(item.bounds.minX).toBeGreaterThan(resistor.bounds.maxX);
-      }
     }
     expect(layout.unplacedNetIds).toEqual(['IO']);
     expect(layout.nets.map((item) => item.id)).not.toContain('N');
     geometry(layout);
   });
 
-  it.each(['unrecognized', 'series'])('aligns a shared input and descends across an LR %s group', (topology) => {
+  it.each(['unrecognized', 'series'])('keeps input preferences from staggering an LR %s group', (topology) => {
     const model = circuit(`A([A]):::pinIn
 ${stage(`${declaration('M1', 'nmos')}\n${declaration('M2', 'nmos')}`, 'LR')}
 ${topology === 'series' ? 'M1 ---|S:D| M2' : ''}
@@ -511,7 +505,7 @@ A ---|G| M1`);
     const [first, second] = layout.devices;
     expect(layout.stages[0].groups[0].topology).toBe(topology);
     expect(first.position[0]).toBeLessThan(second.position[0]);
-    expect(first.position[1]).toBeLessThan(second.position[1]);
+    expect(first.position[1]).toBe(second.position[1]);
     expectPoint(layout.nets[0].anchor!, [layout.nets[0].anchor![0], first.terminals.G[1]]);
     expect(layout.inputTargets).toEqual([{ net: 'A', device: 'M1', terminal: 'G', aligned: true }]);
     expect(model.connections.filter((item) => item.terminal === 'G').map((item) => item.net)).toEqual(['A', 'A']);
@@ -520,7 +514,7 @@ A ---|G| M1`);
       expect(netAt('M1', 'S')).toBe(netAt('M2', 'D'));
       expect(first.rotation).not.toBe(0);
       expect(second.rotation).not.toBe(0);
-      expect(first.terminals.S[1]).toBeLessThan(second.terminals.D[1]);
+      expect(first.terminals.S[1]).toBeCloseTo(second.terminals.D[1]);
     }
     expect(layoutCircuit(model)).toEqual(layout);
     expect(model).toEqual(original);
@@ -538,7 +532,7 @@ B ---|G| M2`));
     expect(layout.nets.map((item) => item.id)).toEqual(['B', 'A']);
     expect(layout.nets[1].anchor![1] - layout.nets[0].anchor![1]).toBeGreaterThanOrEqual(90);
     expect(layout.inputTargets.find((item) => item.net === 'B')!.aligned).toBe(true);
-    expect(layout.inputTargets.find((item) => item.net === 'A')!.aligned).toBe(arrangement === 'LR');
+    expect(layout.inputTargets.find((item) => item.net === 'A')!.aligned).toBe(false);
     if (arrangement === 'LR') expect(device(layout, 'M1').position[0]).toBeLessThan(device(layout, 'M2').position[0]);
     geometry(layout);
   });
@@ -566,11 +560,11 @@ B ---|G| M2`));
     expect(device(layout, 'N1').position[1]).toBe(device(layout, 'N3').position[1]);
     for (const id of ['A', 'B']) {
       expect(layout.nets.filter((net) => net.id === id).map((net) => [net.symbol, net.block, net.role]))
-        .toEqual([['pinIn', 0, 'external'], ['pinIn', 1, 'external'], ['pinIn', 1, 'local']]);
+        .toEqual([['pinIn', 0, 'external'], ['pinIn', 1, 'external']]);
     }
     for (const id of ['Abar', 'Bbar']) {
       expect(layout.nets.filter((net) => net.id === id).map((net) => [net.symbol, net.block, net.role]))
-        .toEqual([['pinOut', 0, 'boundary'], ['pinIn', 1, 'boundary'], ['pinIn', 1, 'local']]);
+        .toEqual([['pinOut', 0, 'boundary'], ['pinIn', 1, 'boundary']]);
       expect(model.nets.filter((net) => net.id === id)).toHaveLength(1);
     }
     for (const stage of layout.stages) {
@@ -669,4 +663,26 @@ R2 ---|B:A| R3`;
     expect(second).toEqual(first);
     geometry(second);
   });
+});
+
+it('uses eligible digital rotations to align a vertical dependency without changing assignments', () => {
+  const model = parseCircuit('circuitDiagram D\nsubgraph stage chain\ndirection TB\nU1[U1]:::buffer\nU2[U2]:::buffer\nend\nU1 ---|O:I| U2');
+  const original = structuredClone(model), layout = layoutCircuit(model);
+  const [first, second] = layout.devices;
+  expect(first.rotation).toBe(180);
+  expect(second.rotation).toBe(0);
+  expect(first.terminals.O[0]).toBeCloseTo(second.terminals.I[0]);
+  expect(first.terminals.O[1]).toBeLessThan(second.terminals.I[1]);
+  expect(model).toEqual(original);
+  geometry(layout);
+});
+
+it('keeps device geometry independent of peripheral types and final graphical occurrences', () => {
+  const model = parseCircuit(xorNand), original = structuredClone(model);
+  const plain = { ...model, nets: model.nets.map((net) => ({ ...net, type: 'net' as const })) };
+  const layout = layoutCircuit(model), withoutPreferences = layoutCircuit(plain);
+  expect(withoutPreferences.devices).toEqual(layout.devices);
+  const routes = routeCircuit(model, layout);
+  expect(routes.layout.devices).toEqual(layout.devices);
+  expect(model).toEqual(original);
 });

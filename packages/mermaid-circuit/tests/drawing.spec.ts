@@ -199,3 +199,18 @@ describe('registered symbol integration', () => {
     expect(() => resolveTerminal('nmos', terminal)).toThrow('Unknown terminal');
   });
 });
+
+describe('right-angle graphical pin anchors', () => {
+  it.each([
+    ['pinIn', 0, [120, 60]], ['pinIn', 90, [60, 120]], ['pinIn', 180, [0, 60]], ['pinIn', 270, [60, 0]],
+    ['pinOut', 0, [0, 60]], ['pinOut', 90, [60, 0]], ['pinOut', 180, [120, 60]], ['pinOut', 270, [60, 120]],
+  ] as const)('transforms %s artwork and anchor through %s degrees', (symbol, rotation, anchor) => {
+    const transform = new Transform({ localOffset: [-60, -60], rotation, translation: [75, 315] });
+    const placed = resolveSymbol(symbol, transform);
+    expectPoint(placed.anchor!, [anchor[0] + 15, anchor[1] + 255]);
+    const [a, b, c, d, e, f] = placed.svgTransform.slice(7, -1).split(' ').map(Number);
+    const [x, y] = resolveSymbol(symbol).anchor!;
+    expectPoint(placed.anchor!, [a * x + c * y + e, b * x + d * y + f]);
+    expect(placed.svg).toBe(resolveSymbol(symbol).svg);
+  });
+});

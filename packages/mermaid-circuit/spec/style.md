@@ -6,18 +6,17 @@ Fixed-symbol schematic rendering is implemented against these approved drawing r
 
 ## Orientation
 
-1. The supply rail appears at the top and ground at the bottom.
+1. Supply references prefer the top and ground references prefer the bottom.
 2. PMOS devices sit above NMOS devices in the same stage.
 3. Signals flow from left to right.
-4. Inputs appear on the left and outputs on the right.
+4. Inputs prefer the left and outputs prefer the right.
 5. Stage frames follow the [stage presentation](#stage-presentation) convention.
-6. Signals stay outside stage frames except for branches crossing the borders to reach device terminals.
-7. Input signals split at junctions outside stage frames.
-8. The first recipient of an input is the top-left recipient. Align its terminal horizontally with the input pin when possible while preserving input declaration order.
-9. In an analog left-to-right stage, successive devices may sit lower as they move right to support input alignment. Digital LR stages follow logic dependencies as defined under [placement and rotation](#placement-and-rotation).
-10. Additional gate connections branch from the corresponding input line using orthogonal routing.
+6. Device placement precedes final graphical pin placement. First-recipient alignment is a preference, not a placement requirement.
+7. Pin branches may split inside or outside stage frames when geometry and routing budgets permit.
+8. Digital LR stages follow logic dependencies as defined under [placement and rotation](#placement-and-rotation).
+9. Additional gate connections use orthogonal routing or repeated occurrences of the same named net.
 
-Shared input branch columns have equal spacing and follow input order from left to right. Parallel PMOS and NMOS groups arranged left to right use the same 90-unit descending stagger.
+Parallel PMOS and NMOS groups arranged left to right retain the same 90-unit descending stagger. Other analog LR groups do not acquire descending placement merely to align input pins.
 
 The expression *supply rail* describes graphical placement, not an electrical object type. Stage ordering, membership, and direction declarations are defined in [the syntax rules](notation.md#syntax-rules).
 
@@ -29,7 +28,7 @@ With multiple nonempty blocks, align their vertical midpoints, preserving declar
 
 Without multiple nonempty blocks, stages retain one vertical sequence. Block placement preserves stage membership and electrical connectivity.
 
-Inputs align with the first recipient in the leftmost receiving block, then branch onward. Within that block, select the top-left recipient using the orientation priorities.
+Graphical pin preferences do not determine device positions. The routing phase resolves final pin occurrences after device geometry is selected.
 
 Stages in the same vertical diagram sequence share a horizontal centerline. Stages retain their individual widths and internal device arrangements.
 
@@ -57,9 +56,9 @@ Apply local reflection before rotation and translation, using the same transform
 
 The horizontal option negates X, and the vertical option negates Y, in local coordinates.
 
-Automatic selection may reverse digital gates vertically. CMOS orientations remain unchanged.
+Automatic selection may rotate eligible digital gates in right-angle increments and reverse them vertically. Evaluate terminal geometry and local complexity estimates when a connection exceeds the preferred routing budget. Preserve CMOS orientation restrictions.
 
-Compare valid orientation candidates by estimated crossings, bends, wire length, and then straight input connections, in that order. Prefer the default orientation when these scores are equal. Electrical connectivity and stage constraints must remain valid for every accepted candidate.
+Compare valid orientation candidates by estimated crossings, bends, and wire length, in that order. Prefer the default orientation when these scores are equal. Electrical connectivity and stage constraints must remain valid for every accepted candidate.
 
 Placement computes geometry independently of routing feasibility and must not invoke full routing to score candidates. Routing consumes the selected layout afterward. A routing conflict fails rendering without invalidating the electrical model or the geometric placement.
 
@@ -67,7 +66,7 @@ Keep the default orientation when rotation offers no supported alignment advanta
 
 Automatic placement prefers the [default CMOS orientations](#symbols), including for four-terminal variants. Explicit directions may rotate those symbols when terminal alignment improves. Rotation does not exchange source and drain identities.
 
-| Object | Region | Order |
+| Object | Preferred region | Order preference |
 | --- | --- | --- |
 | `voltageSource` | Top | Left to right in declaration order |
 | `supplyNet` | Separate top supply region | Declaration order |
@@ -75,21 +74,19 @@ Automatic placement prefers the [default CMOS orientations](#symbols), including
 | `pinIn` | Left | Top to bottom in declaration order |
 | `pinOut` | Right | Top to bottom in declaration order |
 
-A single supply and ground align with the horizontal midpoint of the CMOS conduction terminals. Without unrotated CMOS devices, they align with the stage centerline. Multiple supply or ground symbols retain their declaration order.
+A single supply and ground prefer alignment with the horizontal midpoint of the CMOS conduction terminals. Without unrotated CMOS devices, they prefer alignment with the stage centerline. Multiple supply or ground symbols retain their declaration order.
 
-Output pins appear on the right. Their attachment anchors form a vertically centered group relative to the combined region of nonempty stages. Output order follows declaration order. Peripheral power and ground positions do not determine this center.
+Output pins prefer the right. Their preferred attachment anchors form a vertically centered group relative to the combined region of nonempty stages. Output order follows declaration order. Peripheral power and ground positions do not determine this center.
 
-A single output shared only by unrotated PMOS and NMOS drains aligns with their connecting wire, midway between the lowest PMOS drain and highest NMOS drain. This alignment takes precedence over centering against the full stage region.
+A single output shared only by unrotated PMOS and NMOS drains prefers alignment with their connecting wire, midway between the lowest PMOS drain and highest NMOS drain. This preference takes precedence over centering against the full stage region; pin clearance and routing constraints take precedence over both.
 
 Voltage sources retain their stage identity when placed in the top region. Position does not connect a voltage source to a supply net.
 
-Ordinary nets have no independent symbol placement except for the named endpoints defined under [sectional net presentation](#sectional-net-presentation). The side for `pinInOut` remains undecided.
+Explicitly named nets may use graphical occurrences under [graphical pin placement](#graphical-pin-placement). Implicit unnamed nets remain continuously wired. `pinInOut` placement remains unsupported.
 
-Input fan-out uses the [orientation priorities](#orientation). Return positioned input and recipient anchors for orthogonal branching. Placement does not draw branches or guarantee crossing-free routes.
+Placement returns device geometry and preferred peripheral positions. Routing resolves pin locations and branches. Neither step changes electrical assignments.
 
-In an explicitly left-to-right stage, recognized series devices remain eligible for descending placement when required for input fan-out. Conduction-terminal alignment must not defeat that placement rule. Routing remains responsible for connecting separated terminals.
-
-Placement must be deterministic. Symbol panes must remain separate, except compact input pins may share unused margins to align with their first recipients. Their visible flags and labels must remain separate.
+Placement must be deterministic. Nominal device and pin footprints remain separate under the tile-clearance rules below.
 
 Retain the [pane and snap conventions](#panes-and-snap-points). Spacing remains an internal implementation detail.
 
@@ -127,11 +124,11 @@ Draw local wires from device attachments to these pins. Matching endpoints repla
 
 Repeat external inputs as input-facing pins in each receiving section, without outgoing copies. The final receiving block holds the circuit output.
 
-To avoid long crossing buses, a named gate input serving several stages can use a local input-facing pin at each receiving stage. Each pin retains the same net identity and serves only that stage’s attachments. Keep a continuous route if the extra pins would overlap symbols.
+Repeated local pins are selected by proximity, clearance and branch complexity, not by a fixed count per stage or terminal. An eligible occurrence may serve devices from several stages in the same section.
 
 Each section displays its connected supply and ground nets locally. A local rail refers to the existing global net; it does not declare another source or net. Power wires remain inside their section and follow the common-rail convention.
 
-Every wire end meets a device attachment, local net symbol, or named boundary pin. Keep local routes inside their section frames, with the established frame clearance. Input splits remain outside stage frames.
+Every wire end meets a device attachment, local net symbol, or named boundary pin. Local routes remain inside section frames. Pin branches do not have a compulsory outside-stage split position.
 
 ### Parallel series branches
 
@@ -172,9 +169,33 @@ Dynamic ICs do not inherit the fixed 120 × 120 symbol-pane requirement. The exa
 
 ## Routing and junction presentation
 
-Wires use orthogonal routing. Junction markers are placed according to the [junction contract](notation.md#junctions), with input splits positioned outside stage frames as specified above. Routes and crossings must not redefine electrical connectivity.
+Wires use orthogonal routing. Junction markers are placed at real connected splits according to the [junction contract](notation.md#junctions). Routes and crossings must not redefine electrical connectivity.
 
 Unrotated parallel CMOS devices arranged left to right share a horizontal rail above the group and another below it. Their conduction leads run straight to these rails, so branches split and rejoin at common heights. The rails retain clearance from stage frames.
+
+### Graphical pin placement
+
+Graphical pins reference existing electrical net identifiers. Repeated appearances provide a conceptual Z-axis presentation: their matching identity replaces a visible interconnecting wire. They introduce no physical third coordinate, new device, terminal assignment, or net. Equal labels on different net IDs never establish connectivity. Each disconnected graphical component of a named net must have an identified occurrence; implicit unnamed nets remain continuous.
+
+Device placement establishes the initial geometry. Pins are positioned and oriented afterward, and the renderer consumes the resolved occurrences and routes together. A rejected route must not produce an incomplete success SVG.
+
+A logical tile is a nominal 120 × 120 footprint. Device coordinates remain continuous. Compare footprint centers directly, without rounding to a tile lattice. Sharing requires both horizontal displacement ≤ 600 and vertical displacement ≤ 480 units.
+
+Device-to-pin placement requires an empty tile between orthogonally aligned footprints: `[D][0][P]`, horizontally or vertically. Direct adjacency and overlap are prohibited. Diagonal adjacency is permitted at displacements of at least one tile on both axes when the corresponding horizontal and vertical neighboring spaces are vacant. Apply these relationships geometrically to continuously positioned footprints. This rule does not add a 120-unit wire exclusion zone.
+
+Input and output occurrences may rotate by 0°, 90°, 180°, or 270°. Transform artwork and anchor together, retaining the visual pin class and net identity. Labels remain upright inside the flag, clear of other artwork and unrelated wires. Source pin artwork is unchanged.
+
+### Branch complexity and search
+
+For a new branch, let B be its right-angle bends and C its crossings with unrelated nets. Include local attachment leads; exclude existing bends elsewhere in the trunk and same-net junctions. Unrelated overlaps and ambiguous endpoint contacts remain prohibited.
+
+Sharing an existing pin or its trunk requires B + C ≤ 3, B ≤ 2, and C ≤ 2. Evaluate bounded straight, one-bend and two-bend candidates and reject over-budget candidates immediately. Among eligible occurrences, choose fewer crossings, fewer bends, shorter length, then declaration and occurrence order. Reuse a qualifying occurrence; do not duplicate a pin when a valid local branch exists. When no occurrence qualifies, place another occurrence of that same named net. There is no fixed maximum count or one-pin-per-terminal rule.
+
+Ordinary device-to-device and new local connections prefer B + C ≤ 3 and may extend to B + C ≤ 5. Existing-pin sharing retains its stricter limit. Prefer a repeated named pin when it supplies a local route within the preferred budget. Consider already permitted device orientations using geometry and local estimates; device layout must not invoke the complete router.
+
+Ordinary search tracks complexity during traversal and prunes paths exceeding five. Later routes must preserve the budgets of earlier branches. Use deterministic candidate ordering and tie-breakers. Intermediate tracks remain on the 10-unit routing grid; exact transformed attachments, including fractional placement offsets, remain authoritative. Artwork and anchors translate together and are never independently rounded.
+
+Pin branches may cross or run near stage frames; they have no compulsory first-recipient alignment, branch column, or peripheral coordinate. Ordinary routes and common CMOS rails retain their existing frame-clearance conventions. If a complete route cannot satisfy the bounds, reject it with its net, terminal, stage/block and failed constraint; do not increase the budget or change connectivity.
 
 ## Labels
 

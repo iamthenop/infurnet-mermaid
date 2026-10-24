@@ -2,7 +2,7 @@
 import { expect, it } from 'vitest';
 import { parseCircuit } from '../src/parser/circuitParser.js';
 import { layoutCircuit, type CircuitLayout } from '../src/drawing/layout.js';
-import { routeCircuit, type CircuitRouting, type RoutedComponent } from '../src/drawing/routing.js';
+import { routeCircuit, sharingBudget, pinNearby, pinClearance, routeOrdinaryBranch, type CircuitRouting, type RoutedComponent } from '../src/drawing/routing.js';
 import type { CircuitModel } from '../src/circuitTypes.js';
 import type { Point } from '../src/drawing/geometry.js';
 
@@ -38,9 +38,15 @@ function attachmentLeads(component: RoutedComponent) {
   return leads;
 }
 
-function connectivity(model: CircuitModel, layout: CircuitLayout, routes: CircuitRouting): void {
+function connectivity(model: CircuitModel, initial: CircuitLayout, routes: CircuitRouting): void {
+  const layout = routes.layout;
+  expect(layout.devices).toEqual(initial.devices);
   expect(routes.nets.map((n) => n.net).sort()).toEqual(model.nets.map((n) => n.id).sort());
   for (const net of routes.nets) {
+    if (model.nets.find((n) => n.id === net.net)!.implicit) {
+      expect(net.components).toHaveLength(1);
+      expect(net.attachments.some((a) => a.occurrence)).toBe(false);
+    }
     const assigned = net.attachments.filter((a) => a.device);
     expect(assigned.map((a) => `${a.device}:${a.terminal}`).sort()).toEqual(model.connections.filter((c) => c.net === net.net).map((c) => `${c.device}:${c.terminal}`).sort());
     for (const a of assigned) expect(a.point).toEqual(layout.devices.find((d) => d.id === a.device)!.terminals[a.terminal!]);
@@ -53,7 +59,7 @@ function connectivity(model: CircuitModel, layout: CircuitLayout, routes: Circui
         if (!graph.has(key(a))) graph.set(key(a), new Set());
         graph.get(key(a))!.add(key(b));
       }
-      for (const frame of [...layout.stages.map((s) => s.bounds), ...layout.blocks.flatMap((b) => b.bounds ? [b.bounds] : [])]) {
+      for (const frame of net.attachments.some((a) => a.occurrence) ? [] : [...layout.stages.map((s) => s.bounds), ...layout.blocks.flatMap((b) => b.bounds ? [b.bounds] : [])]) {
         const axis = Math.abs(segment.a[1] - segment.b[1]) < 1e-7 ? 0 : 1;
         const low = axis === 0 ? frame.minX : frame.minY, high = axis === 0 ? frame.maxX : frame.maxY;
         if (Math.max(segment.a[axis], segment.b[axis]) > low && Math.min(segment.a[axis], segment.b[axis]) < high) {
@@ -126,28 +132,19 @@ it.each(Object.entries(fixtures))('routes every connection faithfully: %s', (_pa
   const model = parseCircuit(source), original = structuredClone(model), layout = layoutCircuit(model);
   const routes = routeCircuit(model, layout);
   connectivity(model, layout, routes);
-  if (layout.blocks.filter((block) => block.bounds).length > 1) for (const target of layout.inputTargets.filter((target) => target.aligned)) {
-    const input = layout.nets.find((net) => net.id === target.net)!.anchor!;
-    const terminal = layout.devices.find((device) => device.id === target.device)!.terminals[target.terminal];
-    const route = routes.nets.find((route) => route.net === target.net)!;
-    const straightLength = route.segments.filter((segment) => segment.a[1] === input[1] && segment.b[1] === input[1])
-      .reduce((length, segment) => length + Math.max(0, Math.min(terminal[0], Math.max(segment.a[0], segment.b[0]))
-        - Math.max(input[0], Math.min(segment.a[0], segment.b[0]))), 0);
-    expect(straightLength, `${target.net} must connect straight to ${target.device}.${target.terminal}`).toBeCloseTo(terminal[0] - input[0]);
+  for (const branch of routes.branches) {
+    const horizontal = (s: typeof branch.segments[number]) => Math.abs(s.a[1] - s.b[1]) < 1e-7;
+    const bends = branch.segments.slice(1).filter((s, i) => horizontal(s) !== horizontal(branch.segments[i])).length;
+    const crossed = routes.crossings.filter((c) => (c.over === branch.net || c.under === branch.net) && branch.segments.some((s) =>
+      c.point[0] >= Math.min(s.a[0], s.b[0]) - 1e-7 && c.point[0] <= Math.max(s.a[0], s.b[0]) + 1e-7
+      && c.point[1] >= Math.min(s.a[1], s.b[1]) - 1e-7 && c.point[1] <= Math.max(s.a[1], s.b[1]) + 1e-7));
+    expect(branch.bends).toBe(bends);
+    expect(branch.crossings).toBe(new Set(crossed.map((c) => key(c.point))).size);
+    expect(branch.bends + branch.crossings).toBeLessThanOrEqual(branch.kind === 'shared' ? 3 : 5);
+    if (branch.kind === 'shared') expect(sharingBudget(branch.bends, branch.crossings)).toBe(true);
   }
-  for (const scope of layout.sections ?? [{ block: null }]) {
-    const inputColumns = layout.nets.filter((net) => net.symbol === 'pinIn' && (net.block ?? null) === scope.block)
-      .sort((a, b) => a.anchor![1] - b.anchor![1])
-      .map((net) => routes.nets.find((route) => route.net === net.id)!.components.find((component) => component.block === scope.block)!.junctions)
-      .filter((junctions) => junctions.length).map((junctions) => {
-        expect(junctions.every((point) => point[0] === junctions[0][0])).toBe(true);
-        return junctions[0][0];
-      });
-    if (inputColumns.length > 1) {
-      const spacing = inputColumns[1] - inputColumns[0];
-      expect(spacing).toBeGreaterThanOrEqual(20);
-      for (let i = 2; i < inputColumns.length; i++) expect(inputColumns[i] - inputColumns[i - 1]).toBe(spacing);
-    }
+  for (const pin of routes.layout.nets) {
+    expect(pinClearance(pin.bounds, layout.devices.map((d) => d.bounds), [...layout.devices, ...routes.layout.nets.filter((n) => n !== pin)].map((p) => p.bounds))).toBe(true);
   }
   for (const group of layout.stages.flatMap((stage) => stage.groups)) {
     const devices = group.devices.map((id) => layout.devices.find((device) => device.id === id)!);
@@ -195,44 +192,24 @@ R ---|B| Y
 R2 ---|A| Y`);
   const layout = layoutCircuit(model), routes = routeCircuit(model, layout);
   connectivity(model, layout, routes);
-  const point = direction === 'TB' ? layout.devices.find((d) => d.id === 'R2')!.terminals.A : layout.nets.find((n) => n.id === 'Y')!.anchor!;
-  expect(point[direction === 'TB' ? 0 : 1]).toBe(255);
-  const lead = attachmentLeads(routes.nets.find((net) => net.net === 'Y')!.components[0]).find((lead) => same(lead.attachment.point, point))!;
-  expect(lead.points[0]).toEqual(point);
-  expect(lead.points.length).toBeGreaterThan(1);
-  expect(onGrid(lead.points.at(-1)!)).toBe(true);
+  const point = direction === 'TB' ? layout.devices.find((d) => d.id === 'R2')!.terminals.A : layout.devices.find((d) => d.id === 'R2')!.terminals.A;
+  if (direction === 'TB') expect(point[0]).toBe(255);
+  else expect(layout.nets.find((n) => n.id === 'Y')!.anchor![1]).toBe(255);
+  const lead = routes.nets.find((net) => net.net === 'Y')!.components.flatMap(attachmentLeads).find((lead) => same(lead.attachment.point, point))!;
+  if (!onGrid(point)) {
+    expect(lead.points[0]).toEqual(point);
+    expect(lead.points.length).toBeGreaterThan(1);
+    expect(onGrid(lead.points.at(-1)!)).toBe(true);
+  }
 });
 
-it.each([false, true])('branches upper inputs first on the left (reversed declarations: %s)', (reverse) => {
-  const source = fixtures['../examples/fixtures/nand2.mmd'];
-  const model = parseCircuit(source), layout = layoutCircuit(model);
-  const routes = routeCircuit(reverse ? { ...model, nets: [...model.nets].reverse() } : model, layout);
-  const shared = layout.nets.filter((n) => routes.nets.find((r) => r.net === n.id)!.junctions.length && model.nets.find((item) => item.id === n.id)!.type === 'pinIn').sort((a, b) => a.anchor![1] - b.anchor![1]);
-  for (let i = 1; i < shared.length; i++) {
-    const upper = routes.nets.find((n) => n.net === shared[i - 1].id)!.junctions;
-    const lower = routes.nets.find((n) => n.net === shared[i].id)!.junctions;
-    expect(Math.max(...upper.map((p) => p[0]))).toBeLessThan(Math.min(...lower.map((p) => p[0])));
-  }
-  expect(routes.crossings.length).toBeGreaterThan(0);
-  const output = layout.nets.find((net) => net.id === 'OUT')!.anchor!;
-  const outputRoute = routes.nets.find((net) => net.net === 'OUT')!;
-  expect(outputRoute.junctions.every((point) => point[1] === output[1])).toBe(true);
-  const lastDrainX = Math.max(...outputRoute.attachments.filter((a) => a.device).map((a) => a.point[0]));
-  for (const segment of outputRoute.segments.filter((s) => Math.max(s.a[0], s.b[0]) > lastDrainX)) {
-    expect(segment.a[1]).toBe(output[1]);
-    expect(segment.b[1]).toBe(output[1]);
-  }
-  for (const target of layout.inputTargets) {
-    const route = routes.nets.find((n) => n.net === target.net)!;
-    const input = layout.nets.find((n) => n.id === target.net)!.anchor!;
-    const terminal = layout.devices.find((d) => d.id === target.device)!.terminals[target.terminal];
-    const straight = route.segments.filter((s) => same([s.a[0], input[1]], s.a) && same([s.b[0], input[1]], s.b));
-    const length = straight.reduce((sum, s) => sum + Math.abs(s.b[0] - s.a[0]), 0);
-    if (target.aligned) expect(length).toBeCloseTo(terminal[0] - input[0]);
-    else expect(route.segments.some((s) => Math.abs(s.a[1] - s.b[1]) > 0)).toBe(true);
-    expect(route.junctions.length).toBeGreaterThan(0);
-    for (const p of route.junctions) expect(layout.stages.some(({ bounds: b }) => p[0] >= b.minX && p[0] <= b.maxX && p[1] >= b.minY && p[1] <= b.maxY)).toBe(false);
-  }
+it.each([false, true])('resolves repeated inputs within the branch budget (reversed declarations: %s)', (reverse) => {
+  const model = parseCircuit(fixtures['../examples/fixtures/nand2.mmd']);
+  const ordered = reverse ? { ...model, nets: [...model.nets].reverse() } : model;
+  const layout = layoutCircuit(ordered), routes = routeCircuit(ordered, layout);
+  connectivity(ordered, layout, routes);
+  for (const branch of routes.branches.filter((b) => b.kind === 'shared')) expect(sharingBudget(branch.bends, branch.crossings)).toBe(true);
+  expect(routeCircuit(ordered, layout)).toEqual(routes);
 });
 
 it('rejects unresolved placement and impossible routes explicitly', () => {
@@ -243,12 +220,10 @@ it('rejects unresolved placement and impossible routes explicitly', () => {
   expect(() => routeCircuit(model, corrupt)).toThrow('not on its symbol pane boundary');
   const sectionModel = parseCircuit(fixtures['../examples/fixtures/xor2.mmd']);
   const sectionLayout = layoutCircuit(sectionModel);
-  const missingLocalPin = { ...sectionLayout, nets: sectionLayout.nets.filter((net) => net.id !== 'Abar' || net.role !== 'local') };
-  expect(() => routeCircuit(sectionModel, missingLocalPin)).toThrow('Missing or duplicate input occurrence for N2.G on net Abar');
   expect(() => routeCircuit(sectionModel, { ...sectionLayout, devices: sectionLayout.devices.filter((device) => device.id !== 'N3') }))
     .toThrow('Missing sectional attachment for N3.G on net Bbar');
   const missingEndpoint = { ...sectionLayout, nets: sectionLayout.nets.filter((net) => net.id !== 'Abar' || net.block !== 1) };
-  expect(() => routeCircuit(sectionModel, missingEndpoint)).toThrow(/net Abar|Net Abar/u);
+  connectivity(sectionModel, missingEndpoint, routeCircuit(sectionModel, missingEndpoint));
   const obstructed = { ...layout, devices: [...layout.devices, { ...layout.devices[0], id: 'obstacle', bounds: { minX: -1000, minY: -1000, maxX: 2000, maxY: 2000 } }] };
   expect(() => routeCircuit(model, obstructed)).toThrow(/Cannot route net/u);
 
@@ -279,21 +254,11 @@ it.each(['A', 'B', 'Abar', 'Bbar', 'VDD', 'VSS'])('matches sectional endpoints b
   const layout = layoutCircuit(model), routes = routeCircuit(model, layout);
   const net = routes.nets.find((net) => net.net === id)!;
   expect(model.nets.filter((net) => net.id === id)).toHaveLength(1);
-  expect(net.components.map((component) => component.block)).toEqual(['VDD', 'VSS'].includes(id) ? [0, 1] : [0, 1, 1]);
-  if (!['VDD', 'VSS'].includes(id)) for (const component of net.components.filter((component) => component.block === 1)) {
-    const pin = layout.nets.find((pin) => pin.occurrence === component.attachments.find((attachment) => attachment.occurrence)!.occurrence)!;
-    expect(pin.symbol).toBe('pinIn');
-    expect(pin.recipientStage).toBeDefined();
-    for (const attachment of component.attachments.filter((attachment) => attachment.device)) {
-      expect(layout.devices.find((device) => device.id === attachment.device)!.stage).toBe(pin.recipientStage);
-      expect(attachment.point[1]).toBe(pin.anchor![1]);
-    }
-    expect(component.segments.every((segment) => segment.a[1] === segment.b[1])).toBe(true);
-  }
+  expect([...new Set(net.components.map((component) => component.block))]).toEqual([0, 1]);
   const endpoints = net.components.map((component) => component.attachments.filter((attachment) => attachment.occurrence));
   for (const appearances of endpoints) {
     expect(appearances.length).toBeGreaterThan(0);
-    for (const endpoint of appearances) expect(layout.nets.find((net) => net.occurrence === endpoint.occurrence)!.id).toBe(id);
+    for (const endpoint of appearances) expect(routes.layout.nets.find((net) => net.occurrence === endpoint.occurrence)!.id).toBe(id);
   }
   const coordinates = net.components.map((component) => new Set(component.segments.flatMap((segment) => [key(segment.a), key(segment.b)])));
   for (let first = 0; first < coordinates.length; first++) for (const other of coordinates.slice(first + 1)) {
@@ -344,4 +309,67 @@ it.each([[false, false], [false, true], [true, false], [true, true]])('retains t
   expect(output.has('VDD')).toBe(a !== b);
   expect(output.has('VSS')).toBe(a === b);
   expect(reachable('VDD', model.devices).has('VSS')).toBe(false);
+});
+
+it.each([
+  [0, 0, true], [1, 0, true], [2, 0, true], [0, 1, true], [1, 1, true], [2, 1, true],
+  [0, 2, true], [1, 2, true], [2, 2, false], [3, 0, false], [0, 3, false],
+])('enforces the approved local branch budget B=%s C=%s', (b, c, accepted) => {
+  expect(sharingBudget(Number(b), Number(c))).toBe(accepted);
+});
+
+it.each([[600, 480, true], [600.01, 480, false], [600, 480.01, false], [-600, -480, true], [599.99, 479.99, true]])(
+  'uses rectangular continuous sharing bounds at (%s,%s)', (x, y, accepted) => {
+    const box = { minX: 15, minY: 15, maxX: 135, maxY: 135 };
+    expect(pinNearby(box, { minX: 15 + Number(x), minY: 15 + Number(y), maxX: 135 + Number(x), maxY: 135 + Number(y) })).toBe(accepted);
+  });
+
+it.each([[0, 0, false], [120, 0, false], [0, 120, false], [239.99, 0, false], [0, 239.99, false],
+  [240, 0, true], [0, 240, true], [120, 120, true], [-120, -120, true], [119.99, 120, false]])(
+  'checks continuous device/pin tile separation at (%s,%s)', (x, y, accepted) => {
+    const device = { minX: 15, minY: 15, maxX: 135, maxY: 135 };
+    const pin = { minX: 15 + Number(x), minY: 15 + Number(y), maxX: 135 + Number(x), maxY: 135 + Number(y) };
+    expect(pinClearance(pin, [device])).toBe(accepted);
+  });
+
+it.each(['horizontal', 'vertical'])('rejects diagonal sharing with an occupied %s neighbor', (axis) => {
+  const device = { minX: 15, minY: 15, maxX: 135, maxY: 135 }, pin = { minX: 135, minY: 135, maxX: 255, maxY: 255 };
+  const neighbor = axis === 'horizontal' ? { minX: 135, minY: 15, maxX: 255, maxY: 135 } : { minX: 15, minY: 135, maxX: 135, maxY: 255 };
+  expect(pinClearance(pin, [device], [device, neighbor])).toBe(false);
+});
+
+it('uses a shared occurrence when local branching succeeds and repeats it beyond the neighborhood', () => {
+  const model = parseCircuit('circuitDiagram D\nA([A]):::pinIn\nsubgraph stage gates\ndirection TB\nU1[U1]:::buffer\nU2[U2]:::buffer\nU3[U3]:::buffer\nU4[U4]:::buffer\nend\nA ---|I| U1\nA ---|I| U2\nA ---|I| U3\nA ---|I| U4');
+  const initial = layoutCircuit(model), routes = routeCircuit(model, initial);
+  connectivity(model, initial, routes);
+  const occurrences = routes.layout.nets.filter((n) => n.id === 'A');
+  expect(occurrences.length).toBeGreaterThan(1);
+  expect(occurrences.length).toBeLessThan(4);
+  expect(routes.branches.some((b) => b.net === 'A' && b.kind === 'shared')).toBe(true);
+  for (const component of routes.nets[0].components) {
+    const pin = occurrences.find((p) => component.attachments.some((a) => a.occurrence === p.occurrence))!;
+    for (const attachment of component.attachments.filter((a) => a.device)) expect(pinNearby(pin.bounds, initial.devices.find((d) => d.id === attachment.device)!.bounds)).toBe(true);
+  }
+});
+
+it('prunes an implicit route that requires more than five bends', () => {
+  const lead = [{ a: [20, 50] as Point, b: [30, 50] as Point }], tree = [{ a: [220, 50] as Point, b: [230, 50] as Point }];
+  const area = { minX: 0, minY: 0, maxX: 260, maxY: 140 };
+  const barriers = [
+    { bounds: { minX: 60, minY: 0, maxX: 70, maxY: 80 } },
+    { bounds: { minX: 110, minY: 60, maxX: 120, maxY: 140 } },
+    { bounds: { minX: 160, minY: 0, maxX: 170, maxY: 80 } },
+  ];
+  const route = routeOrdinaryBranch(lead, tree, barriers.slice(0, 1), [], area, [], () => true);
+  expect(route).toBeDefined();
+  expect(routeOrdinaryBranch(lead, tree, barriers, [], area, [], () => true)).toBeUndefined();
+});
+
+it.each(['horizontal', 'vertical'])('requires the intervening %s tile to be vacant', (axis) => {
+  const device = { minX: 15, minY: 15, maxX: 135, maxY: 135 };
+  const box = (offset: number) => axis === 'horizontal'
+    ? { minX: 15 + offset, minY: 15, maxX: 135 + offset, maxY: 135 }
+    : { minX: 15, minY: 15 + offset, maxX: 135, maxY: 135 + offset };
+  expect(pinClearance(box(240), [device], [device, box(120)])).toBe(false);
+  expect(pinClearance(box(360), [device], [device, box(120)])).toBe(true);
 });

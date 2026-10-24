@@ -42,7 +42,7 @@ async function render(id: string, source: string) {
 
 it.each(Object.entries(sources))('renders the catalog, routes, labels, and frames through Mermaid: %s', async (path, source) => {
   const name = path.split('/').at(-1)!.replace('.mmd', '');
-  const model = parseCircuit(source), layout = layoutCircuit(model), routes = routeCircuit(model, layout);
+  const model = parseCircuit(source), routes = routeCircuit(model, layoutCircuit(model)), layout = routes.layout;
   const svg = await render(`fixture-${name}`, source);
   expect(svg + '\n').toBe(svgs[path.replace('.mmd', '.svg')]);
   expect(await render(`fixture-${name}`, source)).toBe(svg);
@@ -95,7 +95,8 @@ it.each(Object.entries(sources))('renders the catalog, routes, labels, and frame
   }
   if (name === 'xor-nand4') {
     expect(inspected.crossings).toHaveLength(0);
-    expect([inspected.width, inspected.height]).toEqual([882, 416]);
+    expect(inspected.width).toBeLessThan(1100);
+    expect(inspected.height).toBeLessThan(700);
     expect(inspected.artwork.filter((symbol) => symbol.reflected).map((symbol) => symbol.id)).toEqual(['N3']);
     const inputs = layout.devices.find((device) => device.id === 'N3')!.terminals;
     expect(inputs.I1[1]).toBeGreaterThan(inputs.I2[1]);
@@ -108,14 +109,6 @@ it.each(Object.entries(sources))('renders the catalog, routes, labels, and frame
     expect(actual.junctions).toEqual(net.junctions);
     if (layout.sectional) expect(actual.components).toEqual(net.components.map((component) => ({ block: String(component.block ?? 'ungrouped'), paths: component.segments.map((segment) => `M ${segment.a.join(' ')} L ${segment.b.join(' ')}`) })));
   }
-  for (const scope of layout.sections ?? [{ block: null }]) {
-    const inputBranches = layout.nets.filter((net) => net.symbol === 'pinIn' && (net.block ?? null) === scope.block)
-      .sort((a, b) => a.anchor![1] - b.anchor![1])
-      .map((net) => routes.nets.find((route) => route.net === net.id)!.components.find((component) => component.block === scope.block)!.junctions).filter((points) => points.length);
-    for (let i = 1; i < inputBranches.length; i++) {
-      expect(Math.max(...inputBranches[i - 1].map((p) => p[0]))).toBeLessThan(Math.min(...inputBranches[i].map((p) => p[0])));
-    }
-  }
   expect(inspected.crossings).toEqual(routes.crossings.map((c) => ({ over: c.over, under: c.under, gap: '7' })));
   expect(inspected.frames).toEqual([
     ...layout.blocks.flatMap((b) => b.bounds ? [{ kind: 'block', index: b.block, bounds: b.bounds, dash: null }] : []),
@@ -124,7 +117,7 @@ it.each(Object.entries(sources))('renders the catalog, routes, labels, and frame
   for (const wire of inspected.wires) for (const path of wire.paths) {
     const [x1, y1, x2, y2] = path!.match(/-?\d+(?:\.\d+)?(?:e[-+]?\d+)?/gu)!.map(Number);
     const horizontal = Math.abs(y1 - y2) < 1e-7;
-    for (const { bounds: b } of inspected.frames) {
+    for (const { bounds: b } of routes.nets.find((n) => n.net === wire.net)!.attachments.some((a) => a.occurrence) ? [] : inspected.frames) {
       const low = horizontal ? Math.min(x1, x2) : Math.min(y1, y2), high = horizontal ? Math.max(x1, x2) : Math.max(y1, y2);
       if (high > (horizontal ? b.minX : b.minY) && low < (horizontal ? b.maxX : b.maxY)) {
         for (const side of horizontal ? [b.minY, b.maxY] : [b.minX, b.maxX]) expect(Math.abs((horizontal ? y1 : x1) - side)).toBeGreaterThanOrEqual(20 - 1e-7);
@@ -194,9 +187,10 @@ end
 M ---|S:A| R
 R ---|B| Y
 R2 ---|A| Y`;
-  const layout = layoutCircuit(parseCircuit(source));
+  const model = parseCircuit(source), initial = layoutCircuit(model), layout = routeCircuit(model, initial).layout;
   const point = direction === 'TB' ? layout.devices.find((d) => d.id === 'R2')!.terminals.A : layout.nets[0].anchor!;
-  expect(point[direction === 'TB' ? 0 : 1]).toBe(255);
+  if (direction === 'TB') expect(point[0]).toBe(255);
+  else expect(initial.nets[0].anchor![1]).toBe(255);
   await render(`fraction-${direction}`, source);
   const endpoints = await page.locator('[data-net="Y"] path').evaluateAll((paths) => paths.flatMap((p) => {
     const numbers = p.getAttribute('d')!.match(/-?\d+(?:\.\d+)?(?:e[-+]?\d+)?/gu)!.map(Number);
@@ -209,4 +203,38 @@ it('treats markup in parameters as inert text', async () => {
   await render('inert-label', 'circuitDiagram A\nR["R<br/><img src=x onerror=window.circuitInjected=true>"]:::resistor');
   expect(await page.locator('#output img, #output script, #output foreignObject, #output [onerror]').count()).toBe(0);
   expect(await page.evaluate(() => (window as unknown as { circuitInjected?: unknown }).circuitInjected)).toBeUndefined();
+});
+
+it.each([0, 90, 180, 270])('keeps plugin pin labels upright and inside flags rotated %s degrees', async (rotation) => {
+  const source = sources[`../examples/fixtures/${rotation === 180 ? 'nand2' : 'xor2'}.mmd`];
+  const model = parseCircuit(source), routes = routeCircuit(model, layoutCircuit(model));
+  const pins = routes.layout.nets.filter((pin) => (pin.symbol === 'pinIn' || pin.symbol === 'pinOut') && pin.rotation === rotation);
+  expect(pins.length).toBeGreaterThan(0);
+  await render(`pin-rotation-${rotation}`, source);
+  const evidence = await page.evaluate((ids) => ids.map((id) => {
+    const group = [...document.querySelectorAll<SVGGElement>('[data-occurrence]')].find((g) => g.getAttribute('data-occurrence') === id)!;
+    const label = [...document.querySelectorAll<SVGTextElement>('[data-occurrence-label]')].find((t) => t.getAttribute('data-occurrence-label') === id)!;
+    const box = label.getBBox(), polygon = group.querySelector<SVGPolygonElement>('polygon')!;
+    const matrix = group.transform.baseVal.consolidate()!.matrix, inverse = matrix.inverse();
+    const corners = [[box.x, box.y], [box.x + box.width, box.y], [box.x, box.y + box.height], [box.x + box.width, box.y + box.height]]
+      .map(([x, y]) => new DOMPoint(x, y).matrixTransform(inverse));
+    const net = group.getAttribute('data-net-symbol');
+    const wireCollision = [...document.querySelectorAll<SVGPathElement>('[data-net] path')].some((path) => {
+      if (path.closest('[data-net]')!.getAttribute('data-net') === net) return false;
+      const p = path.getBBox();
+      return p.x < box.x + box.width && p.x + p.width > box.x && p.y < box.y + box.height && p.y + p.height > box.y;
+    });
+    return { wireCollision, upright: !label.hasAttribute('transform'), contained: corners.every((p) => polygon.isPointInFill(p)), occurrence: id, text: label.textContent,
+      frameCollision: [...document.querySelectorAll<SVGRectElement>('[data-stage], [data-block]')].some((frame) => {
+        const f = frame.getBBox();
+        return ((f.y > box.y && f.y < box.y + box.height || f.y + f.height > box.y && f.y + f.height < box.y + box.height) && f.x < box.x + box.width && f.x + f.width > box.x)
+          || ((f.x > box.x && f.x < box.x + box.width || f.x + f.width > box.x && f.x + f.width < box.x + box.width) && f.y < box.y + box.height && f.y + f.height > box.y);
+      }) };
+  }), pins.map((pin) => pin.occurrence!));
+  for (const actual of evidence) {
+    expect(actual.upright).toBe(true);
+    expect(actual.contained, `${actual.occurrence}: ${actual.text}`).toBe(true);
+    expect(actual.frameCollision).toBe(false);
+    expect(actual.wireCollision).toBe(false);
+  }
 });

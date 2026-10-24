@@ -31,7 +31,6 @@ export interface PlacedNet extends PlacedGeometry {
   readonly region: 'left' | 'right' | 'top' | 'bottom';
   readonly block?: number;
   readonly occurrence?: string;
-  readonly recipientStage?: number;
   readonly role?: 'boundary' | 'local' | 'external';
 }
 
@@ -87,7 +86,7 @@ function enclose(boxes: readonly Bounds[], padding = 0): Bounds {
   return { minX: box.minX - padding, minY: box.minY - padding, maxX: box.maxX + padding, maxY: box.maxY + padding };
 }
 
-function place(symbol: SymbolId, position: Point, rotation: Rotation = 0, reflected = false): PlacedGeometry {
+export function place(symbol: SymbolId, position: Point, rotation: Rotation = 0, reflected = false): PlacedGeometry {
   const { width, height } = resolveSymbol(symbol);
   const transform = new Transform({ rotation, reflectVertical: reflected, localOffset: [-width / 2, -height / 2],
     translation: [position[0] + width / 2, position[1] + height / 2] });
@@ -111,15 +110,8 @@ export function layoutCircuit(model: CircuitModel): CircuitLayout {
       for (const target of assigned.filter((connection) => connection.terminal !== 'O')) {
         const block = blockOf(target.placed);
         const drivers = assigned.filter((connection) => connection.terminal === 'O' && blockOf(connection.placed) === block);
-        const inputs = layout.nets.filter((input) => input.id === net.id && input.symbol === 'pinIn' && (input.block ?? null) === block);
-        const local = inputs.filter((input) => input.recipientStage === target.placed.stage);
-        const origins = drivers.length ? drivers.map((driver) => driver.placed.terminals.O)
-          : (local.length ? local : inputs.filter((input) => input.recipientStage === undefined)).map((input) => input.anchor!);
+        const origins = drivers.map((driver) => driver.placed.terminals.O);
         for (const a of origins) edges.push({ net: net.id, a, b: target.placed.terminals[target.terminal] });
-      }
-      for (const output of layout.nets.filter((output) => output.id === net.id && output.symbol === 'pinOut')) {
-        for (const driver of assigned.filter((connection) => connection.terminal === 'O' && blockOf(connection.placed) === (output.block ?? null)))
-          edges.push({ net: net.id, a: driver.placed.terminals.O, b: output.anchor! });
       }
     }
     let crossings = 0;
@@ -130,9 +122,24 @@ export function layoutCircuit(model: CircuitModel): CircuitLayout {
       if (cross(edge.a, edge.b, other.a) * cross(edge.a, edge.b, other.b) < -1e-7
         && cross(other.a, other.b, edge.a) * cross(other.a, other.b, edge.b) < -1e-7) crossings++;
     }
-    const bends = edges.filter(({ a, b }) => Math.abs(a[0] - b[0]) > 1e-7 && Math.abs(a[1] - b[1]) > 1e-7).length;
+    const bendEstimate = ({ a, b }: typeof edges[number]) => {
+      const escape = (p: Point): Point => {
+        const owner = layout.devices.find((d) => Object.values(d.terminals).some((t) => Math.hypot(t[0] - p[0], t[1] - p[1]) < 1e-7))!;
+        const sides = [Math.abs(p[0] - owner.bounds.minX), Math.abs(p[0] - owner.bounds.maxX), Math.abs(p[1] - owner.bounds.minY), Math.abs(p[1] - owner.bounds.maxY)];
+        const side = sides.indexOf(Math.min(...sides));
+        return [p[0] + (side === 0 ? -30 : side === 1 ? 30 : 0), p[1] + (side === 2 ? -30 : side === 3 ? 30 : 0)];
+      };
+      const start = escape(a), end = escape(b);
+      const estimate = (corner: Point) => {
+        const points = [a, start, corner, end, b].filter((p, i, all) => !i || Math.hypot(p[0] - all[i - 1][0], p[1] - all[i - 1][1]) > 1e-7);
+        const directions = points.slice(1).map((p, i) => Math.abs(p[0] - points[i][0]) < 1e-7 ? Math.sign(p[1] - points[i][1]) * 2 : Math.sign(p[0] - points[i][0]));
+        return directions.slice(1).reduce((sum, d, i) => sum + (d === directions[i] ? 0 : Math.abs(d) === Math.abs(directions[i]) ? 2 : 1), 0);
+      };
+      return Math.min(estimate([start[0], end[1]]), estimate([end[0], start[1]]));
+    };
+    const bends = edges.reduce((sum, edge) => sum + bendEstimate(edge), 0);
     const length = edges.reduce((sum, { a, b }) => sum + Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]), 0);
-    return [crossings, bends, length, layout.inputTargets.filter((target) => !target.aligned).length, layout.devices.filter((device) => device.reflected).length];
+    return [crossings, bends, length, layout.devices.filter((device) => device.reflected).length + layout.devices.filter((device) => device.rotation !== 0).length];
   };
   const better = (a: readonly number[], b: readonly number[] | undefined) => !b || a.some((value, index) => value < b[index] - 1e-7 && a.slice(0, index).every((prior, i) => Math.abs(prior - b[i]) < 1e-7));
   let best = baseline, score = quality(best);
@@ -142,26 +149,28 @@ export function layoutCircuit(model: CircuitModel): CircuitLayout {
       let changed = false;
       for (const device of candidate.devices) {
         if (!['inverter', 'buffer', 'nand'].includes(device.symbol)) continue;
-        const mirrored = { ...device, ...place(device.symbol, device.position, device.rotation, !device.reflected) };
-        const trial = { ...candidate, devices: candidate.devices.map((item) => item.id === device.id ? mirrored : item),
-          inputTargets: candidate.inputTargets.map((target) => target.device !== device.id ? target : { ...target,
-            aligned: Math.abs(mirrored.terminals[target.terminal][1] - candidate.nets.find((net) => net.id === target.net && (net.block === undefined || net.block === model.stages[device.stage].block))!.anchor![1]) < 1e-7 }) };
-        const next = quality(trial);
-        if (better(next, candidateScore)) { candidate = trial; candidateScore = next; changed = true; }
+        for (const rotation of rotations) for (const reflected of [false, true]) {
+          const oriented = { ...device, ...place(device.symbol, device.position, rotation, reflected) };
+          const trial = { ...candidate, devices: candidate.devices.map((item) => item.id === device.id ? oriented : item) };
+          const next = quality(trial);
+          if (better(next, candidateScore)) { candidate = trial; candidateScore = next; changed = true; }
+        }
       }
       if (!changed) break;
     }
     if (better(candidateScore, score)) { best = candidate; score = candidateScore; }
   }
-  return best;
+  return { ...best, inputTargets: best.inputTargets.map((target) => {
+    const device = best.devices.find((d) => d.id === target.device)!;
+    const pin = best.nets.find((n) => n.id === target.net && (!best.sectional || (n.block ?? null) === model.stages[device.stage].block));
+    return { ...target, aligned: !!pin?.anchor && Math.abs(device.terminals[target.terminal][1] - pin.anchor[1]) < 1e-7 };
+  }) };
 }
 
 function layoutConnected(model: CircuitModel, appearances: ReadonlyMap<string, NetType> = new Map(), branches = false, sweep = false): CircuitLayout {
   const netType = (id: string) => appearances.get(id) ?? model.nets.find((net) => net.id === id)?.type;
   const pane = resolveSymbol('resistor').width, gap = pane / 2, padding = pane / 4, pitch = pane + gap;
-  const sharedInputs = model.nets.filter((net) => netType(net.id) === 'pinIn'
-    && model.connections.filter((connection) => connection.net === net.id).length > 1).length;
-  const internalX = pane + gap * 2 + Math.max(0, sharedInputs - 2) * gap + (appearances.size ? pane : 0);
+  const internalX = pane * 2;
   const deviceById = new Map(model.devices.map((device) => [device.id, device]));
   const declaration = new Map(model.devices.map((device, index) => [device.id, index]));
   const netById = new Map(model.nets.map((net) => [net.id, net]));
@@ -278,7 +287,7 @@ function layoutConnected(model: CircuitModel, appearances: ReadonlyMap<string, N
     id: device.id, stage: device.stage, region: 'top' }));
   const supplyY = voltages.length ? pitch : 0;
   supplies.forEach((net, index) => placedNets.set(net.id, { ...place('supplyNet', [internalX + index * pitch, supplyY]), id: net.id, region: 'top' }));
-  let cursorY = (Number(voltages.length > 0) + Number(supplies.length > 0)) * pitch + gap;
+  let cursorY = Number(voltages.length > 0) * pitch + gap;
 
   for (const [stageIndex, stage] of model.stages.entries()) {
     const members = stage.devices.map((id) => deviceById.get(id)!).filter((device) => device.type !== 'voltageSource');
@@ -298,8 +307,7 @@ function layoutConnected(model: CircuitModel, appearances: ReadonlyMap<string, N
         }
       }
       const parallelCmos = group.topology === 'parallel' && (group.devices.every(isPmos) || group.devices.every(isNmos));
-      const stagger = direction === 'LR' && (parallelCmos || group.devices.some((device) =>
-        device.terminals.some((terminal) => netById.get(netAt(device, terminal) ?? '')?.type === 'pinIn')));
+      const stagger = direction === 'LR' && parallelCmos;
       const firstInput = (device: Device) => Math.min(...device.terminals.map((terminal) =>
         inputOrder.get(netAt(device, terminal) ?? '') ?? model.nets.length));
       const rows = new Map(group.devices.map((device, index) => ({ device, index }))
@@ -546,29 +554,6 @@ function layoutSections(model: CircuitModel, sweep = false): CircuitLayout {
       occurrence: `${scopeIndex}:${net.id}:${net.symbol}`, role: appearances.has(net.id) && model.nets.find((item) => item.id === net.id)!.type !== 'pinIn'
         ? 'boundary'
         : net.symbol === 'supplyNet' || net.symbol === 'ground' ? 'local' : 'external' }));
-    for (const input of [...symbols]) {
-      if (input.symbol !== 'pinIn') continue;
-      const sourceNet = nets.find((net) => net.id === input.id)!;
-      if (sourceNet.type !== 'pinIn' && scopeIndex !== memberships.get(input.id)!.at(-1)) continue;
-      const recipients = localModel.connections.filter((connection) => connection.net === input.id);
-      const receivingStages = [...new Set(recipients.map((connection) => localModel.devices.find((device) => device.id === connection.device)!.stage))].sort((a, b) => a - b);
-      if (receivingStages.length < 2 || recipients.some((connection) => connection.terminal !== 'G')) continue;
-      const copies: PlacedNet[] = [];
-      for (const stage of receivingStages.slice(1)) {
-        const recipient = layout.devices.filter((device) => device.stage === stage && recipients.some((connection) => connection.device === device.id))
-          .sort((a, b) => a.terminals.G[1] - b.terminals.G[1] || a.terminals.G[0] - b.terminals.G[0])[0];
-        const position: Point = [layout.stages[stage].bounds.minX - 180, recipient.terminals.G[1] - resolveSymbol('pinIn').anchor![1]];
-        const repeated = place('pinIn', position);
-        if ([...layout.devices, ...symbols, ...copies].some((symbol) => repeated.bounds.minX < symbol.bounds.maxX && repeated.bounds.maxX > symbol.bounds.minX
-          && repeated.bounds.minY < symbol.bounds.maxY && repeated.bounds.maxY > symbol.bounds.minY))
-          break;
-        copies.push({ ...input, ...repeated, recipientStage: scope.stages[stage], role: 'local', occurrence: `${input.occurrence}:stage:${scope.stages[stage]}` });
-      }
-      if (copies.length === receivingStages.length - 1) {
-        symbols[symbols.indexOf(input)] = { ...input, recipientStage: scope.stages[receivingStages[0]] };
-        symbols.push(...copies);
-      }
-    }
     let outputBottom = -Infinity;
     const outgoing = nets.filter((net) => {
       const members = memberships.get(net.id)!;
@@ -585,7 +570,7 @@ function layoutSections(model: CircuitModel, sweep = false): CircuitLayout {
         occurrence: `${scopeIndex}:${net.id}:pinOut`, role: net.type === 'pinOut' && scopeIndex === memberships.get(net.id)!.at(-1) ? 'external' : 'boundary' });
       outputBottom = symbol.bounds.maxY;
     }
-    const box = enclose([...layout.devices, ...symbols].map((item) => item.bounds).concat(layout.stages.map((stage) => stage.bounds)), 90);
+    const box = enclose(layout.devices.map((item) => item.bounds).concat(layout.stages.map((stage) => stage.bounds)), 360);
     return { scope, layout, symbols, box };
   });
   const height = Math.max(...locals.filter((item) => item.scope.block !== null).map((item) => item.box.maxY - item.box.minY));
