@@ -455,6 +455,11 @@ B ---|G| M2`));
     expect(inverters.stages).toEqual([0, 1]);
     expect(core.stages).toEqual([2, 3, 4, 5]);
     expect(inverters.bounds!.maxX).toBeLessThan(core.bounds!.minX);
+    expect(inverters.bounds!.minY + inverters.bounds!.maxY).toBe(core.bounds!.minY + core.bounds!.maxY);
+    expect(layout.inputTargets).toEqual([
+      { net: 'A', device: 'PA', terminal: 'G', aligned: true },
+      { net: 'B', device: 'PB', terminal: 'G', aligned: true },
+    ]);
     expect(layout.bounds.maxY - layout.bounds.minY).toBeLessThan(stacked.bounds.maxY - stacked.bounds.minY);
     for (const stage of layout.stages) {
       const dx = stage.bounds.minX - stacked.stages[stage.stage].bounds.minX;
@@ -489,7 +494,7 @@ end`);
     expect(layout.devices.map((item) => [item.id, item.stage])).toEqual([['Loose', 3], ['R1', 1], ['R2', 2]]);
     const [first, second] = layout.blocks;
     expect(first.bounds!.maxX).toBeLessThan(second.bounds!.minX);
-    expect(first.bounds!.minY).toBe(second.bounds!.minY);
+    expect(first.bounds!.minY + first.bounds!.maxY).toBe(second.bounds!.minY + second.bounds!.maxY);
     expect(layout.stages[0].bounds.maxY).toBeLessThan(layout.stages[1].bounds.minY);
     expect(layout.stages[3].bounds.minY).toBeGreaterThan(Math.max(first.bounds!.maxY, second.bounds!.maxY));
     geometry(layout);

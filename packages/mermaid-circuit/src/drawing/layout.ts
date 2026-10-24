@@ -305,7 +305,10 @@ export function layoutCircuit(model: CircuitModel): CircuitLayout {
   const blockPadding = blockColumns.length > 1 ? gap : padding;
   if (blockColumns.length > 1) {
     const top = Math.min(...stages.map((stage) => stage.bounds.minY)) - blockPadding;
-    let left = internalX - padding, bottom = top;
+    const blockBoxes = blockColumns.map((block) => enclose(block.stages.map((index) => stages[index].bounds), blockPadding));
+    const height = Math.max(...blockBoxes.map((box) => box.maxY - box.minY));
+    let left = internalX - padding;
+    const bottom = top + height;
     const translateStage = (index: number, dx: number, dy: number) => {
       for (const id of model.stages[index].devices) {
         const device = placed.get(id)!;
@@ -314,10 +317,10 @@ export function layoutCircuit(model: CircuitModel): CircuitLayout {
       }
       stages[index] = { ...stages[index], bounds: translateBounds(stages[index].bounds, [dx, dy]) };
     };
-    for (const block of blockColumns) {
-      const box = enclose(block.stages.map((index) => stages[index].bounds), blockPadding);
-      for (const index of block.stages) translateStage(index, left - box.minX, top - box.minY);
-      bottom = Math.max(bottom, top + box.maxY - box.minY);
+    for (const [column, block] of blockColumns.entries()) {
+      const box = blockBoxes[column];
+      const dy = top + (height - (box.maxY - box.minY)) / 2 - box.minY;
+      for (const index of block.stages) translateStage(index, left - box.minX, dy);
       left += box.maxX - box.minX + pitch;
     }
     const ungrouped = stages.filter((stage) => stage.block === null);
@@ -347,9 +350,12 @@ export function layoutCircuit(model: CircuitModel): CircuitLayout {
     let previousBottom = -gap;
     const nets = model.nets.filter((net) => net.type === type);
     for (const [index, net] of nets.entries()) {
+      const column = (id: string) => blockColumns.length > 1
+        ? model.stages[deviceById.get(id)!.stage].block ?? model.blocks.length : 0;
       const recipients = model.devices.flatMap((device) => device.terminals.filter((terminal) => netAt(device, terminal) === net.id)
         .map((terminal) => ({ device: device.id, terminal, point: placed.get(device.id)!.terminals[terminal] })))
-        .sort((a, b) => a.point[1] - b.point[1] || a.point[0] - b.point[0] || declaration.get(a.device)! - declaration.get(b.device)!);
+        .sort((a, b) => (type === 'pinIn' ? column(a.device) - column(b.device) : 0)
+          || a.point[1] - b.point[1] || a.point[0] - b.point[0] || declaration.get(a.device)! - declaration.get(b.device)!);
       const first = recipients[0], anchor = resolveSymbol(type).anchor!;
       let outputY = outputCenterY;
       if (type === 'pinOut' && nets.length === 1 && recipients.every((recipient) => recipient.terminal === 'D'

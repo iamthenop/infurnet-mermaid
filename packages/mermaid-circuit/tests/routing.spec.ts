@@ -67,6 +67,15 @@ it.each(Object.entries(fixtures))('routes every connection faithfully: %s', (_pa
   const model = parseCircuit(source), original = structuredClone(model), layout = layoutCircuit(model);
   const routes = routeCircuit(model, layout);
   connectivity(model, layout, routes);
+  if (layout.blocks.filter((block) => block.bounds).length > 1) for (const target of layout.inputTargets.filter((target) => target.aligned)) {
+    const input = layout.nets.find((net) => net.id === target.net)!.anchor!;
+    const terminal = layout.devices.find((device) => device.id === target.device)!.terminals[target.terminal];
+    const route = routes.nets.find((route) => route.net === target.net)!;
+    const straightLength = route.segments.filter((segment) => segment.a[1] === input[1] && segment.b[1] === input[1])
+      .reduce((length, segment) => length + Math.max(0, Math.min(terminal[0], Math.max(segment.a[0], segment.b[0]))
+        - Math.max(input[0], Math.min(segment.a[0], segment.b[0]))), 0);
+    expect(straightLength, `${target.net} must connect straight to ${target.device}.${target.terminal}`).toBeCloseTo(terminal[0] - input[0]);
+  }
   const inputColumns = layout.nets.filter((net) => model.nets.find((item) => item.id === net.id)!.type === 'pinIn')
     .sort((a, b) => a.anchor![1] - b.anchor![1])
     .map((net) => routes.nets.find((route) => route.net === net.id)!.junctions)

@@ -25,9 +25,11 @@ The expression *supply rail* describes graphical placement, not an electrical ob
 
 Placement produces geometry separate from the electrical model. It preserves device and terminal identities, net assignments, and structural membership.
 
-With multiple nonempty blocks, use columns aligned at the top, preserving declaration order from left to right and down their stages. Ungrouped stages follow below this row, with the implicit final stage last.
+With multiple nonempty blocks, align their vertical midpoints, preserving declaration order from left to right and down their stages. Ungrouped stages follow below this row, with the implicit final stage last.
 
 Without multiple nonempty blocks, stages retain one vertical sequence. Block placement preserves stage membership and electrical connectivity.
+
+Inputs align with the first recipient in the leftmost receiving block, then branch onward. Within that block, select the top-left recipient using the orientation priorities.
 
 Stages in the same vertical diagram sequence share a horizontal centerline. Stages retain their individual widths and internal device arrangements.
 
