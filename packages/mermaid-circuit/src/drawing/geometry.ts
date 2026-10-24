@@ -1,4 +1,4 @@
-// Adapted from Schemdraw's transform.py and segments.py (MIT).
+// Transform order follows Schemdraw's transform.py. Bounds helpers are independent.
 // Copyright (c) 2014-2026 Collin J. Delker. See LICENSE and ACKNOWLEDGEMENTS.md.
 
 export type Point = readonly [x: number, y: number];

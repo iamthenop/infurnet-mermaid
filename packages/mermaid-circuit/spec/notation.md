@@ -122,6 +122,10 @@ A `block` is a typed subgraph that groups related stages into a larger circuit s
 
 A block does not create an electrical interface, a reusable device type, or a new connectivity domain.
 
+Repeated graphical endpoints and local rails refer to existing diagram-wide net identifiers. They are drawing objects, not additional declarations or syntax. Equal visible labels on different net identifiers do not connect those nets.
+
+The [sectional drawing rules](style.md#sectional-net-presentation) govern their appearance.
+
 ### Integrated circuit
 
 An `ic` is a device representation with dynamically defined pins.

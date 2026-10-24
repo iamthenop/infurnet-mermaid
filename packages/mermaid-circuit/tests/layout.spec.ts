@@ -192,9 +192,13 @@ R3 ---|B:A| R1`));
 
   it.each([['NAND2', nand], ['NOR3', nor], ['XOR2', xor]])('centers power and staggers parallel devices consistently in %s', (_name, source) => {
     const layout = layoutCircuit(parseCircuit(source));
-    const xs = layout.devices.flatMap((device) => [device.terminals.D[0], device.terminals.S[0]]);
-    const center = (Math.min(...xs) + Math.max(...xs)) / 2;
-    for (const net of layout.nets.filter((net) => net.symbol === 'supplyNet' || net.symbol === 'ground')) expect(net.anchor![0]).toBe(center);
+    for (const section of layout.sections ?? [{ block: undefined, stages: layout.stages.map((stage) => stage.stage) }]) {
+      const xs = layout.devices.filter((device) => section.stages.includes(device.stage)).flatMap((device) => [device.terminals.D[0], device.terminals.S[0]]);
+      const center = (Math.min(...xs) + Math.max(...xs)) / 2;
+      const rails = layout.nets.filter((net) => net.block === section.block && (net.symbol === 'supplyNet' || net.symbol === 'ground'));
+      expect(rails).toHaveLength(2);
+      for (const net of rails) expect(net.anchor![0]).toBe(center);
+    }
     for (const group of layout.stages.flatMap((stage) => stage.groups).filter((group) => group.topology === 'parallel')) {
       const devices = group.devices.map((id) => device(layout, id));
       for (let i = 1; i < devices.length; i++) expect(devices[i].position[1] - devices[i - 1].position[1]).toBe(90);
@@ -447,7 +451,7 @@ B ---|G| M2`));
     geometry(layout);
   });
 
-  it('places the XOR inverter block left of the core and reduces total height', () => {
+  it('centers XOR sections and places parallel NMOS chains side by side', () => {
     const model = parseCircuit(xor), layout = layoutCircuit(model);
     const stacked = layoutCircuit({ ...model, blocks: [], stages: model.stages.map((stage) => ({ ...stage, block: null })) });
     const [inverters, core] = layout.blocks;
@@ -461,6 +465,18 @@ B ---|G| M2`));
       { net: 'B', device: 'PB', terminal: 'G', aligned: true },
     ]);
     expect(layout.bounds.maxY - layout.bounds.minY).toBeLessThan(stacked.bounds.maxY - stacked.bounds.minY);
+    expect(device(layout, 'N0').position[0]).toBeLessThan(device(layout, 'N2').position[0]);
+    for (const [upper, lower] of [['N0', 'N1'], ['N2', 'N3']]) {
+      expect(device(layout, upper).position[0]).toBe(device(layout, lower).position[0]);
+      expect(device(layout, upper).bounds.maxY).toBeLessThan(device(layout, lower).bounds.minY);
+    }
+    expect(device(layout, 'N0').position[1]).toBe(device(layout, 'N2').position[1]);
+    expect(device(layout, 'N1').position[1]).toBe(device(layout, 'N3').position[1]);
+    for (const id of ['Abar', 'Bbar']) {
+      expect(layout.nets.filter((net) => net.id === id).map((net) => [net.symbol, net.block, net.role]))
+        .toEqual([['pinOut', 0, 'boundary'], ['pinIn', 1, 'boundary']]);
+      expect(model.nets.filter((net) => net.id === id)).toHaveLength(1);
+    }
     for (const stage of layout.stages) {
       const dx = stage.bounds.minX - stacked.stages[stage.stage].bounds.minX;
       const dy = stage.bounds.minY - stacked.stages[stage.stage].bounds.minY;
@@ -470,6 +486,30 @@ B ---|G| M2`));
         expectPoint(after.position, [before.position[0] + dx, before.position[1] + dy]);
       }
     }
+    geometry(layout);
+  });
+
+  it.each([true, false])('recognizes parallel series stages only with both outer nets shared: %s', (shared) => {
+    const model = circuit(`OUT([OUT]):::pinOut
+VSS{{VSS}}:::ground
+OTHER{{OTHER}}:::ground
+subgraph block core
+${stage(`${declaration('M0', 'nmos')}\n${declaration('M1', 'nmos')}`, 'TB').replace('network', 'high')}
+${stage(`${declaration('M2', 'nmos')}\n${declaration('M3', 'nmos')}`, 'TB').replace('network', 'low')}
+end
+OUT ---|D| M0
+OUT ---|D| M2
+M0 ---|S:D| M1
+M2 ---|S:D| M3
+VSS ---|S| M1
+${shared ? 'VSS' : 'OTHER'} ---|S| M3`);
+    const original = structuredClone(model), layout = layoutCircuit(model);
+    if (shared) {
+      expect(device(layout, 'M0').position[1]).toBe(device(layout, 'M2').position[1]);
+      expect(device(layout, 'M0').position[0]).toBeLessThan(device(layout, 'M2').position[0]);
+    } else expect(device(layout, 'M1').bounds.maxY).toBeLessThan(device(layout, 'M2').bounds.minY);
+    expect(layout.stages.map((stage) => stage.block)).toEqual([0, 0]);
+    expect(model).toEqual(original);
     geometry(layout);
   });
 

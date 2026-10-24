@@ -44,8 +44,11 @@ export const renderer: DiagramDefinition['renderer'] = {
     const wires = element(content, 'g', { fill: 'none', stroke: 'black', 'stroke-width': 2, 'stroke-linecap': 'round', 'data-layer': 'wires' });
     for (const net of routing.nets) {
       const group = element(wires, 'g', { 'data-net': net.net });
-      for (const segment of net.segments) element(group, 'path', { d: `M ${segment.a.join(' ')} L ${segment.b.join(' ')}` });
-      for (const point of net.junctions) element(group, 'circle', { cx: point[0], cy: point[1], r: 3, fill: 'black', 'data-junction': net.net });
+      for (const component of net.components) {
+        const parent = layout.sectional ? element(group, 'g', { 'data-route-block': component.block ?? 'ungrouped' }) : group;
+        for (const segment of component.segments) element(parent, 'path', { d: `M ${segment.a.join(' ')} L ${segment.b.join(' ')}` });
+        for (const point of component.junctions) element(parent, 'circle', { cx: point[0], cy: point[1], r: 3, fill: 'black', 'data-junction': net.net });
+      }
     }
     for (const crossing of routing.crossings) {
       const [x, y] = crossing.point;
@@ -57,7 +60,8 @@ export const renderer: DiagramDefinition['renderer'] = {
     const artwork = element(content, 'g', { 'data-layer': 'symbols' });
     for (const [index, placed] of [...layout.devices, ...layout.nets].entries()) {
       const group = element(artwork, 'g', { transform: placed.svgTransform, 'data-symbol': placed.symbol,
-        [Object.hasOwn(placed, 'stage') ? 'data-device' : 'data-net-symbol']: placed.id });
+        [Object.hasOwn(placed, 'stage') ? 'data-device' : 'data-net-symbol']: placed.id,
+        ...('occurrence' in placed && placed.occurrence ? { 'data-occurrence': placed.occurrence, 'data-net-role': placed.role!, 'data-net-block': placed.block ?? 'ungrouped' } : {}) });
       const source = new DOMParser().parseFromString(resolveSymbol(placed.symbol).svg, 'image/svg+xml').documentElement;
       const ids = new Map([...source.querySelectorAll('[id]')].map((node, ordinal) => [node.id, `${id}-symbol-${index}-${ordinal}`]));
       for (const node of source.querySelectorAll('*')) for (const attribute of [...node.attributes]) {
@@ -83,12 +87,13 @@ export const renderer: DiagramDefinition['renderer'] = {
     }
     for (const net of model.nets) {
       if (net.implicit) continue;
-      const placed = layout.nets.find((item) => item.id === net.id);
-      if (placed) {
+      const occurrences = layout.nets.filter((item) => item.id === net.id);
+      if (occurrences.length) for (const placed of occurrences) {
         const [x, y] = placed.position;
-        const point: Point = net.type === 'pinIn' ? [x + 78, y + 65] : net.type === 'pinOut' ? [x + 42, y + 65]
-          : net.type === 'supplyNet' ? [x + 60, y + 26] : [x + 60, y + 104];
-        label(labels, net.label, point, { 'text-anchor': 'middle', 'data-net-label': net.id });
+        const point: Point = placed.symbol === 'pinIn' ? [x + 78, y + 65] : placed.symbol === 'pinOut' ? [x + 42, y + 65]
+          : placed.symbol === 'supplyNet' ? [x + 60, y + 26] : [x + 60, y + 104];
+        label(labels, net.label, point, { 'text-anchor': 'middle', 'data-net-label': net.id,
+          ...(placed.occurrence ? { 'data-occurrence-label': placed.occurrence } : {}) });
       } else {
         const route = routing.nets.find((item) => item.net === net.id)!;
         const length = (a: Point, b: Point) => Math.abs(b[0] - a[0]) + Math.abs(b[1] - a[1]);

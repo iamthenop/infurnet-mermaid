@@ -3,8 +3,15 @@ import type { Bounds, Point } from './geometry.js';
 import type { CircuitLayout } from './layout.js';
 
 export interface WireSegment { readonly a: Point; readonly b: Point }
-export interface Attachment { readonly device?: string; readonly terminal?: string; readonly point: Point }
+export interface Attachment { readonly device?: string; readonly terminal?: string; readonly occurrence?: string; readonly point: Point }
+export interface RoutedComponent {
+  readonly block: number | null;
+  readonly attachments: readonly Attachment[];
+  readonly segments: readonly WireSegment[];
+  readonly junctions: readonly Point[];
+}
 export interface RoutedNet {
+  readonly components: readonly RoutedComponent[];
   readonly net: string;
   readonly attachments: readonly Attachment[];
   readonly segments: readonly WireSegment[];
@@ -124,10 +131,45 @@ class Queue {
 }
 
 export function routeCircuit(model: CircuitModel, layout: CircuitLayout): CircuitRouting {
+  if (!layout.sectional) return routeConnected(model, layout);
+  for (const connection of model.connections) {
+    const device = layout.devices.find((device) => device.id === connection.device);
+    if (!device?.terminals[connection.terminal] || layout.sections!.filter((section) => section.stages.includes(device.stage)).length !== 1)
+      throw new Error(`Missing sectional attachment for ${connection.device}.${connection.terminal} on net ${connection.net}.`);
+  }
+  const routes = layout.sections!.map((section, index) => {
+    const devices = layout.devices.filter((device) => section.stages.includes(device.stage));
+    const ids = new Set(devices.map((device) => device.id));
+    const connections = model.connections.filter((connection) => ids.has(connection.device));
+    const nets = layout.nets.filter((net) => (net.block ?? null) === section.block);
+    const netIds = new Set([...connections.map((connection) => connection.net), ...nets.map((net) => net.id)]);
+    const localModel = { ...model, devices: model.devices.filter((device) => ids.has(device.id)), connections, nets: model.nets.filter((net) => netIds.has(net.id) || index === 0 && !model.connections.some((connection) => connection.net === net.id)) };
+    const localLayout = { ...layout, sectional: undefined, devices, nets, blocks: [], stages: layout.stages.filter((stage) => section.stages.includes(stage.stage)), bounds: section.bounds,
+      inputTargets: layout.inputTargets.filter((target) => ids.has(target.device)) };
+    const routed = routeConnected(localModel, localLayout, section.bounds);
+    for (const net of routed.nets) if (net.segments.some((segment) => [segment.a, segment.b].some((point) =>
+      point[0] < section.bounds.minX + frameClearance || point[0] > section.bounds.maxX - frameClearance
+      || point[1] < section.bounds.minY + frameClearance || point[1] > section.bounds.maxY - frameClearance)))
+      throw new Error(`Net ${net.net} escapes section ${section.block ?? 'ungrouped'}.`);
+    return { block: section.block, routed };
+  });
+  return { nets: model.nets.map((net) => {
+    const components = routes.flatMap(({ block, routed }) => routed.nets.filter((item) => item.net === net.id)
+      .map((item) => ({ block, attachments: item.attachments, segments: item.segments, junctions: item.junctions })));
+    if (!components.length) throw new Error(`No sectional route for net ${net.id}.`);
+    if (components.length > 1 && components.some((component) => !component.attachments.some((attachment) => attachment.occurrence)))
+      throw new Error(`Net ${net.id} has a section without a named endpoint.`);
+    return { net: net.id, components, attachments: components.flatMap((component) => component.attachments),
+      segments: components.flatMap((component) => component.segments), junctions: components.flatMap((component) => component.junctions) };
+  }), crossings: routes.flatMap(({ routed }) => routed.crossings) };
+}
+
+function routeConnected(model: CircuitModel, layout: CircuitLayout, limit?: Bounds): CircuitRouting {
+  const isInput = (id: string) => layout.nets.some((net) => net.id === id && net.symbol === 'pinIn');
   if (layout.unplacedNetIds.length) throw new Error(`Unsupported pinInOut placement: ${layout.unplacedNetIds.join(', ')}.`);
   const panes = [...layout.devices, ...layout.nets];
   const frames = [...layout.stages.map((stage) => stage.bounds), ...layout.blocks.flatMap((block) => block.bounds ? [block.bounds] : [])];
-  const sideBySideBlocks = layout.blocks.filter((block) => block.bounds).length > 1;
+  const sideBySideBlocks = !!limit || layout.blocks.filter((block) => block.bounds).length > 1;
   const entries = model.nets.map((net) => {
     const attachments = model.connections.filter((c) => c.net === net.id).map((c) => {
       const placed = layout.devices.find((d) => d.id === c.device);
@@ -139,12 +181,16 @@ export function routeCircuit(model: CircuitModel, layout: CircuitLayout): Circui
       || model.devices.find((d) => d.id === a.device)!.terminals.indexOf(a.terminal) - model.devices.find((d) => d.id === b.device)!.terminals.indexOf(b.terminal));
     const target = layout.inputTargets.find((t) => t.net === net.id);
     if (target) attachments.sort((a, b) => Number(b.device === target.device && b.terminal === target.terminal) - Number(a.device === target.device && a.terminal === target.terminal));
-    const placed = layout.nets.find((n) => n.id === net.id);
+    const symbols = layout.nets.filter((n) => n.id === net.id);
     const endpoints: (Attachment & { stub: WireSegment })[] = attachments;
-    if (placed?.anchor) endpoints.unshift({ point: placed.anchor, stub: { a: placed.anchor, b: escape(placed.anchor, placed.bounds) } });
+    for (const placed of [...symbols].reverse()) if (placed.anchor) endpoints.unshift({ point: placed.anchor, occurrence: placed.occurrence, stub: { a: placed.anchor, b: escape(placed.anchor, placed.bounds) } });
+    if (symbols.length > 1) {
+      const outgoing = endpoints.splice(1, symbols.length - 1);
+      endpoints.push(...outgoing);
+    }
     return { net, endpoints };
   }).sort((a, b) => {
-    const inputs = Number(b.net.type === 'pinIn') - Number(a.net.type === 'pinIn');
+    const inputs = Number(isInput(b.net.id)) - Number(isInput(a.net.id));
     if (inputs) return inputs;
     if (a.net.implicit && b.net.implicit) {
       const rank = (e: Attachment) => model.devices.findIndex((d) => d.id === e.device) * 10
@@ -168,7 +214,7 @@ export function routeCircuit(model: CircuitModel, layout: CircuitLayout): Circui
     endpoint.stub = { a: endpoint.point, b: [endpoint.point[0], candidates[0]] };
   }
   const stubs = entries.flatMap((entry) => entry.endpoints.length > 1 ? entry.endpoints.map((endpoint) => ({ net: entry.net.id, endpoint })) : []);
-  const straightInputs = entries.filter((entry) => entry.net.type === 'pinIn' && entry.endpoints.length > 1
+  const straightInputs = entries.filter((entry) => isInput(entry.net.id) && entry.endpoints.length > 1
     && horizontal(entry.endpoints[1].stub) && near(entry.endpoints[0].point[1], entry.endpoints[1].point[1]))
     .map((entry) => ({ net: entry.net.id, segment: { a: entry.endpoints[0].point, b: entry.endpoints[1].point } }));
   for (const { net, endpoint } of stubs) {
@@ -207,6 +253,21 @@ export function routeCircuit(model: CircuitModel, layout: CircuitLayout): Circui
     }
   }
   const buses: { net: string; endpoints: typeof entries[number]['endpoints']; segment: WireSegment }[] = [];
+  function addRail(entry: typeof entries[number], endpoints: typeof entries[number]['endpoints'], top: boolean): void {
+    const edge = top ? Math.min(...endpoints.map((endpoint) => endpoint.point[1])) : Math.max(...endpoints.map((endpoint) => endpoint.point[1]));
+    const output = layout.nets.some((net) => net.id === entry.net.id && net.symbol === 'pinOut') ? entry.endpoints.find((endpoint) => !endpoint.device)?.point : undefined;
+    const y = output && (top ? output[1] <= edge - 60 : output[1] >= edge + 60) ? output[1] : edge + (top ? -60 : 60);
+    for (const endpoint of endpoints) endpoint.stub = { a: endpoint.point, b: [endpoint.point[0], y] };
+    const segment: WireSegment = {
+      a: [Math.min(...endpoints.map((endpoint) => endpoint.point[0])), y],
+      b: [Math.max(...endpoints.map((endpoint) => endpoint.point[0])), y],
+    };
+    if (panes.some((pane) => blocks(segment, pane.bounds))
+      || endpoints.some((endpoint) => panes.some((pane) => pane.id !== endpoint.device && blocks(endpoint.stub, pane.bounds)))
+      || [segment, ...endpoints.map((endpoint) => endpoint.stub)].some((wire) => frames.some((frame) => crowdsFrame(wire, frame))))
+      throw new Error(`Cannot route net ${entry.net.id} through a common parallel rail without a symbol collision or frame clearance violation.`);
+    buses.push({ net: entry.net.id, endpoints, segment });
+  }
   for (const stage of layout.stages) for (const group of stage.groups) {
     const devices = group.devices.map((id) => layout.devices.find((device) => device.id === id)!);
     if (group.topology !== 'parallel' || group.direction !== 'LR' || devices.length < 2
@@ -216,20 +277,22 @@ export function routeCircuit(model: CircuitModel, layout: CircuitLayout): Circui
       const entry = entries.find((entry) => devices.every((device) => entry.endpoints.some((endpoint) => endpoint.device === device.id && endpoint.terminal === terminal)));
       if (!entry) continue;
       const endpoints = entry.endpoints.filter((endpoint) => group.devices.includes(endpoint.device!) && endpoint.terminal === terminal);
-      const top = near(endpoints[0].point[1], devices[0].bounds.minY);
-      const edge = top ? Math.min(...endpoints.map((endpoint) => endpoint.point[1])) : Math.max(...endpoints.map((endpoint) => endpoint.point[1]));
-      const output = entry.net.type === 'pinOut' ? entry.endpoints.find((endpoint) => !endpoint.device)?.point : undefined;
-      const y = output && (top ? output[1] <= edge - 60 : output[1] >= edge + 60) ? output[1] : edge + (top ? -60 : 60);
-      for (const endpoint of endpoints) endpoint.stub = { a: endpoint.point, b: [endpoint.point[0], y] };
-      const segment: WireSegment = {
-        a: [Math.min(...endpoints.map((endpoint) => endpoint.point[0])), y],
-        b: [Math.max(...endpoints.map((endpoint) => endpoint.point[0])), y],
-      };
-      if (panes.some((pane) => blocks(segment, pane.bounds))
-        || endpoints.some((endpoint) => panes.some((pane) => pane.id !== endpoint.device && blocks(endpoint.stub, pane.bounds)))
-        || [segment, ...endpoints.map((endpoint) => endpoint.stub)].some((wire) => frames.some((frame) => crowdsFrame(wire, frame))))
-        throw new Error(`Cannot route net ${entry.net.id} through a common parallel rail without a symbol collision or frame clearance violation.`);
-      buses.push({ net: entry.net.id, endpoints, segment });
+      addRail(entry, endpoints, near(endpoints[0].point[1], devices[0].bounds.minY));
+    }
+  }
+  {
+    const chains = layout.stages.filter((stage) => stage.groups.length === 1 && stage.groups[0].topology === 'series'
+      && stage.groups[0].direction === 'TB' && stage.groups[0].devices.every((id) => {
+        const device = layout.devices.find((device) => device.id === id)!;
+        return device.rotation === 0 && ['nmos', 'nmosBlk'].includes(device.symbol);
+      }));
+    const rows = new Map<number, typeof chains>();
+    for (const chain of chains) rows.set(chain.bounds.minY, [...(rows.get(chain.bounds.minY) ?? []), chain]);
+    for (const row of rows.values()) if (row.length > 1) for (const terminal of ['D', 'S']) {
+      const ids = row.map((stage) => terminal === 'D' ? stage.groups[0].devices[0] : stage.groups[0].devices.at(-1)!);
+      const entry = entries.find((entry) => ids.every((id) => entry.endpoints.some((endpoint) => endpoint.device === id && endpoint.terminal === terminal)));
+      if (!entry) throw new Error('Parallel series branches have no common rail.');
+      addRail(entry, entry.endpoints.filter((endpoint) => ids.includes(endpoint.device!) && endpoint.terminal === terminal), terminal === 'D');
     }
   }
   const xs = new Set<number>(), ys = new Set<number>();
@@ -242,7 +305,7 @@ export function routeCircuit(model: CircuitModel, layout: CircuitLayout): Circui
     for (const offset of [0, 30, 40, 60, 80, 90]) ys.add(y + offset);
   const distinct = (values: Set<number>) => [...values].sort((a, b) => a - b).filter((value, i, sorted) => !i || !near(value, sorted[i - 1]));
   const xValues = distinct(xs), yValues = distinct(ys);
-  const sharedInputs = entries.filter((entry) => entry.net.type === 'pinIn' && entry.endpoints.length > 2)
+  const sharedInputs = entries.filter((entry) => isInput(entry.net.id) && entry.endpoints.length > 2)
     .sort((a, b) => a.endpoints[0].point[1] - b.endpoints[0].point[1]);
   const branchColumns = new Map<string, number>();
   if (sharedInputs.length) {
@@ -263,7 +326,9 @@ export function routeCircuit(model: CircuitModel, layout: CircuitLayout): Circui
   const width = xValues.length;
   const points: Point[] = yValues.flatMap((y) => xValues.map((x): Point => [x, y]));
   const neighbors = points.map((p, index) => [index % width ? index - 1 : -1, index % width < width - 1 ? index + 1 : -1, index - width, index + width]
-    .filter((next) => next >= 0 && next < points.length && !equal(p, points[next]) && !panes.some((pane) => blocks({ a: p, b: points[next] }, pane.bounds))
+    .filter((next) => next >= 0 && next < points.length && (!limit || inside(p, limit) && inside(points[next], limit)
+      && [p, points[next]].every((point) => point[0] >= limit.minX + frameClearance && point[0] <= limit.maxX - frameClearance
+        && point[1] >= limit.minY + frameClearance && point[1] <= limit.maxY - frameClearance)) && !equal(p, points[next]) && !panes.some((pane) => blocks({ a: p, b: points[next] }, pane.bounds))
       && !frames.some((frame) => crowdsFrame({ a: p, b: points[next] }, frame))));
   const completed: RoutedNet[] = [];
 
@@ -284,7 +349,7 @@ export function routeCircuit(model: CircuitModel, layout: CircuitLayout): Circui
       const start = points.findIndex((p) => equal(p, endpoint.stub.b));
       const goals = new Set(points.flatMap((p, index) => (segments.length === 1 ? equal(p, segments[0].b) : segments.some((s) => on(p, s)))
         && (branchColumn === undefined || near(p[0], branchColumn))
-        && !(net.type === 'pinIn' && segments.length > 1 && layout.stages.some((stage) => inside(p, stage.bounds))) ? [index] : []));
+        && !(isInput(net.id) && segments.length > 1 && layout.stages.some((stage) => inside(p, stage.bounds))) ? [index] : []));
       const costs = new Float64Array(points.length * 3).fill(Infinity), previous = new Int32Array(points.length * 3).fill(-1);
       const queue = new Queue();
       const initial = start * 3 + (horizontal(endpoint.stub) ? 1 : 2);
@@ -306,7 +371,7 @@ export function routeCircuit(model: CircuitModel, layout: CircuitLayout): Circui
             const cross = intersection(segment, s);
             return cross && (distance(cross, s.a) < 8 || distance(cross, s.b) < 8 || direction !== nextDirection && on(p, s));
           })())) continue;
-          if (net.type === 'pinIn' && segments.length > 1 && segments.some((s) => {
+          if (isInput(net.id) && segments.length > 1 && segments.some((s) => {
             const cross = intersection(segment, s);
             return cross && layout.stages.some((stage) => inside(cross, stage.bounds));
           })) continue;
@@ -324,8 +389,10 @@ export function routeCircuit(model: CircuitModel, layout: CircuitLayout): Circui
     const normalized = split(segments, endpoints);
     const vertices: Point[] = [];
     for (const s of normalized) for (const p of [s.a, s.b]) if (!vertices.some((v) => equal(v, p))) vertices.push(p);
-    completed.push({ net: net.id, attachments: endpoints.map(({ point, device, terminal }) => ({ point, device, terminal })), segments: normalized,
-      junctions: vertices.filter((p) => normalized.filter((s) => equal(p, s.a) || equal(p, s.b)).length >= 3) });
+    const attachments = endpoints.map(({ point, device, terminal, occurrence }) => ({ point, device, terminal, occurrence }));
+    const junctions = vertices.filter((p) => normalized.filter((s) => equal(p, s.a) || equal(p, s.b)).length >= 3);
+    completed.push({ net: net.id, attachments, segments: normalized, junctions,
+      components: [{ block: null, attachments, segments: normalized, junctions }] });
   }
   const crossings: CircuitRouting['crossings'][number][] = [];
   for (let i = 0; i < completed.length; i++) for (const other of completed.slice(i + 1)) {

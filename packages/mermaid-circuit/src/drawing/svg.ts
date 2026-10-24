@@ -1,4 +1,4 @@
-// Adapted from Schemdraw's segments.py and backends/svg.py (MIT).
+// Primitive concepts follow Schemdraw. SVG serialization is independent; see ACKNOWLEDGEMENTS.md.
 // Copyright (c) 2014-2026 Collin J. Delker. See LICENSE and ACKNOWLEDGEMENTS.md.
 
 import { type Point, type Transform } from './geometry.js';

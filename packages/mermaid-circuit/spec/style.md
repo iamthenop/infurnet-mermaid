@@ -25,7 +25,7 @@ The expression *supply rail* describes graphical placement, not an electrical ob
 
 Placement produces geometry separate from the electrical model. It preserves device and terminal identities, net assignments, and structural membership.
 
-With multiple nonempty blocks, align their vertical midpoints, preserving declaration order from left to right and down their stages. Ungrouped stages follow below this row, with the implicit final stage last.
+With multiple nonempty blocks, align their vertical midpoints, preserving declaration order from left to right. Stages run downward except for the parallel branches defined below. Ungrouped stages follow below this row, with the implicit final stage last.
 
 Without multiple nonempty blocks, stages retain one vertical sequence. Block placement preserves stage membership and electrical connectivity.
 
@@ -63,7 +63,7 @@ A single output shared only by unrotated PMOS and NMOS drains aligns with their 
 
 Voltage sources retain their stage identity when placed in the top region. Position does not connect a voltage source to a supply net.
 
-Ordinary named and implicit nets have no independent symbol placement. The side for `pinInOut` remains undecided.
+Ordinary nets have no independent symbol placement except for the named endpoints defined under [sectional net presentation](#sectional-net-presentation). The side for `pinInOut` remains undecided.
 
 Input fan-out uses the [orientation priorities](#orientation). Return positioned input and recipient anchors for orthogonal branching. Placement does not draw branches or guarantee crossing-free routes.
 
@@ -87,11 +87,31 @@ Each stage is enclosed by a dashed frame labelled with its name. Its bounds foll
 
 ### Block presentation
 
-A block visually groups its contained stages. A block does not draw new electrical connections or alter existing wire topology.
+A block visually groups its contained stages within a visible frame. Its bounds enclose local symbols and routes. Block membership does not change electrical connectivity.
 
-The layout result contains block bounds. The renderer draws those bounds as grouping frames without changing route connectivity.
+### Sectional net presentation
 
-Reserve space between adjacent block frames for interconnecting wires and input bends. Split junctions remain outside stages.
+With multiple nonempty blocks, use each block as a presentation section. A visual net occurrence is one appearance of an existing net in that section. Electrical identity remains governed by [net semantics](notation.md#diagram-and-connectivity).
+
+Represent cross-block named signals with section-boundary pins. A signal leaving an earlier block uses `pinOut` artwork; entry into a later block uses `pinIn` artwork. These directions describe graphical flow and do not assign electrical driver or receiver roles.
+
+Each occurrence carries the declared net identifier and displays its label. Repeated pins refer to that same identifier. Matching label text on different identifiers does not join them.
+
+Draw local wires from device attachments to these pins. Matching endpoints replace continuous inter-block wires. Routing records physical components within sections separately from their shared net identity.
+
+Keep external input and output identities. Place external inputs in the first receiving section and external outputs in the last. Add boundary occurrences where those signals continue between sections.
+
+Each section displays its connected supply and ground nets locally. A local rail refers to the existing global net; it does not declare another source or net. Power wires remain inside their section and follow the common-rail convention.
+
+Every wire end meets a device attachment, local net symbol, or named boundary pin. Keep local routes inside their section frames, with the established frame clearance. Input splits remain outside stage frames.
+
+### Parallel series branches
+
+Recognize adjacent NMOS series stages inside one block when they share both outer conduction nets. Each internal chain link must remain a private two-terminal net. Place these branches in separate columns from left to right, keeping each chain top to bottom.
+
+Align branch tops and retain their stage frames and membership. Their common upper and lower nets use shared rails. Unrelated stages keep the default vertical sequence.
+
+The XOR core places `N0` above `N1` and `N2` above `N3`. Its two columns keep `nHigh` and `nLow` separate while sharing `OUT` and `VSS`.
 
 ## Symbols
 

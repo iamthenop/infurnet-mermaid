@@ -1,4 +1,4 @@
-import type { CircuitModel, Device, Direction } from '../circuitTypes.js';
+import type { CircuitModel, Device, Direction, NetType } from '../circuitTypes.js';
 import { Transform, bounds, translateBounds, type Bounds, type Point } from './geometry.js';
 import { resolveSymbol, type SymbolId } from './symbols.js';
 
@@ -28,6 +28,9 @@ export interface PlacedDevice extends PlacedGeometry {
 export interface PlacedNet extends PlacedGeometry {
   readonly id: string;
   readonly region: 'left' | 'right' | 'top' | 'bottom';
+  readonly block?: number;
+  readonly occurrence?: string;
+  readonly role?: 'boundary' | 'local' | 'external';
 }
 
 export interface StageLayout {
@@ -43,6 +46,8 @@ export interface StageLayout {
 }
 
 export interface CircuitLayout {
+  readonly sectional?: true;
+  readonly sections?: readonly { readonly block: number | null; readonly stages: readonly number[]; readonly bounds: Bounds }[];
   readonly devices: readonly PlacedDevice[];
   readonly nets: readonly PlacedNet[];
   readonly stages: readonly StageLayout[];
@@ -91,14 +96,19 @@ function place(symbol: SymbolId, position: Point, rotation: Rotation = 0): Place
 }
 
 export function layoutCircuit(model: CircuitModel): CircuitLayout {
+  return model.blocks.filter((block) => block.stages.length).length > 1 ? layoutSections(model) : layoutConnected(model, new Map(), model.blocks.some((block) => block.stages.length > 0));
+}
+
+function layoutConnected(model: CircuitModel, appearances: ReadonlyMap<string, NetType> = new Map(), branches = false): CircuitLayout {
+  const netType = (id: string) => appearances.get(id) ?? model.nets.find((net) => net.id === id)?.type;
   const pane = resolveSymbol('resistor').width, gap = pane / 2, padding = pane / 4, pitch = pane + gap;
-  const sharedInputs = model.nets.filter((net) => net.type === 'pinIn'
+  const sharedInputs = model.nets.filter((net) => netType(net.id) === 'pinIn'
     && model.connections.filter((connection) => connection.net === net.id).length > 1).length;
-  const internalX = pane + gap * 2 + Math.max(0, sharedInputs - 2) * gap;
+  const internalX = pane + gap * 2 + Math.max(0, sharedInputs - 2) * gap + (appearances.size ? pane : 0);
   const deviceById = new Map(model.devices.map((device) => [device.id, device]));
   const declaration = new Map(model.devices.map((device, index) => [device.id, index]));
   const netById = new Map(model.nets.map((net) => [net.id, net]));
-  const inputOrder = new Map(model.nets.filter((net) => net.type === 'pinIn').map((net, index) => [net.id, index]));
+  const inputOrder = new Map(model.nets.filter((net) => netType(net.id) === 'pinIn').map((net, index) => [net.id, index]));
   const assignments = new Map(model.connections.map((connection) => [`${connection.device}:${connection.terminal}`, connection.net]));
   const netCounts = new Map<string, number>();
   for (const connection of model.connections) netCounts.set(connection.net, (netCounts.get(connection.net) ?? 0) + 1);
@@ -114,7 +124,7 @@ export function layoutCircuit(model: CircuitModel): CircuitLayout {
   };
   const seriesLink = (a: Device, b: Device): boolean => {
     const links = shared(a, b);
-    return links.length === 1 && netCounts.get(links[0].net) === 2 && netById.get(links[0].net)?.type === 'net';
+    return links.length === 1 && netCounts.get(links[0].net) === 2 && netById.get(links[0].net)?.type === 'net' && !appearances.has(links[0].net);
   };
 
   function recognize(devices: Device[]): Group[] {
@@ -206,7 +216,7 @@ export function layoutCircuit(model: CircuitModel): CircuitLayout {
   const placed = new Map<string, PlacedDevice>(), placedNets = new Map<string, PlacedNet>();
   const stages: StageLayout[] = [], fallbackStages: number[] = [];
   const voltages = model.devices.filter((device) => device.type === 'voltageSource');
-  const supplies = model.nets.filter((net) => net.type === 'supplyNet');
+  const supplies = model.nets.filter((net) => netType(net.id) === 'supplyNet');
   voltages.forEach((device, index) => placed.set(device.id, { ...place(device.type, [internalX + index * pitch, 0]),
     id: device.id, stage: device.stage, region: 'top' }));
   const supplyY = voltages.length ? pitch : 0;
@@ -300,6 +310,40 @@ export function layoutCircuit(model: CircuitModel): CircuitLayout {
       placed.set(device.id, { ...device, ...place(device.symbol, [device.position[0], device.position[1] + gap], device.rotation) });
     for (let later = index; later < stages.length; later++) stages[later] = { ...stages[later], bounds: translateBounds(stages[later].bounds, [0, gap]) };
   }
+  if (branches) {
+    const move = (index: number, dx: number, dy: number) => {
+      for (const id of model.stages[index].devices) {
+        const device = placed.get(id)!;
+        placed.set(id, { ...device, ...place(device.symbol, [device.position[0] + dx, device.position[1] + dy], device.rotation) });
+      }
+      stages[index] = { ...stages[index], bounds: translateBounds(stages[index].bounds, [dx, dy]) };
+    };
+    const branchEnds = (stage: StageLayout): readonly string[] | undefined => {
+      if (stage.groups.length !== 1 || stage.groups[0].topology !== 'series' || stage.groups[0].direction !== 'TB') return;
+      const devices = stage.groups[0].devices.map((id) => deviceById.get(id)!);
+      if (devices.length < 2 || !devices.every(isNmos) || devices.some((device) => placed.get(device.id)!.rotation !== 0)) return;
+      const top = netAt(devices[0], 'D'), bottom = netAt(devices.at(-1)!, 'S');
+      if (top && bottom && top !== bottom) return [top, bottom];
+    };
+    for (let first = 0; first < stages.length; first++) {
+      const ends = branchEnds(stages[first]);
+      if (!ends) continue;
+      let last = first;
+      while (last + 1 < stages.length && stages[last + 1].block === stages[first].block && branchEnds(stages[last + 1])?.every((net, index) => net === ends[index])) last++;
+      if (last === first) continue;
+      const oldBottom = stages[last].bounds.maxY;
+      let right = stages[first].bounds.maxX;
+      for (let next = first + 1; next <= last; next++) {
+        move(next, right + pitch - stages[next].bounds.minX, stages[first].bounds.minY - stages[next].bounds.minY);
+        right = stages[next].bounds.maxX;
+      }
+      const row = enclose(stages.slice(first, last + 1).map((stage) => stage.bounds));
+      const dx = stageCenterX - (row.minX + row.maxX) / 2;
+      for (let next = first; next <= last; next++) move(next, dx, 0);
+      for (let next = last + 1; next < stages.length; next++) move(next, 0, row.maxY - oldBottom);
+      first = last;
+    }
+  }
   if (stages.length) cursorY = stages.at(-1)!.bounds.maxY + padding + gap;
   const blockColumns = model.blocks.filter((block) => block.stages.length > 0);
   const blockPadding = blockColumns.length > 1 ? gap : padding;
@@ -342,13 +386,13 @@ export function layoutCircuit(model: CircuitModel): CircuitLayout {
   const outputCenterY = nonemptyStages.length ? (Math.min(...nonemptyStages.map((stage) => stage.bounds.minY))
     + Math.max(...nonemptyStages.map((stage) => stage.bounds.maxY))) / 2 : undefined;
 
-  const groundNets = model.nets.filter((net) => net.type === 'ground');
+  const groundNets = model.nets.filter((net) => netType(net.id) === 'ground');
   const occupiedRight = Math.max(internalX + pane, internalX + Math.max(0, groundNets.length - 1) * pitch + pane,
     ...[...placed.values(), ...placedNets.values()].map((symbol) => symbol.bounds.maxX), ...stages.map((stage) => stage.bounds.maxX));
   const inputTargets: { net: string; device: string; terminal: string; aligned: boolean }[] = [];
   for (const type of ['pinIn', 'pinOut'] as const) {
     let previousBottom = -gap;
-    const nets = model.nets.filter((net) => net.type === type);
+    const nets = model.nets.filter((net) => netType(net.id) === type);
     for (const [index, net] of nets.entries()) {
       const column = (id: string) => blockColumns.length > 1
         ? model.stages[deviceById.get(id)!.stage].block ?? model.blocks.length : 0;
@@ -358,7 +402,7 @@ export function layoutCircuit(model: CircuitModel): CircuitLayout {
           || a.point[1] - b.point[1] || a.point[0] - b.point[0] || declaration.get(a.device)! - declaration.get(b.device)!);
       const first = recipients[0], anchor = resolveSymbol(type).anchor!;
       let outputY = outputCenterY;
-      if (type === 'pinOut' && nets.length === 1 && recipients.every((recipient) => recipient.terminal === 'D'
+      if (type === 'pinOut' && (nets.length === 1 || appearances.size) && recipients.every((recipient) => recipient.terminal === 'D'
         && isCmos(deviceById.get(recipient.device)!) && placed.get(recipient.device)!.rotation === 0)) {
         const pullUp = recipients.filter((recipient) => isPmos(deviceById.get(recipient.device)!));
         const pullDown = recipients.filter((recipient) => isNmos(deviceById.get(recipient.device)!));
@@ -367,7 +411,8 @@ export function layoutCircuit(model: CircuitModel): CircuitLayout {
         if (pullUp.length && pullDown.length && upper < lower) outputY = (upper + lower) / 2;
       }
       const y = type === 'pinOut' && outputY !== undefined
-        ? outputY + (index - (nets.length - 1) / 2) * pitch - anchor[1]
+        ? appearances.size ? Math.max(outputY - anchor[1], previousBottom + gap)
+          : outputY + (index - (nets.length - 1) / 2) * pitch - anchor[1]
         : Math.max(0, Math.round(first?.point[1] ?? gap + anchor[1]) - anchor[1], previousBottom + (type === 'pinIn' ? pitch / 2 - pane : gap));
       const symbol: PlacedNet = { ...place(type, [type === 'pinIn' ? 0 : occupiedRight + gap, y]), id: net.id, region: type === 'pinIn' ? 'left' : 'right' };
       placedNets.set(net.id, symbol); previousBottom = symbol.bounds.maxY;
@@ -385,4 +430,72 @@ export function layoutCircuit(model: CircuitModel): CircuitLayout {
   return { devices: model.devices.map((device) => placed.get(device.id)!), nets: model.nets.flatMap((net) => placedNets.has(net.id) ? [placedNets.get(net.id)!] : []),
     stages, blocks, bounds: boxes.length ? enclose(boxes) : { minX: 0, minY: 0, maxX: 0, maxY: 0 }, inputTargets,
     unplacedNetIds: model.nets.filter((net) => net.type === 'pinInOut').map((net) => net.id), fallbackStages };
+}
+
+function layoutSections(model: CircuitModel): CircuitLayout {
+  const scopes = model.blocks.flatMap((block, index) => block.stages.length ? [{ block: index as number | null, stages: block.stages }] : []);
+  const ungrouped = model.stages.flatMap((stage, index) => stage.block === null ? [index] : []);
+  if (ungrouped.length) scopes.push({ block: null, stages: ungrouped });
+  const deviceScope = new Map(model.devices.map((device) => [device.id, scopes.findIndex((scope) => scope.stages.includes(device.stage))]));
+  const memberships = new Map(model.nets.map((net) => [net.id, [...new Set(model.connections.filter((c) => c.net === net.id)
+    .map((c) => deviceScope.get(c.device)!))].sort((a, b) => a - b)]));
+  const locals = scopes.map((scope, scopeIndex) => {
+    const devices = model.devices.filter((device) => scope.stages.includes(device.stage));
+    const connections = model.connections.filter((connection) => deviceScope.get(connection.device) === scopeIndex);
+    const nets = model.nets.filter((net) => memberships.get(net.id)!.includes(scopeIndex) || !memberships.get(net.id)!.length && scopeIndex === 0);
+    const appearances = new Map<string, NetType>();
+    for (const net of nets) {
+      const members = memberships.get(net.id)!;
+      if (members.length < 2 || net.type === 'supplyNet' || net.type === 'ground' || net.type === 'pinInOut') continue;
+      if (net.implicit) throw new Error(`Section-boundary net ${net.id} requires an explicit net declaration for its label.`);
+      appearances.set(net.id, scopeIndex === members[0] && net.type !== 'pinIn' ? 'pinOut' : 'pinIn');
+    }
+    const localModel: CircuitModel = { ...model, devices: devices.map((device) => ({ ...device, stage: scope.stages.indexOf(device.stage) })),
+      connections, nets, blocks: [], stages: scope.stages.map((index, order) => ({ ...model.stages[index], block: null, order })) };
+    const layout = layoutConnected(localModel, appearances, scope.block !== null);
+    const symbols: PlacedNet[] = layout.nets.map((net) => ({ ...net, ...(scope.block !== null ? { block: scope.block } : {}),
+      occurrence: `${scopeIndex}:${net.id}:${net.symbol}`, role: appearances.has(net.id) && model.nets.find((item) => item.id === net.id)!.type !== 'pinIn'
+        || appearances.has(net.id) && scopeIndex !== memberships.get(net.id)![0] ? 'boundary'
+        : net.symbol === 'supplyNet' || net.symbol === 'ground' ? 'local' : 'external' }));
+    let outputBottom = -Infinity;
+    const outgoing = nets.filter((net) => {
+      const members = memberships.get(net.id)!;
+      return members.length > 1 && symbols.some((symbol) => symbol.id === net.id && symbol.symbol === 'pinIn')
+        && (scopeIndex !== members.at(-1) || net.type === 'pinOut');
+    });
+    const right = Math.max(...layout.stages.map((stage) => stage.bounds.maxX)) + 60;
+    for (const net of outgoing) {
+      const input = symbols.find((symbol) => symbol.id === net.id)!;
+      let y = Math.max(input.position[1], outputBottom + 60);
+      while (symbols.some((symbol) => symbol.region === 'right' && y < symbol.bounds.maxY + 60 && y + 120 > symbol.bounds.minY - 60)) y += 60;
+      const symbol = place('pinOut', [right, y]);
+      symbols.push({ ...symbol, id: net.id, region: 'right', ...(scope.block !== null ? { block: scope.block } : {}),
+        occurrence: `${scopeIndex}:${net.id}:pinOut`, role: net.type === 'pinOut' && scopeIndex === memberships.get(net.id)!.at(-1) ? 'external' : 'boundary' });
+      outputBottom = symbol.bounds.maxY;
+    }
+    const box = enclose([...layout.devices, ...symbols].map((item) => item.bounds).concat(layout.stages.map((stage) => stage.bounds)), 90);
+    return { scope, layout, symbols, box };
+  });
+  const height = Math.max(...locals.filter((item) => item.scope.block !== null).map((item) => item.box.maxY - item.box.minY));
+  let left = 0;
+  const devices: PlacedDevice[] = [], nets: PlacedNet[] = [], stages: StageLayout[] = [], sections: NonNullable<CircuitLayout['sections']>[number][] = [];
+  const inputTargets: CircuitLayout['inputTargets'][number][] = [], fallbackStages: number[] = [];
+  for (const { scope, layout, symbols, box } of locals) {
+    const dx = scope.block === null ? -box.minX : left - box.minX;
+    const dy = scope.block === null ? height + 120 - box.minY : (height - (box.maxY - box.minY)) / 2 - box.minY;
+    const moved = <T extends PlacedGeometry>(item: T): T => ({ ...item,
+      ...place(item.symbol, [item.position[0] + dx, item.position[1] + dy], item.rotation) });
+    devices.push(...layout.devices.map((device) => ({ ...moved(device), stage: scope.stages[device.stage] })));
+    nets.push(...symbols.map(moved));
+    stages.push(...layout.stages.map((stage) => ({ ...stage, stage: scope.stages[stage.stage], block: scope.block, bounds: translateBounds(stage.bounds, [dx, dy]) })));
+    sections.push({ ...scope, bounds: translateBounds(box, [dx, dy]) });
+    inputTargets.push(...layout.inputTargets.filter((target) => model.nets.find((net) => net.id === target.net)!.type === 'pinIn'
+      && !inputTargets.some((previous) => previous.net === target.net)));
+    fallbackStages.push(...layout.fallbackStages.map((index) => scope.stages[index]));
+    left += box.maxX - box.minX + 120;
+  }
+  return { sectional: true, sections, devices: model.devices.map((device) => devices.find((placed) => placed.id === device.id)!), nets,
+    stages: stages.sort((a, b) => a.stage - b.stage), blocks: model.blocks.map((block, index) => ({ block: index, stages: block.stages,
+      bounds: sections.find((section) => section.block === index)?.bounds ?? null })), bounds: enclose(sections.map((section) => section.bounds)),
+    inputTargets, fallbackStages, unplacedNetIds: model.nets.filter((net) => net.type === 'pinInOut').map((net) => net.id) };
 }

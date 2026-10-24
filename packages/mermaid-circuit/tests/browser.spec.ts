@@ -51,7 +51,7 @@ it.each(Object.entries(sources))('renders the catalog, routes, labels, and frame
     const content = svg.querySelector<SVGGElement>('[data-circuit]')!;
     const view = svg.viewBox.baseVal, box = content.getBBox();
     const artwork = symbols.map((symbol) => {
-      const group = [...svg.querySelectorAll<SVGGElement>('[data-symbol]')].find((g) => (g.getAttribute('data-device') ?? g.getAttribute('data-net-symbol')) === symbol.id)!;
+      const group = [...svg.querySelectorAll<SVGGElement>('[data-symbol]')].find((g) => symbol.occurrence ? g.getAttribute('data-occurrence') === symbol.occurrence : (g.getAttribute('data-device') ?? g.getAttribute('data-net-symbol')) === symbol.id)!;
       const matrix = group.transform.baseVal.consolidate()!.matrix;
       const source = new DOMParser().parseFromString(symbol.svg, 'image/svg+xml');
       const geometry = (root: ParentNode) => [...root.querySelectorAll('path,polyline,polygon,line,circle,ellipse,rect')].map((n) => [n.localName, ...['d', 'points', 'x', 'y', 'x1', 'y1', 'x2', 'y2', 'cx', 'cy', 'r', 'rx', 'ry', 'width', 'height'].map((a) => n.getAttribute(a))]);
@@ -61,7 +61,8 @@ it.each(Object.entries(sources))('renders the catalog, routes, labels, and frame
     const wires = routes.nets.map((net) => {
       const group = [...svg.querySelectorAll('[data-net]')].find((g) => g.getAttribute('data-net') === net.net)!;
       return { net: net.net, paths: [...group.querySelectorAll('path')].map((p) => p.getAttribute('d')),
-        junctions: [...group.querySelectorAll('circle')].map((c) => [Number(c.getAttribute('cx')), Number(c.getAttribute('cy'))]) };
+        junctions: [...group.querySelectorAll('circle')].map((c) => [Number(c.getAttribute('cx')), Number(c.getAttribute('cy'))]),
+        components: [...group.querySelectorAll('[data-route-block]')].map((component) => ({ block: component.getAttribute('data-route-block'), paths: [...component.querySelectorAll('path')].map((path) => path.getAttribute('d')) })) };
     });
     const frames = [...svg.querySelectorAll<SVGRectElement>('[data-stage], [data-block]')].map((r) => ({
       kind: r.hasAttribute('data-stage') ? 'stage' : 'block', index: Number(r.getAttribute('data-stage') ?? r.getAttribute('data-block')),
@@ -69,15 +70,16 @@ it.each(Object.entries(sources))('renders the catalog, routes, labels, and frame
     }));
     const ids = [...svg.querySelectorAll('[id]')].map((n) => n.id);
     const textBoxes = [...svg.querySelectorAll<SVGTextElement>('text')].map((t) => ({ text: t.textContent, box: t.getBBox() })).map(({ text, box: b }) => ({ text, x: b.x, y: b.y, right: b.x + b.width, bottom: b.y + b.height }));
-    return { artwork, wires, frames, ids, text: content.textContent, textBoxes,
+    return { artwork, wires, frames, ids, occurrences: [...svg.querySelectorAll('[data-occurrence]')].map((node) => ({ id: node.getAttribute('data-net-symbol'), occurrence: node.getAttribute('data-occurrence'), block: node.getAttribute('data-net-block'), role: node.getAttribute('data-net-role'), label: [...svg.querySelectorAll('[data-occurrence-label]')].find((label) => label.getAttribute('data-occurrence-label') === node.getAttribute('data-occurrence'))?.textContent })), text: content.textContent, textBoxes,
       crossings: [...svg.querySelectorAll('[data-crossing]')].map((g) => ({ over: g.getAttribute('data-crossing'), under: g.getAttribute('data-under'), gap: g.querySelector('path')!.getAttribute('stroke-width') })),
       enclosed: view.x <= box.x && view.y <= box.y && view.x + view.width >= box.x + box.width && view.y + view.height >= box.y + box.height,
       width: view.width, height: view.height, error: svg.querySelector('parsererror, script, foreignObject') !== null };
   }, { symbols: [...layout.devices, ...layout.nets].map((p) => {
     const source = resolveSymbol(p.symbol);
-    return { id: p.id, svg: source.svg, points: [...Object.values(source.terminals), ...(source.anchor ? [source.anchor] : [])] };
+    return { id: p.id, occurrence: 'occurrence' in p ? p.occurrence : undefined, svg: source.svg, points: [...Object.values(source.terminals), ...(source.anchor ? [source.anchor] : [])] };
   }), routes });
   expect(inspected.error).toBe(false);
+  expect(inspected.occurrences).toEqual(layout.nets.filter((net) => net.occurrence).map((net) => ({ id: net.id, occurrence: net.occurrence, block: String(net.block ?? 'ungrouped'), role: net.role, label: model.nets.find((item) => item.id === net.id)!.label })));
   expect(inspected.enclosed).toBe(true);
   expect(inspected.width).toBeGreaterThan(120);
   expect(inspected.height).toBeGreaterThan(120);
@@ -94,12 +96,15 @@ it.each(Object.entries(sources))('renders the catalog, routes, labels, and frame
     const actual = inspected.wires.find((n) => n.net === net.net)!;
     expect(actual.paths).toEqual(net.segments.map((s) => `M ${s.a.join(' ')} L ${s.b.join(' ')}`));
     expect(actual.junctions).toEqual(net.junctions);
+    if (layout.sectional) expect(actual.components).toEqual(net.components.map((component) => ({ block: String(component.block ?? 'ungrouped'), paths: component.segments.map((segment) => `M ${segment.a.join(' ')} L ${segment.b.join(' ')}`) })));
   }
-  const inputBranches = layout.nets.filter((n) => model.nets.find((item) => item.id === n.id)!.type === 'pinIn')
-    .sort((a, b) => a.anchor![1] - b.anchor![1])
-    .map((n) => inspected.wires.find((wire) => wire.net === n.id)!.junctions).filter((points) => points.length);
-  for (let i = 1; i < inputBranches.length; i++) {
-    expect(Math.max(...inputBranches[i - 1].map((p) => p[0]))).toBeLessThan(Math.min(...inputBranches[i].map((p) => p[0])));
+  for (const scope of layout.sections ?? [{ block: null }]) {
+    const inputBranches = layout.nets.filter((net) => net.symbol === 'pinIn' && (net.block ?? null) === scope.block)
+      .sort((a, b) => a.anchor![1] - b.anchor![1])
+      .map((net) => routes.nets.find((route) => route.net === net.id)!.components.find((component) => component.block === scope.block)!.junctions).filter((points) => points.length);
+    for (let i = 1; i < inputBranches.length; i++) {
+      expect(Math.max(...inputBranches[i - 1].map((p) => p[0]))).toBeLessThan(Math.min(...inputBranches[i].map((p) => p[0])));
+    }
   }
   expect(inspected.crossings).toEqual(routes.crossings.map((c) => ({ over: c.over, under: c.under, gap: '7' })));
   expect(inspected.frames).toEqual([

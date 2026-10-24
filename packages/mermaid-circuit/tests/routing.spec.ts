@@ -39,12 +39,42 @@ function connectivity(model: CircuitModel, layout: CircuitLayout, routes: Circui
         expect(x > pane.bounds.minX + 1e-7 && x < pane.bounds.maxX - 1e-7 && y > pane.bounds.minY + 1e-7 && y < pane.bounds.maxY - 1e-7).toBe(false);
       }
     }
-    if (net.attachments.length > 1) {
-      const reached = new Set([key(net.attachments[0].point)]), pending = [...reached];
-      while (pending.length) for (const next of graph.get(pending.pop()!) ?? []) if (!reached.has(next)) { reached.add(next); pending.push(next); }
-      for (const a of net.attachments) expect(reached.has(key(a.point)), `${net.net} must reach ${a.device}.${a.terminal}`).toBe(true);
-      expect(reached.size).toBe(graph.size);
-      for (const [point, edges] of graph) if (edges.size === 1) expect(net.attachments.some((a) => key(a.point) === point), `Dangling wire at ${point}`).toBe(true);
+    expect(net.components.flatMap((component) => component.attachments)).toEqual(net.attachments);
+    expect(net.components.flatMap((component) => component.segments)).toEqual(net.segments);
+    for (const component of net.components) {
+      const local = new Map<string, Set<string>>();
+      for (const segment of component.segments) for (const [a, b] of [[segment.a, segment.b], [segment.b, segment.a]]) {
+        if (!local.has(key(a))) local.set(key(a), new Set());
+        local.get(key(a))!.add(key(b));
+      }
+      if (component.attachments.length > 1) {
+        const reached = new Set([key(component.attachments[0].point)]), pending = [...reached];
+        while (pending.length) for (const next of local.get(pending.pop()!) ?? []) if (!reached.has(next)) { reached.add(next); pending.push(next); }
+        for (const a of component.attachments) expect(reached.has(key(a.point)), `${net.net} must reach ${a.device ?? a.occurrence}.${a.terminal}`).toBe(true);
+        expect(reached.size).toBe(local.size);
+        for (const [point, edges] of local) if (edges.size === 1) expect(component.attachments.some((a) => key(a.point) === point), `Dangling wire at ${point}`).toBe(true);
+      }
+      if (layout.sectional) {
+        const section = layout.sections!.find((section) => section.block === component.block)!;
+        for (const attachment of component.attachments) {
+          if (attachment.device) expect(section.stages).toContain(layout.devices.find((device) => device.id === attachment.device)!.stage);
+          else {
+            const occurrence = layout.nets.find((net) => net.occurrence === attachment.occurrence)!;
+            expect(occurrence.id).toBe(net.net);
+            expect(attachment.point).toEqual(occurrence.anchor);
+            expect(occurrence.block ?? null).toBe(component.block);
+          }
+        }
+        for (const point of component.segments.flatMap((segment) => [segment.a, segment.b])) {
+          expect(point[0]).toBeGreaterThanOrEqual(section.bounds.minX + 20);
+          expect(point[0]).toBeLessThanOrEqual(section.bounds.maxX - 20);
+          expect(point[1]).toBeGreaterThanOrEqual(section.bounds.minY + 20);
+          expect(point[1]).toBeLessThanOrEqual(section.bounds.maxY - 20);
+        }
+      }
+    }
+    if (net.components.length > 1) for (const component of net.components) {
+      expect(component.attachments.some((attachment) => attachment.occurrence)).toBe(true);
     }
     expect(net.junctions.map(key).sort()).toEqual([...graph].filter(([, edges]) => edges.size >= 3).map(([p]) => p).sort());
     for (const other of routes.nets.filter((n) => n.net !== net.net)) for (const a of net.segments) for (const b of other.segments) {
@@ -76,17 +106,19 @@ it.each(Object.entries(fixtures))('routes every connection faithfully: %s', (_pa
         - Math.max(input[0], Math.min(segment.a[0], segment.b[0]))), 0);
     expect(straightLength, `${target.net} must connect straight to ${target.device}.${target.terminal}`).toBeCloseTo(terminal[0] - input[0]);
   }
-  const inputColumns = layout.nets.filter((net) => model.nets.find((item) => item.id === net.id)!.type === 'pinIn')
-    .sort((a, b) => a.anchor![1] - b.anchor![1])
-    .map((net) => routes.nets.find((route) => route.net === net.id)!.junctions)
-    .filter((junctions) => junctions.length).map((junctions) => {
-      expect(junctions.every((point) => point[0] === junctions[0][0])).toBe(true);
-      return junctions[0][0];
-    });
-  if (inputColumns.length > 1) {
-    const spacing = inputColumns[1] - inputColumns[0];
-    expect(spacing).toBeGreaterThanOrEqual(20);
-    for (let i = 2; i < inputColumns.length; i++) expect(inputColumns[i] - inputColumns[i - 1]).toBe(spacing);
+  for (const scope of layout.sections ?? [{ block: null }]) {
+    const inputColumns = layout.nets.filter((net) => net.symbol === 'pinIn' && (net.block ?? null) === scope.block)
+      .sort((a, b) => a.anchor![1] - b.anchor![1])
+      .map((net) => routes.nets.find((route) => route.net === net.id)!.components.find((component) => component.block === scope.block)!.junctions)
+      .filter((junctions) => junctions.length).map((junctions) => {
+        expect(junctions.every((point) => point[0] === junctions[0][0])).toBe(true);
+        return junctions[0][0];
+      });
+    if (inputColumns.length > 1) {
+      const spacing = inputColumns[1] - inputColumns[0];
+      expect(spacing).toBeGreaterThanOrEqual(20);
+      for (let i = 2; i < inputColumns.length; i++) expect(inputColumns[i] - inputColumns[i - 1]).toBe(spacing);
+    }
   }
   for (const group of layout.stages.flatMap((stage) => stage.groups)) {
     const devices = group.devices.map((id) => layout.devices.find((device) => device.id === id)!);
@@ -176,6 +208,12 @@ it('rejects unresolved placement and impossible routes explicitly', () => {
   const model = parseCircuit(fixtures['../examples/fixtures/series.mmd']), layout = layoutCircuit(model);
   const corrupt = { ...layout, devices: layout.devices.map((d, index) => index ? d : { ...d, terminals: { ...d.terminals, A: [300, 300] as Point } }) };
   expect(() => routeCircuit(model, corrupt)).toThrow('not on its symbol pane boundary');
+  const sectionModel = parseCircuit(fixtures['../examples/fixtures/xor2.mmd']);
+  const sectionLayout = layoutCircuit(sectionModel);
+  expect(() => routeCircuit(sectionModel, { ...sectionLayout, devices: sectionLayout.devices.filter((device) => device.id !== 'N3') }))
+    .toThrow('Missing sectional attachment for N3.G on net Bbar');
+  const missingEndpoint = { ...sectionLayout, nets: sectionLayout.nets.filter((net) => net.id !== 'Abar' || net.block !== 1) };
+  expect(() => routeCircuit(sectionModel, missingEndpoint)).toThrow(/net Abar|Net Abar/u);
   const obstructed = { ...layout, devices: [...layout.devices, { ...layout.devices[0], id: 'obstacle', bounds: { minX: -1000, minY: -1000, maxX: 2000, maxY: 2000 } }] };
   expect(() => routeCircuit(model, obstructed)).toThrow(/Cannot route net/u);
 
@@ -198,4 +236,65 @@ it('separates facing attachments on unrelated nets', () => {
   const model = parseCircuit('circuitDiagram A\nR1[R1]:::resistor\nR2[R2]:::resistor\nY([Y]):::pinOut\nZ([Z]):::pinOut\nR1 ---|B| Y\nR2 ---|A| Z');
   const layout = layoutCircuit(model);
   connectivity(model, layout, routeCircuit(model, layout));
+});
+
+
+it.each(['A', 'B', 'Abar', 'Bbar', 'VDD', 'VSS'])('matches sectional endpoints by net identity: %s', (id) => {
+  const model = parseCircuit(fixtures['../examples/fixtures/xor2.mmd']);
+  const layout = layoutCircuit(model), routes = routeCircuit(model, layout);
+  const net = routes.nets.find((net) => net.net === id)!;
+  expect(model.nets.filter((net) => net.id === id)).toHaveLength(1);
+  expect(net.components.map((component) => component.block)).toEqual([0, 1]);
+  const endpoints = net.components.map((component) => component.attachments.filter((attachment) => attachment.occurrence));
+  for (const appearances of endpoints) {
+    expect(appearances.length).toBeGreaterThan(0);
+    for (const endpoint of appearances) expect(layout.nets.find((net) => net.occurrence === endpoint.occurrence)!.id).toBe(id);
+  }
+  const coordinates = net.components.map((component) => new Set(component.segments.flatMap((segment) => [key(segment.a), key(segment.b)])));
+  expect([...coordinates[0]].some((point) => coordinates[1].has(point))).toBe(false);
+});
+
+it('keeps equal labels on different sectional nets separate', () => {
+  const source = fixtures['../examples/fixtures/xor2.mmd'];
+  const original = parseCircuit(source);
+  const model = parseCircuit(source.replace('Abar(("Abar"))', 'Abar(("shared"))').replace('Bbar(("Bbar"))', 'Bbar(("shared"))'));
+  expect(model.nets.filter((net) => net.label === 'shared').map((net) => net.id)).toEqual(['Abar', 'Bbar']);
+  const layout = layoutCircuit(model), routes = routeCircuit(model, layout);
+  expect(routes).toEqual(routeCircuit(original, layoutCircuit(original)));
+  connectivity(model, layout, routes);
+});
+
+it.each([[false, false], [false, true], [true, false], [true, true]])('retains the routed XOR truth table for A=%s B=%s', (a, b) => {
+  const model = parseCircuit(fixtures['../examples/fixtures/xor2.mmd']);
+  const routes = routeCircuit(model, layoutCircuit(model));
+  expect(model.devices).toHaveLength(12);
+  expect(model.connections).toHaveLength(36);
+  expect(routes.nets.flatMap((net) => net.attachments.filter((attachment) => attachment.device))).toHaveLength(36);
+  const terminalNet = (device: string, terminal: string) => routes.nets.find((net) => net.attachments.some((attachment) => attachment.device === device && attachment.terminal === terminal))!.net;
+  const signals = new Map([['A', a], ['B', b]]);
+  const reachable = (start: string, devices: CircuitModel['devices']) => {
+    const edges = devices.filter((device) => {
+      const gate = signals.get(terminalNet(device.id, 'G'));
+      expect(gate).toBeDefined();
+      return device.type === 'pmos' ? !gate : gate;
+    }).map((device) => [terminalNet(device.id, 'D'), terminalNet(device.id, 'S')]);
+    const reached = new Set([start]);
+    for (let pass = 0; pass < model.nets.length; pass++) for (const [left, right] of edges) {
+      if (reached.has(left)) reached.add(right);
+      if (reached.has(right)) reached.add(left);
+    }
+    return reached;
+  };
+  const inverters = model.devices.filter((device) => model.stages[device.stage].block === 0);
+  for (const id of ['Abar', 'Bbar']) {
+    const reached = reachable(id, inverters);
+    expect(Number(reached.has('VDD')) + Number(reached.has('VSS'))).toBe(1);
+    signals.set(id, reached.has('VDD'));
+  }
+  expect(signals.get('Abar')).toBe(!a);
+  expect(signals.get('Bbar')).toBe(!b);
+  const output = reachable('OUT', model.devices);
+  expect(output.has('VDD')).toBe(a !== b);
+  expect(output.has('VSS')).toBe(a === b);
+  expect(reachable('VDD', model.devices).has('VSS')).toBe(false);
 });
