@@ -1,6 +1,7 @@
 /// <reference types="vite/client" />
 import { describe, expect, it } from 'vitest';
 import notation from '../spec/notation.md?raw';
+import nor from '../examples/fixtures/nor3.mmd?raw';
 import { layoutCircuit, type CircuitLayout, type PlacedDevice } from '../src/drawing/layout.js';
 import type { Bounds, Point } from '../src/drawing/geometry.js';
 import { resolveSymbol } from '../src/drawing/symbols.js';
@@ -184,6 +185,18 @@ R3 ---|B:A| R1`));
       const pmos = item.id.startsWith('P');
       expect(item.terminals[pmos ? 'S' : 'D'][1]).toBe(item.bounds.minY);
       expect(item.terminals[pmos ? 'D' : 'S'][1]).toBe(item.bounds.maxY);
+    }
+    geometry(layout);
+  });
+
+  it.each([['NAND2', nand], ['NOR3', nor]])('centers power and staggers parallel devices consistently in %s', (_name, source) => {
+    const layout = layoutCircuit(parseCircuit(source));
+    const xs = layout.devices.flatMap((device) => [device.terminals.D[0], device.terminals.S[0]]);
+    const center = (Math.min(...xs) + Math.max(...xs)) / 2;
+    for (const net of layout.nets.filter((net) => net.symbol === 'supplyNet' || net.symbol === 'ground')) expect(net.anchor![0]).toBe(center);
+    for (const group of layout.stages.flatMap((stage) => stage.groups).filter((group) => group.topology === 'parallel')) {
+      const devices = group.devices.map((id) => device(layout, id));
+      for (let i = 1; i < devices.length; i++) expect(devices[i].position[1] - devices[i - 1].position[1]).toBe(90);
     }
     geometry(layout);
   });

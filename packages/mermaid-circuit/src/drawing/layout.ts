@@ -237,7 +237,7 @@ export function layoutCircuit(model: CircuitModel): CircuitLayout {
       const rows = new Map(group.devices.map((device, index) => ({ device, index }))
         .sort((a, b) => firstInput(a.device) - firstInput(b.device) || a.index - b.index)
         .map(({ device }, row) => [device.id, row]));
-      const staggerPitch = group.topology === 'parallel' && group.devices.every(isPmos) ? pitch / 2 : pitch;
+      const staggerPitch = group.topology === 'parallel' && (group.devices.every(isPmos) || group.devices.every(isNmos)) ? pitch / 2 : pitch;
       const offsets: Point[] = [];
       group.devices.forEach((device, index) => {
         let x = direction === 'LR' ? index * pitch : 0;
@@ -286,6 +286,13 @@ export function layoutCircuit(model: CircuitModel): CircuitLayout {
     stages[index] = { ...stage, bounds: translateBounds(stage.bounds, [dx, 0]) };
   }
   const nonemptyStages = stages.filter((stage) => stage.groups.length > 0);
+  const conductionXs = [...placed.values()].filter((device) => isCmos(deviceById.get(device.id)!) && device.rotation === 0)
+    .flatMap((device) => [device.terminals.D[0], device.terminals.S[0]]);
+  const powerCenterX = conductionXs.length ? (Math.min(...conductionXs) + Math.max(...conductionXs)) / 2 : stageCenterX;
+  if (supplies.length === 1) {
+    const supply = placedNets.get(supplies[0].id)!;
+    placedNets.set(supply.id, { ...supply, ...place('supplyNet', [powerCenterX - resolveSymbol('supplyNet').anchor![0], supplyY]) });
+  }
   const outputCenterY = nonemptyStages.length ? (Math.min(...nonemptyStages.map((stage) => stage.bounds.minY))
     + Math.max(...nonemptyStages.map((stage) => stage.bounds.maxY))) / 2 : undefined;
 
@@ -320,7 +327,8 @@ export function layoutCircuit(model: CircuitModel): CircuitLayout {
     }
   }
   const bottomY = Math.max(cursorY, ...[...placed.values(), ...placedNets.values()].map((symbol) => symbol.bounds.maxY + gap));
-  groundNets.forEach((net, index) => placedNets.set(net.id, { ...place('ground', [internalX + index * pitch, bottomY]), id: net.id, region: 'bottom' }));
+  groundNets.forEach((net, index) => placedNets.set(net.id, { ...place('ground', [groundNets.length === 1
+    ? powerCenterX - resolveSymbol('ground').anchor![0] : internalX + index * pitch, bottomY]), id: net.id, region: 'bottom' }));
   const blocks = model.blocks.map((block, index) => ({ block: index, stages: [...block.stages],
     bounds: block.stages.length ? enclose(block.stages.map((stage) => stages[stage].bounds), padding) : null }));
   const boxes = [...placed.values(), ...placedNets.values()].map((symbol) => symbol.bounds)

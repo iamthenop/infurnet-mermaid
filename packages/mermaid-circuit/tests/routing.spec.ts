@@ -67,6 +67,42 @@ it.each(Object.entries(fixtures))('routes every connection faithfully: %s', (_pa
   const model = parseCircuit(source), original = structuredClone(model), layout = layoutCircuit(model);
   const routes = routeCircuit(model, layout);
   connectivity(model, layout, routes);
+  const inputColumns = layout.nets.filter((net) => model.nets.find((item) => item.id === net.id)!.type === 'pinIn')
+    .sort((a, b) => a.anchor![1] - b.anchor![1])
+    .map((net) => routes.nets.find((route) => route.net === net.id)!.junctions)
+    .filter((junctions) => junctions.length).map((junctions) => {
+      expect(junctions.every((point) => point[0] === junctions[0][0])).toBe(true);
+      return junctions[0][0];
+    });
+  if (inputColumns.length > 1) {
+    const spacing = inputColumns[1] - inputColumns[0];
+    expect(spacing).toBeGreaterThanOrEqual(20);
+    for (let i = 2; i < inputColumns.length; i++) expect(inputColumns[i] - inputColumns[i - 1]).toBe(spacing);
+  }
+  for (const group of layout.stages.flatMap((stage) => stage.groups)) {
+    const devices = group.devices.map((id) => layout.devices.find((device) => device.id === id)!);
+    if (group.topology !== 'parallel' || group.direction !== 'LR' || devices.length < 2
+      || !devices.every((device) => device.rotation === 0 && ['pmos', 'nmos', 'pmosBlk', 'nmosBlk'].includes(device.symbol))) continue;
+    for (const terminal of ['D', 'S']) {
+      const railPoints = devices.map((device) => {
+        const route = routes.nets.find((route) => route.attachments.some((a) => a.device === device.id && a.terminal === terminal))!;
+        const direction = device.terminals[terminal][1] === device.bounds.minY ? -1 : 1;
+        let point = device.terminals[terminal];
+        for (let step = 0; step < route.segments.length; step++) {
+          const incident = route.segments.filter((segment) => same(segment.a, point) || same(segment.b, point));
+          if (incident.some((segment) => segment.a[1] === segment.b[1])) break;
+          const next = incident.map((segment) => same(segment.a, point) ? segment.b : segment.a)
+            .find((next) => next[0] === point[0] && Math.sign(next[1] - point[1]) === direction);
+          expect(next, `${device.id}.${terminal} must run straight to the common rail`).toBeDefined();
+          point = next!;
+        }
+        expect(direction < 0 ? Math.min(...devices.map((d) => d.bounds.minY)) - point[1]
+          : point[1] - Math.max(...devices.map((d) => d.bounds.maxY))).toBeGreaterThanOrEqual(60);
+        return point;
+      });
+      expect(railPoints.every((point) => point[1] === railPoints[0][1])).toBe(true);
+    }
+  }
   expect(routeCircuit(model, layout)).toEqual(routes);
   expect(model).toEqual(original);
   const reordered = { ...model, connections: [...model.connections].reverse() };

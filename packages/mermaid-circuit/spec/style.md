@@ -17,6 +17,8 @@ Fixed-symbol schematic rendering is implemented against these approved drawing r
 9. In a left-to-right stage, successive devices may sit lower as they move right to support input alignment.
 10. Additional gate connections branch from the corresponding input line using orthogonal routing.
 
+Shared input branch columns have equal spacing and follow input order from left to right. Parallel PMOS and NMOS groups arranged left to right use the same 90-unit descending stagger.
+
 The expression *supply rail* describes graphical placement, not an electrical object type. Stage ordering, membership, and direction declarations are defined in [the syntax rules](notation.md#syntax-rules).
 
 ## Placement and rotation
@@ -48,6 +50,8 @@ Automatic placement prefers the [default CMOS orientations](#symbols), including
 | `ground` | Bottom | Left to right in declaration order |
 | `pinIn` | Left | Top to bottom in declaration order |
 | `pinOut` | Right | Top to bottom in declaration order |
+
+A single supply and ground align with the horizontal midpoint of the CMOS conduction terminals. Without unrotated CMOS devices, they align with the stage centerline. Multiple supply or ground symbols retain their declaration order.
 
 Output pins appear on the right. Their attachment anchors form a vertically centered group relative to the combined region of nonempty stages. Output order follows declaration order. Peripheral power and ground positions do not determine this center.
 
@@ -115,6 +119,8 @@ Dynamic ICs do not inherit the fixed 120 × 120 symbol-pane requirement. The exa
 ## Routing and junction presentation
 
 Wires use orthogonal routing. Junction markers are placed according to the [junction contract](notation.md#junctions), with input splits positioned outside stage frames as specified above. Routes and crossings must not redefine electrical connectivity.
+
+Unrotated parallel CMOS devices arranged left to right share a horizontal rail above the group and another below it. Their conduction leads run straight to these rails, so branches split and rejoin at common heights. The rails retain clearance from stage frames.
 
 ## Labels
 

@@ -191,6 +191,32 @@ export function routeCircuit(model: CircuitModel, layout: CircuitLayout): Circui
       if (!conflicts(stub)) { endpoint.stub = stub; break; }
     }
   }
+  const buses: { net: string; endpoints: typeof entries[number]['endpoints']; segment: WireSegment }[] = [];
+  for (const stage of layout.stages) for (const group of stage.groups) {
+    const devices = group.devices.map((id) => layout.devices.find((device) => device.id === id)!);
+    if (group.topology !== 'parallel' || group.direction !== 'LR' || devices.length < 2
+      || !devices.every((device) => device.rotation === 0)
+      || !(['pmos', 'nmos'] as const).some((family) => devices.every((device) => device.symbol === family || device.symbol === `${family}Blk`))) continue;
+    for (const terminal of ['D', 'S']) {
+      const entry = entries.find((entry) => devices.every((device) => entry.endpoints.some((endpoint) => endpoint.device === device.id && endpoint.terminal === terminal)));
+      if (!entry) continue;
+      const endpoints = entry.endpoints.filter((endpoint) => group.devices.includes(endpoint.device!) && endpoint.terminal === terminal);
+      const top = near(endpoints[0].point[1], devices[0].bounds.minY);
+      const edge = top ? Math.min(...endpoints.map((endpoint) => endpoint.point[1])) : Math.max(...endpoints.map((endpoint) => endpoint.point[1]));
+      const output = entry.net.type === 'pinOut' ? entry.endpoints.find((endpoint) => !endpoint.device)?.point : undefined;
+      const y = output && (top ? output[1] <= edge - 60 : output[1] >= edge + 60) ? output[1] : edge + (top ? -60 : 60);
+      for (const endpoint of endpoints) endpoint.stub = { a: endpoint.point, b: [endpoint.point[0], y] };
+      const segment: WireSegment = {
+        a: [Math.min(...endpoints.map((endpoint) => endpoint.point[0])), y],
+        b: [Math.max(...endpoints.map((endpoint) => endpoint.point[0])), y],
+      };
+      if (panes.some((pane) => blocks(segment, pane.bounds))
+        || endpoints.some((endpoint) => panes.some((pane) => pane.id !== endpoint.device && blocks(endpoint.stub, pane.bounds)))
+        || [segment, ...endpoints.map((endpoint) => endpoint.stub)].some((wire) => frames.some((frame) => crowdsFrame(wire, frame))))
+        throw new Error(`Cannot route net ${entry.net.id} through a common parallel rail without a symbol collision or frame clearance violation.`);
+      buses.push({ net: entry.net.id, endpoints, segment });
+    }
+  }
   const xs = new Set<number>(), ys = new Set<number>();
   const add = (p: Point) => { xs.add(p[0]); ys.add(p[1]); };
   for (const entry of entries) for (const endpoint of entry.endpoints) { add(endpoint.point); add(endpoint.stub.b); }
@@ -207,7 +233,15 @@ export function routeCircuit(model: CircuitModel, layout: CircuitLayout): Circui
   if (sharedInputs.length) {
     const left = Math.max(...sharedInputs.map((entry) => entry.endpoints[0].stub.b[0])) + 8;
     const right = Math.min(...frames.map((frame) => frame.minX)) - frameClearance;
-    const columns = xValues.filter((x) => x >= left && x <= right).slice(-sharedInputs.length);
+    const candidates = xValues.filter((x) => x >= left && x <= right);
+    let columns: number[] = [];
+    for (const last of [...candidates].reverse()) {
+      for (let spacing = 20; spacing <= right - left + 20; spacing += 10) {
+        const sequence = sharedInputs.map((_, index) => last - (sharedInputs.length - 1 - index) * spacing);
+        if (sequence.every((x) => candidates.some((candidate) => near(candidate, x)))) { columns = sequence; break; }
+      }
+      if (columns.length) break;
+    }
     if (columns.length < sharedInputs.length) throw new Error('Cannot route shared inputs in top-to-bottom branch order outside stage frames.');
     sharedInputs.forEach((entry, index) => branchColumns.set(entry.net.id, columns[index]));
   }
@@ -219,10 +253,18 @@ export function routeCircuit(model: CircuitModel, layout: CircuitLayout): Circui
   const completed: RoutedNet[] = [];
 
   for (const { net, endpoints } of entries) {
-    const segments: WireSegment[] = endpoints.length > 1 ? [endpoints[0].stub] : [];
+    const netBuses = buses.filter((bus) => bus.net === net.id);
+    const units = [
+      ...netBuses.map((bus) => ({ stub: { a: bus.segment.a, b: bus.segment.a }, device: undefined as string | undefined, terminal: undefined as string | undefined,
+        segments: [bus.segment, ...bus.endpoints.map((endpoint) => endpoint.stub)] })),
+      ...endpoints.filter((endpoint) => !netBuses.some((bus) => bus.endpoints.includes(endpoint)))
+        .map((endpoint) => ({ ...endpoint, segments: [endpoint.stub] })),
+    ];
+    const segments: WireSegment[] = endpoints.length > 1 ? [...units[0].segments] : [];
     const otherSegments = [...completed.flatMap((n) => n.segments), ...entries.filter((entry) => entry.net.id !== net.id)
-      .flatMap((entry) => entry.endpoints.length > 1 ? entry.endpoints.map((e) => e.stub) : [])];
-    for (const endpoint of endpoints.slice(1)) {
+      .flatMap((entry) => entry.endpoints.length > 1 ? entry.endpoints.map((e) => e.stub) : []),
+      ...buses.filter((bus) => bus.net !== net.id).map((bus) => bus.segment)];
+    for (const endpoint of units.slice(1)) {
       const branchColumn = segments.length > 1 ? branchColumns.get(net.id) : undefined;
       const start = points.findIndex((p) => equal(p, endpoint.stub.b));
       const goals = new Set(points.flatMap((p, index) => (segments.length === 1 ? equal(p, segments[0].b) : segments.some((s) => on(p, s)))
@@ -260,7 +302,7 @@ export function routeCircuit(model: CircuitModel, layout: CircuitLayout): Circui
       if (end < 0) throw new Error(`Cannot route net ${net.id} to ${endpoint.device ?? net.id}.${endpoint.terminal ?? 'anchor'} without a false connection or symbol collision.`);
       const path: Point[] = [];
       for (let state = end; state !== -1; state = previous[state]) path.push(points[Math.floor(state / 3)]);
-      segments.push(endpoint.stub, ...simplify(path.reverse()));
+      segments.push(...endpoint.segments, ...simplify(path.reverse()));
     }
     const normalized = split(segments, endpoints);
     const vertices: Point[] = [];
