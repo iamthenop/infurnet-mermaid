@@ -278,16 +278,19 @@ A ---|G| M1`));
     geometry(layout);
   });
 
-  it('retains pin declaration order when direct alignment would overlap pin panes', () => {
+  it.each(['LR', 'stages'])('retains reversed input order with %s device arrangement', (arrangement) => {
+    const members = arrangement === 'LR' ? stage(`${declaration('M1', 'nmos')}\n${declaration('M2', 'nmos')}`, 'LR')
+      : `${stage(declaration('M1', 'nmos')).replace('network', 'first')}\n${stage(declaration('M2', 'nmos')).replace('network', 'second')}`;
     const layout = layoutCircuit(circuit(`B([B]):::pinIn
 A([A]):::pinIn
-${declaration('M1', 'nmos')}
-${declaration('M2', 'nmos')}
+${members}
 A ---|G| M1
 B ---|G| M2`));
     expect(layout.nets.map((item) => item.id)).toEqual(['B', 'A']);
     expect(layout.nets[0].bounds.maxY).toBeLessThan(layout.nets[1].bounds.minY);
-    expect(layout.inputTargets.find((item) => item.net === 'A')!.aligned).toBe(false);
+    expect(layout.inputTargets.find((item) => item.net === 'B')!.aligned).toBe(true);
+    expect(layout.inputTargets.find((item) => item.net === 'A')!.aligned).toBe(arrangement === 'LR');
+    if (arrangement === 'LR') expect(device(layout, 'M1').position[0]).toBeLessThan(device(layout, 'M2').position[0]);
     geometry(layout);
   });
 

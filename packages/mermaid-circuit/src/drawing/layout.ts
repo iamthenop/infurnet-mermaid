@@ -96,6 +96,7 @@ export function layoutCircuit(model: CircuitModel): CircuitLayout {
   const deviceById = new Map(model.devices.map((device) => [device.id, device]));
   const declaration = new Map(model.devices.map((device, index) => [device.id, index]));
   const netById = new Map(model.nets.map((net) => [net.id, net]));
+  const inputOrder = new Map(model.nets.filter((net) => net.type === 'pinIn').map((net, index) => [net.id, index]));
   const assignments = new Map(model.connections.map((connection) => [`${connection.device}:${connection.terminal}`, connection.net]));
   const netCounts = new Map<string, number>();
   for (const connection of model.connections) netCounts.set(connection.net, (netCounts.get(connection.net) ?? 0) + 1);
@@ -229,10 +230,15 @@ export function layoutCircuit(model: CircuitModel): CircuitLayout {
       }
       const stagger = direction === 'LR' && group.topology !== 'series' && group.devices.some((device) =>
         device.terminals.some((terminal) => netById.get(netAt(device, terminal) ?? '')?.type === 'pinIn'));
+      const firstInput = (device: Device) => Math.min(...device.terminals.map((terminal) =>
+        inputOrder.get(netAt(device, terminal) ?? '') ?? model.nets.length));
+      const rows = new Map(group.devices.map((device, index) => ({ device, index }))
+        .sort((a, b) => firstInput(a.device) - firstInput(b.device) || a.index - b.index)
+        .map(({ device }, row) => [device.id, row]));
       const offsets: Point[] = [];
       group.devices.forEach((device, index) => {
         let x = direction === 'LR' ? index * pitch : 0;
-        let y = direction === 'TB' || stagger ? index * pitch : 0;
+        let y = direction === 'TB' ? index * pitch : stagger ? rows.get(device.id)! * pitch : 0;
         if (index > 0 && group.topology === 'series') {
           const link = shared(group.devices[index - 1], device);
           if (link.length === 1) {
