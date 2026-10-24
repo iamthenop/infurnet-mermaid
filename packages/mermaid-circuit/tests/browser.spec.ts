@@ -106,6 +106,16 @@ it.each(Object.entries(sources))('renders the catalog, routes, labels, and frame
     ...layout.blocks.flatMap((b) => b.bounds ? [{ kind: 'block', index: b.block, bounds: b.bounds, dash: null }] : []),
     ...layout.stages.map((s) => ({ kind: 'stage', index: s.stage, bounds: s.bounds, dash: '6 4' })),
   ]);
+  for (const wire of inspected.wires) for (const path of wire.paths) {
+    const [x1, y1, x2, y2] = path!.match(/-?\d+(?:\.\d+)?(?:e[-+]?\d+)?/gu)!.map(Number);
+    const horizontal = Math.abs(y1 - y2) < 1e-7;
+    for (const { bounds: b } of inspected.frames) {
+      const low = horizontal ? Math.min(x1, x2) : Math.min(y1, y2), high = horizontal ? Math.max(x1, x2) : Math.max(y1, y2);
+      if (high > (horizontal ? b.minX : b.minY) && low < (horizontal ? b.maxX : b.maxY)) {
+        for (const side of horizontal ? [b.minY, b.maxY] : [b.minX, b.maxX]) expect(Math.abs((horizontal ? y1 : x1) - side)).toBeGreaterThanOrEqual(20 - 1e-7);
+      }
+    }
+  }
   for (const d of model.devices) expect(inspected.text).toContain(d.id);
   for (const n of model.nets) if (n.implicit) expect(inspected.text).not.toContain(n.id);
   else expect(inspected.text).toContain(n.label);

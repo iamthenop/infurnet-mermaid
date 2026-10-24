@@ -16,6 +16,7 @@ export interface CircuitRouting {
 }
 
 const epsilon = 1e-7;
+const frameClearance = 20;
 const near = (a: number, b: number) => Math.abs(a - b) < epsilon;
 const equal = (a: Point, b: Point) => near(a[0], b[0]) && near(a[1], b[1]);
 const horizontal = (s: WireSegment) => near(s.a[1], s.b[1]);
@@ -47,6 +48,14 @@ function blocks(segment: WireSegment, box: Bounds): boolean {
     && Math.max(segment.a[0], segment.b[0]) > box.minX - 6 && Math.min(segment.a[0], segment.b[0]) < box.maxX + 6
     : segment.a[0] > box.minX - 6 && segment.a[0] < box.maxX + 6
     && Math.max(segment.a[1], segment.b[1]) > box.minY - 6 && Math.min(segment.a[1], segment.b[1]) < box.maxY + 6;
+}
+
+function crowdsFrame(segment: WireSegment, box: Bounds): boolean {
+  const axis = horizontal(segment) ? 0 : 1;
+  const low = axis === 0 ? box.minX : box.minY, high = axis === 0 ? box.maxX : box.maxY;
+  const sides = axis === 0 ? [box.minY, box.maxY] : [box.minX, box.maxX];
+  return Math.max(segment.a[axis], segment.b[axis]) > low && Math.min(segment.a[axis], segment.b[axis]) < high
+    && sides.some((side) => Math.abs(segment.a[1 - axis] - side) < frameClearance - epsilon);
 }
 
 function escape(point: Point, box: Bounds): Point {
@@ -117,6 +126,7 @@ class Queue {
 export function routeCircuit(model: CircuitModel, layout: CircuitLayout): CircuitRouting {
   if (layout.unplacedNetIds.length) throw new Error(`Unsupported pinInOut placement: ${layout.unplacedNetIds.join(', ')}.`);
   const panes = [...layout.devices, ...layout.nets];
+  const frames = [...layout.stages.map((stage) => stage.bounds), ...layout.blocks.flatMap((block) => block.bounds ? [block.bounds] : [])];
   const entries = model.nets.map((net) => {
     const attachments = model.connections.filter((c) => c.net === net.id).map((c) => {
       const placed = layout.devices.find((d) => d.id === c.device);
@@ -174,7 +184,7 @@ export function routeCircuit(model: CircuitModel, layout: CircuitLayout): Circui
   const branchColumns = new Map<string, number>();
   if (sharedInputs.length) {
     const left = Math.max(...sharedInputs.map((entry) => entry.endpoints[0].stub.b[0])) + 8;
-    const right = Math.min(...layout.stages.map((stage) => stage.bounds.minX)) - 8;
+    const right = Math.min(...frames.map((frame) => frame.minX)) - frameClearance;
     const columns = xValues.filter((x) => x >= left && x <= right).slice(-sharedInputs.length);
     if (columns.length < sharedInputs.length) throw new Error('Cannot route shared inputs in top-to-bottom branch order outside stage frames.');
     sharedInputs.forEach((entry, index) => branchColumns.set(entry.net.id, columns[index]));
@@ -182,7 +192,8 @@ export function routeCircuit(model: CircuitModel, layout: CircuitLayout): Circui
   const width = xValues.length;
   const points: Point[] = yValues.flatMap((y) => xValues.map((x): Point => [x, y]));
   const neighbors = points.map((p, index) => [index % width ? index - 1 : -1, index % width < width - 1 ? index + 1 : -1, index - width, index + width]
-    .filter((next) => next >= 0 && next < points.length && !equal(p, points[next]) && !panes.some((pane) => blocks({ a: p, b: points[next] }, pane.bounds))));
+    .filter((next) => next >= 0 && next < points.length && !equal(p, points[next]) && !panes.some((pane) => blocks({ a: p, b: points[next] }, pane.bounds))
+      && !frames.some((frame) => crowdsFrame({ a: p, b: points[next] }, frame))));
   const completed: RoutedNet[] = [];
 
   for (const { net, endpoints } of entries) {

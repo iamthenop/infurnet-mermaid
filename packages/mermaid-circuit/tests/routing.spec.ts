@@ -25,6 +25,15 @@ function connectivity(model: CircuitModel, layout: CircuitLayout, routes: Circui
         if (!graph.has(key(a))) graph.set(key(a), new Set());
         graph.get(key(a))!.add(key(b));
       }
+      for (const frame of [...layout.stages.map((s) => s.bounds), ...layout.blocks.flatMap((b) => b.bounds ? [b.bounds] : [])]) {
+        const axis = Math.abs(segment.a[1] - segment.b[1]) < 1e-7 ? 0 : 1;
+        const low = axis === 0 ? frame.minX : frame.minY, high = axis === 0 ? frame.maxX : frame.maxY;
+        if (Math.max(segment.a[axis], segment.b[axis]) > low && Math.min(segment.a[axis], segment.b[axis]) < high) {
+          for (const side of axis === 0 ? [frame.minY, frame.maxY] : [frame.minX, frame.maxX]) {
+            expect(Math.abs(segment.a[1 - axis] - side)).toBeGreaterThanOrEqual(20 - 1e-7);
+          }
+        }
+      }
       for (const pane of [...layout.devices, ...layout.nets]) {
         const x = (segment.a[0] + segment.b[0]) / 2, y = (segment.a[1] + segment.b[1]) / 2;
         expect(x > pane.bounds.minX + 1e-7 && x < pane.bounds.maxX - 1e-7 && y > pane.bounds.minY + 1e-7 && y < pane.bounds.maxY - 1e-7).toBe(false);

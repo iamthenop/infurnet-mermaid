@@ -88,7 +88,7 @@ Voltage sources retain their stage identity in the top region; stage bounds encl
 
 `src/drawing/routing.ts` connects each model net at its exact transformed attachment points. It retains net identities, terminal attachments, orthogonal segments, junctions, and independent crossings. Centering offsets are preserved, including 15-unit translations.
 
-Routes avoid symbol panes and reserve terminal approaches. Shared inputs reach their upper-left recipient first and branch outside stage frames. Junction dots mark shared-net branches; white gaps distinguish independent crossings on the white drawing background.
+Routes avoid symbol panes and keep parallel runs at least 20 units from stage and block borders. Shared inputs reach their upper-left recipient first and branch outside stage frames. Junction dots mark shared-net branches; white gaps distinguish independent crossings on the white drawing background.
 
 The renderer embeds the approved artwork and draws routes from that same routing result. Device parameters split at `<br/>` into additional text lines. Labels use SVG text nodes, and generated implicit-net identifiers remain invisible.
 
