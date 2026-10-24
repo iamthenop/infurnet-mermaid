@@ -4,7 +4,7 @@ An external Mermaid circuit renderer with identifier `circuitDiagram`. The packa
 
 ## Implemented behavior
 
-The parser accepts `circuitDiagram D` and `circuitDiagram A`, followed by declarations and connections from the closed 17-type vocabulary in [the notation specification](spec/notation.md).
+The parser accepts `circuitDiagram D` and `circuitDiagram A`, followed by declarations and connections from the closed 18-type vocabulary in [the notation specification](spec/notation.md).
 
 ```text
 circuitDiagram D
@@ -155,9 +155,11 @@ Browser tests register the compiled package with real Mermaid and compare render
 
 ## Generated review fixtures
 
-The nine `.mmd` sources and matching `.svg` outputs live in [`examples/fixtures/`](examples/fixtures/). They cover a single device, series, parallel, shared input, CMOS inverter, explicit LR rotation, NAND2, three-input CMOS NOR, and two-input CMOS XOR. Open the SVG files directly in a browser to inspect them.
+The ten `.mmd` sources and matching `.svg` outputs live in [`examples/fixtures/`](examples/fixtures/). They cover a single device, series, parallel, shared input, CMOS inverter, explicit LR rotation, NAND2, three-input CMOS NOR, two-input CMOS XOR, and four-NAND digital XOR. Open the SVG files directly in a browser to inspect them.
 
-The XOR fixture has twelve transistors and thirty-six terminal assignments. Its output is high when exactly one input is high.
+The [four-NAND XOR source](examples/fixtures/xor-nand4.mmd) uses the digital `nand` device and three distinct intermediate nets. Its [generated SVG](examples/fixtures/xor-nand4.svg) demonstrates gate-level logic alongside the transistor-level `xor2` example.
+
+The transistor-level XOR fixture has twelve transistors and thirty-six terminal assignments. Its output is high when exactly one input is high.
 
 The `inputInverters` block sits left of `xorCore`, with their vertical midpoints aligned. Each section shows local VDD and VSS rails.
 

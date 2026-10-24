@@ -5,6 +5,7 @@ import { deviceTypes, netTypes, type CircuitModel } from '../src/circuitTypes.js
 import { ScaffoldDb } from '../src/db.js';
 import { createParser } from '../src/parser.js';
 import notation from '../spec/notation.md?raw';
+import xorNand from '../examples/fixtures/xor-nand4.mmd?raw';
 
 const digital = 'circuitDiagram D\nA(["A"]):::pinIn\nY(["Y"]):::pinOut\nU1["U1"]:::inverter';
 const electrical = 'circuitDiagram A\nN(("N")):::net\nM["M"]:::nmos';
@@ -23,12 +24,12 @@ describe('circuit parser', () => {
   });
 
   it.each(deviceTypes)('retains the approved %s device and its terminal contract', (type) => {
-    const mode = ['buffer', 'inverter'].includes(type) ? 'D' : 'A';
+    const mode = ['buffer', 'inverter', 'nand'].includes(type) ? 'D' : 'A';
     const model = parseCircuit(`circuitDiagram ${mode}\nU1["display<br/>value=1"]:::${type}`);
     const terminals = type.endsWith('Blk') ? ['G', 'D', 'S', 'B']
       : ['pmos', 'nmos'].includes(type) ? ['G', 'D', 'S']
         : type === 'diode' ? ['A', 'K'] : type.endsWith('Source') ? ['P', 'N']
-          : ['inverter', 'buffer'].includes(type) ? ['I', 'O'] : ['A', 'B'];
+          : type === 'nand' ? ['I1', 'I2', 'O'] : ['inverter', 'buffer'].includes(type) ? ['I', 'O'] : ['A', 'B'];
     expect(model.devices[0]).toMatchObject({ id: 'U1', type, label: 'display<br/>value=1', stage: 0 });
     expect([...model.devices[0]!.terminals].sort()).toEqual(terminals.sort());
     expect(model.nets).toEqual([]);
@@ -42,7 +43,7 @@ describe('circuit parser', () => {
   });
 
   it.each(deviceTypes)('rejects %s in its ineligible mode', (type) => {
-    const mode = ['buffer', 'inverter'].includes(type) ? 'A' : 'D';
+    const mode = ['buffer', 'inverter', 'nand'].includes(type) ? 'A' : 'D';
     expect(() => parseCircuit(`circuitDiagram ${mode}\nU1["U1"]:::${type}`)).toThrow('Line 2: Type');
   });
 
@@ -223,6 +224,32 @@ end`);
     for (const device of model.devices) expect(device.bulk).toEqual({ kind: 'implicit', sourceTerminal: 'S' });
   });
 
+  it('preserves the four-NAND XOR topology and truth table', () => {
+    const model = parseCircuit(xorNand);
+    expect(model.mode).toBe('D');
+    expect(model.devices.map(({ id, type }) => [id, type])).toEqual([
+      ['N1', 'nand'], ['N2', 'nand'], ['N3', 'nand'], ['N4', 'nand'],
+    ]);
+    expect(model.connections).toHaveLength(12);
+    expect(model.nets.map(({ id }) => id).sort()).toEqual(['A', 'B', 'Y', 'n1', 'n2', 'n3']);
+    const assignments = Object.fromEntries(model.devices.map((device) => [device.id, Object.fromEntries(
+      model.connections.filter((edge) => edge.device === device.id).map((edge) => [edge.terminal, edge.net]),
+    )]));
+    expect(assignments).toEqual({
+      N1: { I1: 'A', I2: 'B', O: 'n1' }, N2: { I1: 'A', I2: 'n1', O: 'n2' },
+      N3: { I1: 'B', I2: 'n1', O: 'n3' }, N4: { I1: 'n2', I2: 'n3', O: 'Y' },
+    });
+    for (const [a, b, expected] of [[0, 0, 0], [0, 1, 1], [1, 0, 1], [1, 1, 0]]) {
+      const values = new Map([['A', a], ['B', b]]);
+      for (const device of model.devices) {
+        const { I1, I2, O } = assignments[device.id];
+        expect(values.has(I1) && values.has(I2)).toBe(true);
+        values.set(O, Number(!(values.get(I1)! && values.get(I2)!)));
+      }
+      expect(values.get('Y')).toBe(expected);
+    }
+  });
+
   it.each(['pmosBlk', 'nmosBlk'])('retains explicit bulk on %s without inventing nets', (type) => {
     const model = parseCircuit(`circuitDiagram A\nM["M"]:::${type}\nN(("N")):::net\nM ---|B| N`);
     expect(model.devices[0]!.bulk).toEqual({ kind: 'explicit', terminal: 'B' });
@@ -238,6 +265,8 @@ end`);
     [`${digital}\nU1["again"]:::buffer`, 'Duplicate'], [`${digital}\nU1(("again")):::net`, 'Duplicate'],
     [`${digital}\nA ---|I| Missing`, 'undeclared'], [`${digital}\nMissing ---|I| U1`, 'undeclared'],
     [`${digital}\nA ---|G| U1`, 'Unknown terminal'], [`${electrical}\nM ---|B| N`, 'Unknown terminal'],
+    ['circuitDiagram D\nN[N]:::nand\nA([A]):::pinIn\nA ---|I| N', 'Unknown terminal'],
+    ['circuitDiagram D\nN[N]:::nand\nA([A]):::pinIn\nN ---|O2| A', 'Unknown terminal'],
     [`${digital}\nA ---|I| Y`, 'one device and one net'], [`${digital}\nU2["U2"]:::buffer\nU1 ---|I| U2`, 'one device and one net'],
     [`${digital}\nA ---|I| U1\nY ---|I| U1`, 'already connected'],
     [`${digital}\nA --> U1`, 'Unsupported'], [`${digital}\nA ---|I| L:U1`, 'Unsupported'],

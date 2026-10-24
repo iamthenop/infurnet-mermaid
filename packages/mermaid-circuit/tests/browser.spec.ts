@@ -133,9 +133,9 @@ it.each(Object.entries(sources))('renders the catalog, routes, labels, and frame
   expect(errors).toEqual([]);
 });
 
-it.each(['pmos', 'nmos', 'pmosBlk', 'nmosBlk', 'resistor', 'capacitor', 'diode', 'voltageSource', 'currentSource', 'inverter', 'buffer'] as const)(
+it.each(['pmos', 'nmos', 'pmosBlk', 'nmosBlk', 'resistor', 'capacitor', 'diode', 'voltageSource', 'currentSource', 'inverter', 'buffer', 'nand'] as const)(
   'embeds the registered %s artwork with all named terminal attachments', async (type) => {
-    const mode = type === 'inverter' || type === 'buffer' ? 'D' : 'A';
+    const mode = type === 'inverter' || type === 'buffer' || type === 'nand' ? 'D' : 'A';
     const terminals = Object.keys(resolveSymbol(type).terminals);
     const source = `circuitDiagram ${mode}\nU[U]:::${type}\n` + terminals.map((t, i) => `N${i}((N${i})):::net\nN${i} ---|${t}| U`).join('\n');
     await render(`symbol-${type}`, source);

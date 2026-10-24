@@ -1,6 +1,6 @@
 # Notation for circuit diagrams
 
-This specification records the approved syntax and electrical semantics of `circuitDiagram`. The parser implements the 17 authorable object types, diagram modes, typed subgraphs, and fixed-terminal connections described here.
+This specification records the approved syntax and electrical semantics of `circuitDiagram`. The parser implements the 18 authorable object types, diagram modes, typed subgraphs, and fixed-terminal connections described here.
 
 The NAND2 example is a parser, placement, routing, and rendering acceptance fixture. Placement and routing are implemented separately from the electrical model. Dynamic ICs remain unimplemented.
 
@@ -42,7 +42,7 @@ The parser records the diagram mode and enforces registered-shape eligibility fo
 
 ## Object types
 
-The object vocabulary is closed and contains these 17 types:
+The object vocabulary is closed and contains these 18 types:
 
 | Type | Kind | Terminals |
 | --- | --- | --- |
@@ -57,12 +57,15 @@ The object vocabulary is closed and contains these 17 types:
 | `currentSource` | Device | P, N |
 | `inverter` | Device | I, O |
 | `buffer` | Device | I, O |
+| `nand` | Device | I1, I2, O |
 | `net` | Net | None |
 | `supplyNet` | Net | None |
 | `ground` | Net | None |
 | `pinIn` | Net | None |
 | `pinOut` | Net | None |
 | `pinInOut` | Net | None |
+
+`nand` is eligible only in mode `D`. Its two inputs are `I1` and `I2`; its output is `O`.
 
 ### Supply terminology and semantics
 
@@ -171,7 +174,7 @@ subgraph block datapath
 end
 ```
 
-This example illustrates structural membership only. It does not authorize the new logic gates in the currently closed object-type table. The existing 17-type vocabulary remains unchanged.
+This example illustrates structural membership only. The `and` gate remains outside the closed object-type table.
 
 ### Membership and hierarchy
 
