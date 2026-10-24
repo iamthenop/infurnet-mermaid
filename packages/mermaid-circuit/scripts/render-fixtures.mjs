@@ -2,7 +2,7 @@ import { readFile, writeFile } from 'node:fs/promises';
 import { chromium } from 'playwright';
 import { createServer } from 'vite';
 
-const names = ['single-device', 'series', 'parallel', 'shared-input', 'cmos-inverter', 'explicit-lr', 'nand2', 'nor3'];
+const names = ['single-device', 'series', 'parallel', 'shared-input', 'cmos-inverter', 'explicit-lr', 'nand2', 'nor3', 'xor2'];
 const server = await createServer({ root: new URL('../examples/browser/', import.meta.url).pathname,
   server: { host: '127.0.0.1', port: 0 } });
 let browser;

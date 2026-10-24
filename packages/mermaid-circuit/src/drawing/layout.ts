@@ -230,14 +230,15 @@ export function layoutCircuit(model: CircuitModel): CircuitLayout {
           group = reversed; plan = reversePlan;
         }
       }
-      const stagger = direction === 'LR' && group.devices.some((device) =>
-        device.terminals.some((terminal) => netById.get(netAt(device, terminal) ?? '')?.type === 'pinIn'));
+      const parallelCmos = group.topology === 'parallel' && (group.devices.every(isPmos) || group.devices.every(isNmos));
+      const stagger = direction === 'LR' && (parallelCmos || group.devices.some((device) =>
+        device.terminals.some((terminal) => netById.get(netAt(device, terminal) ?? '')?.type === 'pinIn')));
       const firstInput = (device: Device) => Math.min(...device.terminals.map((terminal) =>
         inputOrder.get(netAt(device, terminal) ?? '') ?? model.nets.length));
       const rows = new Map(group.devices.map((device, index) => ({ device, index }))
         .sort((a, b) => firstInput(a.device) - firstInput(b.device) || a.index - b.index)
         .map(({ device }, row) => [device.id, row]));
-      const staggerPitch = group.topology === 'parallel' && (group.devices.every(isPmos) || group.devices.every(isNmos)) ? pitch / 2 : pitch;
+      const staggerPitch = parallelCmos ? pitch / 2 : pitch;
       const offsets: Point[] = [];
       group.devices.forEach((device, index) => {
         let x = direction === 'LR' ? index * pitch : 0;
@@ -285,6 +286,21 @@ export function layoutCircuit(model: CircuitModel): CircuitLayout {
     }
     stages[index] = { ...stage, bounds: translateBounds(stage.bounds, [dx, 0]) };
   }
+  for (let index = 1; index < stages.length; index++) {
+    const above = [...placed.values()].filter((device) => device.stage === index - 1 && device.region === 'internal');
+    const below = [...placed.values()].filter((device) => device.stage === index && device.region === 'internal');
+    const facing = above.some((upper) => below.some((lower) => Object.entries(upper.terminals).some(([a, p]) =>
+      Math.abs(p[1] - upper.bounds.maxY) < 1e-7 && Object.entries(lower.terminals).some(([b, q]) =>
+        Math.abs(q[1] - lower.bounds.minY) < 1e-7
+        && q[1] - p[1] < gap * 3 && netAt(deviceById.get(upper.id)!, a) !== undefined
+        && netAt(deviceById.get(lower.id)!, b) !== undefined
+        && netAt(deviceById.get(upper.id)!, a) !== netAt(deviceById.get(lower.id)!, b)))));
+    if (!facing) continue;
+    for (const device of placed.values()) if (device.region === 'internal' && device.stage >= index)
+      placed.set(device.id, { ...device, ...place(device.symbol, [device.position[0], device.position[1] + gap], device.rotation) });
+    for (let later = index; later < stages.length; later++) stages[later] = { ...stages[later], bounds: translateBounds(stages[later].bounds, [0, gap]) };
+  }
+  if (stages.length) cursorY = stages.at(-1)!.bounds.maxY + padding + gap;
   const nonemptyStages = stages.filter((stage) => stage.groups.length > 0);
   const conductionXs = [...placed.values()].filter((device) => isCmos(deviceById.get(device.id)!) && device.rotation === 0)
     .flatMap((device) => [device.terminals.D[0], device.terminals.S[0]]);

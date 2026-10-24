@@ -152,6 +152,20 @@ export function routeCircuit(model: CircuitModel, layout: CircuitLayout): Circui
     }
     return Number(!!a.net.implicit) - Number(!!b.net.implicit);
   });
+  for (const entry of entries) for (const endpoint of entry.endpoints) {
+    if (!endpoint.device || horizontal(endpoint.stub)) continue;
+    const device = layout.devices.find((device) => device.id === endpoint.device)!;
+    const frame = layout.stages.find((stage) => stage.stage === device.stage)?.bounds;
+    if (!frame) continue;
+    const direction = Math.sign(endpoint.stub.b[1] - endpoint.point[1]);
+    const edge = direction < 0 ? frame.minY : frame.maxY;
+    if (Math.abs(edge - endpoint.point[1]) > 30 + epsilon) continue;
+    const candidates = [-120, 0, 120].flatMap((period) => [0, 30, 40, 60, 80, 90]
+      .map((offset) => Math.floor(edge / 120) * 120 + period + offset))
+      .filter((value) => (value - edge) * direction >= frameClearance)
+      .sort((a, b) => Math.abs(a - edge) - Math.abs(b - edge));
+    endpoint.stub = { a: endpoint.point, b: [endpoint.point[0], candidates[0]] };
+  }
   const stubs = entries.flatMap((entry) => entry.endpoints.length > 1 ? entry.endpoints.map((endpoint) => ({ net: entry.net.id, endpoint })) : []);
   const straightInputs = entries.filter((entry) => entry.net.type === 'pinIn' && entry.endpoints.length > 1
     && horizontal(entry.endpoints[1].stub) && near(entry.endpoints[0].point[1], entry.endpoints[1].point[1]))

@@ -1,0 +1,90 @@
+circuitDiagram A
+
+    A(["A"]):::pinIn
+    B(["B"]):::pinIn
+    OUT(["OUT"]):::pinOut
+    VDD{{"VDD"}}:::supplyNet
+    VSS{{"VSS"}}:::ground
+    Abar(("Abar")):::net
+    Bbar(("Bbar")):::net
+    pMid(("pMid")):::net
+    nHigh(("nHigh")):::net
+    nLow(("nLow")):::net
+
+    subgraph stage invertA
+        direction TB
+        PA["PA"]:::pmos
+        NA["NA"]:::nmos
+    end
+
+    subgraph stage invertB
+        direction TB
+        PB["PB"]:::pmos
+        NB["NB"]:::nmos
+    end
+
+    subgraph stage pullUpInputs
+        direction LR
+        P0["P0"]:::pmos
+        P1["P1"]:::pmos
+    end
+
+    subgraph stage pullUpComplements
+        direction LR
+        P2["P2"]:::pmos
+        P3["P3"]:::pmos
+    end
+
+    subgraph stage pullDownHigh
+        direction TB
+        N0["N0"]:::nmos
+        N1["N1"]:::nmos
+    end
+
+    subgraph stage pullDownLow
+        direction TB
+        N2["N2"]:::nmos
+        N3["N3"]:::nmos
+    end
+
+    A ---|G| PA
+    A ---|G| NA
+    VDD ---|S| PA
+    Abar ---|D| PA
+    Abar ---|D| NA
+    VSS ---|S| NA
+
+    B ---|G| PB
+    B ---|G| NB
+    VDD ---|S| PB
+    Bbar ---|D| PB
+    Bbar ---|D| NB
+    VSS ---|S| NB
+
+    A ---|G| P0
+    B ---|G| P1
+    VDD ---|S| P0
+    VDD ---|S| P1
+    pMid ---|D| P0
+    pMid ---|D| P1
+
+    Abar ---|G| P2
+    Bbar ---|G| P3
+    pMid ---|S| P2
+    pMid ---|S| P3
+    OUT ---|D| P2
+    OUT ---|D| P3
+
+    A ---|G| N0
+    B ---|G| N1
+    OUT ---|D| N0
+    nHigh ---|S| N0
+    nHigh ---|D| N1
+    VSS ---|S| N1
+
+    Abar ---|G| N2
+    Bbar ---|G| N3
+    OUT ---|D| N2
+    nLow ---|S| N2
+    nLow ---|D| N3
+    VSS ---|S| N3

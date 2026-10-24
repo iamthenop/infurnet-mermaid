@@ -151,7 +151,9 @@ Browser tests register the compiled package with real Mermaid and compare render
 
 ## Generated review fixtures
 
-The eight `.mmd` sources and matching `.svg` outputs live in [`examples/fixtures/`](examples/fixtures/). They cover a single device, series, parallel, shared input, CMOS inverter, explicit LR rotation, NAND2, and three-input CMOS NOR. Open the SVG files directly in a browser to inspect them.
+The nine `.mmd` sources and matching `.svg` outputs live in [`examples/fixtures/`](examples/fixtures/). They cover a single device, series, parallel, shared input, CMOS inverter, explicit LR rotation, NAND2, three-input CMOS NOR, and two-input CMOS XOR. Open the SVG files directly in a browser to inspect them.
+
+The XOR fixture includes both input inverters and uses twelve transistors. Its output is high when exactly one input is high.
 
 Regeneration requires Node.js 24.22.1, this workspace's installed npm dependencies, and Playwright's installed Chromium. Use the repository's existing `.venv` runtime and browser cache. From the repository root:
 
@@ -169,6 +171,6 @@ npm run render:fixtures
 
 The command builds the package and starts the existing Vite browser host. Chromium invokes that host's registered plugin through `mermaid.render()` for each source. Only the returned SVG is written, using stable fixture IDs.
 
-Generation fails on any parse, layout, routing, rendering, or empty-output error. All eight renders must succeed before outputs are written. Browser tests compare the tracked SVGs with fresh plugin output and a repeated render.
+Generation fails on any parse, layout, routing, rendering, or empty-output error. All nine renders must succeed before outputs are written. Browser tests compare the tracked SVGs with fresh plugin output and a repeated render.
 
 These SVGs come from the plugin. Reference illustrations show intended appearance; they cannot prove that the plugin works. The owner decides whether the drawings meet the approved design.

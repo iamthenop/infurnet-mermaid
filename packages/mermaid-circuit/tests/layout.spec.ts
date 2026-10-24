@@ -2,6 +2,7 @@
 import { describe, expect, it } from 'vitest';
 import notation from '../spec/notation.md?raw';
 import nor from '../examples/fixtures/nor3.mmd?raw';
+import xor from '../examples/fixtures/xor2.mmd?raw';
 import { layoutCircuit, type CircuitLayout, type PlacedDevice } from '../src/drawing/layout.js';
 import type { Bounds, Point } from '../src/drawing/geometry.js';
 import { resolveSymbol } from '../src/drawing/symbols.js';
@@ -189,7 +190,7 @@ R3 ---|B:A| R1`));
     geometry(layout);
   });
 
-  it.each([['NAND2', nand], ['NOR3', nor]])('centers power and staggers parallel devices consistently in %s', (_name, source) => {
+  it.each([['NAND2', nand], ['NOR3', nor], ['XOR2', xor]])('centers power and staggers parallel devices consistently in %s', (_name, source) => {
     const layout = layoutCircuit(parseCircuit(source));
     const xs = layout.devices.flatMap((device) => [device.terminals.D[0], device.terminals.S[0]]);
     const center = (Math.min(...xs) + Math.max(...xs)) / 2;
