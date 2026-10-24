@@ -14,7 +14,7 @@ Fixed-symbol schematic rendering is implemented against these approved drawing r
 6. Signals stay outside stage frames except for branches crossing the borders to reach device terminals.
 7. Input signals split at junctions outside stage frames.
 8. The first recipient of an input is the top-left recipient. Align its terminal horizontally with the input pin when possible while preserving input declaration order.
-9. In a left-to-right stage, successive devices may sit lower as they move right to support input alignment.
+9. In an analog left-to-right stage, successive devices may sit lower as they move right to support input alignment. Digital LR stages follow logic dependencies as defined under [placement and rotation](#placement-and-rotation).
 10. Additional gate connections branch from the corresponding input line using orthogonal routing.
 
 Shared input branch columns have equal spacing and follow input order from left to right. Parallel PMOS and NMOS groups arranged left to right use the same 90-unit descending stagger.
@@ -36,10 +36,14 @@ Stages in the same vertical diagram sequence share a horizontal centerline. Stag
 | Stage direction | Device arrangement |
 | --- | --- |
 | `auto` | Recognized conduction-series chains run top to bottom; devices across the same two conduction nets run left to right |
-| `LR` | Devices run left to right in declaration order |
+| `LR` | Analog devices run left to right in declaration order; digital devices follow dependency columns |
 | `TB` | Devices run top to bottom |
 
 Explicit direction takes precedence over automatic arrangement. Shared MOSFET gates do not establish a conduction-series relationship. Sharing only one net does not establish a parallel group.
+
+In mode `D`, an explicit `LR` stage lays out acyclic logic in dependency columns derived from output-to-input net assignments. Gates without in-stage predecessors start in the first column; each dependent gate sits one column beyond its deepest predecessor.
+
+Gates in the same column stack in declaration order. Center each column vertically against the tallest column, preserving exact transformed attachments. Cyclic stages retain the existing declaration-order fallback; dependency placement does not change stage membership or electrical connectivity.
 
 Device orientation is independent of arrangement direction. Placement may use right-angle rotations to align connected terminals, applying the same transform to artwork and named attachments.
 

@@ -159,6 +159,8 @@ The ten `.mmd` sources and matching `.svg` outputs live in [`examples/fixtures/`
 
 The [four-NAND XOR source](examples/fixtures/xor-nand4.mmd) uses the digital `nand` device and three distinct intermediate nets. Its [generated SVG](examples/fixtures/xor-nand4.svg) demonstrates gate-level logic alongside the transistor-level `xor2` example.
 
+Digital LR placement follows logic dependencies: N1 occupies the first column, N2 sits above N3 in the second, and N4 occupies the third. The outer gates align with the middle pair's vertical midpoint.
+
 The transistor-level XOR fixture has twelve transistors and thirty-six terminal assignments. Its output is high when exactly one input is high.
 
 The `inputInverters` block sits left of `xorCore`, with their vertical midpoints aligned. Each section shows local VDD and VSS rails.

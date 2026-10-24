@@ -265,6 +265,26 @@ function layoutConnected(model: CircuitModel, appearances: ReadonlyMap<string, N
         }
         offsets.push([Math.round(x), Math.round(y)]);
       });
+      if (model.mode === 'D' && stage.direction === 'LR') {
+        const predecessors = new Map(group.devices.map((device) => [device.id, group.devices.filter((source) => {
+          const output = netAt(source, 'O');
+          return output !== undefined && device.terminals.some((terminal) => terminal !== 'O' && netAt(device, terminal) === output);
+        }).map((source) => source.id)]));
+        const levels = new Map<string, number>();
+        while (levels.size < group.devices.length) {
+          const ready = group.devices.filter((device) => !levels.has(device.id) && predecessors.get(device.id)!.every((id) => levels.has(id)));
+          if (!ready.length) break;
+          for (const device of ready) levels.set(device.id, Math.max(-1, ...predecessors.get(device.id)!.map((id) => levels.get(id)!)) + 1);
+        }
+        if (levels.size === group.devices.length) {
+          const columns = [...new Set(levels.values())].map((level) => group.devices.filter((device) => levels.get(device.id) === level));
+          const rows = Math.max(...columns.map((column) => column.length));
+          group.devices.forEach((device, index) => {
+            const level = levels.get(device.id)!, column = columns.find((column) => levels.get(column[0].id) === level)!;
+            offsets[index] = [level * pitch, ((rows - column.length) / 2 + column.indexOf(device)) * pitch];
+          });
+        }
+      }
       if (direction === 'LR' && group.devices.some(isPmos)) {
         const belowPmos = Math.max(...offsets.filter((_, index) => isPmos(group.devices[index])).map((point) => point[1])) + pitch;
         group.devices.forEach((device, index) => { if (isNmos(device)) offsets[index] = [offsets[index][0], Math.max(offsets[index][1], belowPmos)]; });

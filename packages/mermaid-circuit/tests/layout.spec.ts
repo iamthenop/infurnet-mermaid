@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import notation from '../spec/notation.md?raw';
 import nor from '../examples/fixtures/nor3.mmd?raw';
 import xor from '../examples/fixtures/xor2.mmd?raw';
+import xorNand from '../examples/fixtures/xor-nand4.mmd?raw';
 import { layoutCircuit, type CircuitLayout, type PlacedDevice } from '../src/drawing/layout.js';
 import type { Bounds, Point } from '../src/drawing/geometry.js';
 import { resolveSymbol } from '../src/drawing/symbols.js';
@@ -102,6 +103,51 @@ describe('stage topology and orientation', () => {
     expect(layout.stages[0].groups[0].direction).toBe(direction);
     expect(layout.devices[0].position[axis]).toBeLessThan(layout.devices[1].position[axis]);
     expect(layout.devices[1].position[axis]).toBeLessThan(layout.devices[2].position[axis]);
+    geometry(layout);
+  });
+
+  it.each([
+    ['N1', 'N2', 'N3', 'N4'], ['N4', 'N3', 'N2', 'N1'], ['N4', 'N2', 'N1', 'N3'],
+  ])('places digital LR dependencies in columns with declaration order %j,%j,%j,%j', (...order) => {
+    const source = xorNand.replace(/    N1[^\n]+\n    N2[^\n]+\n    N3[^\n]+\n    N4[^\n]+/u,
+      order.map((id) => `    ${declaration(id, 'nand')}`).join('\n'));
+    const model = parseCircuit(source), before = structuredClone(model), layout = layoutCircuit(model);
+    const [first, upper, lower, last] = ['N1', ...order.filter((id) => id === 'N2' || id === 'N3'), 'N4']
+      .map((id) => device(layout, id));
+    expect(first.position[0]).toBeLessThan(upper.position[0]);
+    expect(upper.position[0]).toBe(lower.position[0]);
+    expect(lower.position[0]).toBeLessThan(last.position[0]);
+    expect(upper.position[1]).toBeLessThan(lower.position[1]);
+    expect(first.position[1]).toBe((upper.position[1] + lower.position[1]) / 2);
+    expect(last.position[1]).toBe(first.position[1]);
+    expect(layout.devices.every((placed) => placed.rotation === 0)).toBe(true);
+    const frame = layout.stages[0].bounds;
+    expect([frame.maxX - frame.minX, frame.maxY - frame.minY]).toEqual([540, 360]);
+    expect(layoutCircuit({ ...model, connections: [...model.connections].reverse() }).devices).toEqual(layout.devices);
+    expect(model).toEqual(before);
+    geometry(layout, true);
+  });
+
+  it('levels digital inverter and buffer dependencies independently of declaration order', () => {
+    const model = parseCircuit(`circuitDiagram D
+${stage(`${declaration('U3', 'buffer')}\n${declaration('U2', 'inverter')}\n${declaration('U1', 'buffer')}`, 'LR')}
+U1 ---|O:I| U2
+U2 ---|O:I| U3`);
+    const layout = layoutCircuit(model);
+    expect(device(layout, 'U1').position[0]).toBeLessThan(device(layout, 'U2').position[0]);
+    expect(device(layout, 'U2').position[0]).toBeLessThan(device(layout, 'U3').position[0]);
+    expect(new Set(layout.devices.map((placed) => placed.position[1])).size).toBe(1);
+    geometry(layout);
+  });
+
+  it('retains digital LR declaration fallback when dependencies contain feedback', () => {
+    const model = parseCircuit(`circuitDiagram D
+${stage(`${declaration('U2', 'inverter')}\n${declaration('U1', 'inverter')}`, 'LR')}
+U1 ---|O:I| U2
+U2 ---|O:I| U1`);
+    const layout = layoutCircuit(model);
+    expect(device(layout, 'U2').position[0]).toBeLessThan(device(layout, 'U1').position[0]);
+    expect(layout.devices.every((placed) => placed.rotation === 0)).toBe(true);
     geometry(layout);
   });
 
