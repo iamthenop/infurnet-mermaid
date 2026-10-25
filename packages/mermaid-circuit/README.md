@@ -52,13 +52,13 @@ The JSON shape catalog supplies mode eligibility and fixed terminal names. It is
 
 ## Drawing foundation
 
-The TypeScript modules in `src/drawing/` provide point transforms, bounds, and SVG primitives. They adapt selected geometry and SVG operations from Schemdraw.
+The TypeScript modules in `src/drawing/` provide a small, standalone drawing core adapted from Schemdraw. They support manual composition with `Drawing`, `Element`, `Line`, `Wire`, and `Dot`. They do not consume the circuit model or choose device positions.
 
 Source links, credit, and the upstream notice appear in [ACKNOWLEDGEMENTS.md](ACKNOWLEDGEMENTS.md). The package uses the [MIT license](LICENSE).
 
 Transforms apply a local offset, scale, rotation, then global translation. SVG coordinates increase rightward and downward, so positive angles rotate clockwise. The same matrix transforms terminal points and symbol artwork.
 
-The SVG serializer emits line, polyline, path, circle, and text elements with escaped values. It preserves supplied coordinates and element order. It produces fragments for an SVG parent, not a separate document.
+The SVG serializer emits line, polyline, path, circle, and text elements with escaped values, preserving coordinates and element order. `Drawing.toSVG(margin)` wraps these fragments and catalog symbols in a standalone SVG document. The default margin is four units.
 
 `node scripts/build-shape-assets.mjs` reads the catalog and copies each registered SVG into an ignored TypeScript module. Both build and unit-test commands run this step. The compiled module ships under `dist/generated/`, so symbol lookup needs no file or network access at runtime.
 
@@ -66,7 +66,62 @@ The 103 source SVGs retain their artwork and license notices. `shapes/shapes.jso
 
 `resolveSymbol` returns SVG content, pane dimensions, transformed attachment points, and the matching SVG matrix. `resolveTerminal` checks a named terminal. Catalog lookup does not make a shape authorable in circuit notation.
 
-The generated module is derived data; it must not be edited or committed. These drawing tools are not yet connected to Mermaid's renderer, which still returns an empty SVG. Device placement, wire routing, and visible circuit drawing remain unimplemented.
+The generated module is derived data; it must not be edited or committed. These drawing tools are not connected to Mermaid's renderer, which still returns an empty SVG. Automatic placement, routing, and circuit rendering remain unimplemented.
+
+### Manual drawing
+
+`Drawing.add` returns the placed element, including its transformed anchors and bounds. Elements stay in drawing order. `here` and `theta` expose the current position and direction.
+
+`move(dx, dy)` and `moveFrom(point, dx, dy, direction)` change the cursor without drawing. `push()` saves the cursor; `pop()` restores it. An empty stack leaves the cursor unchanged.
+
+An `Element` uses a catalog symbol. Its options include `at`, `rotation`, `scale`, `reverse`, `flip`, `anchor`, `drop`, and `labels`. `anchor` aligns a named local anchor with `at`.
+
+Named anchors include the catalog terminals, the pane `center`, and `anchor` where the catalog defines one. Placed elements also expose `xy`, the transformed local origin.
+
+`reverse` reflects horizontally about the local center; `flip` reflects about the local X axis. Anchor alignment is applied with those reflections. Scale accepts one number or an X/Y pair.
+
+Artwork and anchors use the same transform. A symbol keeps its fixed catalog geometry; the core does not extend its leads.
+
+Without `drop`, a catalog element leaves the cursor unchanged. A named or local-point `drop` moves it to that transformed anchor or point and adopts the element direction. As in Schemdraw, an explicit zero rotation with a point drop preserves the prior direction.
+
+`Line(length, options)` defaults to length three and drops at `end`; its other anchors are `start` and `center`.
+
+`Wire` takes `at` (or the cursor), `to`, and one of three shapes: `-`, `-|`, or `|-`. Its points are absolute drawing coordinates. Endpoints remain exact.
+
+Orthogonal wires update direction to their final leg; a straight wire keeps the prior direction. A wire exposes `start`, `end`, and `mid` anchors; for an orthogonal wire, `mid` is the midpoint of its final leg. Zero-length final legs retain Schemdraw's fallback direction: up for `-|`, left for `|-`.
+
+`Dot(radius, options)` draws a filled circle and moves the cursor to its position. Its default radius is 0.075. It keeps the prior direction unless given an explicit nonzero rotation or named drop.
+
+Choose line lengths and dot radii to suit the catalog's 120-unit panes.
+
+Labels require text and a named anchor or point, with an optional offset. Their positions follow the element transform; text stays upright. Wire label points and offsets use drawing coordinates.
+
+Bounds include transformed geometry and label anchor points, but exclude stroke widths and text glyph extents. The core does not measure fonts or prevent overlaps. SVG overflow remains visible; callers can increase the margin for labels and thick strokes.
+
+After building, run this example from the package directory with Node's module input mode. The drawing core is internal; it has no package-root export.
+
+```sh
+node --input-type=module <<'JS'
+import { Drawing, Element, Wire, Dot } from './dist/drawing/core.js';
+
+const drawing = new Drawing();
+const first = drawing.add(new Element('resistor', {
+  at: [-120, -60],
+  labels: [{ text: 'R1', at: 'center', offset: [0, -30] }],
+}));
+const second = drawing.add(new Element('resistor', {
+  at: [120, 0],
+  labels: [{ text: 'R2', at: 'center', offset: [0, -30] }],
+}));
+const wire = drawing.add(new Wire({
+  at: first.anchors.B, to: second.anchors.A, shape: '-|',
+}));
+drawing.add(new Dot(3, { at: wire.anchors.mid }));
+console.log(drawing.toSVG(12));
+JS
+```
+
+This draws two registered symbols, one wire, a dot, and labels. It tests drawing mechanics; it neither creates nor validates electrical connectivity. The port excludes other wire shapes, arrow options, automatic junctions, IC construction, and Schemdraw's other backends and full fluent API.
 
 ## Local consumption
 

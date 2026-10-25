@@ -6,12 +6,21 @@ This plugin uses code and artwork from [Schemdraw](https://github.com/cdelker/sc
 
 The port draws from these files at revision `e3cb52981f1ef297ddb083c9329ad89a6c8d1db4`:
 
+- [schemdraw.py](https://github.com/cdelker/schemdraw/blob/e3cb52981f1ef297ddb083c9329ad89a6c8d1db4/schemdraw/schemdraw.py): ordered drawing composition, cursor movement, and saving and restoring cursor state.
+- [elements/elements.py](https://github.com/cdelker/schemdraw/blob/e3cb52981f1ef297ddb083c9329ad89a6c8d1db4/schemdraw/elements/elements.py): explicit placement, reflection, named anchors, drop behavior, and basic label placement.
+- [elements/lines.py](https://github.com/cdelker/schemdraw/blob/e3cb52981f1ef297ddb083c9329ad89a6c8d1db4/schemdraw/elements/lines.py): straight lines, the `-`, `-|`, and `|-` wire shapes, and filled dots.
 - [transform.py](https://github.com/cdelker/schemdraw/blob/e3cb52981f1ef297ddb083c9329ad89a6c8d1db4/schemdraw/transform.py): local offset, scale, rotation, and global translation.
 - [segments.py](https://github.com/cdelker/schemdraw/blob/e3cb52981f1ef297ddb083c9329ad89a6c8d1db4/schemdraw/segments.py): path, circle, text, bounds, and presentation data.
 - [backends/svg.py](https://github.com/cdelker/schemdraw/blob/e3cb52981f1ef297ddb083c9329ad89a6c8d1db4/schemdraw/backends/svg.py): SVG elements with per-element drawing attributes.
 - [LICENSE.txt](https://github.com/cdelker/schemdraw/blob/e3cb52981f1ef297ddb083c9329ad89a6c8d1db4/LICENSE.txt): upstream MIT notice.
 
 The port uses SVG coordinates. X points right and Y points down. One matrix transforms both the artwork and its attachment points.
+
+The drawing core reuses the existing TypeScript transforms, primitives, and catalog lookup. It supports manual composition and standalone SVG output. It does not port automatic lead extension, the full label API, other wire variants, or other backends.
+
+It is not connected to the Mermaid renderer.
+
+Catalog arc bounds use the endpoint-to-center conversion in the [SVG implementation notes](https://www.w3.org/TR/SVG/implnote.html#ArcConversionEndpointToCenter), with extrema calculated after the drawing transform. Bounds cover geometry rather than measured text or stroke extents.
 
 ## Symbol artwork
 

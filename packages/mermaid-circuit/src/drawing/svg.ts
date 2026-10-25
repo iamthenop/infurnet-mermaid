@@ -1,7 +1,7 @@
 // Adapted from Schemdraw's segments.py and backends/svg.py (MIT).
 // Copyright (c) 2014-2026 Collin J. Delker. See LICENSE and ACKNOWLEDGEMENTS.md.
 
-import { type Point, type Transform } from './geometry.js';
+import { type Bounds, type Point, type Transform } from './geometry.js';
 
 export interface Presentation {
   readonly stroke?: string;
@@ -77,4 +77,13 @@ export function serializePrimitive(primitive: Primitive): string {
 
 export function serializePrimitives(primitives: readonly Primitive[]): string {
   return primitives.map(serializePrimitive).filter((element) => element !== '').join('\n');
+}
+
+// Content consists of trusted catalog artwork and serialized primitives.
+export function serializeSvg(content: string, box: Bounds, margin = 4): string {
+  if (!Number.isFinite(margin) || margin < 0) throw new RangeError('SVG margin must be finite and nonnegative.');
+  const width = Math.max(1, box.maxX - box.minX + 2 * margin);
+  const height = Math.max(1, box.maxY - box.minY + 2 * margin);
+  const viewBox = [box.minX - margin, box.minY - margin, width, height].map(number).join(' ');
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}" width="${number(width)}" height="${number(height)}" overflow="visible">\n${content}\n</svg>`;
 }

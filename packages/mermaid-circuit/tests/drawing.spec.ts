@@ -6,6 +6,8 @@ import { Transform, bounds, reflectHorizontal, reflectVertical, rotate, scale, t
   transformBounds, translateBounds, type Point } from '../src/drawing/geometry.js';
 import { serializePrimitive, serializePrimitives, serializeTransform, type Primitive } from '../src/drawing/svg.js';
 import { resolveSymbol, resolveTerminal } from '../src/drawing/symbols.js';
+import { resolveSymbolBounds } from '../src/drawing/symbols.js';
+import { Drawing, Element, Line, Wire, Dot, type WireShape } from '../src/drawing/core.js';
 
 const sourceAssets = import.meta.glob<string>('../shapes/*.svg', { eager: true, query: '?raw', import: 'default' });
 
@@ -69,6 +71,162 @@ describe('drawing geometry', () => {
     expect(() => bounds([])).toThrow('at least one point');
     expect(() => bounds([[Infinity, 0]])).toThrow('finite');
     expect(() => new Transform({ rotation: NaN })).toThrow('finite');
+  });
+});
+
+describe('Schemdraw drawing core', () => {
+  it('adds sequential elements and restores nested cursor positions and directions', () => {
+    const drawing = new Drawing();
+    expect(drawing.here).toEqual([0, 0]);
+    expect(drawing.theta).toBe(0);
+    const first = drawing.add(new Line(120));
+    drawing.push();
+    const branch = drawing.add(new Line(60, { rotation: 90 }));
+    expectPoint(drawing.here, [120, 60]);
+    expect(drawing.theta).toBe(90);
+    drawing.push();
+    drawing.moveFrom([-10, -20], 0.25, -0.5, 37);
+    drawing.move(5, 7);
+    expectPoint(drawing.here, [-4.75, -13.5]);
+    expect(drawing.elements).toEqual([first, branch]);
+    drawing.pop();
+    expectPoint(drawing.here, [120, 60]);
+    expect(drawing.theta).toBe(90);
+    drawing.pop();
+    expectPoint(drawing.here, [120, 0]);
+    expect(drawing.theta).toBe(0);
+    drawing.pop();
+    expectPoint(drawing.here, [120, 0]);
+    expect(first.anchors.end).toEqual([120, 0]);
+    expectPoint(branch.anchors.end, [120, 60]);
+  });
+
+  it('places a named anchor exactly and uses one matrix for reflection, scaling, artwork and terminals', () => {
+    const drawing = new Drawing();
+    drawing.moveFrom([300, 400], 0, 0, 25);
+    const symbol = drawing.add(new Element('resistor', { at: [-5.5, 7.25], anchor: 'A',
+      rotation: 90, scale: [2, 3], reverse: true, flip: true, drop: 'B' }));
+    expectPoint(symbol.anchors.A, [-5.5, 7.25]);
+    expectPoint(symbol.anchors.B, [-5.5, -232.75]);
+    expectPoint(drawing.here, symbol.anchors.B);
+    expect(drawing.theta).toBe(90);
+    const [a, b, c, d, e, f] = symbol.symbol!.svgTransform.slice(7, -1).split(' ').map(Number);
+    for (const [name, [x, y]] of Object.entries(catalog.resistor.terminals)) {
+      expectPoint(symbol.anchors[name], [a * x + c * y + e, b * x + d * y + f]);
+    }
+    expect(symbol.symbol!.svg).toBe(sourceAssets['../shapes/resistor.svg']);
+    expect(drawing.toSVG()).toContain(`transform="${symbol.symbol!.svgTransform}"`);
+  });
+
+  it('keeps placement without a drop from moving the cursor and reverses about the local center', () => {
+    const drawing = new Drawing();
+    drawing.moveFrom([3, 4], 0, 0, 45);
+    const symbol = drawing.add(new Element('resistor', { at: [10, 20], rotation: 0, reverse: true }));
+    expectPoint(symbol.anchors.A, [130, 80]);
+    expectPoint(symbol.anchors.B, [10, 80]);
+    expect(drawing.here).toEqual([3, 4]);
+    expect(drawing.theta).toBe(45);
+    drawing.add(new Element('resistor', { at: [0, 0], rotation: 0, drop: [120, 60] }));
+    expect(drawing.here).toEqual([120, 60]);
+    expect(drawing.theta).toBe(45);
+  });
+
+  it.each<[WireShape, readonly Point[], Point, number]>([
+    ['-', [[15.25, -8.5], [-24.75, 31.5]], [-4.75, 11.5], 37],
+    ['-|', [[15.25, -8.5], [-24.75, -8.5], [-24.75, 31.5]], [-24.75, 11.5], 90],
+    ['|-', [[15.25, -8.5], [15.25, 31.5], [-24.75, 31.5]], [-4.75, 31.5], 180],
+  ])('matches the pinned %s wire geometry, anchors and drop direction', (shape, points, mid, direction) => {
+    const drawing = new Drawing();
+    drawing.moveFrom([100, 200], 0, 0, 37);
+    const wire = drawing.add(new Wire({ at: [15.25, -8.5], to: [-24.75, 31.5], shape }));
+    expect(wire.primitives[0]).toMatchObject({ kind: 'polyline', points });
+    expect(wire.anchors.start).toEqual(points[0]);
+    expect(wire.anchors.end).toEqual(points.at(-1));
+    expect(wire.anchors.xy).toEqual(points[0]);
+    expect(wire.anchors.mid).toEqual(mid);
+    expect(drawing.here).toEqual([-24.75, 31.5]);
+    expect(drawing.theta).toBe(direction);
+    expect(wire.bounds).toEqual({ minX: -24.75, minY: -8.5, maxX: 15.25, maxY: 31.5 });
+  });
+
+  it('preserves wire endpoints and the pinned drop conventions for zero-length final legs', () => {
+    for (const [shape, theta] of [['-', 23], ['-|', -90], ['|-', 180]] as const) {
+      const drawing = new Drawing();
+      drawing.moveFrom([0.1, -0.2], 0, 0, 23);
+      const wire = drawing.add(new Wire({ to: drawing.here, shape }));
+      expect(wire.anchors.end).toEqual([0.1, -0.2]);
+      expect(drawing.here).toEqual([0.1, -0.2]);
+      expect(drawing.theta).toBe(theta);
+    }
+  });
+
+  it('preserves direction for default dots, honors explicit rotation and bounds circles exactly', () => {
+    const drawing = new Drawing();
+    drawing.moveFrom([0, 0], 0, 0, 33);
+    drawing.add(new Dot(1));
+    expect(drawing.theta).toBe(33);
+    const dot = drawing.add(new Dot(2, { at: [-10, -20], scale: [2, 1], rotation: 45 }));
+    expect(drawing.here).toEqual([-10, -20]);
+    expect(drawing.theta).toBe(45);
+    expect(dot.primitives[0]).toMatchObject({ kind: 'circle', center: [0, 0], radius: 2, fill: '#000' });
+    expectPoint([dot.bounds.minX, dot.bounds.minY], [-10 - Math.sqrt(10), -20 - Math.sqrt(10)]);
+    expectPoint([dot.bounds.maxX, dot.bounds.maxY], [-10 + Math.sqrt(10), -20 + Math.sqrt(10)]);
+  });
+
+  it('composes two catalog devices, a terminal-to-terminal wire, dot and escaped labels in order', () => {
+    const drawing = new Drawing();
+    const first = drawing.add(new Element('resistor', { at: [-120, -60], labels: [{ text: 'R1 <&>', at: 'center' }] }));
+    const second = drawing.add(new Element('resistor', { at: [120, 0], labels: [{ text: 'R2', at: 'center', offset: [0, 20] }] }));
+    const wire = drawing.add(new Wire({ at: first.anchors.B, to: second.anchors.A, shape: '-|' }));
+    const dot = drawing.add(new Dot(3, { at: wire.anchors.mid }));
+    expect(wire.anchors.start).toEqual(first.anchors.B);
+    expect(wire.anchors.end).toEqual(second.anchors.A);
+    expect(wire.primitives[0]).toMatchObject({ points: [[0, 0], [120, 0], [120, 60]] });
+    expect(dot.anchors.center).toEqual([120, 30]);
+    expect(drawing.elements).toEqual([first, second, wire, dot]);
+    expect(drawing.bounds).toEqual({ minX: -120, minY: -12, maxX: 240, maxY: 80 });
+    const svg = drawing.toSVG();
+    expect(svg).toBe(drawing.toSVG());
+    expect(svg).toContain('viewBox="-124 -16 368 100"');
+    expect(svg).toContain('R1 &lt;&amp;&gt;');
+    expect(svg).toContain('Copyright (c) 2014-2026 Collin J. Delker');
+    const ids = [...svg.matchAll(/\bid="([^"]+)"/gu)].map((match) => match[1]);
+    expect(new Set(ids).size).toBe(ids.length);
+    expect(svg.indexOf('element-0-resistor')).toBeLessThan(svg.indexOf('element-1-resistor'));
+    expect(svg.indexOf('element-1-resistor')).toBeLessThan(svg.indexOf('<polyline'));
+    expect(svg.indexOf('<polyline')).toBeLessThan(svg.indexOf('<circle'));
+  });
+
+  it('measures actual symbol geometry instead of the pane, including rotated vertices and arcs', () => {
+    expect(resolveSymbolBounds('resistor')).toEqual({ minX: 0, minY: 48, maxX: 120, maxY: 72 });
+    const transform = new Transform({ rotation: 45 });
+    const result = resolveSymbolBounds('resistor', transform);
+    expectPoint([result.minX, result.minY], [-60 * Math.SQRT1_2, 60 * Math.SQRT1_2]);
+    expectPoint([result.maxX, result.maxY], [60 * Math.SQRT1_2, 180 * Math.SQRT1_2]);
+    expect(result).not.toEqual(transformBounds(resolveSymbolBounds('resistor'), transform));
+    const capacitor = resolveSymbolBounds('capacitor2');
+    expectPoint([capacitor.minX, capacitor.minY], [0, 47.253333]);
+    expectPoint([capacitor.maxX, capacitor.maxY], [120, 72.746666]);
+  });
+
+  it('leaves drawings unchanged on invalid placement and permits reusable element definitions', () => {
+    const drawing = new Drawing(), line = new Line(10);
+    const first = drawing.add(line), second = drawing.add(line);
+    expect(first.anchors.start).toEqual([0, 0]);
+    expect(first.anchors.end).toEqual([10, 0]);
+    expect(second.anchors.end).toEqual([20, 0]);
+    for (const element of [new Element('resistor', { anchor: 'missing' }),
+      new Dot(1, { labels: [{ text: '\u0000', at: 'center' }] }),
+      new Wire({ to: [1, 2], shape: 'z' as WireShape }), new Line(1, { at: [NaN, 0] }),
+      new Element('resistor', { drop: [Infinity, 0] })]) {
+      expect(() => drawing.add(element)).toThrow();
+      expect(drawing.here).toEqual([20, 0]);
+      expect(drawing.elements).toEqual([first, second]);
+    }
+    expect(() => new Line(-1)).toThrow(RangeError);
+    expect(() => new Dot(-1)).toThrow(RangeError);
+    expect(new Drawing().bounds).toEqual({ minX: 0, minY: 0, maxX: 0, maxY: 0 });
+    expect(new Drawing().toSVG(0)).toContain('viewBox="0 0 1 1"');
   });
 });
 
