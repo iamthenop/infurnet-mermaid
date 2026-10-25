@@ -85,3 +85,16 @@ export function transformBounds(box: Bounds, transform: Transform): Bounds {
 export function translateBounds(box: Bounds, offset: Point): Bounds {
   return transformBounds(box, new Transform({ translation: offset }));
 }
+
+export function unionBounds(boxes: readonly Bounds[]): Bounds {
+  return boxes.length === 0 ? { minX: 0, minY: 0, maxX: 0, maxY: 0 }
+    : bounds(boxes.flatMap((box): Point[] => [[box.minX, box.minY], [box.maxX, box.maxY]]));
+}
+
+export function circleBounds(center: Point, radius: number, transform = new Transform()): Bounds {
+  if (!Number.isFinite(radius) || radius < 0) throw new RangeError('Circle radius must be finite and nonnegative.');
+  const [x, y] = transform.apply(center);
+  const [a, b, c, d] = transform.matrix;
+  const dx = radius * Math.hypot(a, c), dy = radius * Math.hypot(b, d);
+  return bounds([[x - dx, y - dy], [x + dx, y + dy]]);
+}
