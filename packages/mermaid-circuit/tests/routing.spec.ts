@@ -2,7 +2,7 @@
 import { describe, expect, it } from 'vitest';
 import { parseCircuit } from '../src/parser/circuitParser.js';
 import { floorplan } from '../src/drawing/layout.js';
-import { acceptsRoute, chooseRoute, crossingPoints, routeLayout, validPath, type Route } from '../src/drawing/routing.js';
+import { acceptsRoute, chooseRoute, crossingPoints, mayProxy, routeLayout, validateConnectivity, validPath, type Route } from '../src/drawing/routing.js';
 
 const fixtures = import.meta.glob<string>('../examples/fixtures/*.mmd', { eager: true, query: '?raw', import: 'default' });
 
@@ -40,13 +40,18 @@ describe('orthogonal routing', () => {
       expect(validPath(route.points)).toBe(true);
       expect(crossingPoints(route, routing.routes)!.length).toBeLessThanOrEqual(route.shape === '-' ? 2 : 1);
     }
-    for (const proxy of routing.proxies) {
+    for (const proxy of routing.occurrences) {
       expect(model.nets).toContainEqual(proxy.net);
       expect(proxy.net.type).not.toBe('net');
+      if (proxy.isProxy) expect(mayProxy(proxy.net, layout.proxyPolicy)).toBe(true);
       if (proxy.net.type === 'pinIn') expect(proxy.branches).toBeLessThanOrEqual(3);
       expect(proxy.placed.transform.matrix.slice(0, 4).map((value) => value + 0)).toEqual(proxy.net.type === 'pinInOut'
         && proxy.placed.transform.matrix[0] === -1 ? [-1, 0, 0, 1] : [1, 0, 0, 1]);
     }
+    for (const net of model.nets.filter((net) => net.type === 'pinOut' || net.type === 'pinIn' && !mayProxy(net, layout.proxyPolicy))) {
+      expect(routing.occurrences.filter((item) => item.net.id === net.id)).toHaveLength(1);
+    }
+    if (_name.endsWith('wireless-solenoid.mmd')) expect(routing.occurrences).toEqual([]);
     for (const junction of routing.junctions) {
       expect(model.nets.some((net) => net.id === junction.net)).toBe(true);
       const touches = routing.routes.filter((route) => route.points.slice(1).some((b, index) => {
@@ -61,10 +66,41 @@ describe('orthogonal routing', () => {
     expect(routeLayout(floorplan(model))).toEqual(routing);
   });
 
+  it('uses original graph counts and permits input proxies only at the four-to-one threshold', () => {
+    const base = 'circuitDiagram D\nA([A]):::pinIn\nB([B]):::pinIn\nY([Y]):::pinOut\nV{{V}}:::supplyNet\nG{{G}}:::ground\n';
+    const source = (count: number) => base + Array.from({ length: count }, (_, index) => `U${index}[U${index}]:::buffer`).join('\n');
+    const below = floorplan(parseCircuit(source(7))), at = floorplan(parseCircuit(source(8)));
+    expect(below.proxyPolicy).toEqual({ inputs: 2, devices: 7 });
+    expect(at.proxyPolicy).toEqual({ inputs: 2, devices: 8 });
+    expect(mayProxy(below.nets[0], below.proxyPolicy)).toBe(false);
+    expect(mayProxy(at.nets[0], at.proxyPolicy)).toBe(true);
+    expect(mayProxy(at.nets[2], at.proxyPolicy)).toBe(false);
+    const bidirectional = floorplan(parseCircuit(source(7) + '\nIO([IO]):::pinInOut'));
+    expect(bidirectional.proxyPolicy).toEqual({ inputs: 2, devices: 8 });
+  });
+
+  it('rejects a broken output conductor and an extra output occurrence', () => {
+    const layout = floorplan(parseCircuit(fixtures['../examples/fixtures/cmos-nand2.mmd']));
+    const drawing = routeLayout(layout);
+    const drain = layout.devices.find((item) => item.device.id === 'N0')!.placed.anchors.D;
+    const bridge = drawing.routes.find((route) => route.net === 'OUT' && route.shape === '-'
+      && route.points.at(-1)![0] === drain[0] && route.points.at(-1)![1] === drain[1])!;
+    expect(bridge).toBeDefined();
+    const [a, b] = bridge.points, y = (a[1] + b[1]) / 2;
+    const disconnected: Route[] = drawing.routes.filter((route) => route !== bridge).concat([
+      { net: 'OUT', shape: '-', points: [a, [a[0], y - 15]] },
+      { net: 'OUT', shape: '-', points: [[a[0], y + 15], b] },
+    ]);
+    expect(() => validateConnectivity(layout, { ...drawing, routes: disconnected })).toThrow('disconnected');
+    const output = drawing.occurrences.find((item) => item.net.type === 'pinOut')!;
+    expect(() => validateConnectivity(layout, { ...drawing, occurrences: [...drawing.occurrences, { ...output, isProxy: true }] }))
+      .toThrow('Unauthorized proxy');
+  });
+
   it('places input left, output right, supply above and ground below an inverter', () => {
     const layout = floorplan(parseCircuit(fixtures['../examples/fixtures/cmos-inverter.mmd']));
     const routing = routeLayout(layout);
-    for (const proxy of routing.proxies) {
+    for (const proxy of routing.occurrences) {
       const targets = layout.attachments.filter((item) => item.net === proxy.net.id).map((item) => item.point);
       const at = proxy.placed.anchors.anchor;
       if (proxy.net.type === 'pinIn') expect(at[0]).toBeLessThan(Math.min(...targets.map((point) => point[0])));
@@ -80,8 +116,8 @@ describe('orthogonal routing', () => {
       + Array.from({ length: count }, (_, i) => `A --- G${i} |I|`).join('\n');
     const three = routeLayout(floorplan(parseCircuit(source(3))));
     const four = routeLayout(floorplan(parseCircuit(source(4))));
-    expect(three.proxies.filter((proxy) => proxy.net.id === 'A')).toHaveLength(1);
-    expect(four.proxies.filter((proxy) => proxy.net.id === 'A')).toHaveLength(2);
+    expect(three.occurrences.filter((proxy) => proxy.net.id === 'A')).toHaveLength(1);
+    expect(four.occurrences.filter((proxy) => proxy.net.id === 'A')).toHaveLength(2);
   });
 
   it('centers parallel split and rejoin points on straight common conductors', () => {

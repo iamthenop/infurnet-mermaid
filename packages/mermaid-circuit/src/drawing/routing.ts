@@ -4,10 +4,10 @@ import type { Bounds, Point } from './geometry.js';
 import { pad, validateOrientation, type Attachment, type Layout } from './layout.js';
 
 export interface Route { readonly net: string; readonly points: readonly Point[]; readonly shape: WireShape }
-export interface Proxy { readonly net: Net; readonly element: Element; readonly placed: PlacedElement; readonly branches: number }
+export interface NetOccurrence { readonly net: Net; readonly element: Element; readonly placed: PlacedElement; readonly branches: number; readonly isProxy: boolean }
 export interface Routing {
   readonly routes: readonly Route[];
-  readonly proxies: readonly Proxy[];
+  readonly occurrences: readonly NetOccurrence[];
   readonly junctions: readonly { net: string; point: Point }[];
   readonly attachments: readonly Attachment[];
   readonly bends: number;
@@ -86,7 +86,7 @@ export function chooseRoute(net: string, start: Point, end: Point, existing: rea
   return route;
 }
 
-function junctions(routes: readonly Route[]): { net: string; point: Point }[] {
+function junctions(routes: readonly Route[], attachments: readonly Attachment[]): { net: string; point: Point }[] {
   const result: { net: string; point: Point }[] = [];
   for (const net of new Set(routes.map((route) => route.net))) {
     const edges = routes.filter((route) => route.net === net).flatMap((route) => segments(route.points));
@@ -104,16 +104,23 @@ function junctions(routes: readonly Route[]): { net: string; point: Point }[] {
           directions.add(Math.abs(end[0] - point[0]) > EPS ? end[0] < point[0] ? 'L' : 'R' : end[1] < point[1] ? 'T' : 'B');
         }
       }
+      for (const attachment of attachments) if (attachment.net === net && equal(attachment.point, point)) {
+        directions.add(({ T: 'B', B: 'T', L: 'R', R: 'L' } as const)[attachment.side]);
+      }
       if (directions.size >= 3) result.push({ net, point });
     }
   }
   return result;
 }
 
-function groupsFor(attachments: readonly Attachment[], input: boolean): Attachment[][] {
+function groupsFor(attachments: readonly Attachment[], input: boolean, layout: Layout): Attachment[][] {
   const groups: Attachment[][] = [];
-  for (const stage of new Set(attachments.map((item) => item.stage))) {
-    const items = attachments.filter((item) => item.stage === stage);
+  const region = (item: Attachment) => {
+    const parallel = layout.parallelStages.findIndex((group) => group.stages.includes(item.stage) && group.nets.includes(item.net));
+    return parallel === -1 ? `stage:${item.stage}` : `parallel:${parallel}`;
+  };
+  for (const stage of new Set(attachments.map(region))) {
+    const items = attachments.filter((item) => region(item) === stage);
     const facing = items.length === 2 && items[0].side !== items[1].side
       && ['T', 'B'].includes(items[0].side) && ['T', 'B'].includes(items[1].side)
       && Math.abs(items[0].point[0] - items[1].point[0]) < EPS;
@@ -136,15 +143,60 @@ function groupJoint(items: readonly Attachment[], layout: Layout, input: boolean
   switch (items[0].side) {
     case 'T': return [x, Math.min(...ys) - 60];
     case 'B': return [x, Math.max(...ys) + 60];
-    case 'L': return [input ? layout.stageBounds[items[0].stage].minX - 60 : Math.min(...xs) - 120, input ? items[0].point[1] : y];
+    case 'L': return [input ? Math.min(...items.map((item) => layout.stageBounds[item.stage].minX)) - 60 : Math.min(...xs) - 120, input ? items[0].point[1] : y];
     case 'R': return [Math.max(...xs) + 120, y];
   }
 }
 
+export function mayProxy(net: Net, policy: Layout['proxyPolicy']): boolean {
+  if (net.type === 'net' || net.type === 'pinOut') return false;
+  return net.type !== 'pinIn' || policy.devices >= 4 * policy.inputs;
+}
+
+export function validateConnectivity(layout: Layout, drawing: Routing): void {
+  const known = new Set(layout.nets.map((net) => net.id));
+  if (drawing.routes.some((route) => !known.has(route.net)) || drawing.occurrences.some((item) => !known.has(item.net.id))) {
+    throw new Error('Rendered connectivity contains an unknown net.');
+  }
+  for (const net of layout.nets) {
+    const wires = drawing.routes.filter((route) => route.net === net.id);
+    const occurrences = drawing.occurrences.filter((item) => item.net.id === net.id);
+    const attachments = layout.attachments.filter((item) => item.net === net.id);
+    if (!attachments.length && !wires.length && !occurrences.length) continue;
+    if (net.type !== 'net' && occurrences.length === 0) throw new Error(`Missing original occurrence for net "${net.id}".`);
+    if (occurrences.length > 1 && !mayProxy(net, layout.proxyPolicy)) throw new Error(`Unauthorized proxy for net "${net.id}".`);
+    if (net.type === 'net' && occurrences.length) throw new Error(`Unauthorized generic-net occurrence for "${net.id}".`);
+    const parents = wires.map((_, index) => index);
+    const root = (index: number): number => {
+      while (parents[index] !== index) index = parents[index];
+      return index;
+    };
+    const join = (a: number, b: number) => { parents[root(a)] = root(b); };
+    const touching = (point: Point) => wires.flatMap((wire, index) => segments(wire.points)
+      .some(([a, b]) => intersection(a, b, point, point) !== undefined) ? [index] : []);
+    for (let a = 0; a < wires.length; a++) for (let b = a + 1; b < wires.length; b++) {
+      if (segments(wires[a].points).some(([p, q]) => segments(wires[b].points)
+        .some(([r, s]) => intersection(p, q, r, s) !== undefined))) join(a, b);
+    }
+    const occurrenceWires = occurrences.map((item) => {
+      const matches = touching(item.placed.anchors.anchor);
+      if (!matches.length) throw new Error(`Detached occurrence for net "${net.id}".`);
+      return matches[0];
+    });
+    for (let index = 1; index < occurrenceWires.length; index++) join(occurrenceWires[0], occurrenceWires[index]);
+    for (const attachment of attachments) if (!touching(attachment.point).length) {
+      throw new Error(`Rendered connectivity omits ${attachment.device}.${attachment.terminal}.`);
+    }
+    if (!attachments.length || !wires.length || new Set(wires.map((_, index) => root(index))).size !== 1) {
+      throw new Error(`Rendered connectivity is disconnected for net "${net.id}".`);
+    }
+  }
+}
+
 export function routeLayout(layout: Layout): Routing {
-  const routes: Route[] = [], proxies: Proxy[] = [];
+  const routes: Route[] = [], occurrences: NetOccurrence[] = [];
   const bodies = layout.devices.map((item) => item.placed.bounds);
-  const obstacles = () => [...bodies, ...proxies.map((proxy) => proxy.placed.bounds)];
+  const obstacles = () => [...bodies, ...occurrences.map((proxy) => proxy.placed.bounds)];
   function branches(net: string, group: readonly Attachment[], joint: Point, initial: readonly Route[]): Route[] {
     const added: Route[] = [];
     for (const item of group) if (!equal(item.point, joint)) {
@@ -164,19 +216,36 @@ export function routeLayout(layout: Layout): Routing {
     const attachments = layout.attachments.filter((item) => item.net === net.id);
     if (!attachments.length) continue;
     const input = net.type === 'pinIn' || net.type === 'pinInOut';
-    const groups = groupsFor(attachments, input);
-    if (net.type === 'net') {
-      const joints = groups.map((group) => groupJoint(group, layout, false));
+    const singleOccurrence = net.type !== 'net' && !mayProxy(net, layout.proxyPolicy);
+    if (singleOccurrence && input && attachments.length > 3) {
+      throw new Error(`Routing failure for net "${net.id}": the branch limit requires a proxy that the circuit threshold forbids.`);
+    }
+    const groups = singleOccurrence && input ? [attachments] : groupsFor(attachments, input, layout);
+    let joinedAt: Point | undefined;
+    if (net.type === 'net' || singleOccurrence) {
+      const joints = groups.map((group) => groupJoint(group, layout, input));
+      if (singleOccurrence && input && attachments.length > 1) {
+        const inputs = layout.nets.filter((item) => item.type === 'pinIn');
+        const extra = inputs.indexOf(net) * 60;
+        joints[0] = [joints[0][0] - extra, joints[0][1]];
+      }
       const added: Route[] = [];
       for (let i = 0; i < groups.length; i++) added.push(...branches(net.id, groups[i], joints[i], [...routes, ...added]));
-      for (let i = 1; i < joints.length; i++) if (!equal(joints[i - 1], joints[i])) {
+      if (net.type === 'net' && groups.length > 1 && attachments.every((item) => item.side === 'B')) {
+        const bus: Point = [(Math.min(...joints.map((point) => point[0])) + Math.max(...joints.map((point) => point[0]))) / 2,
+          Math.max(...joints.map((point) => point[1])) + 60];
+        added.push(...branches(net.id, groups.map((group, index) => ({ ...group[0], point: joints[index] })), bus, [...routes, ...added]));
+      } else for (let i = 1; i < joints.length; i++) if (!equal(joints[i - 1], joints[i])) {
         added.push(chooseRoute(net.id, joints[i - 1], joints[i], [...routes, ...added], obstacles()));
       }
       routes.push(...added);
-      continue;
+      if (net.type === 'net') continue;
+      joinedAt = joints.every((point) => Math.abs(point[0] - joints[0][0]) < EPS)
+        ? [joints[0][0], (Math.min(...joints.map((point) => point[1])) + Math.max(...joints.map((point) => point[1]))) / 2]
+        : joints.at(-1)!;
     }
-    function addProxyGroup(group: readonly Attachment[]): boolean {
-      const joint = groupJoint(group, layout, input);
+    function addOccurrence(group: readonly Attachment[], connectedAt?: Point): boolean {
+      const joint = connectedAt ?? groupJoint(group, layout, input);
       const first = group[0], stage = layout.stageBounds[first.stage];
       const commonConductor = group.length > 1 && ['T', 'B'].includes(first.side) && group.every((item) => item.side === first.side);
       const left = net.type === 'pinIn' || net.type === 'pinInOut' && first.side === 'L';
@@ -196,12 +265,12 @@ export function routeLayout(layout: Layout): Routing {
         const box = pad(placed.bounds, 4);
         if (obstacles().some((other) => box.minX < other.maxX && box.maxX > other.minX && box.minY < other.maxY && box.maxY > other.minY)) continue;
         try {
-          const added = branches(net.id, group, joint, routes);
+          const added = connectedAt ? [] : branches(net.id, group, joint, routes);
           const trunk = chooseRoute(net.id, at, joint, [...routes, ...added], [...obstacles(), placed.bounds]);
           if (commonConductor && Math.abs(trunk.points.at(-2)![0] - joint[0]) > EPS) continue;
           if (routes.some((route) => route.net !== net.id && hitsBox(route.points, placed.bounds))) continue;
           routes.push(...added, trunk);
-          proxies.push({ net, element, placed, branches: group.length });
+          occurrences.push({ net, element, placed, branches: group.length, isProxy: occurrences.some((item) => item.net.id === net.id) });
           return true;
         } catch (error) {
           if (!(error instanceof Error) || !error.message.startsWith('Routing failure')) throw error;
@@ -209,18 +278,24 @@ export function routeLayout(layout: Layout): Routing {
       }
       return false;
     }
+    if (joinedAt) {
+      if (!addOccurrence(attachments, joinedAt)) throw new Error(`Routing failure for net "${net.id}": cannot place its single occurrence.`);
+      continue;
+    }
     for (const group of groups) {
-      if (addProxyGroup(group)) continue;
+      if (addOccurrence(group)) continue;
       if (group.length > 1 && ['T', 'B'].includes(group[0].side) && group.every((item) => item.side === group[0].side)) {
         throw new Error(`Routing failure for centered parallel conductor on net "${net.id}".`);
       }
       if (group.length === 1) throw new Error(`Routing failure for net "${net.id}" at ${group[0].device}.${group[0].terminal}: no valid graphical occurrence.`);
-      for (const item of group) if (!addProxyGroup([item])) {
+      for (const item of group) if (!addOccurrence([item])) {
         throw new Error(`Routing failure for net "${net.id}" at ${item.device}.${item.terminal}: no valid graphical occurrence.`);
       }
     }
   }
   const crossings = new Set(routes.flatMap((route) => (crossingPoints(route, routes) ?? []).map(key)));
-  return { routes, proxies, junctions: junctions(routes), attachments: layout.attachments,
+  const result: Routing = { routes, occurrences, junctions: junctions(routes, layout.attachments), attachments: layout.attachments,
     bends: routes.filter((route) => route.shape !== '-').length, crossings: crossings.size };
+  validateConnectivity(layout, result);
+  return result;
 }

@@ -44,6 +44,11 @@ describe('basic floorplanning', () => {
     expect(center('N2')[1]).toBeLessThan(center('N3')[1]);
     expect(center('N1')[1]).toBe((center('N2')[1] + center('N3')[1]) / 2);
     expect(center('N4')[1]).toBe(center('N1')[1]);
+    const upper = layout.devices.find((item) => item.device.id === 'N2')!.placed.anchors;
+    const lower = layout.devices.find((item) => item.device.id === 'N3')!.placed.anchors;
+    expect(upper.I1[1]).toBeLessThan(upper.I2[1]);
+    expect(lower.I1[1]).toBeGreaterThan(lower.I2[1]);
+    expect(lower.O[1]).toBe(lower.center[1]);
   });
 
   it('preserves blocks and centers the input-inverter block beside the XOR core', () => {
@@ -53,6 +58,11 @@ describe('basic floorplanning', () => {
     expect(blocks[0].bounds.maxX).toBeLessThan(blocks[1].bounds.minX);
     expect(blocks[0].bounds.minY + blocks[0].bounds.maxY).toBe(blocks[1].bounds.minY + blocks[1].bounds.maxY);
     expect(layout.devices.map((item) => item.device)).toEqual(model.devices);
+    const high = layout.stageBounds[4], low = layout.stageBounds[5];
+    expect(high.maxX).toBeLessThan(low.minX);
+    expect(high.minY).toBe(low.minY);
+    expect(high.maxY).toBe(low.maxY);
+    expect(layout.parallelStages).toEqual([{ stages: [4, 5], nets: ['OUT', 'VSS'] }]);
   });
 
   it('uses the approved fixed IC body and one centered terminal per side', () => {

@@ -13,6 +13,7 @@ export interface RenderReport {
   readonly terminals: number;
   readonly nets: number;
   readonly proxies: number;
+  readonly occurrences: number;
   readonly junctions: number;
   readonly bends: number;
   readonly crossings: number;
@@ -58,19 +59,20 @@ function compose(model: CircuitModel) {
         'data-x': String(point[0]), 'data-y': String(point[1]), ...(attached ? { 'data-terminal-net': attached.net } : {}) });
     }
   }
-  routing.proxies.forEach((proxy, index) => {
-    add(proxy.element, { 'data-proxy': String(index), 'data-net': proxy.net.id, 'data-type': proxy.net.type,
+  routing.occurrences.forEach((proxy, index) => {
+    add(proxy.element, { 'data-net-occurrence': String(index), ...(proxy.isProxy ? { 'data-proxy': 'true' } : {}), 'data-net': proxy.net.id, 'data-type': proxy.net.type,
       'data-branches': String(proxy.branches) });
     const anchor = proxy.placed.anchors.anchor;
     const point: Point = proxy.net.type === 'supplyNet' ? [anchor[0], proxy.placed.bounds.minY - 12]
       : proxy.net.type === 'ground' ? [anchor[0], proxy.placed.bounds.maxY + 22]
         : [(proxy.placed.bounds.minX + proxy.placed.bounds.maxX) / 2, anchor[1] + 5];
-    text(proxy.net.label, point, { 'data-proxy-label': proxy.net.id });
+    text(proxy.net.label, point, { 'data-net-label': proxy.net.id });
   });
   for (const junction of routing.junctions) add(new Dot(3, { at: junction.point }),
     { 'data-junction': 'true', 'data-net': junction.net });
   const report: RenderReport = { devices: model.devices.length, terminals: model.connections.length, nets: model.nets.length,
-    proxies: routing.proxies.length, junctions: routing.junctions.length, bends: routing.bends, crossings: routing.crossings,
+    proxies: routing.occurrences.filter((item) => item.isProxy).length, occurrences: routing.occurrences.length,
+    junctions: routing.junctions.length, bends: routing.bends, crossings: routing.crossings,
     placementMs: placedAt - start, routingMs: routedAt - placedAt };
   return { drawing, attributes, report };
 }
@@ -94,7 +96,7 @@ export const renderer: DiagramDefinition['renderer'] = {
       for (const [name, value] of Object.entries(attrs)) group.setAttribute(name, value);
       if (attrs['data-stage']) group.setAttribute('stroke-dasharray', '8 6');
       if (attrs['data-block']) group.setAttribute('stroke-width', '1');
-      if (attrs['data-proxy-label'] || attrs['data-ic-label']) group.setAttribute('text-anchor', 'middle');
+      if (attrs['data-net-label'] || attrs['data-ic-label']) group.setAttribute('text-anchor', 'middle');
     }
     for (const element of root.querySelectorAll('[id]')) element.id = `${id}-${element.id}`;
     svg.replaceChildren(...[...root.childNodes].map((node) => document.importNode(node, true)));

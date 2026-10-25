@@ -80,7 +80,7 @@
 <g data-drawing-index="17" data-label="true" data-terminal="S" data-terminal-device="N0" data-x="90" data-y="480" data-terminal-net="VSS">
 <text x="98" y="471" xml:space="preserve" fill="#000">S</text>
 </g>
-<g data-drawing-index="18" data-proxy="0" data-net="VDD" data-type="supplyNet" data-branches="1">
+<g data-drawing-index="18" data-net-occurrence="0" data-net="VDD" data-type="supplyNet" data-branches="1">
 <g transform="matrix(1 0 0 1 30 -150)">
 
 <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
@@ -93,10 +93,10 @@
 
 </g>
 </g>
-<g data-drawing-index="19" data-label="true" data-proxy-label="VDD" text-anchor="middle">
+<g data-drawing-index="19" data-label="true" data-net-label="VDD" text-anchor="middle">
 <text x="90" y="-87.6" xml:space="preserve" fill="#000">VDD</text>
 </g>
-<g data-drawing-index="20" data-proxy="1" data-net="A" data-type="pinIn" data-branches="2">
+<g data-drawing-index="20" data-net-occurrence="1" data-net="A" data-type="pinIn" data-branches="2">
 <g transform="matrix(1 0 0 1 -330 0)">
 
 <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
@@ -108,10 +108,10 @@
 
 </g>
 </g>
-<g data-drawing-index="21" data-label="true" data-proxy-label="A" text-anchor="middle">
+<g data-drawing-index="21" data-label="true" data-net-label="A" text-anchor="middle">
 <text x="-248" y="65" xml:space="preserve" fill="#000">A</text>
 </g>
-<g data-drawing-index="22" data-proxy="2" data-net="OUT" data-type="pinOut" data-branches="2">
+<g data-drawing-index="22" data-net-occurrence="2" data-net="OUT" data-type="pinOut" data-branches="2">
 <g transform="matrix(1 0 0 1 300 180)">
 
 <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
@@ -123,10 +123,10 @@
 
 </g>
 </g>
-<g data-drawing-index="23" data-label="true" data-proxy-label="OUT" text-anchor="middle">
+<g data-drawing-index="23" data-label="true" data-net-label="OUT" text-anchor="middle">
 <text x="338" y="245" xml:space="preserve" fill="#000">OUT</text>
 </g>
-<g data-drawing-index="24" data-proxy="3" data-net="VSS" data-type="ground" data-branches="1">
+<g data-drawing-index="24" data-net-occurrence="3" data-net="VSS" data-type="ground" data-branches="1">
 <g transform="matrix(1 0 0 1 30 510)">
 
 <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
@@ -137,7 +137,7 @@
 
 </g>
 </g>
-<g data-drawing-index="25" data-label="true" data-proxy-label="VSS" text-anchor="middle">
+<g data-drawing-index="25" data-label="true" data-net-label="VSS" text-anchor="middle">
 <text x="90" y="612.16" xml:space="preserve" fill="#000">VSS</text>
 </g>
 <g data-drawing-index="26" data-junction="true" data-net="A">

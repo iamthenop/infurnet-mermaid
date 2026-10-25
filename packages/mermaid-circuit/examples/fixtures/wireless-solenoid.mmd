@@ -1,14 +1,12 @@
 circuitDiagram A
 %% Owner circuit reference; physical module labels and ratings are not verified here.
-BatteryPlus{{"12 V"}}:::supplyNet
-VDD{{"Fused 12 V"}}:::supplyNet
-Return{{"0 V"}}:::ground
 subgraph block power
+    subgraph stage protection
+        direction LR
+        Fuse["Fuse<br/>2 A"]:::fuse
+    end
     subgraph stage battery
         Source["Source<br/>Milwaukee M12 12 V"]:::voltageSource
-    end
-    subgraph stage protection
-        Fuse["Fuse<br/>2 A"]:::fuse
     end
 end
 subgraph block control
@@ -23,14 +21,11 @@ subgraph block load
         Diode["Diode<br/>1N5408"]:::diode
     end
 end
-Source |P| --- BatteryPlus
-BatteryPlus --- Fuse |A|
-Fuse |B| --- VDD
-VDD --- |v+| T:remote
-VDD --- |ctl| L:remote
-B:remote |v-| --- Return
-Source |N| --- Return
+Source |P| --- |A| Fuse
+Fuse |B| --- |v+| T:remote
+Fuse |B| --- |ctl| L:remote
+B:remote |v-| --- |N| Source
 R:remote |no| --- |A| Solenoid
 R:remote |no| --- |K| Diode
-Solenoid |B| --- Return
-Diode |A| --- Return
+Solenoid |B| --- |N| Source
+Diode |A| --- |N| Source

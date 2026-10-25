@@ -4,6 +4,7 @@ import { chromium, type Browser } from 'playwright';
 import { createServer, type ViteDevServer } from 'vite';
 import { parseCircuit } from '../src/parser/circuitParser.js';
 import { floorplan } from '../src/drawing/layout.js';
+import { routeLayout } from '../src/drawing/routing.js';
 import catalog from '../shapes/shapes.json' with { type: 'json' };
 
 const fixtures = import.meta.glob<string>('../examples/fixtures/*.mmd', { eager: true, query: '?raw', import: 'default' });
@@ -23,16 +24,18 @@ beforeAll(async () => {
 it.each(Object.entries(fixtures))('renders all assignments and exact artwork transforms for %s', async (path, source) => {
   const page = await browser!.newPage();
   const model = parseCircuit(source), layout = floorplan(model);
+  const planned = routeLayout(layout);
   const expected = layout.devices.map((item) => ({ id: item.device.id, type: item.device.type,
     terminals: item.device.type === 'ic' ? Object.fromEntries(Object.entries(item.device.pinSides!).map(([name, side]) =>
       [name, ({ T: [90, 0], B: [90, 180], L: [0, 90], R: [180, 90] } as const)[side]])) : catalog[item.device.type].terminals,
-    anchors: item.placed.anchors }));
+    anchors: item.placed.anchors, nets: Object.fromEntries(model.connections.filter((connection) => connection.device === item.device.id)
+      .map((connection) => [connection.terminal, connection.net])) }));
   try {
     await page.goto(server!.resolvedUrls!.local[0]!);
     await page.waitForFunction(() => document.getElementById('status')?.textContent === 'Circuit rendered successfully.');
     await page.addScriptTag({ type: 'module', content: "import { renderFixture } from '/main.ts'; window.renderFixture = renderFixture;" });
     await page.waitForFunction(() => typeof (window as unknown as { renderFixture?: unknown }).renderFixture === 'function');
-    const result = await page.evaluate(async ({ source, expected }) => {
+    const result = await page.evaluate(async ({ source, expected, expectedRoutes, expectedOccurrences }) => {
       const { renderFixture } = window as unknown as { renderFixture: typeof import('../examples/browser/main.js')['renderFixture'] };
       const first = await renderFixture('verified-fixture', source);
       const second = await renderFixture('verified-fixture', source);
@@ -51,6 +54,20 @@ it.each(Object.entries(fixtures))('renders all assignments and exact artwork tra
         if (!points.every((point, index) => close(point, declared[index]))) errors.push('wire transform');
         return { net: group.getAttribute('data-net'), points };
       });
+      if (wires.length !== expectedRoutes.length) errors.push('omitted or extra wire');
+      wires.forEach((wire, index) => {
+        const planned = expectedRoutes[index];
+        if (!planned || wire.net !== planned.net || wire.points.length !== planned.points.length
+          || !wire.points.every((point, index) => close(point, planned.points[index]))) errors.push('rendered graph differs from validated graph');
+      });
+      const occurrences = [...root.querySelectorAll('[data-net-occurrence]')];
+      if (occurrences.length !== expectedOccurrences.length) errors.push('omitted or extra net occurrence');
+      occurrences.forEach((element, index) => {
+        const expected = expectedOccurrences[index];
+        if (!expected || element.getAttribute('data-net') !== expected.net || element.hasAttribute('data-proxy') !== expected.isProxy) {
+          errors.push('rendered occurrence violates proxy policy');
+        }
+      });
       for (const device of expected) {
         const group = [...root.querySelectorAll<SVGGElement>('[data-device]')].find((group) => group.getAttribute('data-device') === device.id)!;
         if (!group) { errors.push(`missing ${device.id}`); continue; }
@@ -64,6 +81,7 @@ it.each(Object.entries(fixtures))('renders all assignments and exact artwork tra
           const label = marker.querySelector('text')!;
           if (!close([Number(label.getAttribute('x')) - 8, Number(label.getAttribute('y')) + 9], [actual.x, actual.y])) errors.push('label transform');
           const net = marker.getAttribute('data-terminal-net');
+          if (net !== (device.nets[terminal] ?? null)) errors.push(`changed net ${device.id}.${terminal}`);
           if (net && !wires.some((wire) => wire.net === net && [wire.points[0], wire.points.at(-1)!]
             .some((point) => close(point, [actual.x, actual.y])))) errors.push(`unwired ${device.id}.${terminal}`);
         }
@@ -78,7 +96,7 @@ it.each(Object.entries(fixtures))('renders all assignments and exact artwork tra
           if (hit) errors.push(`body traversal ${device.id}`);
         }
       }
-      for (const group of root.querySelectorAll<SVGGElement>('[data-proxy]')) {
+      for (const group of root.querySelectorAll<SVGGElement>('[data-net-occurrence]')) {
         if (!['supplyNet', 'ground'].includes(group.getAttribute('data-type')!)) continue;
         const artwork = group.querySelector<SVGGraphicsElement>('[transform]')!;
         const matrix = root.getScreenCTM()!.inverse().multiply(artwork.getScreenCTM()!);
@@ -89,7 +107,8 @@ it.each(Object.entries(fixtures))('renders all assignments and exact artwork tra
         assignments: root.querySelectorAll('[data-terminal-net]').length,
         stages: root.querySelectorAll('[data-stage]').length, blocks: root.querySelectorAll('[data-block]').length,
         report: second.report, viewBox: root.getAttribute('viewBox')!.split(/\s+/u).map(Number) };
-    }, { source, expected });
+    }, { source, expected, expectedRoutes: planned.routes,
+      expectedOccurrences: planned.occurrences.map((item) => ({ net: item.net.id, isProxy: item.isProxy })) });
     expect(result.errors, path).toEqual([]);
     expect(result.deterministic).toBe(true);
     expect(result.uniqueIds).toBe(true);

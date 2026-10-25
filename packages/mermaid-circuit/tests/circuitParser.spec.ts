@@ -27,6 +27,8 @@ describe('circuit parser', () => {
     ].map((group) => group.sort()).sort());
     expect(model.devices.find((device) => device.id === 'remote')!.pinSides)
       .toEqual({ 'v+': 'T', ctl: 'L', 'v-': 'B', no: 'R' });
+    expect(model.nets.every((net) => net.type === 'net' && net.implicit)).toBe(true);
+    expect(model.devices.map((device) => device.id).sort()).toEqual(['Diode', 'Fuse', 'Solenoid', 'Source', 'remote']);
     expect(() => parseCircuit(source.replace('L:remote', 'T:remote'))).toThrow('one IC pin per side');
     expect(() => parseCircuit(source.replace('T:remote', 'remote'))).toThrow('side qualifier');
     expect(() => parseCircuit(source + '\nVDD --- |v+| R:remote')).toThrow('conflicting sides');

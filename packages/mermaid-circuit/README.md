@@ -63,7 +63,7 @@ The public default export conforms to Mermaid's `ExternalDiagramDefinition`. Its
 
 The registered renderer places devices from the accepted model, routes orthogonal wires, and draws catalog artwork through the TypeScript drawing core. It preserves terminal and net identities, adds junction dots at shared-net branches, and shows stage and block frames. The [drawing specification](spec/style.md#basic-automatic-drawing) defines the supported placement and routing rules.
 
-Routing supports straight wires and the two one-bend forms. Supply, ground, and pin nets can have repeated graphical occurrences; generic internal nets cannot. An unsupported route fails explicitly instead of dropping a connection.
+Routing supports straight wires and the two one-bend forms. Named-net copies follow the [proxy policy](spec/style.md#basic-automatic-drawing); generic internal nets have no proxy symbols. An unsupported route fails explicitly instead of dropping a connection.
 
 The floorplanner recognizes supported series and parallel groups from their conduction terminals. Digital gates follow dependency levels, so the four-NAND XOR occupies three columns. This is a basic renderer, with no global layout search or general IC sizing policy.
 
@@ -197,7 +197,7 @@ Browser tests register the compiled package with real Mermaid in Chromium. They 
 
 ## Generated circuit examples
 
-Each SVG is produced by the registered Mermaid plugin from its source fixture. The generator prints device, terminal, proxy, bend, and crossing counts, plus placement and routing times.
+Each SVG is produced by the registered Mermaid plugin from its source fixture. The generator prints device, terminal, occurrence, proxy, bend, and crossing counts, plus placement and routing times. Proxy counts include only copies after a net’s first occurrence.
 
 | Circuit | Source | Generated SVG |
 | --- | --- | --- |
@@ -213,4 +213,6 @@ Regenerate all five with the existing Node and Chromium environment:
 npm run render:fixtures --workspace mermaid-circuit
 ```
 
-The controller preserves the supplied `ctl` terminal and circuit connections. Its IC uses the fixed geometry in [IC presentation](spec/style.md#integrated-circuit-presentation). The drawing does not verify physical module labels or battery, fuse, and wiring selection.
+The controller preserves the supplied `ctl` terminal and explicit DC connections to the voltage source. Its `ctl` and `no` pins represent the relay interface without invented internal contacts.
+
+Its IC uses the fixed geometry in [IC presentation](spec/style.md#integrated-circuit-presentation). The drawing does not verify physical module labels or battery, fuse, and wiring selection.

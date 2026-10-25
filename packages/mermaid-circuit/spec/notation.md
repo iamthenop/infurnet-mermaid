@@ -429,7 +429,7 @@ The example does not establish physical package pin numbers, ordering among mult
 14. Subgraphs use the [typed declarations](#typed-subgraph-declarations) and terminate with `end`.
 15. Stage names use camelCase.
 16. Subgraphs follow the [membership and hierarchy rules](#membership-and-hierarchy).
-17. Stages stack vertically in declaration order.
+17. Stages stack vertically in declaration order, except for parallel branches placed together under [Basic automatic drawing](style.md#basic-automatic-drawing).
 18. `direction LR` selects left-to-right stage placement. It is the stored default when no direction is written; connectivity-based defaults are defined in [Basic automatic drawing](style.md#basic-automatic-drawing).
 19. `direction TB` selects top-to-bottom stage placement. Digital dependency levels follow the [orientation rules](style.md#orientation).
 20. Devices declared outside all explicit stages occupy an implicit final stage.

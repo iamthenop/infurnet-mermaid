@@ -164,9 +164,17 @@ Placement and routing are separate operations. Placement uses terminal-to-net me
 
 Series devices default to top-to-bottom placement, while parallel devices default to left-to-right placement. Explicit stage directions are retained. Declaration order breaks ties and places devices whose connections do not establish a supported arrangement.
 
-Supply occurrences default above their group, ground below, input pins left, and output pins right. The router may add graphical occurrences of existing supply, ground, or pin nets near their attachments. It draws no planar wire between those occurrences and never substitutes a proxy for a generic internal net.
+Supply occurrences default above their group, ground below, input pins left, and output pins right. A net's first symbol is its original graphical occurrence; further copies are proxies. The counts reported by the renderer distinguish occurrences from proxies.
 
-An input occurrence serves at most three branches. Additional occurrences preserve the same electrical net identifier. Junction dots mark actual branch points within a shared net; crossings of unrelated nets receive no dot.
+Proxy eligibility is evaluated on the original circuit graph, before adding graphical copies. Let I count the original `pinIn` nodes. Let D count all original nodes except `pinIn`, `supplyNet`, `ground`, and `pinOut`; this includes `pinInOut` and `voltageSource`.
+
+A `pinOut` has one graphical occurrence and is never proxied. A `pinIn` may be proxied only when D ≥ 4 × I; reaching that threshold permits copies but does not require them. Supply, ground, and bidirectional-pin eligibility remains unchanged.
+
+Repeated occurrences retain their source net identifier. No planar wire connects separate occurrences used as proxies. Generic internal nets have no graphical proxy type, and proxies must not obscure a parallel branch's shared endpoints.
+
+An input occurrence serves at most three branches. If that limit requires a proxy forbidden by the threshold, routing fails explicitly. Junction dots mark actual branch points within a shared net; crossings of unrelated nets receive no dot.
+
+Parallel branches visibly share both endpoint conductors, including branches in separate stages. Stages containing parallel chains of the same device type sit side by side within their block, while their device membership stays intact.
 
 Common conductors for parallel groups remain straight. Their branch feed points use the midpoint between the outermost conduction terminals, so the split and rejoin centerlines agree. Terminal branches reach that conductor without bending the shared line.
 
@@ -174,6 +182,12 @@ Routing tries an orthogonal straight connection first, then horizontal-first and
 
 Supply and ground occurrences never rotate or reflect. Pins may rotate only with a connected device. Every symbol transformation also transforms its terminal attachments without changing their identities.
 
+A lower NAND sharing its second input with an upper NAND supports vertical mirroring to align the shared-input branches.
+
 Exact group centering may translate a whole symbol by a fractional grid offset, including 15 units. Symbol-local attachments remain authoritative; artwork and attachment points move together. Routing meets those exact transformed positions.
 
 The router reports a failure if the permitted wire shapes and net occurrences cannot connect a net. It does not discard assignments or run a global layout search. The fixed spacing favors clear routes over a small bounding box.
+
+Rendered connectivity is checked against the source model. Wire segments must connect every assigned terminal; only eligible named-net proxies may join separate drawn components by identity. A crossing between unrelated nets does not join those nets.
+
+DC circuits retain explicit wires to source terminals when the source defines those connections. Rendering does not add supply rails, ground references, component labels, or internal relay contacts absent from the source.

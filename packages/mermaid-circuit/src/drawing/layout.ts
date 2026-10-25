@@ -9,6 +9,7 @@ export interface DevicePlacement {
   readonly placed: PlacedElement;
   readonly pane: Bounds;
   readonly rotation: number;
+  readonly flip: boolean;
 }
 export interface Attachment {
   readonly device: string;
@@ -27,6 +28,8 @@ export interface Layout {
   readonly stageBounds: readonly Bounds[];
   readonly nets: readonly Net[];
   readonly bounds: Bounds;
+  readonly parallelStages: readonly { stages: readonly number[]; nets: readonly string[] }[];
+  readonly proxyPolicy: { readonly inputs: number; readonly devices: number };
 }
 
 export function pad(box: Bounds, amount: number): Bounds {
@@ -69,12 +72,12 @@ export function deviceElement(device: Device, options: ElementOptions): Element 
   ], { ...anchors, center: [90, 90] }, options);
 }
 
-function placement(device: Device, at: Point, rotation: number, anchor: string): DevicePlacement {
-  const element = deviceElement(device, { at, rotation, anchor });
+function placement(device: Device, at: Point, rotation: number, anchor: string, flip = false): DevicePlacement {
+  const element = deviceElement(device, { at, rotation, anchor, flip });
   const placed = element.place();
   const size = device.type === 'ic' ? 180 : 120;
   const pane = bounds(placed.transform.applyAll([[0, 0], [size, 0], [size, size], [0, size]]));
-  return { device, element, placed, pane, rotation };
+  return { device, element, placed, pane, rotation, flip };
 }
 
 function levels(edges: readonly (readonly number[])[]): number[] {
@@ -105,7 +108,11 @@ export function floorplan(model: CircuitModel): Layout {
         const row = depth.slice(0, index).filter((value) => value === depth[index]).length;
         const count = depth.filter((value) => value === depth[index]).length;
         const x = depth[index] * 360, y = (row - (count - 1) / 2) * 240 + (maxRows - 1) * 120;
-        return placement(device, stage.direction === 'TB' ? [y, x] : [x, y], stage.direction === 'TB' ? 90 : 0, 'center');
+        const peers = devices.filter((_, other) => depth[other] === depth[index]);
+        const sharedInput = netAt(device, 'I2');
+        const flip = device.type === 'nand' && count === 2 && row === 1 && sharedInput !== undefined
+          && peers.every((peer) => peer.type === 'nand' && netAt(peer, 'I2') === sharedInput);
+        return placement(device, stage.direction === 'TB' ? [y, x] : [x, y], stage.direction === 'TB' ? 90 : 0, 'center', flip);
       });
     }
     const groups: Device[][] = [];
@@ -126,7 +133,8 @@ export function floorplan(model: CircuitModel): Layout {
     if (!linked && groups.every((group) => group.length === 1)) {
       return devices.map((device, index) => placement(device,
         stage.direction === 'TB' ? [0, index * 300] : [index * 300, index * 90],
-        defaultRotation(device), conduction(device)?.[0] ?? 'center'));
+        devices.length === 1 && stage.explicitDirection && stage.direction === 'LR' && conduction(device)?.[0] === 'A'
+          ? 0 : defaultRotation(device), conduction(device)?.[0] ?? 'center'));
     }
     const transpose = stage.explicitDirection && (linked ? stage.direction === 'LR' : stage.direction === 'TB');
     const occupied = new Map<number, number>();
@@ -145,37 +153,58 @@ export function floorplan(model: CircuitModel): Layout {
   const groupStages: number[][] = model.blocks.map((block) => [...block.stages]);
   const ungrouped = model.stages.flatMap((stage, index) => stage.block === null ? [index] : []);
   if (ungrouped.length) groupStages.push(ungrouped);
-  const groupHeights = groupStages.map((indices) => indices.reduce((height, index) => {
-    const box = unionBounds(stageLayouts[index].map((item) => item.pane));
-    return height + box.maxY - box.minY + 240;
-  }, 0));
+  const stageBoxes = stageLayouts.map((items) => unionBounds(items.map((item) => item.pane)));
+  const stageEnds = model.stages.map((stage) => {
+    const members = stage.devices.map((id) => deviceById.get(id)!);
+    if (!members.length || !members.every((device) => device.type === members[0].type)
+      || !members.every((device) => conduction(device))) return undefined;
+    const first = members.map((device) => netAt(device, conduction(device)![0]));
+    const last = members.map((device) => netAt(device, conduction(device)![1]));
+    const incoming = [...new Set(first.filter((net) => net !== undefined && !last.includes(net)))];
+    const outgoing = [...new Set(last.filter((net) => net !== undefined && !first.includes(net)))];
+    return incoming.length === 1 && outgoing.length === 1 ? [incoming[0]!, outgoing[0]!] : undefined;
+  });
+  const parallelStages: { stages: number[]; nets: string[] }[] = [];
+  const groupRows = groupStages.map((indices) => {
+    const rows: number[][] = [];
+    for (const index of indices) {
+      const ends = stageEnds[index];
+      const same = ends && rows.find((row) => stageEnds[row[0]]?.every((net, i) => net === ends[i]));
+      if (same) same.push(index); else rows.push([index]);
+    }
+    for (const row of rows) if (row.length > 1) parallelStages.push({ stages: row, nets: stageEnds[row[0]]! });
+    return rows;
+  });
+  const rowWidth = (row: readonly number[]) => row.reduce((width, index) => width + stageBoxes[index].maxX - stageBoxes[index].minX, 0) + (row.length - 1) * 300;
+  const rowHeight = (row: readonly number[]) => Math.max(0, ...row.map((index) => stageBoxes[index].maxY - stageBoxes[index].minY));
+  const groupHeights = groupRows.map((rows) => rows.reduce((height, row) => height + rowHeight(row) + 240, 0));
   const fullHeight = Math.max(0, ...groupHeights);
   const devices: DevicePlacement[] = [], frames: Frame[] = [], stageBounds: Bounds[] = [];
   let groupX = 0;
-  groupStages.forEach((indices, groupIndex) => {
-    const groupWidth = Math.max(0, ...indices.map((index) => {
-      const box = unionBounds(stageLayouts[index].map((item) => item.pane)); return box.maxX - box.minX;
-    }));
+  groupRows.forEach((rows, groupIndex) => {
+    const groupWidth = Math.max(0, ...rows.map(rowWidth));
     let y = (fullHeight - groupHeights[groupIndex]) / 2;
-    for (const index of indices) {
-      const local = stageLayouts[index], box = unionBounds(local.map((item) => item.pane));
-      // Stage geometry shares a centerline; symbol-local attachment offsets stay intact.
-      const dx = groupX + groupWidth / 2 - (box.minX + box.maxX) / 2;
-      const dy = y - box.minY;
-      for (const item of local) {
-        const anchor = conduction(item.device)?.[0] ?? 'center';
-        const point = item.placed.anchors[anchor];
-        devices.push(placement(item.device, [point[0] + dx, point[1] + dy], item.rotation, anchor));
+    for (const row of rows) {
+      let x = groupX + (groupWidth - rowWidth(row)) / 2;
+      for (const index of row) {
+        const local = stageLayouts[index], box = stageBoxes[index];
+        const dx = x - box.minX, dy = y - box.minY;
+        for (const item of local) {
+          const anchor = conduction(item.device)?.[0] ?? 'center';
+          const point = item.placed.anchors[anchor];
+          devices.push(placement(item.device, [point[0] + dx, point[1] + dy], item.rotation, anchor, item.flip));
+        }
+        stageBounds[index] = pad({ minX: x, maxX: box.maxX + dx, minY: y, maxY: y + box.maxY - box.minY }, 30);
+        const labelRoom = Math.ceil(Math.max(60, ...local.flatMap((item) => item.device.label.split(/<br\s*\/?\s*>/iu)
+          .map((line) => line.length * 8 + 24))) / 30) * 30;
+        stageBounds[index] = { ...stageBounds[index], maxX: box.maxX + dx + labelRoom };
+        if (!model.stages[index].implicit) frames.push({ kind: 'stage', name: model.stages[index].name!, bounds: stageBounds[index] });
+        x += box.maxX - box.minX + 300;
       }
-      stageBounds[index] = pad({ minX: box.minX + dx, maxX: box.maxX + dx, minY: y, maxY: y + box.maxY - box.minY }, 30);
-      const labelRoom = Math.ceil(Math.max(60, ...local.flatMap((item) => item.device.label.split(/<br\s*\/?\s*>/iu)
-        .map((line) => line.length * 8 + 24))) / 30) * 30;
-      stageBounds[index] = { ...stageBounds[index], maxX: box.maxX + dx + labelRoom };
-      if (!model.stages[index].implicit) frames.push({ kind: 'stage', name: model.stages[index].name!, bounds: stageBounds[index] });
-      y += box.maxY - box.minY + 240;
+      y += rowHeight(row) + 240;
     }
     if (groupIndex < model.blocks.length) frames.push({ kind: 'block', name: model.blocks[groupIndex].name,
-      bounds: pad(unionBounds(indices.map((index) => stageBounds[index])), 90) });
+      bounds: pad(unionBounds(groupStages[groupIndex].map((index) => stageBounds[index])), 90) });
     groupX += groupWidth + 600;
   });
   const positioned = new Map(devices.map((item) => [item.device.id, item]));
@@ -187,6 +216,8 @@ export function floorplan(model: CircuitModel): Layout {
     distances.sort((a, b) => a[1] - b[1]);
     return { ...connection, point, side: distances[0][0], stage: item.device.stage, rotation: item.rotation };
   });
-  return { devices, attachments, frames, stageBounds, nets: model.nets,
+  return { devices, attachments, frames, stageBounds, nets: model.nets, parallelStages,
+    proxyPolicy: { inputs: model.nets.filter((net) => net.type === 'pinIn').length,
+      devices: model.devices.length + model.nets.filter((net) => net.type === 'pinInOut').length },
     bounds: unionBounds([...devices.map((item) => item.pane), ...frames.map((frame) => frame.bounds)]) };
 }
