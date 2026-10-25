@@ -87,6 +87,25 @@ describe('circuit parser', () => {
     expect(() => parseCircuit(`${declarations}\nP0 |S| --- |S| P1`)).toThrow('source-to-source');
   });
 
+  it('connects motor and solenoid terminals through one implied net without adding endpoint inference', () => {
+    const declarations = 'circuitDiagram A\nM1["M1"]:::motor\nS1["S1"]:::solenoid';
+    const model = parseCircuit(`${declarations}\nM1 |B| --- |A| S1`);
+    expect(topology(model)).toEqual([['M1.B', 'S1.A']]);
+    expect(model.nets).toHaveLength(1);
+    expect(model.nets[0]).toMatchObject({ type: 'net', implicit: true });
+    expect(model.devices.map(({ terminals }) => terminals)).toEqual([['A', 'B'], ['A', 'B']]);
+    for (const connection of ['M1 |G| --- |A| S1', 'M1 |B| --- |S| S1']) {
+      expect(() => parseCircuit(`${declarations}\n${connection}`)).toThrow('Unknown terminal');
+    }
+    expect(() => parseCircuit(`${declarations}\nVDD --- M1 |A|`)).toThrow('Declare endpoint "VDD" explicitly');
+  });
+
+  it.each(['lamp', 'lamp2', 'breaker', 'antenna', 'opamp'])('keeps %s catalog-only', (type) => {
+    for (const mode of ['A', 'D']) {
+      expect(() => parseCircuit(`circuitDiagram ${mode}\nU1["U1"]:::${type}`)).toThrow('Unknown authorable');
+    }
+  });
+
   it.each(['pmos', 'nmos', 'pmosBlk', 'nmosBlk'])('requires drain-to-source written order for direct %s connections', (type) => {
     const source = `circuitDiagram A\nP0["P0"]:::${type}\nP1["P1"]:::${type}`;
     for (const link of ['P0 |D| --- |S| P1', 'P0 |D| --- P1 |S|']) {

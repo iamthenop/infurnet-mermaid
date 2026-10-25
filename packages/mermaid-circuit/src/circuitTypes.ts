@@ -2,7 +2,7 @@ export type Direction = 'LR' | 'TB';
 export type CircuitMode = 'D' | 'A';
 
 export const deviceTypes = ['pmos', 'nmos', 'pmosBlk', 'nmosBlk', 'resistor', 'capacitor',
-  'diode', 'voltageSource', 'currentSource', 'inverter', 'buffer'] as const;
+  'diode', 'voltageSource', 'currentSource', 'inverter', 'buffer', 'motor', 'solenoid'] as const;
 export const netTypes = ['net', 'supplyNet', 'ground', 'pinIn', 'pinOut', 'pinInOut'] as const;
 export type DeviceType = typeof deviceTypes[number];
 export type NetType = typeof netTypes[number];

@@ -28,6 +28,18 @@ The SVG files adapt Schemdraw's [electrical elements](https://schemdraw.readthed
 
 The build copies the registered SVGs as strings. It keeps all text and notices intact. The nine IC templates stay outside this bundle.
 
+The following artwork uses the same pinned revision as the drawing core:
+
+- [misc.py](https://github.com/cdelker/schemdraw/blob/e3cb52981f1ef297ddb083c9329ad89a6c8d1db4/schemdraw/elements/misc.py): `Motor` provides the circle and contacts for `motor` and `solenoid`.
+- [sources.py](https://github.com/cdelker/schemdraw/blob/e3cb52981f1ef297ddb083c9329ad89a6c8d1db4/schemdraw/elements/sources.py): `Lamp` and `Lamp2` provide the filament and crossed-circle forms.
+- [twoterm.py](https://github.com/cdelker/schemdraw/blob/e3cb52981f1ef297ddb083c9329ad89a6c8d1db4/schemdraw/elements/twoterm.py): `Breaker` provides the contact circles and curved arc.
+- [oneterm.py](https://github.com/cdelker/schemdraw/blob/e3cb52981f1ef297ddb083c9329ad89a6c8d1db4/schemdraw/elements/oneterm.py): `Antenna` provides the stem and triangular body.
+- [opamp.py](https://github.com/cdelker/schemdraw/blob/e3cb52981f1ef297ddb083c9329ad89a6c8d1db4/schemdraw/elements/opamp.py): `Opamp` provides the triangle, input signs, and attachment geometry.
+
+Each asset scales the reference uniformly, converts its Y axis, and places it in the symbol pane. Leads reach the catalog's snap points. The op-amp retains five attachments and omits offset-null pins.
+
+The motor adds the requested centered `M`. The solenoid uses the motor's circle and contacts with a straight mechanical-motion arrow instead of `M`. Both are independent SVGs with the full upstream notice.
+
 ## Schemdraw MIT notice
 
 The following is Schemdraw's full notice from the pinned upstream revision:

@@ -286,9 +286,42 @@ describe('SVG fragments', () => {
 });
 
 describe('registered symbol integration', () => {
+  it.each(['motor', 'solenoid', 'lamp', 'lamp2', 'breaker', 'antenna', 'opamp'] as const)(
+    '%s draws independently with geometric bounds inside its pane', (id) => {
+      const drawing = new Drawing();
+      const element = drawing.add(new Element(id));
+      expect(element.symbol!.svg).toBe(symbolAssets[id]);
+      expect(drawing.bounds.minX).toBeGreaterThanOrEqual(0);
+      expect(drawing.bounds.minY).toBeGreaterThanOrEqual(0);
+      expect(drawing.bounds.maxX).toBeLessThanOrEqual(120);
+      expect(drawing.bounds.maxY).toBeLessThanOrEqual(120);
+      expect(drawing.bounds.maxX).toBeGreaterThan(drawing.bounds.minX);
+      expect(drawing.bounds.maxY).toBeGreaterThan(drawing.bounds.minY);
+      const svg = drawing.toSVG();
+      expect(svg).toContain(`id="element-0-${id}"`);
+      expect(svg).toBe(drawing.toSVG());
+    },
+  );
+
+  it.each(['motor', 'solenoid'] as const)('%s rotates and reflects its artwork and attachments together', (id) => {
+    const drawing = new Drawing();
+    for (const rotation of [0, 90, 37]) {
+      const placed = drawing.add(new Element(id, {
+        at: [-20, 70], anchor: 'A', rotation, reverse: true, flip: true, scale: [1.5, 0.75],
+      }));
+      expectPoint(placed.anchors.A, [-20, 70]);
+      expectPoint(placed.anchors.B, placed.transform.apply([120, 60]));
+      expect(placed.symbol!.svgTransform).toBe(serializeTransform(placed.transform));
+      expect(placed.bounds).toEqual(resolveSymbolBounds(id, placed.transform));
+    }
+    const svg = drawing.toSVG();
+    const ids = [...svg.matchAll(/\bid="([^"]+)"/gu)].map((match) => match[1]);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
   it('bundles exactly the registered catalog', () => {
     expect(Object.keys(symbolAssets).sort()).toEqual(Object.keys(catalog).sort());
-    expect(Object.keys(symbolAssets)).toHaveLength(103);
+    expect(Object.keys(symbolAssets)).toHaveLength(110);
   });
 
   it.each(Object.entries(catalog))('%s preserves source SVG bytes, notices and catalog metadata', (id, entry) => {

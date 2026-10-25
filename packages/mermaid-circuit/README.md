@@ -4,7 +4,7 @@ An external Mermaid diagram parser with identifier `circuitDiagram`. The package
 
 ## Implemented behavior
 
-The parser accepts `circuitDiagram D` and `circuitDiagram A`, followed by declarations and connections from the closed 16-type vocabulary in [the notation specification](spec/notation.md).
+The parser accepts `circuitDiagram D` and `circuitDiagram A`, followed by declarations and connections from the closed 18-type vocabulary in [the notation specification](spec/notation.md).
 
 ```text
 circuitDiagram D
@@ -19,7 +19,22 @@ U1 |O| --- Y
 
 Blank lines and Mermaid `%%` comments are accepted. The parser validates mode eligibility, declaration brackets, object identity, device terminals, terminal-qualified connections, and typed stage/block membership. Optional device parameters remain uninterpreted label content.
 
-Catalog-only shapes and dynamic ICs are not authorable. The full 103-shape catalog is not an authorable device vocabulary.
+Catalog-only shapes and dynamic ICs are not authorable. The full 110-shape catalog is not an authorable device vocabulary.
+
+Mode `A` accepts `motor` and `solenoid`. Both use terminals `A` and `B`:
+
+```text
+circuitDiagram A
+M1["M1"]:::motor
+S1["S1"]:::solenoid
+M1 |B| --- |A| S1
+```
+
+The motor is a circle with `M` inside. The solenoid is a circle with a straight arrow through its center. This arrow shows motion; it adds no electrical rule.
+
+The five new catalog-only shapes are `lamp`, `lamp2`, `breaker`, `antenna`, and `opamp`. They work with the standalone drawing core but cannot be declared in circuit notation.
+
+Existing diode assets are unchanged. Use `diode` for an ordinary rectifier diode.
 
 Direct device connections name both terminals in endpoint order:
 
@@ -62,7 +77,7 @@ The SVG serializer emits line, polyline, path, circle, and text elements with es
 
 `node scripts/build-shape-assets.mjs` reads the catalog and copies each registered SVG into an ignored TypeScript module. Both build and unit-test commands run this step. The compiled module ships under `dist/generated/`, so symbol lookup needs no file or network access at runtime.
 
-The 103 source SVGs retain their artwork and license notices. `shapes/shapes.json` remains the authority for dimensions, terminals, anchors, and mode metadata. The nine IC templates remain outside the bundle.
+The 110 source SVGs retain their artwork and license notices. `shapes/shapes.json` remains the authority for dimensions, terminals, anchors, and mode metadata. The nine IC templates remain outside the bundle.
 
 `resolveSymbol` returns SVG content, pane dimensions, transformed attachment points, and the matching SVG matrix. `resolveTerminal` checks a named terminal. Catalog lookup does not make a shape authorable in circuit notation.
 
@@ -170,4 +185,4 @@ npx playwright install chromium
 npm run test:browser --workspace mermaid-circuit
 ```
 
-Unit tests cover detection, lazy loading, parser and definition interfaces, all 16 notation types, mode eligibility, structural membership, normalized connections, NAND2 topology, invalid input, and database reset and isolation. Browser tests use Vite and Playwright Chromium to register the compiled package with real Mermaid, inspect valid empty SVG output, reject unsupported notation, and render again after failure. See the [root README](../../README.md) for `.venv/` runtime activation and CI commands.
+Unit tests cover detection, lazy loading, parser and definition interfaces, all 18 notation types, mode eligibility, structural membership, normalized connections, NAND2 topology, invalid input, and database reset and isolation. Browser tests use Vite and Playwright Chromium to register the compiled package with real Mermaid, inspect valid empty SVG output, reject unsupported notation, and render again after failure. See the [root README](../../README.md) for `.venv/` runtime activation and CI commands.
