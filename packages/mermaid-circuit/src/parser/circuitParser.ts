@@ -181,6 +181,7 @@ export function parseCircuit(text: string): CircuitModel {
       }
       const first = endpoint(left, leftTerminal, line), second = endpoint(right, rightTerminal, line);
       if (leftTerminal === 'S' && rightTerminal === 'S') fail(line, 'Direct source-to-source connections are not supported.');
+      if (leftTerminal === 'S' && rightTerminal === 'D') fail(line, 'Direct source-to-drain connections are not supported; write drain-to-source.');
       const firstNet = namedNets.get(first), secondNet = namedNets.get(second);
       if (firstNet !== undefined && secondNet !== undefined && firstNet !== secondNet) {
         fail(line, `Direct connection conflicts with named nets "${firstNet}" and "${secondNet}".`);

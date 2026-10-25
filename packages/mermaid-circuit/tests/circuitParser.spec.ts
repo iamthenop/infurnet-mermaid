@@ -59,7 +59,7 @@ describe('circuit parser', () => {
     expect(model.nets.map((net) => net.id)).toEqual(['A', 'B']);
   });
 
-  it('normalizes direct, reversed and repeated terminal connections into the same membership', () => {
+  it('normalizes resistor terminal membership independently of endpoint order and duplicate statements', () => {
     const direct = parseCircuit(`${resistors}\nR1 |B| --- |A| R2`);
     const reversed = parseCircuit(`${resistors}\nR2 |A| --- |B| R1\nR1 |B| --- |A| R2\nR1 |B| --- |A| R2`);
     expect(topology(direct)).toEqual([['R1.B', 'R2.A']]);
@@ -85,6 +85,18 @@ describe('circuit parser', () => {
       expect(model.nets).toHaveLength(1);
     }
     expect(() => parseCircuit(`${declarations}\nP0 |S| --- |S| P1`)).toThrow('source-to-source');
+  });
+
+  it.each(['pmos', 'nmos', 'pmosBlk', 'nmosBlk'])('requires drain-to-source written order for direct %s connections', (type) => {
+    const source = `circuitDiagram A\nP0["P0"]:::${type}\nP1["P1"]:::${type}`;
+    for (const link of ['P0 |D| --- |S| P1', 'P0 |D| --- P1 |S|']) {
+      expect(topology(parseCircuit(`${source}\n${link}`))).toEqual([['P0.D', 'P1.S']]);
+    }
+    for (const link of ['P1 |S| --- |D| P0', 'P1 |S| --- P0 |D|']) {
+      expect(() => parseCircuit(`${source}\n${link}`)).toThrow('Line 4: Direct source-to-drain');
+      expect(() => parseCircuit(`${source}\nP0 |D| --- |S| P1\n${link}`))
+        .toThrow('Line 5: Direct source-to-drain');
+    }
   });
 
   it('rejects retired direct syntax and authored generic nets', () => {

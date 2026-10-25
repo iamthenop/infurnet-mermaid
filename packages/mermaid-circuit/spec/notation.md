@@ -224,7 +224,7 @@ P0 |D| --- |S| P1
 P0 |D| --- P1 |S|
 ```
 
-Both forms connect `P0.D` to `P1.S` with the same stated direction. Reversing the endpoints reverses that direction, but both terminals still belong to the same net. The order of statements in the document does not change electrical membership.
+Both forms connect `P0.D` to `P1.S` with the same stated direction. The reversed source-to-drain form, `P1 |S| --- |D| P0`, is invalid. Reordering whole statements in the document does not change electrical membership.
 
 ### External endpoints
 
@@ -279,7 +279,7 @@ This connects `R1.B` to `R2.A`. The parser retains the existing `CircuitModel.ne
 
 Generic nets cannot be authored with `:::net`. The former `R1 ---|B:A| R2` syntax is rejected rather than retained as an alias.
 
-Direct `P0 |S| --- |S| P1` connections are rejected. No additional terminal-pair restrictions are introduced. Unknown devices and terminals, unlabeled device endpoints, and direct endpoint-to-endpoint connections are rejected.
+Direct source-to-source and source-to-drain connections are rejected; write drain-to-source connections in that order. No other terminal-pair restrictions are introduced. Unknown devices and terminals, unlabeled device endpoints, and direct endpoint-to-endpoint connections are rejected.
 
 ### Implied nets and junctions
 
@@ -294,7 +294,7 @@ R1 |B| --- |A| R2
 R1 |B| --- |A| R3
 ```
 
-This creates one net containing `R1.B`, `R2.A`, and `R3.A`. Repeated statements do not duplicate terminal memberships. Reordered or reversed statements preserve net membership, although reversing an endpoint pair changes its stated current-flow direction.
+This creates one net containing `R1.B`, `R2.A`, and `R3.A`. Repeated statements do not duplicate terminal memberships. Reordering whole statements preserves net membership; it does not reverse their endpoints.
 
 The following instead creates two distinct nets:
 
@@ -465,7 +465,7 @@ circuitDiagram A
     A ---|G| NMOS0
     B ---|G| NMOS1
     OUT ---|D| NMOS0
-    NMOS0 |S| --- |D| NMOS1
+    NMOS1 |D| --- |S| NMOS0
     NMOS1 |S| --- VSS
 ```
 

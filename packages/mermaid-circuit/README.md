@@ -32,11 +32,11 @@ R2["R2"]:::resistor
 R1 |B| --- |A| R2
 ```
 
-This connects `R1.B` to `R2.A` with current flow stated from left to right. Reversing the endpoints reverses the stated direction while preserving net membership. The parser normalizes connectivity into terminal-to-net relationships; generic nets are implied and cannot be declared with `:::net`.
+This connects `R1.B` to `R2.A` with current flow stated from left to right. The parser normalizes connectivity into terminal-to-net relationships; generic nets are implied and cannot be declared with `:::net`.
 
 The former colon-separated terminal syntax is rejected.
 
-Shared terminals imply one net and a junction, while distinct terminal groups remain separate. Repeated statements do not duplicate connectivity. Direct source-to-source statements are rejected.
+Shared terminals imply one net and a junction, while distinct terminal groups remain separate. Repeated statements do not duplicate connectivity. Direct source-to-source and source-to-drain statements are rejected; write drain-to-source connections in that order.
 
 External endpoints may be declared using their existing types. Missing declarations are inferred from the approved MOS terminal mapping in [connection syntax](spec/notation.md#connection-syntax), never from names such as `VDD`. Endpoints without a mapped MOS connection require explicit declarations.
 
