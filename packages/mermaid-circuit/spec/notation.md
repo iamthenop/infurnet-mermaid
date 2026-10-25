@@ -1,6 +1,8 @@
 # Notation for circuit diagrams
 
-This specification records the approved syntax and electrical semantics of `circuitDiagram`. The parser implements the 17 authorable object types, diagram modes, typed subgraphs, and fixed-terminal connections described here. The NAND2 example is a parser acceptance fixture. Layout, wiring, dynamic ICs, and device rendering remain unimplemented.
+This specification records the approved syntax and electrical semantics of `circuitDiagram`. The parser implements the 16 authorable object types, diagram modes, typed subgraphs, and fixed-terminal connections described here. The NAND2 example is a parser acceptance fixture.
+
+Layout, wiring, dynamic ICs, and device rendering remain unimplemented.
 
 The notation is a deliberately restricted Mermaid flowchart-like syntax. Compatibility with the complete Mermaid flowchart grammar is not promised. Geometry and presentation are governed by [Drawing style](style.md).
 
@@ -16,7 +18,7 @@ circuitDiagram D
 circuitDiagram A
 ```
 
-Devices and nets are declared as nodes. Every electrical connection joins a net to one named device terminal. Device types and terminal names are defined here; visual geometry does not establish electrical connectivity.
+Devices are declared as nodes. Connections imply nets by joining named device terminals and external endpoints. Device types and terminal names are defined here; visual geometry does not establish electrical connectivity.
 
 ### Diagram modes
 
@@ -40,7 +42,7 @@ The parser records the diagram mode and enforces registered-shape eligibility fo
 
 ## Object types
 
-The object vocabulary is closed and contains these 17 types:
+The authorable object vocabulary is closed and contains these 16 types. Generic nets remain internal connectivity groups and cannot be declared with `:::net`.
 
 | Type | Kind | Terminals |
 | --- | --- | --- |
@@ -55,7 +57,6 @@ The object vocabulary is closed and contains these 17 types:
 | `currentSource` | Device | P, N |
 | `inverter` | Device | I, O |
 | `buffer` | Device | I, O |
-| `net` | Net | None |
 | `supplyNet` | Net | None |
 | `ground` | Net | None |
 | `pinIn` | Net | None |
@@ -112,7 +113,7 @@ These references preserve the existing asset filenames in the [shape library](..
 
 A `stage` is a typed subgraph that groups devices for ordering and placement.
 
-A stage does not define electrical connectivity. Device terminals remain connected through named nets.
+A stage does not define electrical connectivity. Device terminals remain connected through implied nets.
 
 ### Block
 
@@ -165,7 +166,7 @@ subgraph block datapath
 end
 ```
 
-This example illustrates structural membership only. It does not authorize the new logic gates in the currently closed object-type table. The existing 17-type vocabulary remains unchanged.
+This example illustrates structural membership only. It does not authorize the new logic gates in the currently closed object-type table. The existing 16-type vocabulary remains unchanged.
 
 ### Membership and hierarchy
 
@@ -214,148 +215,101 @@ Typed subgraph parsing and structural validation are implemented. Dynamic IC con
 
 ## Connection syntax
 
-A named-net connection joins exactly one net to one named device terminal. Direct device shorthand is normalized into these terminal-to-net relationships.
+Connections are written from left to right in the stated direction of current flow. This is diagram notation, not electrical simulation or design-rule checking. The direction does not establish voltage polarity, current magnitude, or extra connections.
 
-The net and device may appear in either order.
-
-```text
-net ---|terminal| device
-device ---|terminal| net
-```
-
-The label between vertical bars identifies the terminal belonging to the device endpoint.
-
-Reversing the written endpoints does not change electrical connectivity.
-
-Connection order does not imply signal direction, voltage polarity, current direction, or power flow.
-
-The following connections are electrically equivalent:
+Each device endpoint names its terminal beside the device identifier. A terminal on the right endpoint may appear before or after that identifier:
 
 ```text
-A ---|I| U1
-U1 ---|I| A
+P0 |D| --- |S| P1
+P0 |D| --- P1 |S|
 ```
 
-Direct device-to-device connections require both terminal names and are normalized into the netlist. Unlabeled device-to-device connections and direct net-to-net connections remain prohibited. Shared connectivity may use explicitly named or parser-generated implicit nets.
+Both forms connect `P0.D` to `P1.S` with the same stated direction. The reversed source-to-drain form, `P1 |S| --- |D| P0`, is invalid. Reordering whole statements in the document does not change electrical membership.
 
-For fixed-terminal devices, the terminal label must match a terminal defined by the device's notation contract.
+### External endpoints
+
+External endpoints use their identifiers without terminal labels:
+
+```text
+VDD --- P0 |S|
+A --- |G| P0
+P0 |D| --- B
+B --- N1 |D|
+A --- N1 |G|
+N1 |S| --- GND
+```
+
+Devices must be declared. Endpoint declarations use the existing `supplyNet`, `ground`, `pinIn`, `pinOut`, and `pinInOut` types. Explicit declarations determine endpoint type and label, even when their connections appear earlier in the document.
+
+Missing endpoint declarations may be inferred from the connected MOS device and terminal:
+
+| Connected device | Terminal | Inferred endpoint type |
+| --- | --- | --- |
+| `pmos`, `pmosBlk` | S | `supplyNet` |
+| `nmos`, `nmosBlk` | S | `ground` |
+| Any of these MOS devices | G | `pinIn` |
+| Any of these MOS devices | D | `pinOut` |
+
+An undeclared endpoint is created once, using its first mapped connection's type and its identifier as its label. Later references reuse that endpoint without changing its type, even when another connected terminal has a different inference mapping. Names such as `VDD` and `GND` do not determine type, and neither does the endpoint's written side.
+
+Reordering connections can change which type is inferred first, but does not change net membership. An explicit endpoint declaration takes precedence over inference.
+
+Inference is resolved before connectivity, so an earlier connection can reuse an endpoint inferred by a later MOS connection. No inference mapping is defined for other device terminals; endpoints without a mapped connection require explicit declarations. `pinInOut` remains explicitly declarable and is not inferred.
+
+For example, after declaring three PMOS devices, these statements share one inferred supply endpoint:
+
+```text
+VDD --- P0 |S|
+VDD --- P1 |S|
+VDD --- P2 |S|
+```
+
+All three source terminals belong to the same net. This does not use a direct source-to-source statement.
 
 ### Direct device connections
 
-```text
-device1 ---|terminal1:terminal2| device2
-```
-
-The two terminal identifiers correspond to the device endpoints in written order. Both must name valid terminals on their respective devices. Direct shorthand is permitted only between declared, authorable devices with distinct identifiers; forward references are accepted.
-
-For example, `R1 ---|B:A| R2` connects `R1.B` to `R2.A`. The reversed expression `R2 ---|A:B| R1` is electrically equivalent. The colon separates two terminal names; it does not specify IC pin placement or signal direction.
-
-#### Direct connection normalization
-
-A direct device connection is shorthand for two device terminals sharing one electrical net.
-
-The parser must represent the relationship through the existing netlist.
-
-A direct connection does not introduce a separate electrical edge type.
-
-If the connected terminal group already belongs to one named net, that net is used.
-
-If the connected terminal group has no named net, the parser creates one implicit net.
-
-All device terminals joined through a chain of direct connections belong to the same net when the chain shares terminal endpoints.
-
-Two different explicitly named nets must not be silently merged through shorthand. Such a conflict is rejected.
-
-Repeated equivalent connections do not create additional electrical relationships.
-
-The written order of connection statements does not change the electrical relationships they establish.
-
-#### Explicit and implicit net equivalence
+Both endpoints must identify declared devices with distinct identifiers and valid terminals. Forward references to declared devices are accepted.
 
 ```text
 circuitDiagram A
-
 R1["R1"]:::resistor
 R2["R2"]:::resistor
-n1(("n1")):::net
-
-R1 ---|B| n1
-n1 ---|A| R2
+R1 |B| --- |A| R2
 ```
 
-The following represents equivalent connectivity:
+This connects `R1.B` to `R2.A`. The parser retains the existing `CircuitModel.nets` and terminal-to-net `Connection` representation. It creates one internal generic net when the terminal group has no external endpoint.
+
+Generic nets cannot be authored with `:::net`. The former `R1 ---|B:A| R2` syntax is rejected rather than retained as an alias.
+
+Direct source-to-source and source-to-drain connections are rejected; write drain-to-source connections in that order. No other terminal-pair restrictions are introduced. Unknown devices and terminals, unlabeled device endpoints, and direct endpoint-to-endpoint connections are rejected.
+
+### Implied nets and junctions
+
+Connections sharing a terminal form one electrical group without a net or junction declaration:
 
 ```text
 circuitDiagram A
-
-R1["R1"]:::resistor
-R2["R2"]:::resistor
-
-R1 ---|B:A| R2
-```
-
-Both representations connect precisely the same two device terminals. The first uses the author-declared net `n1`; the second uses an implicit net generated by the parser. The difference in net naming does not change electrical connectivity.
-
-#### Branches and series connections
-
-Direct connections may form a network through a shared terminal endpoint:
-
-```text
-circuitDiagram A
-
 R1["R1"]:::resistor
 R2["R2"]:::resistor
 R3["R3"]:::resistor
-
-R1 ---|B:A| R2
-R1 ---|B:A| R3
+R1 |B| --- |A| R2
+R1 |B| --- |A| R3
 ```
 
-This produces one shared implicit net containing `R1.B`, `R2.A`, and `R3.A`. The two statements do not create separate nets.
+This creates one net containing `R1.B`, `R2.A`, and `R3.A`. Repeated statements do not duplicate terminal memberships. Reordering whole statements preserves net membership; it does not reverse their endpoints.
 
-Conversely, the following connections between those devices describe two distinct nets:
+The following instead creates two distinct nets:
 
 ```text
-R1 ---|B:A| R2
-R2 ---|B:A| R3
+R1 |B| --- |A| R2
+R2 |B| --- |A| R3
 ```
 
-`R2.A` and `R2.B` are distinct terminals. This establishes a series connection rather than joining all three devices into one net.
+`R2.A` and `R2.B` remain separate terminals. Device membership in a stage or block does not join them.
 
-#### Named-net intersections
+A group connected to one named external endpoint uses that endpoint's identity. Existing normalization rejects attempts to assign different named endpoints to the same terminal group. This checks identifier consistency, not electrical current or voltage.
 
-When direct connections intersect an explicitly named net, the parser uses that net's identity:
-
-```text
-circuitDiagram A
-
-R1["R1"]:::resistor
-R2["R2"]:::resistor
-n1(("n1")):::net
-
-R1 ---|B:A| R2
-R2 ---|A| n1
-```
-
-Both `R1.B` and `R2.A` resolve to `n1`. The resolution also works when the explicit net connection appears before the shorthand statement.
-
-The following input is invalid because the shorthand would combine terminal groups attached to different named nets:
-
-```text
-circuitDiagram A
-
-R1["R1"]:::resistor
-R2["R2"]:::resistor
-n1(("n1")):::net
-n2(("n2")):::net
-
-R1 ---|B| n1
-R2 ---|A| n2
-
-R1 ---|B:A| R2
-```
-
-The parser rejects this conflict without replacing, renaming, or merging `n1` and `n2`.
+Junction placement belongs to rendering and is outside the parser's responsibility.
 
 ### IC pin connections
 
@@ -364,8 +318,8 @@ An IC connection uses the same net-to-terminal notation as other devices.
 The IC endpoint additionally identifies the side on which the named terminal appears.
 
 ```text
-net ---|pinName| side:device
-side:device ---|pinName| net
+net --- |pinName| side:device
+side:device |pinName| --- net
 ```
 
 The permitted side identifiers are:
@@ -386,8 +340,8 @@ A connected IC pin has its name, electrical connection, and placement side estab
 For example:
 
 ```text
-A ---|IN1| L:U1
-L:U1 ---|IN1| A
+A --- |IN1| L:U1
+L:U1 |IN1| --- A
 ```
 
 Both statements describe terminal `IN1` on the left side of IC `U1`, connected to net `A`.
@@ -396,7 +350,7 @@ No separate pin-placement statement is required for that connection.
 
 The IC's named terminals form its electrical interface. Pin placement does not independently establish additional connectivity.
 
-### Symmetric fixed-terminal example
+### Fixed-terminal example
 
 The following is an intended notation example:
 
@@ -410,8 +364,8 @@ subgraph stage logic
     U1["U1"]:::inverter
 end
 
-A  ---|I| U1
-U1 ---|O| Y
+A --- U1 |I|
+U1 |O| --- Y
 ```
 
 This demonstrates that a device may appear on the left side of a connection. Both `I` and `O` remain the existing inverter terminals. No new electrical connection type is introduced.
@@ -432,12 +386,12 @@ subgraph stage logic
     U1["U1"]:::ic
 end
 
-A    ---|IN1| L:U1
-L:U1 ---|IN2| B
-R:U1 ---|OUT| Y
+A --- |IN1| L:U1
+B --- |IN2| L:U1
+R:U1 |OUT| --- Y
 
-VDD  ---|VCC| T:U1
-B:U1 ---|GND| VSS
+VDD --- |VCC| T:U1
+B:U1 |GND| --- VSS
 ```
 
 This example illustrates the approved connection notation for a future dynamic IC device. The `ic` type is not yet authorable by the current parser.
@@ -453,12 +407,12 @@ The example does not establish physical package pin numbers, ordering among mult
 3. Node identifiers contain letters and digits and are unique within the diagram.
 4. A node declaration uses Mermaid-style brackets followed by `:::type`.
 5. Device declarations use square brackets.
-6. Ordinary nets use circular `((...))` syntax.
+6. Generic nets are implied by connections; `:::net` declarations are rejected.
 7. Supply and ground nets use `{{...}}` syntax.
 8. Input, output, and bidirectional pins use `([...])` syntax.
 9. Labels preserve the author's device or net name.
 10. Optional device parameters appear below the instance name, separated by `<br/>` in the label. The notation does not interpret parameter values.
-11. Connections follow the [connection syntax](#connection-syntax). The net and device endpoints may appear in either order.
+11. Connections follow the [connection syntax](#connection-syntax); written left-to-right order states current-flow direction.
 12. A device terminal connects to one net.
 13. Nets connect to device terminals, not directly to other nets.
 14. Subgraphs use the [typed declarations](#typed-subgraph-declarations) and terminate with `end`.
@@ -490,7 +444,6 @@ circuitDiagram A
     OUT(["OUT"]):::pinOut
     VDD{{"VDD"}}:::supplyNet
     VSS{{"VSS"}}:::ground
-    n01(("n01")):::net
 
     subgraph stage pullUp
         direction LR
@@ -508,15 +461,14 @@ circuitDiagram A
     B ---|G| PMOS1
     VDD ---|S| PMOS0
     VDD ---|S| PMOS1
-    OUT ---|D| PMOS0
-    OUT ---|D| PMOS1
+    PMOS0 |D| --- OUT
+    PMOS1 |D| --- OUT
 
     A ---|G| NMOS0
     B ---|G| NMOS1
     OUT ---|D| NMOS0
-    n01 ---|S| NMOS0
-    n01 ---|D| NMOS1
-    VSS ---|S| NMOS1
+    NMOS1 |D| --- |S| NMOS0
+    NMOS1 |S| --- VSS
 ```
 
 This fixture establishes parallel PMOS pull-up devices, series NMOS pull-down devices, shared input nets, an internal intermediate net, explicit supply and ground connections, named device terminals, and different stage placement directions.

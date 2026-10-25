@@ -48,7 +48,7 @@ export function parseCircuit(text: string): CircuitModel {
   const stages: PendingStage[] = [], blocks: PendingBlock[] = [], scopes: Scope[] = [];
   const nodes = new Map<string, Device | Net>();
   const deviceIds = new Set<string>();
-  const pending: { left: string; right: string; terminal: string; secondTerminal: string | undefined; line: number }[] = [];
+  const pending: { left: string; right: string; leftTerminal: string | undefined; rightTerminal: string | undefined; line: number }[] = [];
   const outside: number[] = [];
 
   for (const { text, line } of statements.slice(1)) {
@@ -81,9 +81,13 @@ export function parseCircuit(text: string): CircuitModel {
       stages[scope.index]!.direction = direction[1] as Direction;
       continue;
     }
-    const connection = text.match(/^([A-Za-z0-9]+)\s*---\|([A-Za-z0-9]+)(?::([A-Za-z0-9]+))?\|\s*([A-Za-z0-9]+)$/u);
+    const connection = text.match(/^([A-Za-z0-9]+)(?:\s*\|([A-Za-z0-9]+)\|)?\s*---\s*(?:\|([A-Za-z0-9]+)\|\s*)?([A-Za-z0-9]+)(?:\s*\|([A-Za-z0-9]+)\|)?$/u);
     if (connection) {
-      pending.push({ left: connection[1]!, terminal: connection[2]!, secondTerminal: connection[3], right: connection[4]!, line });
+      const leftTerminal = connection[2], rightTerminal = connection[3] ?? connection[5];
+      if ((!leftTerminal && !rightTerminal) || (connection[3] && connection[5])) {
+        fail(line, 'A device endpoint requires exactly one terminal label.');
+      }
+      pending.push({ left: connection[1]!, leftTerminal, rightTerminal, right: connection[4]!, line });
       continue;
     }
     const node = text.match(/^([A-Za-z0-9]+)\s*(.*?)\s*:::([A-Za-z0-9]+)$/u);
@@ -91,18 +95,16 @@ export function parseCircuit(text: string): CircuitModel {
     const [, id, body, type] = node as [string, string, string, string];
     if (nodes.has(id)) fail(line, `Duplicate node identifier "${id}".`);
     const isDevice = (deviceTypes as readonly string[]).includes(type);
-    const isNet = (netTypes as readonly string[]).includes(type);
+    const isNet = type !== 'net' && (netTypes as readonly string[]).includes(type);
     if (!isDevice && !isNet) fail(line, `Unknown authorable object type "${type}".`);
-    const delimiters = isDevice ? ['[', ']'] : type === 'net' ? ['((', '))']
+    const delimiters = isDevice ? ['[', ']']
       : type === 'supplyNet' || type === 'ground' ? ['{{', '}}'] : ['([', '])'];
     if (!body.startsWith(delimiters[0]!) || !body.endsWith(delimiters[1]!)) {
       fail(line, `Incorrect declaration brackets for "${type}".`);
     }
     const displayLabel = label(body.slice(delimiters[0]!.length, -delimiters[1]!.length).trim(), line);
-    if (type !== 'net') {
-      const entry = catalog[type as Exclude<NetType, 'net'> | DeviceType];
-      if (!entry.allowedModes.includes(mode)) fail(line, `Type "${type}" is not eligible in mode ${mode}.`);
-    }
+    const entry = catalog[type as Exclude<NetType, 'net'> | DeviceType];
+    if (!entry.allowedModes.includes(mode)) fail(line, `Type "${type}" is not eligible in mode ${mode}.`);
     if (isDevice) {
       if (scope?.kind === 'block') fail(line, 'Blocks contain stages, not direct device declarations.');
       const deviceType = type as DeviceType;
@@ -129,6 +131,26 @@ export function parseCircuit(text: string): CircuitModel {
     });
     stages.push({ name: null, implicit: true, order: index, direction: 'LR', mode, block: null, devices: ids });
   }
+  for (const { left, right, leftTerminal, rightTerminal } of pending) {
+    if (leftTerminal !== undefined && rightTerminal !== undefined) continue;
+    const device = leftTerminal !== undefined ? left : right;
+    const net = leftTerminal !== undefined ? right : left;
+    if (nodes.has(net) || !deviceIds.has(device)) continue;
+    const connected = nodes.get(device) as Device;
+    const terminal = leftTerminal ?? rightTerminal;
+    const pmos = connected.type === 'pmos' || connected.type === 'pmosBlk';
+    const nmos = connected.type === 'nmos' || connected.type === 'nmosBlk';
+    let type: NetType | undefined;
+    if (pmos || nmos) {
+      if (terminal === 'G') type = 'pinIn';
+      else if (terminal === 'D') type = 'pinOut';
+      else if (terminal === 'S') type = pmos ? 'supplyNet' : 'ground';
+    }
+    if (type === undefined) continue;
+    const inferred: Net = { id: net, type, label: net, implicit: true };
+    nodes.set(net, inferred);
+    nets.push(inferred);
+  }
   const parents = new Map<string, string>();
   const namedNets = new Map<string, string>();
   const endpoints = new Map<string, { device: string; terminal: string }>();
@@ -151,13 +173,15 @@ export function parseCircuit(text: string): CircuitModel {
     }
     return root(key);
   }
-  for (const { left, right, terminal, secondTerminal, line } of pending) {
-    if (!nodes.has(left) || !nodes.has(right)) fail(line, `Connection references an undeclared object: ${left}, ${right}.`);
-    if (secondTerminal !== undefined) {
+  for (const { left, right, leftTerminal, rightTerminal, line } of pending) {
+    if (leftTerminal !== undefined && rightTerminal !== undefined) {
+      if (!nodes.has(left) || !nodes.has(right)) fail(line, `Connection references an undeclared device: ${left}, ${right}.`);
       if (!deviceIds.has(left) || !deviceIds.has(right) || left === right) {
         fail(line, 'A direct connection requires two distinct devices.');
       }
-      const first = endpoint(left, terminal, line), second = endpoint(right, secondTerminal, line);
+      const first = endpoint(left, leftTerminal, line), second = endpoint(right, rightTerminal, line);
+      if (leftTerminal === 'S' && rightTerminal === 'S') fail(line, 'Direct source-to-source connections are not supported.');
+      if (leftTerminal === 'S' && rightTerminal === 'D') fail(line, 'Direct source-to-drain connections are not supported; write drain-to-source.');
       const firstNet = namedNets.get(first), secondNet = namedNets.get(second);
       if (firstNet !== undefined && secondNet !== undefined && firstNet !== secondNet) {
         fail(line, `Direct connection conflicts with named nets "${firstNet}" and "${secondNet}".`);
@@ -169,10 +193,14 @@ export function parseCircuit(text: string): CircuitModel {
       if (net !== undefined) namedNets.set(canonical, net);
       continue;
     }
-    if (deviceIds.has(left) === deviceIds.has(right)) fail(line, 'A connection requires one device and one net.');
-    const device = deviceIds.has(left) ? left : right;
-    const net = deviceIds.has(left) ? right : left;
+    const device = leftTerminal !== undefined ? left : right;
+    const net = leftTerminal !== undefined ? right : left;
+    if (!nodes.has(device)) fail(line, `Connection references an undeclared device: ${device}.`);
+    if (!deviceIds.has(device)) fail(line, 'The terminal label must belong to the device endpoint.');
+    if (deviceIds.has(net)) fail(line, 'Each device endpoint requires its own terminal label.');
+    const terminal = (leftTerminal ?? rightTerminal)!;
     const key = endpoint(device, terminal, line);
+    if (!nodes.has(net)) fail(line, `Declare endpoint "${net}" explicitly; no connected terminal defines its inferred type.`);
     const previous = namedNets.get(key);
     if (previous !== undefined && previous !== net) fail(line, `Terminal "${key}" is already connected to net "${previous}".`);
     namedNets.set(key, net);

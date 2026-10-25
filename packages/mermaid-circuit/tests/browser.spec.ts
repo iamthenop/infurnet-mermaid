@@ -31,14 +31,15 @@ it('registers the compiled package and renders successive empty diagrams in Chro
     await page.waitForFunction(() => typeof (window as unknown as { renderFixture?: unknown }).renderFixture === 'function');
     const result = await page.evaluate(async () => {
       const { renderFixture } = window as unknown as { renderFixture: typeof import('../examples/browser/main.js')['renderFixture'] };
-      const first = await renderFixture('first-render', 'circuitDiagram D\nA(("A")):::net\nU["U"]:::inverter\nA ---|I| U');
+      const first = await renderFixture('first-render', 'circuitDiagram D\nA(["A"]):::pinIn\nU["U"]:::inverter\nA ---|I| U');
       let rejection = '';
       try {
         await renderFixture('invalid-render', 'circuitDiagram D\nR1 resistor');
       } catch (error) {
         rejection = String(error);
       }
-      const second = await renderFixture('second-render', 'circuitDiagram A\n%% comment\nR["R"]:::resistor\nR2["R2"]:::resistor\nR ---|B:A| R2');
+      const second = await renderFixture('second-render', 'circuitDiagram A\n%% comment\nR["R"]:::resistor\nR2["R2"]:::resistor\nR |B| --- |A| R2');
+      const inferred = await renderFixture('inferred-render', 'circuitDiagram A\nP["P"]:::pmos\nN["N"]:::nmos\nPower --- P |S|\nInput --- P |G|\nP |D| --- Output\nOutput --- N |D|\nInput --- N |G|\nN |S| --- Return');
       const inspect = (svg: string) => {
         const doc = new DOMParser().parseFromString(svg, 'image/svg+xml');
         return {
@@ -50,13 +51,14 @@ it('registers the compiled package and renders successive empty diagrams in Chro
           marks: doc.querySelectorAll('path, rect, circle, line, polyline, polygon, text').length,
         };
       };
-      return { first: inspect(first.svg), second: inspect(second.svg), secondSvg: second.svg, rejection };
+      return { first: inspect(first.svg), second: inspect(second.svg), inferred: inspect(inferred.svg), secondSvg: second.svg, rejection };
     });
-    for (const svg of [result.first, result.second]) {
+    for (const svg of [result.first, result.second, result.inferred]) {
       expect(svg).toMatchObject({ name: 'svg', namespace: 'http://www.w3.org/2000/svg', error: false, type: 'circuitDiagram', marks: 0 });
     }
     expect(result.first.id).toBe('first-render');
     expect(result.second.id).toBe('second-render');
+    expect(result.inferred.id).toBe('inferred-render');
     expect(result.rejection).toContain('Unsupported circuit statement');
     expect(result.secondSvg).not.toMatch(/first-render|invalid-render|R1 resistor/u);
     expect(errors).toEqual([]);

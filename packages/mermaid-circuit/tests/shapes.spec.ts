@@ -198,7 +198,8 @@ describe('shape catalog', () => {
       Object.keys(assets).map((path) => path.split('/').at(-1)!).sort(),
     );
     const definitions = [...notation.matchAll(/^\| `([^`]+)` \| (Device|Net) \| ([^|]+) \|$/gmu)];
-    expect(definitions).toHaveLength(17);
+    expect(definitions).toHaveLength(16);
+    expect(definitions.map((match) => match[1])).not.toContain('net');
     const existing = definitions.map((match) => match[1]!).filter((key) => key !== 'net');
     expect(Object.keys(shapes)).toEqual(expect.arrayContaining(existing));
     const approved = new Set([...existing, ...Object.values(variants).flat(), ...digitalAdditions]);
