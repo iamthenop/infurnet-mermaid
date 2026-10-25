@@ -1,0 +1,192 @@
+import type { CircuitModel, Device, Net, PinSide } from '../circuitTypes.js';
+import { Element, Graphic, type ElementOptions, type PlacedElement } from './core.js';
+import { bounds, unionBounds, type Bounds, type Point } from './geometry.js';
+import type { SymbolId } from './symbols.js';
+
+export interface DevicePlacement {
+  readonly device: Device;
+  readonly element: Element;
+  readonly placed: PlacedElement;
+  readonly pane: Bounds;
+  readonly rotation: number;
+}
+export interface Attachment {
+  readonly device: string;
+  readonly terminal: string;
+  readonly net: string;
+  readonly point: Point;
+  readonly side: PinSide;
+  readonly stage: number;
+  readonly rotation: number;
+}
+export interface Frame { readonly kind: 'stage' | 'block'; readonly name: string; readonly bounds: Bounds }
+export interface Layout {
+  readonly devices: readonly DevicePlacement[];
+  readonly attachments: readonly Attachment[];
+  readonly frames: readonly Frame[];
+  readonly stageBounds: readonly Bounds[];
+  readonly nets: readonly Net[];
+  readonly bounds: Bounds;
+}
+
+export function pad(box: Bounds, amount: number): Bounds {
+  return { minX: box.minX - amount, minY: box.minY - amount, maxX: box.maxX + amount, maxY: box.maxY + amount };
+}
+
+export function validateOrientation(type: string, rotation: number, reverse = false, flip = false, connectedRotation = 0): void {
+  if (['supplyNet', 'ground'].includes(type) && (rotation !== 0 || reverse || flip)) {
+    throw new Error('Supply and ground occurrences cannot rotate or reflect.');
+  }
+  if (['pinIn', 'pinOut', 'pinInOut'].includes(type) && rotation !== 0 && rotation !== connectedRotation) {
+    throw new Error('A pin may rotate only with its connected device.');
+  }
+}
+
+function conduction(device: Device): [string, string] | undefined {
+  if (device.type.startsWith('pmos')) return ['S', 'D'];
+  if (device.type.startsWith('nmos')) return ['D', 'S'];
+  if (device.type === 'diode') return ['K', 'A'];
+  if (device.type.endsWith('Source')) return ['P', 'N'];
+  if (['resistor', 'capacitor', 'fuse', 'motor', 'solenoid'].includes(device.type)) return ['A', 'B'];
+  return undefined;
+}
+
+function defaultRotation(device: Device): number {
+  if (device.type === 'diode') return 270;
+  return conduction(device)?.[0] === 'A' ? 90 : 0;
+}
+
+export function deviceElement(device: Device, options: ElementOptions): Element {
+  if (device.type !== 'ic') return new Element(device.type as SymbolId, options);
+  const sides: Record<PinSide, Point> = { T: [90, 0], B: [90, 180], L: [0, 90], R: [180, 90] };
+  const anchors = Object.fromEntries(Object.entries(device.pinSides ?? {}).map(([name, side]) => [name, sides[side]]));
+  return new Graphic([
+    { kind: 'polyline', points: [[30, 30], [150, 30], [150, 150], [30, 150], [30, 30]] },
+    { kind: 'line', start: [90, 0], end: [90, 30] },
+    { kind: 'line', start: [90, 150], end: [90, 180] },
+    { kind: 'line', start: [0, 90], end: [30, 90] },
+    { kind: 'line', start: [150, 90], end: [180, 90] },
+  ], { ...anchors, center: [90, 90] }, options);
+}
+
+function placement(device: Device, at: Point, rotation: number, anchor: string): DevicePlacement {
+  const element = deviceElement(device, { at, rotation, anchor });
+  const placed = element.place();
+  const size = device.type === 'ic' ? 180 : 120;
+  const pane = bounds(placed.transform.applyAll([[0, 0], [size, 0], [size, size], [0, size]]));
+  return { device, element, placed, pane, rotation };
+}
+
+function levels(edges: readonly (readonly number[])[]): number[] {
+  const state = edges.map(() => 0), result = edges.map(() => 0);
+  function visit(index: number): number {
+    if (state[index] === 1) throw new Error('Unsupported cyclic placement dependency.');
+    if (state[index] === 2) return result[index];
+    state[index] = 1;
+    result[index] = Math.max(0, ...edges[index].map((parent) => visit(parent) + 1));
+    state[index] = 2;
+    return result[index];
+  }
+  return edges.map((_, index) => visit(index));
+}
+
+export function floorplan(model: CircuitModel): Layout {
+  const deviceById = new Map(model.devices.map((device) => [device.id, device]));
+  const membership = new Map(model.connections.map((connection) => [`${connection.device}:${connection.terminal}`, connection.net]));
+  const netAt = (device: Device, terminal: string) => membership.get(`${device.id}:${terminal}`);
+  const stageLayouts = model.stages.map((stage) => {
+    const devices = stage.devices.map((id) => deviceById.get(id)!);
+    if (model.mode === 'D') {
+      const edges = devices.map((target) => devices.flatMap((source, index) => source !== target
+        && netAt(source, 'O') !== undefined && target.terminals.some((terminal) => terminal !== 'O'
+          && netAt(target, terminal) === netAt(source, 'O')) ? [index] : []));
+      const depth = levels(edges), maxRows = Math.max(1, ...depth.map((level) => depth.filter((value) => value === level).length));
+      return devices.map((device, index) => {
+        const row = depth.slice(0, index).filter((value) => value === depth[index]).length;
+        const count = depth.filter((value) => value === depth[index]).length;
+        const x = depth[index] * 360, y = (row - (count - 1) / 2) * 240 + (maxRows - 1) * 120;
+        return placement(device, stage.direction === 'TB' ? [y, x] : [x, y], stage.direction === 'TB' ? 90 : 0, 'center');
+      });
+    }
+    const groups: Device[][] = [];
+    const keys = new Map<string, number>();
+    for (const device of devices) {
+      const pair = conduction(device), first = pair && netAt(device, pair[0]), second = pair && netAt(device, pair[1]);
+      const key = first && second ? JSON.stringify([first, second]) : device.id;
+      let group = keys.get(key);
+      if (group === undefined) { group = groups.length; keys.set(key, group); groups.push([]); }
+      groups[group].push(device);
+    }
+    const edges = groups.map(([target], i) => groups.flatMap(([source], j) => {
+      const from = conduction(source), to = conduction(target);
+      return i !== j && from && to && netAt(source, from[1]) !== undefined
+        && netAt(source, from[1]) === netAt(target, to[0]) ? [j] : [];
+    }));
+    const linked = edges.some((edge) => edge.length), depth = levels(edges);
+    if (!linked && groups.every((group) => group.length === 1)) {
+      return devices.map((device, index) => placement(device,
+        stage.direction === 'TB' ? [0, index * 300] : [index * 300, index * 90],
+        defaultRotation(device), conduction(device)?.[0] ?? 'center'));
+    }
+    const transpose = stage.explicitDirection && (linked ? stage.direction === 'LR' : stage.direction === 'TB');
+    const occupied = new Map<number, number>();
+    const rows = groups.map((group, index) => {
+      const row = occupied.get(depth[index]) ?? 0;
+      occupied.set(depth[index], row + group.length);
+      return row;
+    });
+    return groups.flatMap((group, index) => group.map((device, member) => {
+      const cross = (rows[index] + member - ((occupied.get(depth[index]) ?? 1) - 1) / 2) * 300;
+      const along = depth[index] * 360 + (group.length > 1 ? member * 90 : 0);
+      return placement(device, transpose ? [along, cross] : [cross, along],
+        (defaultRotation(device) + (transpose ? 270 : 0)) % 360, conduction(device)?.[0] ?? 'center');
+    }));
+  });
+  const groupStages: number[][] = model.blocks.map((block) => [...block.stages]);
+  const ungrouped = model.stages.flatMap((stage, index) => stage.block === null ? [index] : []);
+  if (ungrouped.length) groupStages.push(ungrouped);
+  const groupHeights = groupStages.map((indices) => indices.reduce((height, index) => {
+    const box = unionBounds(stageLayouts[index].map((item) => item.pane));
+    return height + box.maxY - box.minY + 240;
+  }, 0));
+  const fullHeight = Math.max(0, ...groupHeights);
+  const devices: DevicePlacement[] = [], frames: Frame[] = [], stageBounds: Bounds[] = [];
+  let groupX = 0;
+  groupStages.forEach((indices, groupIndex) => {
+    const groupWidth = Math.max(0, ...indices.map((index) => {
+      const box = unionBounds(stageLayouts[index].map((item) => item.pane)); return box.maxX - box.minX;
+    }));
+    let y = (fullHeight - groupHeights[groupIndex]) / 2;
+    for (const index of indices) {
+      const local = stageLayouts[index], box = unionBounds(local.map((item) => item.pane));
+      // Stage geometry shares a centerline; symbol-local attachment offsets stay intact.
+      const dx = groupX + groupWidth / 2 - (box.minX + box.maxX) / 2;
+      const dy = y - box.minY;
+      for (const item of local) {
+        const anchor = conduction(item.device)?.[0] ?? 'center';
+        const point = item.placed.anchors[anchor];
+        devices.push(placement(item.device, [point[0] + dx, point[1] + dy], item.rotation, anchor));
+      }
+      stageBounds[index] = pad({ minX: box.minX + dx, maxX: box.maxX + dx, minY: y, maxY: y + box.maxY - box.minY }, 30);
+      const labelRoom = Math.ceil(Math.max(60, ...local.flatMap((item) => item.device.label.split(/<br\s*\/?\s*>/iu)
+        .map((line) => line.length * 8 + 24))) / 30) * 30;
+      stageBounds[index] = { ...stageBounds[index], maxX: box.maxX + dx + labelRoom };
+      if (!model.stages[index].implicit) frames.push({ kind: 'stage', name: model.stages[index].name!, bounds: stageBounds[index] });
+      y += box.maxY - box.minY + 240;
+    }
+    if (groupIndex < model.blocks.length) frames.push({ kind: 'block', name: model.blocks[groupIndex].name,
+      bounds: pad(unionBounds(indices.map((index) => stageBounds[index])), 90) });
+    groupX += groupWidth + 600;
+  });
+  const positioned = new Map(devices.map((item) => [item.device.id, item]));
+  const attachments = model.connections.map((connection): Attachment => {
+    const item = positioned.get(connection.device)!, point = item.placed.anchors[connection.terminal], box = item.pane;
+    if (!point) throw new Error(`Missing placed terminal ${connection.device}.${connection.terminal}.`);
+    const distances: [PinSide, number][] = [['T', Math.abs(point[1] - box.minY)], ['B', Math.abs(point[1] - box.maxY)],
+      ['L', Math.abs(point[0] - box.minX)], ['R', Math.abs(point[0] - box.maxX)]];
+    distances.sort((a, b) => a[1] - b[1]);
+    return { ...connection, point, side: distances[0][0], stage: item.device.stage, rotation: item.rotation };
+  });
+  return { devices, attachments, frames, stageBounds, nets: model.nets,
+    bounds: unionBounds([...devices.map((item) => item.pane), ...frames.map((frame) => frame.bounds)]) };
+}

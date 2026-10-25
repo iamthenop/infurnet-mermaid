@@ -1,0 +1,22 @@
+circuitDiagram A
+subgraph stage pullUp
+    direction LR
+    P0["P0"]:::pmos
+    P1["P1"]:::pmos
+end
+subgraph stage pullDown
+    direction TB
+    N0["N0"]:::nmos
+    N1["N1"]:::nmos
+end
+VDD --- P0 |S|
+VDD --- P1 |S|
+A --- P0 |G|
+B --- P1 |G|
+P0 |D| --- OUT
+P1 |D| --- OUT
+A --- N0 |G|
+B --- N1 |G|
+OUT --- N0 |D|
+N1 |D| --- |S| N0
+N1 |S| --- VSS

@@ -1,0 +1,20 @@
+circuitDiagram D
+A(["A"]):::pinIn
+B(["B"]):::pinIn
+Y(["Y"]):::pinOut
+subgraph stage xorNands
+    direction LR
+    N1["N1"]:::nand
+    N2["N2"]:::nand
+    N3["N3"]:::nand
+    N4["N4"]:::nand
+end
+A --- N1 |I1|
+B --- N1 |I2|
+N1 |O| --- N2 |I2|
+N1 |O| --- N3 |I2|
+A --- N2 |I1|
+B --- N3 |I1|
+N2 |O| --- N4 |I1|
+N3 |O| --- N4 |I2|
+N4 |O| --- Y

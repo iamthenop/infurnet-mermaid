@@ -2,7 +2,7 @@
 
 This specification governs how a renderer draws `circuitDiagram`. Circuit syntax, device types, terminal names, and electrical semantics are defined in [Notation for circuit diagrams](notation.md).
 
-These are approved drawing requirements, not a claim that schematic rendering is implemented. They define the established CMOS schematic convention, not a universal placement policy for all analog and digital circuits.
+The basic renderer implements the placement and routing subset described here. The CMOS conventions are not a general layout policy for every electrical circuit.
 
 ## Orientation
 
@@ -14,7 +14,7 @@ These are approved drawing requirements, not a claim that schematic rendering is
 6. Signals stay outside stage frames except for branches crossing the borders to reach device terminals.
 7. Input signals split at junctions outside stage frames.
 8. The first gate driven by an input is aligned horizontally with that input pin.
-9. In a left-to-right stage, each successive device sits lower than the device to its left.
+9. Analog devices in a left-to-right row retain a vertical stagger for input access. Digital stages use signal-dependency levels: gates at the same level share a column in LR, or a row in TB, in declaration order.
 10. Additional gate connections branch from the corresponding input line using orthogonal routing.
 
 The expression *supply rail* describes graphical placement, not an electrical object type. Stage ordering, membership, and direction declarations are defined in [the syntax rules](notation.md#syntax-rules).
@@ -31,7 +31,7 @@ Each stage is enclosed by a dashed frame labelled with its name. Stage placement
 
 A block visually groups its contained stages. A block does not draw new electrical connections or alter existing wire topology.
 
-The precise block-border styling, padding, and treatment of routes crossing its boundary remain for the placement and rendering implementation.
+Blocks use a solid outline around their stage frames. Blocks sit side by side, with their vertical midpoints aligned. Stage frames are dashed; neither kind of frame creates an electrical connection.
 
 ## Symbols
 
@@ -60,7 +60,9 @@ Internal IC circuitry is not rendered merely because an IC body is present.
 
 The nine existing [IC templates](../shapes/ic-templates/) provide visual references. The templates do not establish pin ordering, package numbering, or electrical connectivity.
 
-Dynamic ICs do not inherit the fixed 120 × 120 symbol-pane requirement. The exact resizing, spacing, pin ordering, and routing methodology remains future work. Dynamic IC rendering is not implemented by the current plugin.
+The supported four-pin IC has a fixed 120 × 120 rectangular body with one centered pin per side. Each lead is 30 units long, giving a 180 × 180 extent. This geometry applies only to the approved one-pin-per-side case.
+
+General IC resizing and pin ordering remain outside this release.
 
 ## Routing and junction presentation
 
@@ -155,3 +157,23 @@ The resistor default uses the IEEE zigzag. The diode default is an ordinary junc
 Alternative representations require explicit shape keys. Shape selection does not change electrical connectivity.
 
 The shape catalog may contain symbols that the current circuit notation cannot yet express. Catalog availability does not imply parser, renderer, or electrical-model support.
+
+## Basic automatic drawing
+
+Placement and routing are separate operations. Placement uses terminal-to-net membership to detect series chains and parallel groups. Parallel membership requires both conduction nets; a single shared net is insufficient.
+
+Series devices default to top-to-bottom placement, while parallel devices default to left-to-right placement. Explicit stage directions are retained. Declaration order breaks ties and places devices whose connections do not establish a supported arrangement.
+
+Supply occurrences default above their group, ground below, input pins left, and output pins right. The router may add graphical occurrences of existing supply, ground, or pin nets near their attachments. It draws no planar wire between those occurrences and never substitutes a proxy for a generic internal net.
+
+An input occurrence serves at most three branches. Additional occurrences preserve the same electrical net identifier. Junction dots mark actual branch points within a shared net; crossings of unrelated nets receive no dot.
+
+Common conductors for parallel groups remain straight. Their branch feed points use the midpoint between the outermost conduction terminals, so the split and rejoin centerlines agree. Terminal branches reach that conductor without bending the shared line.
+
+Routing tries an orthogonal straight connection first, then horizontal-first and vertical-first one-bend connections. A straight wire may cross at most two unrelated wires, and a bent wire at most one. Overlapping unrelated wires, reverse turns, and traversal through symbol bodies are rejected.
+
+Supply and ground occurrences never rotate or reflect. Pins may rotate only with a connected device. Every symbol transformation also transforms its terminal attachments without changing their identities.
+
+Exact group centering may translate a whole symbol by a fractional grid offset, including 15 units. Symbol-local attachments remain authoritative; artwork and attachment points move together. Routing meets those exact transformed positions.
+
+The router reports a failure if the permitted wire shapes and net occurrences cannot connect a net. It does not discard assignments or run a global layout search. The fixed spacing favors clear routes over a small bounding box.

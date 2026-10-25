@@ -1,9 +1,9 @@
 import catalog from '../../shapes/shapes.json' with { type: 'json' };
 import { deviceTypes, netTypes, type CircuitMode, type CircuitModel,
-  type Connection, type Device, type DeviceType, type Direction, type Net, type NetType } from '../circuitTypes.js';
+  type Connection, type Device, type DeviceType, type Direction, type Net, type NetType, type PinSide } from '../circuitTypes.js';
 
 type PendingStage = { name: string | null; implicit: boolean; order: number; direction: Direction;
-  mode: CircuitMode; block: number | null; devices: string[] };
+  explicitDirection?: true; mode: CircuitMode; block: number | null; devices: string[] };
 type PendingBlock = { name: string; mode: CircuitMode; stages: number[] };
 type Scope = { kind: 'stage' | 'block'; index: number; line: number };
 type Statement = { text: string; line: number };
@@ -48,7 +48,8 @@ export function parseCircuit(text: string): CircuitModel {
   const stages: PendingStage[] = [], blocks: PendingBlock[] = [], scopes: Scope[] = [];
   const nodes = new Map<string, Device | Net>();
   const deviceIds = new Set<string>();
-  const pending: { left: string; right: string; leftTerminal: string | undefined; rightTerminal: string | undefined; line: number }[] = [];
+  const pending: { left: string; right: string; leftSide?: PinSide; rightSide?: PinSide;
+    leftTerminal: string | undefined; rightTerminal: string | undefined; line: number }[] = [];
   const outside: number[] = [];
 
   for (const { text, line } of statements.slice(1)) {
@@ -79,15 +80,20 @@ export function parseCircuit(text: string): CircuitModel {
     if (direction) {
       if (scope?.kind !== 'stage') fail(line, 'Direction must be declared inside a stage.');
       stages[scope.index]!.direction = direction[1] as Direction;
+      stages[scope.index]!.explicitDirection = true;
       continue;
     }
-    const connection = text.match(/^([A-Za-z0-9]+)(?:\s*\|([A-Za-z0-9]+)\|)?\s*---\s*(?:\|([A-Za-z0-9]+)\|\s*)?([A-Za-z0-9]+)(?:\s*\|([A-Za-z0-9]+)\|)?$/u);
+    const connection = text.match(/^((?:[TBLR]:)?[A-Za-z0-9]+)(?:\s*\|([A-Za-z0-9+\-]+)\|)?\s*---\s*(?:\|([A-Za-z0-9+\-]+)\|\s*)?((?:[TBLR]:)?[A-Za-z0-9]+)(?:\s*\|([A-Za-z0-9+\-]+)\|)?$/u);
     if (connection) {
       const leftTerminal = connection[2], rightTerminal = connection[3] ?? connection[5];
       if ((!leftTerminal && !rightTerminal) || (connection[3] && connection[5])) {
         fail(line, 'A device endpoint requires exactly one terminal label.');
       }
-      pending.push({ left: connection[1]!, leftTerminal, rightTerminal, right: connection[4]!, line });
+      const endpoint = (value: string) => value.includes(':')
+        ? { id: value.slice(2), side: value[0] as PinSide } : { id: value, side: undefined };
+      const left = endpoint(connection[1]!), right = endpoint(connection[4]!);
+      pending.push({ left: left.id, leftSide: left.side, right: right.id, rightSide: right.side,
+        leftTerminal, rightTerminal, line });
       continue;
     }
     const node = text.match(/^([A-Za-z0-9]+)\s*(.*?)\s*:::([A-Za-z0-9]+)$/u);
@@ -103,13 +109,14 @@ export function parseCircuit(text: string): CircuitModel {
       fail(line, `Incorrect declaration brackets for "${type}".`);
     }
     const displayLabel = label(body.slice(delimiters[0]!.length, -delimiters[1]!.length).trim(), line);
-    const entry = catalog[type as Exclude<NetType, 'net'> | DeviceType];
-    if (!entry.allowedModes.includes(mode)) fail(line, `Type "${type}" is not eligible in mode ${mode}.`);
+    const entry = type === 'ic' ? undefined : catalog[type as Exclude<NetType, 'net'> | Exclude<DeviceType, 'ic'>];
+    if (type === 'ic' ? mode !== 'A' : !entry!.allowedModes.includes(mode)) fail(line, `Type "${type}" is not eligible in mode ${mode}.`);
     if (isDevice) {
       if (scope?.kind === 'block') fail(line, 'Blocks contain stages, not direct device declarations.');
       const deviceType = type as DeviceType;
       const device: Device = { id, type: deviceType, label: displayLabel,
-        terminals: Object.keys(catalog[deviceType].terminals), stage: scope?.index ?? -1,
+        terminals: entry ? Object.keys(entry.terminals) : [], stage: scope?.index ?? -1,
+        ...(type === 'ic' ? { pinSides: {} } : {}),
         ...(type === 'pmos' || type === 'nmos' ? { bulk: { kind: 'implicit' as const, sourceTerminal: 'S' as const } }
           : type === 'pmosBlk' || type === 'nmosBlk' ? { bulk: { kind: 'explicit' as const, terminal: 'B' as const } } : {}) };
       if (scope) stages[scope.index]!.devices.push(id);
@@ -122,6 +129,24 @@ export function parseCircuit(text: string): CircuitModel {
     }
   }
   if (scopes.length) fail(scopes.at(-1)!.line, 'Unclosed subgraph.');
+  for (const connection of pending) {
+    for (const [id, terminal, side] of [[connection.left, connection.leftTerminal, connection.leftSide],
+      [connection.right, connection.rightTerminal, connection.rightSide]] as const) {
+      const device = nodes.get(id) as Device | undefined;
+      if (side && device?.type !== 'ic') fail(connection.line, 'Unsupported side qualifier on a non-IC endpoint.');
+      if (device?.type !== 'ic') continue;
+      if (!side || !terminal) fail(connection.line, 'IC terminals require a named pin and side qualifier.');
+      const pins = device.pinSides as Record<string, PinSide>;
+      if (pins[terminal] && pins[terminal] !== side) fail(connection.line, `IC pin "${terminal}" has conflicting sides.`);
+      if (Object.entries(pins).some(([name, value]) => value === side && name !== terminal)) {
+        fail(connection.line, 'This release supports one IC pin per side only.');
+      }
+      if (!pins[terminal]) { pins[terminal] = side; (device.terminals as string[]).push(terminal); }
+    }
+  }
+  for (const device of devices) {
+    if (device.type === 'ic' && device.terminals.length !== 4) fail(header!.line, 'This release requires one IC pin on each of T, B, L and R.');
+  }
   if (outside.length) {
     const index = stages.length;
     const ids = outside.map((position) => {

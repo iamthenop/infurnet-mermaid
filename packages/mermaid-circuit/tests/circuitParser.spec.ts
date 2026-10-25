@@ -9,6 +9,7 @@ import notation from '../spec/notation.md?raw';
 const digital = 'circuitDiagram D\nA(["A"]):::pinIn\nY(["Y"]):::pinOut\nU1["U1"]:::inverter';
 const electrical = 'circuitDiagram A\nN(["N"]):::pinInOut\nM["M"]:::nmos';
 const resistors = 'circuitDiagram A\nR1["R1"]:::resistor\nR2["R2"]:::resistor\nR3["R3"]:::resistor';
+const drawingFixtures = import.meta.glob<string>('../examples/fixtures/*.mmd', { eager: true, query: '?raw', import: 'default' });
 
 function topology(model: CircuitModel): string[][] {
   return [...new Set(model.connections.map(({ net }) => net))].map((net) => model.connections
@@ -17,18 +18,75 @@ function topology(model: CircuitModel): string[][] {
 }
 
 describe('circuit parser', () => {
+  it('preserves the controller topology and the four IC pin sides', () => {
+    const source = drawingFixtures['../examples/fixtures/wireless-solenoid.mmd'];
+    const model = parseCircuit(source);
+    expect(topology(model)).toEqual([
+      ['Source.P', 'Fuse.A'], ['Fuse.B', 'remote.v+', 'remote.ctl'],
+      ['Source.N', 'remote.v-', 'Solenoid.B', 'Diode.A'], ['remote.no', 'Solenoid.A', 'Diode.K'],
+    ].map((group) => group.sort()).sort());
+    expect(model.devices.find((device) => device.id === 'remote')!.pinSides)
+      .toEqual({ 'v+': 'T', ctl: 'L', 'v-': 'B', no: 'R' });
+    expect(() => parseCircuit(source.replace('L:remote', 'T:remote'))).toThrow('one IC pin per side');
+    expect(() => parseCircuit(source.replace('T:remote', 'remote'))).toThrow('side qualifier');
+    expect(() => parseCircuit(source + '\nVDD --- |v+| R:remote')).toThrow('conflicting sides');
+    expect(() => parseCircuit('circuitDiagram A\nremote[remote]:::ic')).toThrow('one IC pin on each');
+  });
+
+  it('retains all twelve XOR devices and the specified terminal groups', () => {
+    const model = parseCircuit(drawingFixtures['../examples/fixtures/cmos-xor12.mmd']);
+    expect(model.devices).toHaveLength(12);
+    expect(model.stages.map((stage) => stage.name)).toEqual(['invertA', 'invertB', 'pullUpInputs', 'pullUpComplements', 'pullDownHigh', 'pullDownLow']);
+    expect(topology(model)).toEqual([
+      ['PA.G', 'NA.G', 'P0.G', 'N0.G'], ['PB.G', 'NB.G', 'P1.G', 'N1.G'],
+      ['PA.S', 'PB.S', 'P0.S', 'P1.S'], ['NA.S', 'NB.S', 'N1.S', 'N3.S'],
+      ['PA.D', 'NA.D', 'P2.G', 'N2.G'], ['PB.D', 'NB.D', 'P3.G', 'N3.G'],
+      ['P0.D', 'P1.D', 'P2.S', 'P3.S'], ['P2.D', 'P3.D', 'N0.D', 'N2.D'],
+      ['N0.S', 'N1.D'], ['N2.S', 'N3.D'],
+    ].map((group) => group.sort()).sort());
+  });
+
+  it.each([false, true].flatMap((a) => [false, true].map((b) => [a, b] as const)))('verifies NAND and both XOR truth tables for A=%s B=%s', (a, b) => {
+    for (const [name, expected] of [['cmos-inverter', !a], ['cmos-nand2', !(a && b)], ['cmos-xor12', a !== b], ['xor-nand4', a !== b]] as const) {
+      const model = parseCircuit(drawingFixtures[`../examples/fixtures/${name}.mmd`]);
+      const terminals = new Map(model.connections.map((connection) => [`${connection.device}.${connection.terminal}`, connection.net]));
+      const values = new Map<string, boolean>([['A', a], ['B', b], ['VDD', true], ['VSS', false]]);
+      for (let pass = 0; pass < model.devices.length + 1; pass++) {
+        const conductive: [string, string][] = [];
+        for (const device of model.devices) {
+          const net = (terminal: string) => terminals.get(`${device.id}.${terminal}`)!;
+          if (device.type === 'nand') {
+            const first = values.get(net('I1')), second = values.get(net('I2'));
+            if (first !== undefined && second !== undefined) values.set(net('O'), !(first && second));
+          } else {
+            const gate = values.get(net('G'));
+            if (gate !== undefined && (device.type === 'pmos' ? !gate : gate)) conductive.push([net('S'), net('D')]);
+          }
+        }
+        for (let propagation = 0; propagation < model.nets.length; propagation++) {
+          for (const [first, second] of conductive) {
+            if (values.has(first) && values.has(second)) expect(values.get(first), name).toBe(values.get(second));
+            else if (values.has(first)) values.set(second, values.get(first)!);
+            else if (values.has(second)) values.set(first, values.get(second)!);
+          }
+        }
+      }
+      expect(values.get(name === 'xor-nand4' ? 'Y' : 'OUT'), name).toBe(expected);
+    }
+  });
+
   it.each(['D', 'A'])('parses an empty %s circuit', (mode) => {
     expect(parseCircuit(`\n%% comment\ncircuitDiagram ${mode}\n%% end`))
       .toEqual({ mode, devices: [], nets: [], stages: [], blocks: [], connections: [] });
   });
 
-  it.each(deviceTypes)('retains the approved %s device and its terminal contract', (type) => {
-    const mode = ['buffer', 'inverter'].includes(type) ? 'D' : 'A';
+  it.each(deviceTypes.filter((type) => type !== 'ic'))('retains the approved %s device and its terminal contract', (type) => {
+    const mode = ['buffer', 'inverter', 'nand'].includes(type) ? 'D' : 'A';
     const model = parseCircuit(`circuitDiagram ${mode}\nU1["display<br/>value=1"]:::${type}`);
     const terminals = type.endsWith('Blk') ? ['G', 'D', 'S', 'B']
       : ['pmos', 'nmos'].includes(type) ? ['G', 'D', 'S']
         : type === 'diode' ? ['A', 'K'] : type.endsWith('Source') ? ['P', 'N']
-          : ['inverter', 'buffer'].includes(type) ? ['I', 'O'] : ['A', 'B'];
+          : type === 'nand' ? ['I1', 'I2', 'O'] : ['inverter', 'buffer'].includes(type) ? ['I', 'O'] : ['A', 'B'];
     expect(model.devices[0]).toMatchObject({ id: 'U1', type, label: 'display<br/>value=1', stage: 0 });
     expect([...model.devices[0]!.terminals].sort()).toEqual(terminals.sort());
     expect(model.nets).toEqual([]);
@@ -42,7 +100,7 @@ describe('circuit parser', () => {
   });
 
   it.each(deviceTypes)('rejects %s in its ineligible mode', (type) => {
-    const mode = ['buffer', 'inverter'].includes(type) ? 'A' : 'D';
+    const mode = ['buffer', 'inverter', 'nand'].includes(type) ? 'A' : 'D';
     expect(() => parseCircuit(`circuitDiagram ${mode}\nU1["U1"]:::${type}`)).toThrow('Line 2: Type');
   });
 
@@ -324,9 +382,9 @@ subgraph stage third
 end`);
     expect(model.blocks).toEqual([{ name: 'datapath', mode: 'D', stages: [0, 1] }]);
     expect(model.stages).toEqual([
-      { name: 'first', implicit: false, order: 0, mode: 'D', direction: 'TB', block: 0, devices: ['U1'] },
+      { name: 'first', implicit: false, order: 0, mode: 'D', direction: 'TB', explicitDirection: true, block: 0, devices: ['U1'] },
       { name: 'second', implicit: false, order: 1, mode: 'D', direction: 'LR', block: 0, devices: ['U2'] },
-      { name: 'third', implicit: false, order: 2, mode: 'D', direction: 'LR', block: null, devices: ['U3'] },
+      { name: 'third', implicit: false, order: 2, mode: 'D', direction: 'LR', explicitDirection: true, block: null, devices: ['U3'] },
       { name: null, implicit: true, order: 3, mode: 'D', direction: 'LR', block: null, devices: ['Loose'] },
     ]);
     expect(model.devices.map((device) => device.stage)).toEqual([3, 0, 1, 2]);
@@ -368,7 +426,7 @@ end`);
 
   it.each([
     ['', 'Line 1'], ['circuitDiagram', 'Line 1'], ['circuitDiagram X', 'Line 1'], ['flowchart D', 'Line 1'],
-    ['circuitDiagram D extra', 'Line 1'], ['circuitDiagram D\nU["U"]:::ic', 'Unknown authorable'],
+    ['circuitDiagram D extra', 'Line 1'], ['circuitDiagram D\nU["U"]:::ic', 'not eligible'],
     ['circuitDiagram D\nU["U"]:::and', 'Unknown authorable'], ['circuitDiagram A\nU["U"]:::jfet', 'Unknown authorable'],
     ['circuitDiagram D\nM["M"]:::pmos', 'not eligible'], ['circuitDiagram A\nU["U"]:::inverter', 'not eligible'],
     [`${digital}\nU1["again"]:::buffer`, 'Duplicate'], [`${digital}\nU1(["again"]):::pinInOut`, 'Duplicate'],

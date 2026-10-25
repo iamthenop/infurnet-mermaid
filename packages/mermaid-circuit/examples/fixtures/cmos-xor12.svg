@@ -1,0 +1,874 @@
+<svg id="fixture-cmos-xor12" width="2042" xmlns="http://www.w3.org/2000/svg" viewBox="-466 -327.6 2042 2739.7599999999998" height="2739.7599999999998" overflow="visible" font-family="sans-serif" font-size="14" role="graphics-document document" aria-roledescription="circuitDiagram">
+<g data-drawing-index="0" data-block="inputInverters" stroke-width="1">
+<polyline points="-120,330 270,330 270,1770 -120,1770 -120,330" stroke="#777" stroke-width="1" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="1" data-label="true" data-frame-label="block">
+<text x="-108" y="352" xml:space="preserve" fill="#000">inputInverters</text>
+</g>
+<g data-drawing-index="2" data-block="xorCore" stroke-width="1">
+<polyline points="600,-120 1290,-120 1290,2220 600,2220 600,-120" stroke="#777" stroke-width="1" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="3" data-label="true" data-frame-label="block">
+<text x="612" y="-98" xml:space="preserve" fill="#000">xorCore</text>
+</g>
+<g data-drawing-index="4" data-stage="invertA" stroke-dasharray="8 6">
+<polyline points="-30,420 180,420 180,960 -30,960 -30,420" stroke="#777" stroke-width="1" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="5" data-label="true" data-frame-label="stage">
+<text x="-18" y="378" xml:space="preserve" fill="#000">invertA</text>
+</g>
+<g data-drawing-index="6" data-stage="invertB" stroke-dasharray="8 6">
+<polyline points="-30,1140 180,1140 180,1680 -30,1680 -30,1140" stroke="#777" stroke-width="1" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="7" data-label="true" data-frame-label="stage">
+<text x="-18" y="1098" xml:space="preserve" fill="#000">invertB</text>
+</g>
+<g data-drawing-index="8" data-stage="pullUpInputs" stroke-dasharray="8 6">
+<polyline points="690,-30 1200,-30 1200,240 690,240 690,-30" stroke="#777" stroke-width="1" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="9" data-label="true" data-frame-label="stage">
+<text x="702" y="-72" xml:space="preserve" fill="#000">pullUpInputs</text>
+</g>
+<g data-drawing-index="10" data-stage="pullUpComplements" stroke-dasharray="8 6">
+<polyline points="690,420 1200,420 1200,690 690,690 690,420" stroke="#777" stroke-width="1" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="11" data-label="true" data-frame-label="stage">
+<text x="702" y="378" xml:space="preserve" fill="#000">pullUpComplements</text>
+</g>
+<g data-drawing-index="12" data-stage="pullDownHigh" stroke-dasharray="8 6">
+<polyline points="840,870 1050,870 1050,1410 840,1410 840,870" stroke="#777" stroke-width="1" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="13" data-label="true" data-frame-label="stage">
+<text x="852" y="828" xml:space="preserve" fill="#000">pullDownHigh</text>
+</g>
+<g data-drawing-index="14" data-stage="pullDownLow" stroke-dasharray="8 6">
+<polyline points="840,1590 1050,1590 1050,2130 840,2130 840,1590" stroke="#777" stroke-width="1" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="15" data-label="true" data-frame-label="stage">
+<text x="852" y="1548" xml:space="preserve" fill="#000">pullDownLow</text>
+</g>
+<g data-drawing-index="16" data-net="@implicit:N0:S" data-wire="-" data-points="[[960,1260],[960,1140]]">
+<polyline points="960,1260 960,1140" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="17" data-net="@implicit:N0:S" data-wire="-" data-points="[[960,1020],[960,1140]]">
+<polyline points="960,1020 960,1140" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="18" data-net="@implicit:N2:S" data-wire="-" data-points="[[960,1980],[960,1860]]">
+<polyline points="960,1980 960,1860" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="19" data-net="@implicit:N2:S" data-wire="-" data-points="[[960,1740],[960,1860]]">
+<polyline points="960,1740 960,1860" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="20" data-net="@implicit:P0:D" data-wire="|-" data-points="[[810,120],[810,270],[960,270]]">
+<polyline points="810,120 810,270 960,270" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="21" data-net="@implicit:P0:D" data-wire="|-" data-points="[[1110,210],[1110,270],[960,270]]">
+<polyline points="1110,210 1110,270 960,270" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="22" data-net="@implicit:P0:D" data-wire="|-" data-points="[[810,450],[810,390],[960,390]]">
+<polyline points="810,450 810,390 960,390" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="23" data-net="@implicit:P0:D" data-wire="|-" data-points="[[1110,540],[1110,390],[960,390]]">
+<polyline points="1110,540 1110,390 960,390" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="24" data-net="@implicit:P0:D" data-wire="-" data-points="[[960,270],[960,390]]">
+<polyline points="960,270 960,390" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="25" data-net="A" data-wire="-" data-points="[[0,510],[-90,510]]">
+<polyline points="0,510 -90,510" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="26" data-net="A" data-wire="-|" data-points="[[0,870],[-90,870],[-90,510]]">
+<polyline points="0,870 -90,870 -90,510" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="27" data-net="A" data-wire="-" data-points="[[-210,510],[-90,510]]">
+<polyline points="-210,510 -90,510" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="28" data-net="A" data-wire="-" data-points="[[570,60],[720,60]]">
+<polyline points="570,60 720,60" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="29" data-net="A" data-wire="-" data-points="[[720,960],[870,960]]">
+<polyline points="720,960 870,960" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="30" data-net="B" data-wire="-" data-points="[[0,1230],[-90,1230]]">
+<polyline points="0,1230 -90,1230" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="31" data-net="B" data-wire="-|" data-points="[[0,1590],[-90,1590],[-90,1230]]">
+<polyline points="0,1590 -90,1590 -90,1230" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="32" data-net="B" data-wire="-" data-points="[[-210,1230],[-90,1230]]">
+<polyline points="-210,1230 -90,1230" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="33" data-net="B" data-wire="-" data-points="[[570,150],[1020,150]]">
+<polyline points="570,150 1020,150" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="34" data-net="B" data-wire="-" data-points="[[720,1320],[870,1320]]">
+<polyline points="720,1320 870,1320" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="35" data-net="Abar" data-wire="-" data-points="[[90,570],[90,690]]">
+<polyline points="90,570 90,690" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="36" data-net="Abar" data-wire="-" data-points="[[90,810],[90,690]]">
+<polyline points="90,810 90,690" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="37" data-net="Abar" data-wire="-" data-points="[[300,690],[90,690]]">
+<polyline points="300,690 90,690" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="38" data-net="Abar" data-wire="-" data-points="[[570,510],[720,510]]">
+<polyline points="570,510 720,510" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="39" data-net="Abar" data-wire="-" data-points="[[720,1680],[870,1680]]">
+<polyline points="720,1680 870,1680" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="40" data-net="Bbar" data-wire="-" data-points="[[90,1290],[90,1410]]">
+<polyline points="90,1290 90,1410" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="41" data-net="Bbar" data-wire="-" data-points="[[90,1530],[90,1410]]">
+<polyline points="90,1530 90,1410" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="42" data-net="Bbar" data-wire="-" data-points="[[300,1410],[90,1410]]">
+<polyline points="300,1410 90,1410" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="43" data-net="Bbar" data-wire="-" data-points="[[570,600],[1020,600]]">
+<polyline points="570,600 1020,600" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="44" data-net="Bbar" data-wire="-" data-points="[[720,2040],[870,2040]]">
+<polyline points="720,2040 870,2040" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="45" data-net="OUT" data-wire="|-" data-points="[[810,570],[810,720],[960,720]]">
+<polyline points="810,570 810,720 960,720" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="46" data-net="OUT" data-wire="|-" data-points="[[1110,660],[1110,720],[960,720]]">
+<polyline points="1110,660 1110,720 960,720" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="47" data-net="OUT" data-wire="-|" data-points="[[1320,780],[960,780],[960,720]]">
+<polyline points="1320,780 960,780 960,720" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="48" data-net="OUT" data-wire="-" data-points="[[1170,900],[960,900]]">
+<polyline points="1170,900 960,900" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="49" data-net="OUT" data-wire="-" data-points="[[1170,1620],[960,1620]]">
+<polyline points="1170,1620 960,1620" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="50" data-net="VDD" data-wire="-" data-points="[[90,420],[90,450]]">
+<polyline points="90,420 90,450" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="51" data-net="VDD" data-wire="-" data-points="[[90,1140],[90,1170]]">
+<polyline points="90,1140 90,1170" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="52" data-net="VDD" data-wire="|-" data-points="[[810,0],[810,-60],[960,-60]]">
+<polyline points="810,0 810,-60 960,-60" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="53" data-net="VDD" data-wire="|-" data-points="[[1110,90],[1110,-60],[960,-60]]">
+<polyline points="1110,90 1110,-60 960,-60" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="54" data-net="VDD" data-wire="-" data-points="[[960,-90],[960,-60]]">
+<polyline points="960,-90 960,-60" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="55" data-net="VSS" data-wire="-" data-points="[[90,960],[90,930]]">
+<polyline points="90,960 90,930" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="56" data-net="VSS" data-wire="-" data-points="[[90,1680],[90,1650]]">
+<polyline points="90,1680 90,1650" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="57" data-net="VSS" data-wire="-" data-points="[[960,1410],[960,1380]]">
+<polyline points="960,1410 960,1380" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="58" data-net="VSS" data-wire="-" data-points="[[960,2130],[960,2100]]">
+<polyline points="960,2130 960,2100" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="59" data-device="PA" data-type="pmos" data-stage-index="0">
+<g transform="matrix(1 0 0 1 0 450)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-cmos-xor12-element-59-pmos" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="35.28" cy="60" r="6.72" id="fixture-cmos-xor12-element-59-gate-bubble" stroke="#000" fill="none" stroke-width="2"></circle>
+    <path d="M 90 16.8 L 90 40.8 L 51.6 40.8 L 51.6 79.2 L 90 79.2 L 90 103.2" id="fixture-cmos-xor12-element-59-reference-1" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path d="M 42 40.8 L 42 79.2" id="fixture-cmos-xor12-element-59-reference-2" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path d="M 28.56 60 L 11.28 60" id="fixture-cmos-xor12-element-59-reference-3" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <line id="fixture-cmos-xor12-element-59-gate-extension" x1="0" y1="60" x2="11.28" y2="60"></line>
+    <line id="fixture-cmos-xor12-element-59-upper-extension" x1="90" y1="0" x2="90" y2="16.8"></line>
+    <line id="fixture-cmos-xor12-element-59-lower-extension" x1="90" y1="103.2" x2="90" y2="120"></line>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="60" data-label="true" data-device-label="PA">
+<text x="132" y="554" xml:space="preserve" fill="#000">PA</text>
+</g>
+<g data-drawing-index="61" data-label="true" data-terminal="G" data-terminal-device="PA" data-x="0" data-y="510" data-terminal-net="A">
+<text x="8" y="501" xml:space="preserve" fill="#000">G</text>
+</g>
+<g data-drawing-index="62" data-label="true" data-terminal="S" data-terminal-device="PA" data-x="90" data-y="450" data-terminal-net="VDD">
+<text x="98" y="441" xml:space="preserve" fill="#000">S</text>
+</g>
+<g data-drawing-index="63" data-label="true" data-terminal="D" data-terminal-device="PA" data-x="90" data-y="570" data-terminal-net="Abar">
+<text x="98" y="561" xml:space="preserve" fill="#000">D</text>
+</g>
+<g data-drawing-index="64" data-device="NA" data-type="nmos" data-stage-index="0">
+<g transform="matrix(1 0 0 1 0 810)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-cmos-xor12-element-64-nmos" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 90 16.8 L 90 40.8 L 51.6 40.8 L 51.6 79.2 L 90 79.2 L 90 103.2" id="fixture-cmos-xor12-element-64-reference-0" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path d="M 42 40.8 L 42 79.2" id="fixture-cmos-xor12-element-64-reference-1" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path d="M 42 60 L 11.28 60" id="fixture-cmos-xor12-element-64-reference-2" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <line id="fixture-cmos-xor12-element-64-gate-extension" x1="0" y1="60" x2="11.28" y2="60"></line>
+    <line id="fixture-cmos-xor12-element-64-upper-extension" x1="90" y1="0" x2="90" y2="16.8"></line>
+    <line id="fixture-cmos-xor12-element-64-lower-extension" x1="90" y1="103.2" x2="90" y2="120"></line>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="65" data-label="true" data-device-label="NA">
+<text x="132" y="914" xml:space="preserve" fill="#000">NA</text>
+</g>
+<g data-drawing-index="66" data-label="true" data-terminal="G" data-terminal-device="NA" data-x="0" data-y="870" data-terminal-net="A">
+<text x="8" y="861" xml:space="preserve" fill="#000">G</text>
+</g>
+<g data-drawing-index="67" data-label="true" data-terminal="D" data-terminal-device="NA" data-x="90" data-y="810" data-terminal-net="Abar">
+<text x="98" y="801" xml:space="preserve" fill="#000">D</text>
+</g>
+<g data-drawing-index="68" data-label="true" data-terminal="S" data-terminal-device="NA" data-x="90" data-y="930" data-terminal-net="VSS">
+<text x="98" y="921" xml:space="preserve" fill="#000">S</text>
+</g>
+<g data-drawing-index="69" data-device="PB" data-type="pmos" data-stage-index="1">
+<g transform="matrix(1 0 0 1 0 1170)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-cmos-xor12-element-69-pmos" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="35.28" cy="60" r="6.72" id="fixture-cmos-xor12-element-69-gate-bubble" stroke="#000" fill="none" stroke-width="2"></circle>
+    <path d="M 90 16.8 L 90 40.8 L 51.6 40.8 L 51.6 79.2 L 90 79.2 L 90 103.2" id="fixture-cmos-xor12-element-69-reference-1" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path d="M 42 40.8 L 42 79.2" id="fixture-cmos-xor12-element-69-reference-2" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path d="M 28.56 60 L 11.28 60" id="fixture-cmos-xor12-element-69-reference-3" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <line id="fixture-cmos-xor12-element-69-gate-extension" x1="0" y1="60" x2="11.28" y2="60"></line>
+    <line id="fixture-cmos-xor12-element-69-upper-extension" x1="90" y1="0" x2="90" y2="16.8"></line>
+    <line id="fixture-cmos-xor12-element-69-lower-extension" x1="90" y1="103.2" x2="90" y2="120"></line>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="70" data-label="true" data-device-label="PB">
+<text x="132" y="1274" xml:space="preserve" fill="#000">PB</text>
+</g>
+<g data-drawing-index="71" data-label="true" data-terminal="G" data-terminal-device="PB" data-x="0" data-y="1230" data-terminal-net="B">
+<text x="8" y="1221" xml:space="preserve" fill="#000">G</text>
+</g>
+<g data-drawing-index="72" data-label="true" data-terminal="S" data-terminal-device="PB" data-x="90" data-y="1170" data-terminal-net="VDD">
+<text x="98" y="1161" xml:space="preserve" fill="#000">S</text>
+</g>
+<g data-drawing-index="73" data-label="true" data-terminal="D" data-terminal-device="PB" data-x="90" data-y="1290" data-terminal-net="Bbar">
+<text x="98" y="1281" xml:space="preserve" fill="#000">D</text>
+</g>
+<g data-drawing-index="74" data-device="NB" data-type="nmos" data-stage-index="1">
+<g transform="matrix(1 0 0 1 0 1530)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-cmos-xor12-element-74-nmos" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 90 16.8 L 90 40.8 L 51.6 40.8 L 51.6 79.2 L 90 79.2 L 90 103.2" id="fixture-cmos-xor12-element-74-reference-0" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path d="M 42 40.8 L 42 79.2" id="fixture-cmos-xor12-element-74-reference-1" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path d="M 42 60 L 11.28 60" id="fixture-cmos-xor12-element-74-reference-2" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <line id="fixture-cmos-xor12-element-74-gate-extension" x1="0" y1="60" x2="11.28" y2="60"></line>
+    <line id="fixture-cmos-xor12-element-74-upper-extension" x1="90" y1="0" x2="90" y2="16.8"></line>
+    <line id="fixture-cmos-xor12-element-74-lower-extension" x1="90" y1="103.2" x2="90" y2="120"></line>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="75" data-label="true" data-device-label="NB">
+<text x="132" y="1634" xml:space="preserve" fill="#000">NB</text>
+</g>
+<g data-drawing-index="76" data-label="true" data-terminal="G" data-terminal-device="NB" data-x="0" data-y="1590" data-terminal-net="B">
+<text x="8" y="1581" xml:space="preserve" fill="#000">G</text>
+</g>
+<g data-drawing-index="77" data-label="true" data-terminal="D" data-terminal-device="NB" data-x="90" data-y="1530" data-terminal-net="Bbar">
+<text x="98" y="1521" xml:space="preserve" fill="#000">D</text>
+</g>
+<g data-drawing-index="78" data-label="true" data-terminal="S" data-terminal-device="NB" data-x="90" data-y="1650" data-terminal-net="VSS">
+<text x="98" y="1641" xml:space="preserve" fill="#000">S</text>
+</g>
+<g data-drawing-index="79" data-device="P0" data-type="pmos" data-stage-index="2">
+<g transform="matrix(1 0 0 1 720 0)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-cmos-xor12-element-79-pmos" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="35.28" cy="60" r="6.72" id="fixture-cmos-xor12-element-79-gate-bubble" stroke="#000" fill="none" stroke-width="2"></circle>
+    <path d="M 90 16.8 L 90 40.8 L 51.6 40.8 L 51.6 79.2 L 90 79.2 L 90 103.2" id="fixture-cmos-xor12-element-79-reference-1" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path d="M 42 40.8 L 42 79.2" id="fixture-cmos-xor12-element-79-reference-2" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path d="M 28.56 60 L 11.28 60" id="fixture-cmos-xor12-element-79-reference-3" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <line id="fixture-cmos-xor12-element-79-gate-extension" x1="0" y1="60" x2="11.28" y2="60"></line>
+    <line id="fixture-cmos-xor12-element-79-upper-extension" x1="90" y1="0" x2="90" y2="16.8"></line>
+    <line id="fixture-cmos-xor12-element-79-lower-extension" x1="90" y1="103.2" x2="90" y2="120"></line>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="80" data-label="true" data-device-label="P0">
+<text x="852" y="104" xml:space="preserve" fill="#000">P0</text>
+</g>
+<g data-drawing-index="81" data-label="true" data-terminal="G" data-terminal-device="P0" data-x="720" data-y="60" data-terminal-net="A">
+<text x="728" y="51" xml:space="preserve" fill="#000">G</text>
+</g>
+<g data-drawing-index="82" data-label="true" data-terminal="S" data-terminal-device="P0" data-x="810" data-y="0" data-terminal-net="VDD">
+<text x="818" y="-9" xml:space="preserve" fill="#000">S</text>
+</g>
+<g data-drawing-index="83" data-label="true" data-terminal="D" data-terminal-device="P0" data-x="810" data-y="120" data-terminal-net="@implicit:P0:D">
+<text x="818" y="111" xml:space="preserve" fill="#000">D</text>
+</g>
+<g data-drawing-index="84" data-device="P1" data-type="pmos" data-stage-index="2">
+<g transform="matrix(1 0 0 1 1020 90)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-cmos-xor12-element-84-pmos" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="35.28" cy="60" r="6.72" id="fixture-cmos-xor12-element-84-gate-bubble" stroke="#000" fill="none" stroke-width="2"></circle>
+    <path d="M 90 16.8 L 90 40.8 L 51.6 40.8 L 51.6 79.2 L 90 79.2 L 90 103.2" id="fixture-cmos-xor12-element-84-reference-1" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path d="M 42 40.8 L 42 79.2" id="fixture-cmos-xor12-element-84-reference-2" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path d="M 28.56 60 L 11.28 60" id="fixture-cmos-xor12-element-84-reference-3" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <line id="fixture-cmos-xor12-element-84-gate-extension" x1="0" y1="60" x2="11.28" y2="60"></line>
+    <line id="fixture-cmos-xor12-element-84-upper-extension" x1="90" y1="0" x2="90" y2="16.8"></line>
+    <line id="fixture-cmos-xor12-element-84-lower-extension" x1="90" y1="103.2" x2="90" y2="120"></line>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="85" data-label="true" data-device-label="P1">
+<text x="1152" y="194" xml:space="preserve" fill="#000">P1</text>
+</g>
+<g data-drawing-index="86" data-label="true" data-terminal="G" data-terminal-device="P1" data-x="1020" data-y="150" data-terminal-net="B">
+<text x="1028" y="141" xml:space="preserve" fill="#000">G</text>
+</g>
+<g data-drawing-index="87" data-label="true" data-terminal="S" data-terminal-device="P1" data-x="1110" data-y="90" data-terminal-net="VDD">
+<text x="1118" y="81" xml:space="preserve" fill="#000">S</text>
+</g>
+<g data-drawing-index="88" data-label="true" data-terminal="D" data-terminal-device="P1" data-x="1110" data-y="210" data-terminal-net="@implicit:P0:D">
+<text x="1118" y="201" xml:space="preserve" fill="#000">D</text>
+</g>
+<g data-drawing-index="89" data-device="P2" data-type="pmos" data-stage-index="3">
+<g transform="matrix(1 0 0 1 720 450)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-cmos-xor12-element-89-pmos" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="35.28" cy="60" r="6.72" id="fixture-cmos-xor12-element-89-gate-bubble" stroke="#000" fill="none" stroke-width="2"></circle>
+    <path d="M 90 16.8 L 90 40.8 L 51.6 40.8 L 51.6 79.2 L 90 79.2 L 90 103.2" id="fixture-cmos-xor12-element-89-reference-1" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path d="M 42 40.8 L 42 79.2" id="fixture-cmos-xor12-element-89-reference-2" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path d="M 28.56 60 L 11.28 60" id="fixture-cmos-xor12-element-89-reference-3" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <line id="fixture-cmos-xor12-element-89-gate-extension" x1="0" y1="60" x2="11.28" y2="60"></line>
+    <line id="fixture-cmos-xor12-element-89-upper-extension" x1="90" y1="0" x2="90" y2="16.8"></line>
+    <line id="fixture-cmos-xor12-element-89-lower-extension" x1="90" y1="103.2" x2="90" y2="120"></line>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="90" data-label="true" data-device-label="P2">
+<text x="852" y="554" xml:space="preserve" fill="#000">P2</text>
+</g>
+<g data-drawing-index="91" data-label="true" data-terminal="G" data-terminal-device="P2" data-x="720" data-y="510" data-terminal-net="Abar">
+<text x="728" y="501" xml:space="preserve" fill="#000">G</text>
+</g>
+<g data-drawing-index="92" data-label="true" data-terminal="S" data-terminal-device="P2" data-x="810" data-y="450" data-terminal-net="@implicit:P0:D">
+<text x="818" y="441" xml:space="preserve" fill="#000">S</text>
+</g>
+<g data-drawing-index="93" data-label="true" data-terminal="D" data-terminal-device="P2" data-x="810" data-y="570" data-terminal-net="OUT">
+<text x="818" y="561" xml:space="preserve" fill="#000">D</text>
+</g>
+<g data-drawing-index="94" data-device="P3" data-type="pmos" data-stage-index="3">
+<g transform="matrix(1 0 0 1 1020 540)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-cmos-xor12-element-94-pmos" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="35.28" cy="60" r="6.72" id="fixture-cmos-xor12-element-94-gate-bubble" stroke="#000" fill="none" stroke-width="2"></circle>
+    <path d="M 90 16.8 L 90 40.8 L 51.6 40.8 L 51.6 79.2 L 90 79.2 L 90 103.2" id="fixture-cmos-xor12-element-94-reference-1" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path d="M 42 40.8 L 42 79.2" id="fixture-cmos-xor12-element-94-reference-2" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path d="M 28.56 60 L 11.28 60" id="fixture-cmos-xor12-element-94-reference-3" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <line id="fixture-cmos-xor12-element-94-gate-extension" x1="0" y1="60" x2="11.28" y2="60"></line>
+    <line id="fixture-cmos-xor12-element-94-upper-extension" x1="90" y1="0" x2="90" y2="16.8"></line>
+    <line id="fixture-cmos-xor12-element-94-lower-extension" x1="90" y1="103.2" x2="90" y2="120"></line>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="95" data-label="true" data-device-label="P3">
+<text x="1152" y="644" xml:space="preserve" fill="#000">P3</text>
+</g>
+<g data-drawing-index="96" data-label="true" data-terminal="G" data-terminal-device="P3" data-x="1020" data-y="600" data-terminal-net="Bbar">
+<text x="1028" y="591" xml:space="preserve" fill="#000">G</text>
+</g>
+<g data-drawing-index="97" data-label="true" data-terminal="S" data-terminal-device="P3" data-x="1110" data-y="540" data-terminal-net="@implicit:P0:D">
+<text x="1118" y="531" xml:space="preserve" fill="#000">S</text>
+</g>
+<g data-drawing-index="98" data-label="true" data-terminal="D" data-terminal-device="P3" data-x="1110" data-y="660" data-terminal-net="OUT">
+<text x="1118" y="651" xml:space="preserve" fill="#000">D</text>
+</g>
+<g data-drawing-index="99" data-device="N0" data-type="nmos" data-stage-index="4">
+<g transform="matrix(1 0 0 1 870 900)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-cmos-xor12-element-99-nmos" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 90 16.8 L 90 40.8 L 51.6 40.8 L 51.6 79.2 L 90 79.2 L 90 103.2" id="fixture-cmos-xor12-element-99-reference-0" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path d="M 42 40.8 L 42 79.2" id="fixture-cmos-xor12-element-99-reference-1" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path d="M 42 60 L 11.28 60" id="fixture-cmos-xor12-element-99-reference-2" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <line id="fixture-cmos-xor12-element-99-gate-extension" x1="0" y1="60" x2="11.28" y2="60"></line>
+    <line id="fixture-cmos-xor12-element-99-upper-extension" x1="90" y1="0" x2="90" y2="16.8"></line>
+    <line id="fixture-cmos-xor12-element-99-lower-extension" x1="90" y1="103.2" x2="90" y2="120"></line>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="100" data-label="true" data-device-label="N0">
+<text x="1002" y="1004" xml:space="preserve" fill="#000">N0</text>
+</g>
+<g data-drawing-index="101" data-label="true" data-terminal="G" data-terminal-device="N0" data-x="870" data-y="960" data-terminal-net="A">
+<text x="878" y="951" xml:space="preserve" fill="#000">G</text>
+</g>
+<g data-drawing-index="102" data-label="true" data-terminal="D" data-terminal-device="N0" data-x="960" data-y="900" data-terminal-net="OUT">
+<text x="968" y="891" xml:space="preserve" fill="#000">D</text>
+</g>
+<g data-drawing-index="103" data-label="true" data-terminal="S" data-terminal-device="N0" data-x="960" data-y="1020" data-terminal-net="@implicit:N0:S">
+<text x="968" y="1011" xml:space="preserve" fill="#000">S</text>
+</g>
+<g data-drawing-index="104" data-device="N1" data-type="nmos" data-stage-index="4">
+<g transform="matrix(1 0 0 1 870 1260)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-cmos-xor12-element-104-nmos" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 90 16.8 L 90 40.8 L 51.6 40.8 L 51.6 79.2 L 90 79.2 L 90 103.2" id="fixture-cmos-xor12-element-104-reference-0" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path d="M 42 40.8 L 42 79.2" id="fixture-cmos-xor12-element-104-reference-1" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path d="M 42 60 L 11.28 60" id="fixture-cmos-xor12-element-104-reference-2" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <line id="fixture-cmos-xor12-element-104-gate-extension" x1="0" y1="60" x2="11.28" y2="60"></line>
+    <line id="fixture-cmos-xor12-element-104-upper-extension" x1="90" y1="0" x2="90" y2="16.8"></line>
+    <line id="fixture-cmos-xor12-element-104-lower-extension" x1="90" y1="103.2" x2="90" y2="120"></line>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="105" data-label="true" data-device-label="N1">
+<text x="1002" y="1364" xml:space="preserve" fill="#000">N1</text>
+</g>
+<g data-drawing-index="106" data-label="true" data-terminal="G" data-terminal-device="N1" data-x="870" data-y="1320" data-terminal-net="B">
+<text x="878" y="1311" xml:space="preserve" fill="#000">G</text>
+</g>
+<g data-drawing-index="107" data-label="true" data-terminal="D" data-terminal-device="N1" data-x="960" data-y="1260" data-terminal-net="@implicit:N0:S">
+<text x="968" y="1251" xml:space="preserve" fill="#000">D</text>
+</g>
+<g data-drawing-index="108" data-label="true" data-terminal="S" data-terminal-device="N1" data-x="960" data-y="1380" data-terminal-net="VSS">
+<text x="968" y="1371" xml:space="preserve" fill="#000">S</text>
+</g>
+<g data-drawing-index="109" data-device="N2" data-type="nmos" data-stage-index="5">
+<g transform="matrix(1 0 0 1 870 1620)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-cmos-xor12-element-109-nmos" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 90 16.8 L 90 40.8 L 51.6 40.8 L 51.6 79.2 L 90 79.2 L 90 103.2" id="fixture-cmos-xor12-element-109-reference-0" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path d="M 42 40.8 L 42 79.2" id="fixture-cmos-xor12-element-109-reference-1" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path d="M 42 60 L 11.28 60" id="fixture-cmos-xor12-element-109-reference-2" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <line id="fixture-cmos-xor12-element-109-gate-extension" x1="0" y1="60" x2="11.28" y2="60"></line>
+    <line id="fixture-cmos-xor12-element-109-upper-extension" x1="90" y1="0" x2="90" y2="16.8"></line>
+    <line id="fixture-cmos-xor12-element-109-lower-extension" x1="90" y1="103.2" x2="90" y2="120"></line>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="110" data-label="true" data-device-label="N2">
+<text x="1002" y="1724" xml:space="preserve" fill="#000">N2</text>
+</g>
+<g data-drawing-index="111" data-label="true" data-terminal="G" data-terminal-device="N2" data-x="870" data-y="1680" data-terminal-net="Abar">
+<text x="878" y="1671" xml:space="preserve" fill="#000">G</text>
+</g>
+<g data-drawing-index="112" data-label="true" data-terminal="D" data-terminal-device="N2" data-x="960" data-y="1620" data-terminal-net="OUT">
+<text x="968" y="1611" xml:space="preserve" fill="#000">D</text>
+</g>
+<g data-drawing-index="113" data-label="true" data-terminal="S" data-terminal-device="N2" data-x="960" data-y="1740" data-terminal-net="@implicit:N2:S">
+<text x="968" y="1731" xml:space="preserve" fill="#000">S</text>
+</g>
+<g data-drawing-index="114" data-device="N3" data-type="nmos" data-stage-index="5">
+<g transform="matrix(1 0 0 1 870 1980)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-cmos-xor12-element-114-nmos" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 90 16.8 L 90 40.8 L 51.6 40.8 L 51.6 79.2 L 90 79.2 L 90 103.2" id="fixture-cmos-xor12-element-114-reference-0" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path d="M 42 40.8 L 42 79.2" id="fixture-cmos-xor12-element-114-reference-1" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path d="M 42 60 L 11.28 60" id="fixture-cmos-xor12-element-114-reference-2" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <line id="fixture-cmos-xor12-element-114-gate-extension" x1="0" y1="60" x2="11.28" y2="60"></line>
+    <line id="fixture-cmos-xor12-element-114-upper-extension" x1="90" y1="0" x2="90" y2="16.8"></line>
+    <line id="fixture-cmos-xor12-element-114-lower-extension" x1="90" y1="103.2" x2="90" y2="120"></line>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="115" data-label="true" data-device-label="N3">
+<text x="1002" y="2084" xml:space="preserve" fill="#000">N3</text>
+</g>
+<g data-drawing-index="116" data-label="true" data-terminal="G" data-terminal-device="N3" data-x="870" data-y="2040" data-terminal-net="Bbar">
+<text x="878" y="2031" xml:space="preserve" fill="#000">G</text>
+</g>
+<g data-drawing-index="117" data-label="true" data-terminal="D" data-terminal-device="N3" data-x="960" data-y="1980" data-terminal-net="@implicit:N2:S">
+<text x="968" y="1971" xml:space="preserve" fill="#000">D</text>
+</g>
+<g data-drawing-index="118" data-label="true" data-terminal="S" data-terminal-device="N3" data-x="960" data-y="2100" data-terminal-net="VSS">
+<text x="968" y="2091" xml:space="preserve" fill="#000">S</text>
+</g>
+<g data-drawing-index="119" data-proxy="0" data-net="A" data-type="pinIn" data-branches="2">
+<g transform="matrix(1 0 0 1 -330 450)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-cmos-xor12-element-119-pin-in" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polygon id="fixture-cmos-xor12-element-119-body" points="44,42 104,42 116,60 104,78 44,78"></polygon>
+    <line id="fixture-cmos-xor12-element-119-stem" x1="116" y1="60" x2="120" y2="60"></line>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="120" data-label="true" data-proxy-label="A" text-anchor="middle">
+<text x="-248" y="515" xml:space="preserve" fill="#000">A</text>
+</g>
+<g data-drawing-index="121" data-proxy="1" data-net="A" data-type="pinIn" data-branches="1">
+<g transform="matrix(1 0 0 1 450 0)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-cmos-xor12-element-121-pin-in" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polygon id="fixture-cmos-xor12-element-121-body" points="44,42 104,42 116,60 104,78 44,78"></polygon>
+    <line id="fixture-cmos-xor12-element-121-stem" x1="116" y1="60" x2="120" y2="60"></line>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="122" data-label="true" data-proxy-label="A" text-anchor="middle">
+<text x="532" y="65" xml:space="preserve" fill="#000">A</text>
+</g>
+<g data-drawing-index="123" data-proxy="2" data-net="A" data-type="pinIn" data-branches="1">
+<g transform="matrix(1 0 0 1 600 900)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-cmos-xor12-element-123-pin-in" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polygon id="fixture-cmos-xor12-element-123-body" points="44,42 104,42 116,60 104,78 44,78"></polygon>
+    <line id="fixture-cmos-xor12-element-123-stem" x1="116" y1="60" x2="120" y2="60"></line>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="124" data-label="true" data-proxy-label="A" text-anchor="middle">
+<text x="682" y="965" xml:space="preserve" fill="#000">A</text>
+</g>
+<g data-drawing-index="125" data-proxy="3" data-net="B" data-type="pinIn" data-branches="2">
+<g transform="matrix(1 0 0 1 -330 1170)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-cmos-xor12-element-125-pin-in" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polygon id="fixture-cmos-xor12-element-125-body" points="44,42 104,42 116,60 104,78 44,78"></polygon>
+    <line id="fixture-cmos-xor12-element-125-stem" x1="116" y1="60" x2="120" y2="60"></line>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="126" data-label="true" data-proxy-label="B" text-anchor="middle">
+<text x="-248" y="1235" xml:space="preserve" fill="#000">B</text>
+</g>
+<g data-drawing-index="127" data-proxy="4" data-net="B" data-type="pinIn" data-branches="1">
+<g transform="matrix(1 0 0 1 450 90)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-cmos-xor12-element-127-pin-in" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polygon id="fixture-cmos-xor12-element-127-body" points="44,42 104,42 116,60 104,78 44,78"></polygon>
+    <line id="fixture-cmos-xor12-element-127-stem" x1="116" y1="60" x2="120" y2="60"></line>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="128" data-label="true" data-proxy-label="B" text-anchor="middle">
+<text x="532" y="155" xml:space="preserve" fill="#000">B</text>
+</g>
+<g data-drawing-index="129" data-proxy="5" data-net="B" data-type="pinIn" data-branches="1">
+<g transform="matrix(1 0 0 1 600 1260)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-cmos-xor12-element-129-pin-in" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polygon id="fixture-cmos-xor12-element-129-body" points="44,42 104,42 116,60 104,78 44,78"></polygon>
+    <line id="fixture-cmos-xor12-element-129-stem" x1="116" y1="60" x2="120" y2="60"></line>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="130" data-label="true" data-proxy-label="B" text-anchor="middle">
+<text x="682" y="1325" xml:space="preserve" fill="#000">B</text>
+</g>
+<g data-drawing-index="131" data-proxy="6" data-net="Abar" data-type="pinInOut" data-branches="2">
+<g transform="matrix(1 0 0 1 300 630)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-cmos-xor12-element-131-pin-io" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <line id="fixture-cmos-xor12-element-131-stem" x1="0" y1="60" x2="4" y2="60"></line>
+    <polygon id="fixture-cmos-xor12-element-131-body" points="4,60 16,42 64,42 76,60 64,78 16,78"></polygon>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="132" data-label="true" data-proxy-label="Abar" text-anchor="middle">
+<text x="338" y="695" xml:space="preserve" fill="#000">¬A</text>
+</g>
+<g data-drawing-index="133" data-proxy="7" data-net="Abar" data-type="pinInOut" data-branches="1">
+<g transform="matrix(-1 0 0 1 570 450)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-cmos-xor12-element-133-pin-io" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <line id="fixture-cmos-xor12-element-133-stem" x1="0" y1="60" x2="4" y2="60"></line>
+    <polygon id="fixture-cmos-xor12-element-133-body" points="4,60 16,42 64,42 76,60 64,78 16,78"></polygon>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="134" data-label="true" data-proxy-label="Abar" text-anchor="middle">
+<text x="532" y="515" xml:space="preserve" fill="#000">¬A</text>
+</g>
+<g data-drawing-index="135" data-proxy="8" data-net="Abar" data-type="pinInOut" data-branches="1">
+<g transform="matrix(-1 0 0 1 720 1620)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-cmos-xor12-element-135-pin-io" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <line id="fixture-cmos-xor12-element-135-stem" x1="0" y1="60" x2="4" y2="60"></line>
+    <polygon id="fixture-cmos-xor12-element-135-body" points="4,60 16,42 64,42 76,60 64,78 16,78"></polygon>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="136" data-label="true" data-proxy-label="Abar" text-anchor="middle">
+<text x="682" y="1685" xml:space="preserve" fill="#000">¬A</text>
+</g>
+<g data-drawing-index="137" data-proxy="9" data-net="Bbar" data-type="pinInOut" data-branches="2">
+<g transform="matrix(1 0 0 1 300 1350)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-cmos-xor12-element-137-pin-io" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <line id="fixture-cmos-xor12-element-137-stem" x1="0" y1="60" x2="4" y2="60"></line>
+    <polygon id="fixture-cmos-xor12-element-137-body" points="4,60 16,42 64,42 76,60 64,78 16,78"></polygon>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="138" data-label="true" data-proxy-label="Bbar" text-anchor="middle">
+<text x="338" y="1415" xml:space="preserve" fill="#000">¬B</text>
+</g>
+<g data-drawing-index="139" data-proxy="10" data-net="Bbar" data-type="pinInOut" data-branches="1">
+<g transform="matrix(-1 0 0 1 570 540)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-cmos-xor12-element-139-pin-io" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <line id="fixture-cmos-xor12-element-139-stem" x1="0" y1="60" x2="4" y2="60"></line>
+    <polygon id="fixture-cmos-xor12-element-139-body" points="4,60 16,42 64,42 76,60 64,78 16,78"></polygon>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="140" data-label="true" data-proxy-label="Bbar" text-anchor="middle">
+<text x="532" y="605" xml:space="preserve" fill="#000">¬B</text>
+</g>
+<g data-drawing-index="141" data-proxy="11" data-net="Bbar" data-type="pinInOut" data-branches="1">
+<g transform="matrix(-1 0 0 1 720 1980)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-cmos-xor12-element-141-pin-io" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <line id="fixture-cmos-xor12-element-141-stem" x1="0" y1="60" x2="4" y2="60"></line>
+    <polygon id="fixture-cmos-xor12-element-141-body" points="4,60 16,42 64,42 76,60 64,78 16,78"></polygon>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="142" data-label="true" data-proxy-label="Bbar" text-anchor="middle">
+<text x="682" y="2045" xml:space="preserve" fill="#000">¬B</text>
+</g>
+<g data-drawing-index="143" data-proxy="12" data-net="OUT" data-type="pinOut" data-branches="2">
+<g transform="matrix(1 0 0 1 1320 720)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-cmos-xor12-element-143-pin-out" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <line id="fixture-cmos-xor12-element-143-stem" x1="0" y1="60" x2="4" y2="60"></line>
+    <polygon id="fixture-cmos-xor12-element-143-body" points="4,42 64,42 76,60 64,78 4,78"></polygon>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="144" data-label="true" data-proxy-label="OUT" text-anchor="middle">
+<text x="1358" y="785" xml:space="preserve" fill="#000">OUT</text>
+</g>
+<g data-drawing-index="145" data-proxy="13" data-net="OUT" data-type="pinOut" data-branches="1">
+<g transform="matrix(1 0 0 1 1170 840)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-cmos-xor12-element-145-pin-out" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <line id="fixture-cmos-xor12-element-145-stem" x1="0" y1="60" x2="4" y2="60"></line>
+    <polygon id="fixture-cmos-xor12-element-145-body" points="4,42 64,42 76,60 64,78 4,78"></polygon>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="146" data-label="true" data-proxy-label="OUT" text-anchor="middle">
+<text x="1208" y="905" xml:space="preserve" fill="#000">OUT</text>
+</g>
+<g data-drawing-index="147" data-proxy="14" data-net="OUT" data-type="pinOut" data-branches="1">
+<g transform="matrix(1 0 0 1 1170 1560)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-cmos-xor12-element-147-pin-out" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <line id="fixture-cmos-xor12-element-147-stem" x1="0" y1="60" x2="4" y2="60"></line>
+    <polygon id="fixture-cmos-xor12-element-147-body" points="4,42 64,42 76,60 64,78 4,78"></polygon>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="148" data-label="true" data-proxy-label="OUT" text-anchor="middle">
+<text x="1208" y="1625" xml:space="preserve" fill="#000">OUT</text>
+</g>
+<g data-drawing-index="149" data-proxy="15" data-net="VDD" data-type="supplyNet" data-branches="1">
+<g transform="matrix(1 0 0 1 30 300)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-cmos-xor12-element-149-supplyNet" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 60 120 L 60 74.4" id="fixture-cmos-xor12-element-149-reference-0" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path d="M 60 74.4 L 33 74.4" id="fixture-cmos-xor12-element-149-reference-1" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path d="M 60 74.4 L 87 74.4" id="fixture-cmos-xor12-element-149-reference-2" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="150" data-label="true" data-proxy-label="VDD" text-anchor="middle">
+<text x="90" y="362.4" xml:space="preserve" fill="#000">VDD</text>
+</g>
+<g data-drawing-index="151" data-proxy="16" data-net="VDD" data-type="supplyNet" data-branches="1">
+<g transform="matrix(1 0 0 1 30 1020)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-cmos-xor12-element-151-supplyNet" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 60 120 L 60 74.4" id="fixture-cmos-xor12-element-151-reference-0" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path d="M 60 74.4 L 33 74.4" id="fixture-cmos-xor12-element-151-reference-1" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path d="M 60 74.4 L 87 74.4" id="fixture-cmos-xor12-element-151-reference-2" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="152" data-label="true" data-proxy-label="VDD" text-anchor="middle">
+<text x="90" y="1082.4" xml:space="preserve" fill="#000">VDD</text>
+</g>
+<g data-drawing-index="153" data-proxy="17" data-net="VDD" data-type="supplyNet" data-branches="2">
+<g transform="matrix(1 0 0 1 900 -210)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-cmos-xor12-element-153-supplyNet" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 60 120 L 60 74.4" id="fixture-cmos-xor12-element-153-reference-0" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path d="M 60 74.4 L 33 74.4" id="fixture-cmos-xor12-element-153-reference-1" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path d="M 60 74.4 L 87 74.4" id="fixture-cmos-xor12-element-153-reference-2" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="154" data-label="true" data-proxy-label="VDD" text-anchor="middle">
+<text x="960" y="-147.6" xml:space="preserve" fill="#000">VDD</text>
+</g>
+<g data-drawing-index="155" data-proxy="18" data-net="VSS" data-type="ground" data-branches="1">
+<g transform="matrix(1 0 0 1 30 960)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-cmos-xor12-element-155-ground" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 60 0 L 60 45.6 L 24 45.6 L 96 45.6 M 34.8 62.88 L 85.2 62.88 M 52.8 80.16 L 67.2 80.16" id="fixture-cmos-xor12-element-155-reference-0" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="156" data-label="true" data-proxy-label="VSS" text-anchor="middle">
+<text x="90" y="1062.16" xml:space="preserve" fill="#000">VSS</text>
+</g>
+<g data-drawing-index="157" data-proxy="19" data-net="VSS" data-type="ground" data-branches="1">
+<g transform="matrix(1 0 0 1 30 1680)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-cmos-xor12-element-157-ground" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 60 0 L 60 45.6 L 24 45.6 L 96 45.6 M 34.8 62.88 L 85.2 62.88 M 52.8 80.16 L 67.2 80.16" id="fixture-cmos-xor12-element-157-reference-0" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="158" data-label="true" data-proxy-label="VSS" text-anchor="middle">
+<text x="90" y="1782.16" xml:space="preserve" fill="#000">VSS</text>
+</g>
+<g data-drawing-index="159" data-proxy="20" data-net="VSS" data-type="ground" data-branches="1">
+<g transform="matrix(1 0 0 1 900 1410)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-cmos-xor12-element-159-ground" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 60 0 L 60 45.6 L 24 45.6 L 96 45.6 M 34.8 62.88 L 85.2 62.88 M 52.8 80.16 L 67.2 80.16" id="fixture-cmos-xor12-element-159-reference-0" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="160" data-label="true" data-proxy-label="VSS" text-anchor="middle">
+<text x="960" y="1512.16" xml:space="preserve" fill="#000">VSS</text>
+</g>
+<g data-drawing-index="161" data-proxy="21" data-net="VSS" data-type="ground" data-branches="1">
+<g transform="matrix(1 0 0 1 900 2130)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-cmos-xor12-element-161-ground" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 60 0 L 60 45.6 L 24 45.6 L 96 45.6 M 34.8 62.88 L 85.2 62.88 M 52.8 80.16 L 67.2 80.16" id="fixture-cmos-xor12-element-161-reference-0" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="162" data-label="true" data-proxy-label="VSS" text-anchor="middle">
+<text x="960" y="2232.16" xml:space="preserve" fill="#000">VSS</text>
+</g>
+<g data-drawing-index="163" data-junction="true" data-net="@implicit:P0:D">
+<circle cx="0" cy="0" r="3" stroke="#000" stroke-width="2" fill="#000" transform="matrix(1 0 0 1 960 270)"></circle>
+</g>
+<g data-drawing-index="164" data-junction="true" data-net="@implicit:P0:D">
+<circle cx="0" cy="0" r="3" stroke="#000" stroke-width="2" fill="#000" transform="matrix(1 0 0 1 960 390)"></circle>
+</g>
+<g data-drawing-index="165" data-junction="true" data-net="A">
+<circle cx="0" cy="0" r="3" stroke="#000" stroke-width="2" fill="#000" transform="matrix(1 0 0 1 -90 510)"></circle>
+</g>
+<g data-drawing-index="166" data-junction="true" data-net="B">
+<circle cx="0" cy="0" r="3" stroke="#000" stroke-width="2" fill="#000" transform="matrix(1 0 0 1 -90 1230)"></circle>
+</g>
+<g data-drawing-index="167" data-junction="true" data-net="Abar">
+<circle cx="0" cy="0" r="3" stroke="#000" stroke-width="2" fill="#000" transform="matrix(1 0 0 1 90 690)"></circle>
+</g>
+<g data-drawing-index="168" data-junction="true" data-net="Bbar">
+<circle cx="0" cy="0" r="3" stroke="#000" stroke-width="2" fill="#000" transform="matrix(1 0 0 1 90 1410)"></circle>
+</g>
+<g data-drawing-index="169" data-junction="true" data-net="OUT">
+<circle cx="0" cy="0" r="3" stroke="#000" stroke-width="2" fill="#000" transform="matrix(1 0 0 1 960 720)"></circle>
+</g>
+<g data-drawing-index="170" data-junction="true" data-net="VDD">
+<circle cx="0" cy="0" r="3" stroke="#000" stroke-width="2" fill="#000" transform="matrix(1 0 0 1 960 -60)"></circle>
+</g>
+</svg>

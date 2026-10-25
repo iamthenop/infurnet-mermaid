@@ -1,0 +1,36 @@
+circuitDiagram A
+%% Owner circuit reference; physical module labels and ratings are not verified here.
+BatteryPlus{{"12 V"}}:::supplyNet
+VDD{{"Fused 12 V"}}:::supplyNet
+Return{{"0 V"}}:::ground
+subgraph block power
+    subgraph stage battery
+        Source["Source<br/>Milwaukee M12 12 V"]:::voltageSource
+    end
+    subgraph stage protection
+        Fuse["Fuse<br/>2 A"]:::fuse
+    end
+end
+subgraph block control
+    subgraph stage receiver
+        remote["remote<br/>QIACHIP 433 MHz"]:::ic
+    end
+end
+subgraph block load
+    subgraph stage actuator
+        direction LR
+        Solenoid["Solenoid<br/>uxcell 12 V 20 N"]:::solenoid
+        Diode["Diode<br/>1N5408"]:::diode
+    end
+end
+Source |P| --- BatteryPlus
+BatteryPlus --- Fuse |A|
+Fuse |B| --- VDD
+VDD --- |v+| T:remote
+VDD --- |ctl| L:remote
+B:remote |v-| --- Return
+Source |N| --- Return
+R:remote |no| --- |A| Solenoid
+R:remote |no| --- |K| Diode
+Solenoid |B| --- Return
+Diode |A| --- Return

@@ -1,8 +1,8 @@
 # Notation for circuit diagrams
 
-This specification records the approved syntax and electrical semantics of `circuitDiagram`. The parser implements the 18 authorable object types, diagram modes, typed subgraphs, and fixed-terminal connections described here. The NAND2 example is a parser acceptance fixture.
+This specification records the approved syntax and electrical semantics of `circuitDiagram`. The parser implements the 21 authorable object types, diagram modes, typed subgraphs, and fixed-terminal connections described here. The NAND2 example is a parser acceptance fixture.
 
-Layout, wiring, dynamic ICs, and device rendering remain unimplemented.
+Basic placement, orthogonal wiring, and symbol rendering are implemented. IC support is limited to the one-pin-per-side case described below.
 
 The notation is a deliberately restricted Mermaid flowchart-like syntax. Compatibility with the complete Mermaid flowchart grammar is not promised. Geometry and presentation are governed by [Drawing style](style.md).
 
@@ -38,11 +38,11 @@ Every stage and block inherits its diagram mode. Subgraphs cannot make an otherw
 
 Electrical connectivity is defined by nets and named device terminals in either mode. Rendering does not establish connectivity.
 
-The parser records the diagram mode and enforces registered-shape eligibility for authorable types. Layout and rendering remain subsequent implementation work.
+The parser records the diagram mode and enforces registered-shape eligibility for authorable types. Basic layout and rendering consume that model without changing connectivity.
 
 ## Object types
 
-The authorable object vocabulary is closed and contains these 18 types. Generic nets remain internal connectivity groups and cannot be declared with `:::net`.
+The authorable object vocabulary is closed and contains these 21 types. Generic nets remain internal connectivity groups and cannot be declared with `:::net`.
 
 | Type | Kind | Terminals |
 | --- | --- | --- |
@@ -57,6 +57,9 @@ The authorable object vocabulary is closed and contains these 18 types. Generic 
 | `currentSource` | Device | P, N |
 | `motor` | Device | A, B |
 | `solenoid` | Device | A, B |
+| `fuse` | Device | A, B |
+| `nand` | Device | I1, I2, O |
+| `ic` | Device | Dynamic |
 | `inverter` | Device | I, O |
 | `buffer` | Device | I, O |
 | `supplyNet` | Net | None |
@@ -101,6 +104,8 @@ These references preserve the existing asset filenames in the [shape library](..
 | `currentSource` | `isource.svg` |
 | `motor` | `motor.svg` |
 | `solenoid` | `solenoid.svg` |
+| `fuse` | `fuse.svg` |
+| `nand` | `nand.svg` |
 | `inverter` | `inverter.svg` |
 | `buffer` | `buffer.svg` |
 | `supplyNet` | `vdd.svg` |
@@ -170,7 +175,7 @@ subgraph block datapath
 end
 ```
 
-This example illustrates structural membership only. It does not authorize the new logic gates in the currently closed object-type table. The existing 18-type vocabulary remains unchanged.
+This example illustrates structural membership only. It does not authorize the new logic gates in the currently closed object-type table. The existing 21-type vocabulary remains unchanged.
 
 ### Membership and hierarchy
 
@@ -213,9 +218,11 @@ The approved connection notation provides side assignment for connected IC pins.
 
 The ordering of multiple pins on one side, unconnected pin declarations, physical package numbering, IC definition and instance syntax, and automatic body sizing remain future design work.
 
-The `ic` device representation is not yet included in the closed authorable object-type table. Dynamic IC parsing and rendering are not implemented.
+The `ic` type is authorable in mode `A` for a single device with exactly one connected pin on each of T, B, L, and R. Connections define the pin names and sides; repeated assignments must agree. This release rejects missing sides, multiple pins on a side, and side qualifiers on catalog devices.
 
-Typed subgraph parsing and structural validation are implemented. Dynamic IC construction and schematic rendering remain unimplemented.
+Pin names may contain letters, digits, `+`, and `-`. Side qualifiers also apply to IC endpoints in direct device-to-device connections. No reusable IC definitions, package numbering, or arbitrary pin-order rules are implemented.
+
+Typed subgraph parsing and structural validation remain unchanged. The renderer draws stage and block groups with their actual devices.
 
 ## Connection syntax
 
@@ -398,7 +405,7 @@ VDD --- |VCC| T:U1
 B:U1 |GND| --- VSS
 ```
 
-This example illustrates the approved connection notation for a future dynamic IC device. The `ic` type is not yet authorable by the current parser.
+This example illustrates the approved connection notation for a future dynamic IC device. The current parser supports only the four-pin, one-pin-per-side subset; this five-pin example remains illustrative.
 
 The five named terminals belong to the IC instance. Their sides are specified by their connection endpoints. Electrical connectivity is established by the corresponding nets.
 
@@ -423,8 +430,8 @@ The example does not establish physical package pin numbers, ordering among mult
 15. Stage names use camelCase.
 16. Subgraphs follow the [membership and hierarchy rules](#membership-and-hierarchy).
 17. Stages stack vertically in declaration order.
-18. `direction LR` places stage devices side by side and is the default.
-19. `direction TB` stacks stage devices vertically.
+18. `direction LR` selects left-to-right stage placement. It is the stored default when no direction is written; connectivity-based defaults are defined in [Basic automatic drawing](style.md#basic-automatic-drawing).
+19. `direction TB` selects top-to-bottom stage placement. Digital dependency levels follow the [orientation rules](style.md#orientation).
 20. Devices declared outside all explicit stages occupy an implicit final stage.
 21. There are no notation-level style declarations.
 
