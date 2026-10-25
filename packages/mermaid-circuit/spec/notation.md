@@ -250,7 +250,9 @@ Missing endpoint declarations may be inferred from the connected MOS device and 
 | Any of these MOS devices | G | `pinIn` |
 | Any of these MOS devices | D | `pinOut` |
 
-An undeclared endpoint is created once, using its first mapped connection's type and its identifier as its label. Later references reuse that endpoint. Names such as `VDD` and `GND` do not determine type, and neither does the endpoint's written side.
+An undeclared endpoint is created once, using its first mapped connection's type and its identifier as its label. Later references reuse that endpoint without changing its type, even when another connected terminal has a different inference mapping. Names such as `VDD` and `GND` do not determine type, and neither does the endpoint's written side.
+
+Reordering connections can change which type is inferred first, but does not change net membership. An explicit endpoint declaration takes precedence over inference.
 
 Inference is resolved before connectivity, so an earlier connection can reuse an endpoint inferred by a later MOS connection. No inference mapping is defined for other device terminals; endpoints without a mapped connection require explicit declarations. `pinInOut` remains explicitly declarable and is not inferred.
 

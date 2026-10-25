@@ -167,6 +167,22 @@ VDD --- P0 |S|`);
   });
 
   it.each([
+    ['X --- P0 |S|', 'N0 |S| --- X', 'supplyNet'],
+    ['N0 |S| --- X', 'X --- P0 |S|', 'ground'],
+    ['X --- P0 |G|', 'P0 |D| --- X', 'pinIn'],
+    ['P0 |D| --- X', 'X --- P0 |G|', 'pinOut'],
+  ])('retains the type inferred by %s when followed by %s', (first, second, type) => {
+    const source = `circuitDiagram A\nP0["P0"]:::pmos\nN0["N0"]:::nmos\n${first}\n${second}\n${first}`;
+    const model = parseCircuit(source);
+    expect(model.nets).toEqual([{ id: 'X', type, label: 'X', implicit: true }]);
+    expect(model.connections).toHaveLength(2);
+    expect(model.connections.every(({ net }) => net === 'X')).toBe(true);
+    const declared = parseCircuit(`${source}\nX(["Shared"]):::pinInOut`);
+    expect(declared.nets).toEqual([{ id: 'X', type: 'pinInOut', label: 'Shared' }]);
+    expect(topology(declared)).toEqual(topology(model));
+  });
+
+  it.each([
     ['pmosBlk', 'B'], ['nmosBlk', 'B'], ['resistor', 'A'], ['capacitor', 'B'],
     ['diode', 'K'], ['voltageSource', 'P'], ['currentSource', 'N'], ['inverter', 'I'], ['buffer', 'O'],
   ])('requires an explicit endpoint type outside the approved inference mapping: %s.%s', (type, terminal) => {
