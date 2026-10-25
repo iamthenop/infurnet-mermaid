@@ -4,7 +4,7 @@ An external Mermaid diagram parser with identifier `circuitDiagram`. The package
 
 ## Implemented behavior
 
-The parser accepts `circuitDiagram D` and `circuitDiagram A`, followed by declarations and connections from the closed 17-type vocabulary in [the notation specification](spec/notation.md).
+The parser accepts `circuitDiagram D` and `circuitDiagram A`, followed by declarations and connections from the closed 16-type vocabulary in [the notation specification](spec/notation.md).
 
 ```text
 circuitDiagram D
@@ -13,11 +13,13 @@ Y(["Y"]):::pinOut
 subgraph stage logic
     U1["U1"]:::inverter
 end
-A ---|I| U1
-U1 ---|O| Y
+A --- U1 |I|
+U1 |O| --- Y
 ```
 
-Blank lines and Mermaid `%%` comments are accepted. The parser validates mode eligibility, declaration brackets, object identity, device terminals, symmetric connections, and typed stage/block membership. Optional device parameters remain uninterpreted label content. Catalog-only shapes and dynamic ICs are not authorable. The full 103-shape catalog is not an authorable device vocabulary.
+Blank lines and Mermaid `%%` comments are accepted. The parser validates mode eligibility, declaration brackets, object identity, device terminals, terminal-qualified connections, and typed stage/block membership. Optional device parameters remain uninterpreted label content.
+
+Catalog-only shapes and dynamic ICs are not authorable. The full 103-shape catalog is not an authorable device vocabulary.
 
 Direct device connections name both terminals in endpoint order:
 
@@ -27,12 +29,18 @@ circuitDiagram A
 R1["R1"]:::resistor
 R2["R2"]:::resistor
 
-R1 ---|B:A| R2
+R1 |B| --- |A| R2
 ```
 
-This connects `R1.B` to `R2.A`; `R2 ---|A:B| R1` is equivalent. The parser normalizes direct connections into terminal-to-net relationships, creating an internal net without a visible label when no explicit net exists.
+This connects `R1.B` to `R2.A` with current flow stated from left to right. Reversing the endpoints reverses the stated direction while preserving net membership. The parser normalizes connectivity into terminal-to-net relationships; generic nets are implied and cannot be declared with `:::net`.
 
-Shared terminal endpoints form one net, while different terminals preserve separate series nets. An intersecting named net supplies the net identity; a connection that would merge two named nets is rejected. Repeated equivalent connections are deduplicated.
+The former colon-separated terminal syntax is rejected.
+
+Shared terminals imply one net and a junction, while distinct terminal groups remain separate. Repeated statements do not duplicate connectivity. Direct source-to-source statements are rejected.
+
+External endpoints may be declared using their existing types. Missing declarations are inferred from the approved MOS terminal mapping in [connection syntax](spec/notation.md#connection-syntax), never from names such as `VDD`. Endpoints without a mapped MOS connection require explicit declarations.
+
+The normalized model remains a connectivity model, not an electrical simulator.
 
 The parsed model records devices, nets, normalized terminal-to-net connections, ordered stages, blocks, and the declared mode. Three-terminal MOSFETs record their implicit bulk-to-source relationship; four-terminal variants expose B. Stage membership creates no electrical connections.
 
@@ -107,4 +115,4 @@ npx playwright install chromium
 npm run test:browser --workspace mermaid-circuit
 ```
 
-Unit tests cover detection, lazy loading, parser and definition interfaces, all 17 notation types, mode eligibility, structural membership, normalized connections, NAND2 topology, invalid input, and database reset and isolation. Browser tests use Vite and Playwright Chromium to register the compiled package with real Mermaid, inspect valid empty SVG output, reject unsupported notation, and render again after failure. See the [root README](../../README.md) for `.venv/` runtime activation and CI commands.
+Unit tests cover detection, lazy loading, parser and definition interfaces, all 16 notation types, mode eligibility, structural membership, normalized connections, NAND2 topology, invalid input, and database reset and isolation. Browser tests use Vite and Playwright Chromium to register the compiled package with real Mermaid, inspect valid empty SVG output, reject unsupported notation, and render again after failure. See the [root README](../../README.md) for `.venv/` runtime activation and CI commands.
