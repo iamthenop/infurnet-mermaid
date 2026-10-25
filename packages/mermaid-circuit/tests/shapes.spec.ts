@@ -63,6 +63,7 @@ const variants = {
 const deferredVariants = ['hemtNoArrow', 'rshunt', 'batteryDouble'] as const;
 const digitalAdditions = ['and', 'nand', 'or', 'nor', 'xor', 'xnor', 'notNot', 'tgate',
   'tristate', 'schmitt', 'schmittNot', 'schmittAnd', 'schmittNand'] as const;
+const electricalAdditions = ['motor', 'solenoid', 'lamp', 'lamp2', 'breaker', 'antenna', 'opamp'] as const;
 const sharedShapes = ['pinIn', 'pinOut', 'pinInOut', 'supplyNet', 'ground', 'groundSignal', 'groundChassis', 'vss'];
 
 const icTemplates = import.meta.glob<string>('../shapes/ic-templates/*.svg', { eager: true, query: '?raw', import: 'default' });
@@ -73,7 +74,7 @@ const templateSvg = (name: string) => icTemplates[`../shapes/ic-templates/${name
 describe('unregistered IC visual templates', () => {
   it('keeps exactly the nine approved templates separate from the registered catalog', () => {
     expect(Object.keys(icTemplates).sort()).toEqual(templateNames.map((name) => `../shapes/ic-templates/${name}.svg`).sort());
-    expect(Object.keys(shapes)).toHaveLength(103);
+    expect(Object.keys(shapes)).toHaveLength(110);
     for (const entry of Object.values(shapes)) expect(entry.file).not.toContain('ic-');
   });
 
@@ -186,7 +187,7 @@ describe('unregistered IC visual templates', () => {
 describe('shape catalog', () => {
   it('keeps the approved inventory complete and deferred variants absent', () => {
     expect(Object.values(variants).flat()).toHaveLength(74);
-    expect(Object.keys(shapes)).toHaveLength(103);
+    expect(Object.keys(shapes)).toHaveLength(110);
     for (const key of deferredVariants) expect(Object.keys(shapes)).not.toContain(key);
   });
   it.each(Object.entries(variants))('contains every approved %s variant', (_family, keys) => {
@@ -198,11 +199,11 @@ describe('shape catalog', () => {
       Object.keys(assets).map((path) => path.split('/').at(-1)!).sort(),
     );
     const definitions = [...notation.matchAll(/^\| `([^`]+)` \| (Device|Net) \| ([^|]+) \|$/gmu)];
-    expect(definitions).toHaveLength(16);
+    expect(definitions).toHaveLength(18);
     expect(definitions.map((match) => match[1])).not.toContain('net');
     const existing = definitions.map((match) => match[1]!).filter((key) => key !== 'net');
     expect(Object.keys(shapes)).toEqual(expect.arrayContaining(existing));
-    const approved = new Set([...existing, ...Object.values(variants).flat(), ...digitalAdditions]);
+    const approved = new Set([...existing, ...Object.values(variants).flat(), ...digitalAdditions, ...electricalAdditions]);
     for (const key of Object.keys(shapes)) expect(approved.has(key), key).toBe(true);
     expect(existing).not.toContain('source');
     for (const [, key, , terminals] of definitions) {
@@ -221,11 +222,11 @@ describe('shape catalog', () => {
       expect(shape.allowedModes, key).toEqual(family === 'digital' ? ['D'] : family === 'shared' ? ['D', 'A'] : ['A']);
       counts[family]++;
     }
-    expect(counts).toEqual({ digital: 15, shared: 8, electrical: 80 });
+    expect(counts).toEqual({ digital: 15, shared: 8, electrical: 87 });
   });
 
   it('preserves all existing catalog values apart from mode eligibility', async () => {
-    const added: readonly string[] = digitalAdditions;
+    const added: readonly string[] = [...digitalAdditions, ...electricalAdditions];
     const existing = Object.fromEntries(Object.entries(shapes).filter(([key]) => !added.includes(key))
       .map(([key, { allowedModes: _modes, ...entry }]) => [key, entry]));
     expect(Object.keys(existing)).toHaveLength(90);
@@ -359,6 +360,50 @@ describe('shape catalog', () => {
       expect(Object.keys(shape.terminals).sort(), key).toEqual(expected.sort());
       expect(Boolean(shape.anchor), key).toBe(variants.grounds.includes(key));
     }
+  });
+
+  it('preserves actuator, lamp, breaker, antenna and amplifier distinctions', () => {
+    for (const key of electricalAdditions) {
+      const svg = readSvg(shapes[key].file);
+      expect(shapes[key].file).toBe(`${key}.svg`);
+      expect(svg).toContain('e3cb52981f1ef297ddb083c9329ad89a6c8d1db4');
+      expect(svg).toContain('Copyright (c) 2014-2026 Collin J. Delker');
+      expect(svg).toContain('Permission is hereby granted, free of charge');
+      expect(svg).toContain('THE SOFTWARE IS PROVIDED "AS IS"');
+      const markup = svg.replace(/<!--[\s\S]*?-->/gu, '');
+      expect(markup).not.toMatch(/<(?:use|image)\b|\b(?:href|on\w+)\s*=|url\s*\(|<!DOCTYPE|<!ENTITY/iu);
+      if (key !== 'antenna' && key !== 'opamp') {
+        expect(shapes[key].terminals).toEqual({ A: [0, 60], B: [120, 60] });
+      }
+    }
+    const motor = readSvg(shapes.motor.file), solenoid = readSvg(shapes.solenoid.file);
+    for (const key of ['motor', 'solenoid'] as const) {
+      expect(pathPoints(referencePaths(key).find(({ id }) => id === 'electrical-leads')!))
+        .toEqual([[0, 60], [36, 60], [84, 60], [120, 60]]);
+    }
+    for (const svg of [motor, solenoid, readSvg(shapes.lamp.file), readSvg(shapes.lamp2.file)]) {
+      const circle = elements(svg, 'circle')[0]!.attrs;
+      expect(['cx', 'cy', 'r'].map((name) => Number(circle[name]))).toEqual([60, 60, 24]);
+    }
+    const mark = elements(motor, 'text')[0]!.attrs;
+    expect([Number(mark.x), Number(mark.y)]).toEqual([60, 60]);
+    expect(motor).toContain('>M</text>');
+    expect(solenoid).not.toMatch(/<(?:text|tspan)\b/u);
+    const shaft = pathPoints(referencePaths('solenoid').find(({ id }) => id === 'motion-shaft')!);
+    expect(shaft).toEqual([[60, 96], [60, 24]]);
+    const head = elements(solenoid, 'polygon')[0]!.attrs;
+    expect(points(head.points!)[0]).toEqual(shaft[1]);
+    expect(pathPoints(referencePaths('lamp').find(({ id }) => id === 'reference-2')!)).toHaveLength(100);
+    expect(referencePaths('lamp2').filter(({ id }) => ['reference-2', 'reference-3'].includes(id!)))
+      .toHaveLength(2);
+    expect(elements(readSvg(shapes.breaker.file), 'circle')).toHaveLength(2);
+    expect(referencePaths('breaker').some(({ d }) => d!.includes(' A '))).toBe(true);
+    expect(shapes.antenna.terminals).toEqual({});
+    expect(shapes.antenna.anchor).toEqual([60, 90]);
+    expect(shapes.opamp.terminals).toEqual({ in1: [0, 40], in2: [0, 80], out: [120, 60], vd: [60, 0], vs: [60, 120] });
+    const body = pathSubpaths(referencePaths('opamp')[0]!.d!)[0]!;
+    expect(body[0]).toEqual(body.at(-1));
+    expect((body[2]![0] - body[1]![0]) / (body[3]![1] - body[1]![1])).toBeCloseTo(Math.sqrt(3) / 2);
   });
 
   it('preserves the reference controlled-source marks and terminal polarity', () => {

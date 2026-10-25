@@ -1,6 +1,6 @@
 # Notation for circuit diagrams
 
-This specification records the approved syntax and electrical semantics of `circuitDiagram`. The parser implements the 16 authorable object types, diagram modes, typed subgraphs, and fixed-terminal connections described here. The NAND2 example is a parser acceptance fixture.
+This specification records the approved syntax and electrical semantics of `circuitDiagram`. The parser implements the 18 authorable object types, diagram modes, typed subgraphs, and fixed-terminal connections described here. The NAND2 example is a parser acceptance fixture.
 
 Layout, wiring, dynamic ICs, and device rendering remain unimplemented.
 
@@ -42,7 +42,7 @@ The parser records the diagram mode and enforces registered-shape eligibility fo
 
 ## Object types
 
-The authorable object vocabulary is closed and contains these 16 types. Generic nets remain internal connectivity groups and cannot be declared with `:::net`.
+The authorable object vocabulary is closed and contains these 18 types. Generic nets remain internal connectivity groups and cannot be declared with `:::net`.
 
 | Type | Kind | Terminals |
 | --- | --- | --- |
@@ -55,6 +55,8 @@ The authorable object vocabulary is closed and contains these 16 types. Generic 
 | `diode` | Device | A, K |
 | `voltageSource` | Device | P, N |
 | `currentSource` | Device | P, N |
+| `motor` | Device | A, B |
+| `solenoid` | Device | A, B |
 | `inverter` | Device | I, O |
 | `buffer` | Device | I, O |
 | `supplyNet` | Net | None |
@@ -97,6 +99,8 @@ These references preserve the existing asset filenames in the [shape library](..
 | `diode` | `diode.svg` |
 | `voltageSource` | `vsource.svg` |
 | `currentSource` | `isource.svg` |
+| `motor` | `motor.svg` |
+| `solenoid` | `solenoid.svg` |
 | `inverter` | `inverter.svg` |
 | `buffer` | `buffer.svg` |
 | `supplyNet` | `vdd.svg` |
@@ -166,7 +170,7 @@ subgraph block datapath
 end
 ```
 
-This example illustrates structural membership only. It does not authorize the new logic gates in the currently closed object-type table. The existing 16-type vocabulary remains unchanged.
+This example illustrates structural membership only. It does not authorize the new logic gates in the currently closed object-type table. The existing 18-type vocabulary remains unchanged.
 
 ### Membership and hierarchy
 

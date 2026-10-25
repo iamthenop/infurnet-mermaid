@@ -2036,5 +2036,138 @@
     "allowedModes": [
       "D"
     ]
+  },
+  "motor": {
+    "file": "motor.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "A": [
+        0,
+        60
+      ],
+      "B": [
+        120,
+        60
+      ]
+    },
+    "allowedModes": [
+      "A"
+    ]
+  },
+  "solenoid": {
+    "file": "solenoid.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "A": [
+        0,
+        60
+      ],
+      "B": [
+        120,
+        60
+      ]
+    },
+    "allowedModes": [
+      "A"
+    ]
+  },
+  "lamp": {
+    "file": "lamp.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "A": [
+        0,
+        60
+      ],
+      "B": [
+        120,
+        60
+      ]
+    },
+    "allowedModes": [
+      "A"
+    ]
+  },
+  "lamp2": {
+    "file": "lamp2.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "A": [
+        0,
+        60
+      ],
+      "B": [
+        120,
+        60
+      ]
+    },
+    "allowedModes": [
+      "A"
+    ]
+  },
+  "breaker": {
+    "file": "breaker.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "A": [
+        0,
+        60
+      ],
+      "B": [
+        120,
+        60
+      ]
+    },
+    "allowedModes": [
+      "A"
+    ]
+  },
+  "antenna": {
+    "file": "antenna.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {},
+    "anchor": [
+      60,
+      90
+    ],
+    "allowedModes": [
+      "A"
+    ]
+  },
+  "opamp": {
+    "file": "opamp.svg",
+    "width": 120,
+    "height": 120,
+    "terminals": {
+      "in1": [
+        0,
+        40
+      ],
+      "in2": [
+        0,
+        80
+      ],
+      "out": [
+        120,
+        60
+      ],
+      "vd": [
+        60,
+        0
+      ],
+      "vs": [
+        60,
+        120
+      ]
+    },
+    "allowedModes": [
+      "A"
+    ]
   }
 }
