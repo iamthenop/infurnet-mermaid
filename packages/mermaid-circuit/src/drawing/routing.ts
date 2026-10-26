@@ -4,7 +4,7 @@ import type { Bounds, Point } from './geometry.js';
 import { pad, validateOrientation, type Attachment, type Layout } from './layout.js';
 
 export interface Route { readonly net: string; readonly points: readonly Point[]; readonly shape: WireShape }
-export interface NetOccurrence { readonly net: Net; readonly element: Element; readonly placed: PlacedElement; readonly branches: number; readonly isProxy: boolean }
+export interface NetOccurrence { readonly net: Net; readonly element: Element; readonly placed: PlacedElement; readonly branches: number; readonly isProxy: boolean; readonly stages: readonly number[] }
 export interface Routing {
   readonly routes: readonly Route[];
   readonly occurrences: readonly NetOccurrence[];
@@ -155,7 +155,7 @@ function groupJoint(items: readonly Attachment[], layout: Layout, input: boolean
   switch (items[0].side) {
     case 'T': return [x, Math.min(...ys) - (items.length > 2 ? 120 : 60)];
     case 'B': return [x, Math.max(...ys) + (items.length > 2 ? 120 : 60)];
-    case 'L': return [input ? Math.min(...items.map((item) => layout.stageBounds[item.stage].minX)) - 60 : Math.min(...xs) - 120, input ? items[0].point[1] : y];
+    case 'L': return [input ? Math.min(...items.map((item) => layout.stageBounds[item.stage].minX)) - 60 : Math.min(...xs) - 120, y];
     case 'R': return [Math.max(...xs) + 120, y];
   }
 }
@@ -211,6 +211,10 @@ export function validateConnectivity(layout: Layout, drawing: Routing): void {
     if (!attachments.length && !wires.length && !occurrences.length) continue;
     if (net.type !== 'net' && occurrences.length === 0) throw new Error(`Missing original occurrence for net "${net.id}".`);
     if (occurrences.length > 1 && !mayProxy(net, layout.proxyPolicy)) throw new Error(`Unauthorized proxy for net "${net.id}".`);
+    if (net.type === 'pinIn') for (const block of layout.blockProxyPolicies) {
+      const local = occurrences.filter((item) => item.stages.some((stage) => block.stages.includes(stage)));
+      if (local.length > 1 && !mayProxy(net, block)) throw new Error(`Unauthorized input proxy in block ${block.block} for net "${net.id}".`);
+    }
     if (net.type === 'net' && occurrences.length) throw new Error(`Unauthorized generic-net occurrence for "${net.id}".`);
     const parents = wires.map((_, index) => index);
     const root = (index: number): number => {
@@ -248,6 +252,13 @@ export function routeLayout(layout: Layout): Routing {
   function branches(net: string, group: readonly Attachment[], joint: Point, initial: readonly Route[]): Route[] {
     const added: Route[] = [];
     if (group.length > 1) scopes.push({ net, point: joint, stages: [...new Set(group.map((item) => item.stage))] });
+    const verticalConductor = group.length > 1 && ['L', 'R'].includes(group[0].side)
+      && group.every((item) => item.side === group[0].side);
+    if (verticalConductor) {
+      const ys = group.map((item) => item.point[1]);
+      const top: Point = [joint[0], Math.min(...ys)], bottom: Point = [joint[0], Math.max(...ys)];
+      if (!equal(top, bottom)) added.push(chooseRoute(net, top, bottom, initial, obstacles()));
+    }
     for (const item of group) if (!equal(item.point, joint)) {
       const side = item.side;
       const axis = conductorAxis(group) ?? (group.every((other) => other.side === side) && ['L', 'R'].includes(side) ? 1 : undefined);
@@ -277,7 +288,8 @@ export function routeLayout(layout: Layout): Routing {
         const route: Route = { net, points, shape: points.length === 2 ? '-' : '|-' };
         if (!acceptsRoute(route, [...initial, ...added], obstacles())) throw new Error(`Routing failure for centered parallel conductor on net "${net}".`);
         added.push(route);
-      } else added.push(chooseRoute(net, item.point, joint, [...initial, ...added], obstacles(), side === 'T' || side === 'B'));
+      } else added.push(chooseRoute(net, item.point, verticalConductor ? [joint[0], item.point[1]] : joint,
+        [...initial, ...added], obstacles(), side === 'T' || side === 'B'));
     }
     return added;
   }
@@ -290,7 +302,17 @@ export function routeLayout(layout: Layout): Routing {
     if (singleOccurrence && input && attachments.length > 3) {
       throw new Error(`Routing failure for net "${net.id}": the branch limit requires a proxy that the circuit threshold forbids.`);
     }
-    const groups = singleOccurrence && input ? [attachments] : groupsFor(attachments, input, layout);
+    let groups = singleOccurrence && input ? [attachments] : groupsFor(attachments, input, layout);
+    if (net.type === 'pinIn' && !singleOccurrence) for (const block of layout.blockProxyPolicies) {
+      if (mayProxy(net, block)) continue;
+      const local = groups.filter((group) => group.some((item) => block.stages.includes(item.stage)));
+      if (!local.length) continue;
+      const index = groups.indexOf(local[0]);
+      const merged = local.flat();
+      if (merged.length > 3) throw new Error(`Routing failure for net "${net.id}": block ${block.block} forbids the proxy required by the branch limit.`);
+      groups = groups.filter((group) => !local.includes(group));
+      groups.splice(index, 0, merged);
+    }
     let joinedAt: Point | undefined;
     if (net.type === 'net' || singleOccurrence) {
       const joints = groups.map((group) => groupJoint(group, layout, input));
@@ -304,6 +326,17 @@ export function routeLayout(layout: Layout): Routing {
       if (groups.length === 1 && ['pinIn', 'pinOut', 'pinInOut'].includes(net.type)) {
         const peer = pinPlacements.find((item) => item.net.type === net.type && reflectionAxis(attachments, item.group, layout) !== undefined);
         if (peer) joints[0] = [peer.joint[0], 2 * reflectionAxis(attachments, peer.group, layout)! - peer.joint[1]];
+      }
+      if (singleOccurrence && input && attachments.length > 1 && attachments.every((item) => item.side === 'L')) {
+        const laterInputs = ordered.slice(ordered.indexOf(net) + 1).filter((other) => other.type === net.type
+          && !mayProxy(other, layout.proxyPolicy));
+        const incoming = layout.attachments.filter((item) => laterInputs.some((other) => other.id === item.net)
+          && item.side === 'L' && item.point[0] > joints[0][0]);
+        const clear = (y: number) => incoming.every((item) => Math.abs(item.point[1] - y) > EPS);
+        if (!clear(joints[0][1])) {
+          const y = [30, -30, 60, -60].map((offset) => joints[0][1] + offset).find(clear);
+          if (y !== undefined) joints[0] = [joints[0][0], y];
+        }
       }
       const added: Route[] = [];
       for (let i = 0; i < groups.length; i++) added.push(...branches(net.id, groups[i], joints[i], [...routes, ...added]));
@@ -338,6 +371,10 @@ export function routeLayout(layout: Layout): Routing {
         : joints.at(-1)!;
     }
     function addOccurrence(group: readonly Attachment[], connectedAt?: Point): boolean {
+      const stages = [...new Set(group.map((item) => item.stage))];
+      if (net.type === 'pinIn' && layout.blockProxyPolicies.some((block) => !mayProxy(net, block)
+        && stages.some((stage) => block.stages.includes(stage)) && occurrences.some((item) => item.net.id === net.id
+          && item.stages.some((stage) => block.stages.includes(stage))))) return false;
       const peer = pinPlacements.find((item) => item.net.type === net.type && reflectionAxis(group, item.group, layout) !== undefined);
       const axis = peer ? reflectionAxis(group, peer.group, layout)! : undefined;
       const reflected = (point: Point): Point => [point[0], 2 * axis! - point[1]];
@@ -371,7 +408,7 @@ export function routeLayout(layout: Layout): Routing {
           if (routes.some((route) => route.net !== net.id && hitsBox(route.points, placed.bounds))) continue;
           junctions([...routes, ...added, trunk], layout.attachments);
           routes.push(...added, trunk);
-          occurrences.push({ net, element, placed, branches: group.length, isProxy: occurrences.some((item) => item.net.id === net.id) });
+          occurrences.push({ net, element, placed, stages, branches: group.length, isProxy: occurrences.some((item) => item.net.id === net.id) });
           if (['pinIn', 'pinOut', 'pinInOut'].includes(net.type)) pinPlacements.push({ net, group, at, joint });
           return true;
         } catch (error) {
@@ -392,6 +429,58 @@ export function routeLayout(layout: Layout): Routing {
       if (group.length === 1) throw new Error(`Routing failure for net "${net.id}" at ${group[0].device}.${group[0].terminal}: no valid graphical occurrence.`);
       for (const item of group) if (!addOccurrence([item])) {
         throw new Error(`Routing failure for net "${net.id}" at ${item.device}.${item.terminal}: no valid graphical occurrence.`);
+      }
+    }
+  }
+  const columns = new Map<string, number[]>();
+  occurrences.forEach((item, index) => {
+    if (!['pinIn', 'pinOut', 'pinInOut'].includes(item.net.type)) return;
+    const left = item.net.type === 'pinIn' || item.net.type === 'pinInOut' && item.placed.transform.matrix[0] < 0;
+    const block = layout.blockProxyPolicies.find((block) => item.stages.every((stage) => block.stages.includes(stage)));
+    const column = `${block?.block ?? 'diagram'}:${item.net.type}:${left ? 'L' : 'R'}`;
+    columns.set(column, [...columns.get(column) ?? [], index]);
+  });
+  for (const [column, indices] of columns) {
+    if (indices.length < 2) continue;
+    const left = column.endsWith(':L');
+    const xs = indices.map((index) => occurrences[index].placed.anchors.anchor[0]);
+    if (Math.max(...xs) - Math.min(...xs) < EPS) continue;
+    const near = left ? Math.max(...xs) : Math.min(...xs);
+    const edge = left ? Math.min(...xs) : Math.max(...xs);
+    const positions = [...new Set([near, ...[0, 120, 240, 360].map((offset) => edge + (left ? -offset : offset))])];
+    for (const x of positions) {
+      const replacements = new Map(indices.map((index) => {
+        const item = occurrences[index], anchor = item.placed.anchors.anchor;
+        const element = new Element(item.net.type as Exclude<Net['type'], 'net'>, {
+          at: [x, anchor[1]], anchor: 'anchor', rotation: 0,
+          reverse: item.net.type === 'pinInOut' && left });
+        return [index, { ...item, element, placed: element.place() }] as const;
+      }));
+      const proposed = occurrences.map((item, index) => replacements.get(index) ?? item);
+      const boxes = [...bodies, ...proposed.map((item) => item.placed.bounds)];
+      if (indices.some((index) => {
+        const box = pad(proposed[index].placed.bounds, 4);
+        return boxes.some((other, i) => i !== bodies.length + index && box.minX < other.maxX && box.maxX > other.minX
+          && box.minY < other.maxY && box.maxY > other.minY);
+      })) continue;
+      const changed = routes.map((route, index) => ({ route, index, occurrence: indices.find((i) => occurrences[i].net.id === route.net
+        && equal(occurrences[i].placed.anchors.anchor, route.points[0])) })).filter((item) => item.occurrence !== undefined);
+      const kept = routes.filter((_, index) => !changed.some((item) => item.index === index));
+      const updated = new Map<number, Route>();
+      try {
+        for (const item of changed) {
+          const route = chooseRoute(item.route.net, proposed[item.occurrence!].placed.anchors.anchor,
+            item.route.points.at(-1)!, [...kept, ...updated.values()], boxes, item.route.shape === '|-');
+          updated.set(item.index, route);
+        }
+        const candidateRoutes = routes.map((route, index) => updated.get(index) ?? route);
+        if (candidateRoutes.some((route) => !acceptsRoute(route, candidateRoutes, boxes))) continue;
+        junctions(candidateRoutes, layout.attachments);
+        indices.forEach((index) => { occurrences[index] = proposed[index]; });
+        updated.forEach((route, index) => { routes[index] = route; });
+        break;
+      } catch (error) {
+        if (!(error instanceof Error) || !error.message.startsWith('Routing failure')) throw error;
       }
     }
   }

@@ -63,10 +63,6 @@ describe('orthogonal routing', () => {
       expect(routing.occurrences.filter((item) => item.net.id === net.id)).toHaveLength(1);
     }
     if (_name.endsWith('wireless-solenoid.mmd')) expect(routing.occurrences).toEqual([]);
-    if (_name.endsWith('cmos-xor12.mmd')) {
-      const pin = routing.occurrences.find((item) => item.net.id === 'B' && !item.isProxy)!;
-      expect(pin.placed.anchors.anchor[1]).toBe(layout.devices.find((item) => item.device.id === 'PB')!.placed.anchors.G[1]);
-    }
     for (const junction of routing.junctions) {
       const directions = new Set<string>();
       expect(model.nets.some((net) => net.id === junction.net)).toBe(true);
@@ -107,6 +103,46 @@ describe('orthogonal routing', () => {
     expect(mayProxy(at.nets[2], at.proxyPolicy)).toBe(false);
     const bidirectional = floorplan(parseCircuit(source(7) + '\nIO([IO]):::pinInOut'));
     expect(bidirectional.proxyPolicy).toEqual({ inputs: 2, devices: 8 });
+  });
+
+  it('enforces diagram and block proxy thresholds using original connected block counts', () => {
+    const source = (count: number) => 'circuitDiagram D\nA([A]):::pinIn\nUnused([Unused]):::pinIn\nsubgraph block local\n'
+      + Array.from({ length: count }, (_, i) => `subgraph stage part${i}\nG${i}[G${i}]:::buffer\nend`).join('\n')
+      + '\nend\nsubgraph block other\n' + Array.from({ length: 8 - count }, (_, i) => `U${i}[U${i}]:::buffer`).join('\n')
+      + '\nend\n' + Array.from({ length: count }, (_, i) => `A --- G${i} |I|`).join('\n');
+    const below = floorplan(parseCircuit(source(3))), at = floorplan(parseCircuit(source(4)));
+    expect(below.proxyPolicy).toEqual({ inputs: 2, devices: 8 });
+    expect(below.blockProxyPolicies[0]).toMatchObject({ inputs: 1, devices: 3 });
+    expect(at.blockProxyPolicies[0]).toMatchObject({ inputs: 1, devices: 4 });
+    expect(mayProxy(below.nets[0], below.proxyPolicy)).toBe(true);
+    const single = routeLayout(below), multiple = routeLayout(at);
+    expect(single.occurrences.filter((item) => item.net.id === 'A')).toHaveLength(1);
+    expect(multiple.occurrences.filter((item) => item.net.id === 'A')).toHaveLength(4);
+    expect(() => validateConnectivity(below, { ...single, occurrences: [...single.occurrences,
+      { ...single.occurrences[0], isProxy: true }] })).toThrow('Unauthorized input proxy in block');
+    const diagramBelow = floorplan(parseCircuit(source(4) + '\nUnused2([Unused2]):::pinIn'));
+    expect(mayProxy(diagramBelow.nets[0], diagramBelow.blockProxyPolicies[0])).toBe(true);
+    expect(mayProxy(diagramBelow.nets[0], diagramBelow.proxyPolicy)).toBe(false);
+    expect(() => routeLayout(diagramBelow)).toThrow('circuit threshold forbids');
+    const xor = floorplan(parseCircuit(fixtures['../examples/fixtures/cmos-xor12.mmd']));
+    expect(xor.blockProxyPolicies.map(({ inputs, devices }) => ({ inputs, devices })))
+      .toEqual([{ inputs: 2, devices: 6 }, { inputs: 2, devices: 10 }]);
+  });
+
+  it.each(['cmos-inverter', 'cmos-nand2', 'cmos-xor12'])('aligns input flags and centers their branches in %s', (name) => {
+    const layout = floorplan(parseCircuit(fixtures[`../examples/fixtures/${name}.mmd`])), routing = routeLayout(layout);
+    const blocks = layout.blockProxyPolicies.length ? layout.blockProxyPolicies.map((block) => block.stages)
+      : [layout.stageBounds.map((_, index) => index)];
+    for (const stages of blocks) {
+      const pins = routing.occurrences.filter((item) => item.net.type === 'pinIn' && item.stages.every((stage) => stages.includes(stage)));
+      expect(new Set(pins.map((item) => item.placed.anchors.anchor[0])).size).toBe(1);
+      for (const pin of pins) {
+        const anchors = layout.attachments.filter((item) => item.net === pin.net.id && pin.stages.includes(item.stage));
+        const ys = anchors.map((item) => item.point[1]);
+        expect(pin.placed.anchors.anchor[1]).toBe((Math.min(...ys) + Math.max(...ys)) / 2);
+      }
+    }
+    expect(() => validateConnectivity(layout, routing)).not.toThrow();
   });
 
   it('rejects a broken output conductor and an extra output occurrence', () => {
@@ -256,7 +292,9 @@ describe('orthogonal routing', () => {
     const reflect = (point: readonly number[]) => [point[0], 2 * axis - point[1]];
     const upper = routing.routes.filter((route) => route.net === 'A');
     const lower = routing.routes.filter((route) => route.net === 'B');
-    expect(lower.map((route) => route.points)).toEqual(upper.map((route) => route.points.map(reflect)));
+    const geometry = (points: readonly (readonly number[])[]) => JSON.stringify([...points].sort((a, b) => a[0] - b[0] || a[1] - b[1]));
+    expect(lower.map((route) => geometry(route.points)).sort())
+      .toEqual(upper.map((route) => geometry(route.points.map(reflect))).sort());
     const pin = (net: string) => routing.occurrences.find((item) => item.net.id === net)!.placed.anchors.anchor;
     expect(pin('B')).toEqual(reflect(pin('A')));
     expect(routing.junctions.find((item) => item.net === 'B')!.point)

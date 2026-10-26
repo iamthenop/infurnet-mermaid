@@ -13,9 +13,8 @@ The basic renderer implements the placement and routing subset described here. T
 5. Stage frames follow the [stage presentation](#stage-presentation) convention.
 6. Signals cross stage and block frames as required to reach their terminals.
 7. Junction placement follows the nearest shared scope in [Routing and junction presentation](#routing-and-junction-presentation).
-8. The first gate driven by an input is aligned horizontally with that input pin.
-9. Analog devices with separate control terminals retain a vertical stagger for input access in a left-to-right row. Parallel two-terminal devices align their conduction endpoints. Digital stages use signal-dependency levels: gates at the same level share a column in LR, or a row in TB, in declaration order.
-10. Additional gate connections branch from the corresponding input line using orthogonal routing.
+8. Analog devices with separate control terminals retain a vertical stagger for input access in a left-to-right row. Parallel two-terminal devices align their conduction endpoints. Digital stages use signal-dependency levels: gates at the same level share a column in LR, or a row in TB, in declaration order.
+9. Gate connections branch from the corresponding input line using orthogonal routing.
 
 The expression *supply rail* describes graphical placement, not an electrical object type. Stage ordering, membership, and direction declarations are defined in [the syntax rules](notation.md#syntax-rules).
 
@@ -194,6 +193,8 @@ Supply occurrences default above their group, ground below, input pins left, and
 
 Proxy eligibility is evaluated on the original circuit graph, before adding graphical copies. Let I count the original `pinIn` nodes. Let D count all original nodes except `pinIn`, `supplyNet`, `ground`, and `pinOut`; this includes `pinInOut` and `voltageSource`.
 
+The same counts also apply within each block. Count its original devices and each distinct connected net once, using the same exclusions. A block's first input occurrence can serve its local branches; extra copies require both the diagram and that block to satisfy D ≥ 4 × I.
+
 A `pinOut` has one graphical occurrence and is never proxied. A `pinIn` may be proxied only when D ≥ 4 × I; reaching that threshold permits copies but does not require them. Supply, ground, and bidirectional-pin eligibility remains unchanged.
 
 Repeated occurrences retain their source net identifier. No planar wire connects separate occurrences used as proxies. Generic internal nets have no graphical proxy type, and proxies must not obscure a parallel branch's shared endpoints.
@@ -226,7 +227,11 @@ Supply and ground occurrences never rotate or reflect. Pins may rotate only with
 
 A lower NAND sharing its second input with an upper NAND supports vertical mirroring to align the shared-input branches. Symmetry extends to corresponding `pinIn`, `pinOut`, and `pinInOut` occurrences, split junctions, and wire entry directions where feasible.
 
+Pins of the same type and side prefer a shared column within their block, or at diagram level when ungrouped. Their wire junctions retain any needed staggering. A column moves as a group only when topology, body clearance, and crossing limits remain valid.
+
 Equivalent reflected branches match device types and terminal sides, then prefer reflected pin positions. Connection declaration order does not override that match. Symmetry does not justify additional proxies.
+
+An input pin prefers the midpoint of its connected branch group, subject to wire clearance. A single connection aligns naturally with its terminal.
 
 Exact group centering may translate a whole symbol by a fractional grid offset, including 15 units. Symbol-local attachments remain authoritative; artwork and attachment points move together. Routing meets those exact transformed positions.
 

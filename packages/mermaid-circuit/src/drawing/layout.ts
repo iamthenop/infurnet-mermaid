@@ -32,6 +32,7 @@ export interface Layout {
   readonly bounds: Bounds;
   readonly parallelStages: readonly { stages: readonly number[]; nets: readonly string[] }[];
   readonly proxyPolicy: { readonly inputs: number; readonly devices: number };
+  readonly blockProxyPolicies: readonly { readonly block: number; readonly stages: readonly number[]; readonly inputs: number; readonly devices: number }[];
 }
 
 export function pad(box: Bounds, amount: number): Bounds {
@@ -322,7 +323,14 @@ export function floorplan(model: CircuitModel): Layout {
     distances.sort((a, b) => a[1] - b[1]);
     return { ...connection, point, side: distances[0][0], stage: item.device.stage, rotation: item.rotation };
   });
-  return { devices, attachments, frames, stageBounds, nets: model.nets, parallelStages,
+  const blockProxyPolicies = model.blocks.map((block, index) => {
+    const members = model.devices.filter((device) => block.stages.includes(device.stage));
+    const connected = new Set(model.connections.filter((item) => members.some((device) => device.id === item.device)).map((item) => item.net));
+    const nets = model.nets.filter((net) => connected.has(net.id));
+    return { block: index, stages: block.stages, inputs: nets.filter((net) => net.type === 'pinIn').length,
+      devices: members.length + nets.filter((net) => net.type === 'pinInOut').length };
+  });
+  return { devices, attachments, frames, stageBounds, nets: model.nets, parallelStages, blockProxyPolicies,
     proxyPolicy: { inputs: model.nets.filter((net) => net.type === 'pinIn').length,
       devices: model.devices.length + model.nets.filter((net) => net.type === 'pinInOut').length },
     bounds: unionBounds([...devices.map((item) => item.pane), ...frames.map((frame) => frame.bounds)]) };

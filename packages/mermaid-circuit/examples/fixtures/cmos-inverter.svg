@@ -2,148 +2,151 @@
 <g data-drawing-index="0" data-net="VDD" data-wire="-" data-points="[[90,-60],[90,0]]">
 <polyline points="90,-60 90,0" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
 </g>
-<g data-drawing-index="1" data-net="A" data-wire="-" data-points="[[0,60],[-90,60]]">
+<g data-drawing-index="1" data-net="A" data-wire="-" data-points="[[-90,60],[-90,420]]">
+<polyline points="-90,60 -90,420" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="2" data-net="A" data-wire="-" data-points="[[0,60],[-90,60]]">
 <polyline points="0,60 -90,60" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
 </g>
-<g data-drawing-index="2" data-net="A" data-wire="-|" data-points="[[0,420],[-90,420],[-90,60]]">
-<polyline points="0,420 -90,420 -90,60" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+<g data-drawing-index="3" data-net="A" data-wire="-" data-points="[[0,420],[-90,420]]">
+<polyline points="0,420 -90,420" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
 </g>
-<g data-drawing-index="3" data-net="A" data-wire="-" data-points="[[-210,60],[-90,60]]">
-<polyline points="-210,60 -90,60" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+<g data-drawing-index="4" data-net="A" data-wire="-" data-points="[[-210,240],[-90,240]]">
+<polyline points="-210,240 -90,240" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
 </g>
-<g data-drawing-index="4" data-net="OUT" data-wire="-" data-points="[[90,120],[90,240]]">
+<g data-drawing-index="5" data-net="OUT" data-wire="-" data-points="[[90,120],[90,240]]">
 <polyline points="90,120 90,240" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
 </g>
-<g data-drawing-index="5" data-net="OUT" data-wire="-" data-points="[[90,360],[90,240]]">
+<g data-drawing-index="6" data-net="OUT" data-wire="-" data-points="[[90,360],[90,240]]">
 <polyline points="90,360 90,240" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
 </g>
-<g data-drawing-index="6" data-net="OUT" data-wire="-" data-points="[[300,240],[90,240]]">
+<g data-drawing-index="7" data-net="OUT" data-wire="-" data-points="[[300,240],[90,240]]">
 <polyline points="300,240 90,240" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
 </g>
-<g data-drawing-index="7" data-net="VSS" data-wire="-" data-points="[[90,540],[90,480]]">
+<g data-drawing-index="8" data-net="VSS" data-wire="-" data-points="[[90,540],[90,480]]">
 <polyline points="90,540 90,480" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
 </g>
-<g data-drawing-index="8" data-device="P0" data-type="pmos" data-stage-index="0">
+<g data-drawing-index="9" data-device="P0" data-type="pmos" data-stage-index="0">
 <g transform="matrix(1 0 0 1 0 0)">
 
 <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
-  <g id="fixture-cmos-inverter-element-8-pmos" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <circle cx="35.28" cy="60" r="6.72" id="fixture-cmos-inverter-element-8-gate-bubble" stroke="#000" fill="none" stroke-width="2"></circle>
-    <path d="M 90 16.8 L 90 40.8 L 51.6 40.8 L 51.6 79.2 L 90 79.2 L 90 103.2" id="fixture-cmos-inverter-element-8-reference-1" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-    <path d="M 42 40.8 L 42 79.2" id="fixture-cmos-inverter-element-8-reference-2" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-    <path d="M 28.56 60 L 11.28 60" id="fixture-cmos-inverter-element-8-reference-3" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-    <line id="fixture-cmos-inverter-element-8-gate-extension" x1="0" y1="60" x2="11.28" y2="60"></line>
-    <line id="fixture-cmos-inverter-element-8-upper-extension" x1="90" y1="0" x2="90" y2="16.8"></line>
-    <line id="fixture-cmos-inverter-element-8-lower-extension" x1="90" y1="103.2" x2="90" y2="120"></line>
+  <g id="fixture-cmos-inverter-element-9-pmos" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="35.28" cy="60" r="6.72" id="fixture-cmos-inverter-element-9-gate-bubble" stroke="#000" fill="none" stroke-width="2"></circle>
+    <path d="M 90 16.8 L 90 40.8 L 51.6 40.8 L 51.6 79.2 L 90 79.2 L 90 103.2" id="fixture-cmos-inverter-element-9-reference-1" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path d="M 42 40.8 L 42 79.2" id="fixture-cmos-inverter-element-9-reference-2" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path d="M 28.56 60 L 11.28 60" id="fixture-cmos-inverter-element-9-reference-3" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <line id="fixture-cmos-inverter-element-9-gate-extension" x1="0" y1="60" x2="11.28" y2="60"></line>
+    <line id="fixture-cmos-inverter-element-9-upper-extension" x1="90" y1="0" x2="90" y2="16.8"></line>
+    <line id="fixture-cmos-inverter-element-9-lower-extension" x1="90" y1="103.2" x2="90" y2="120"></line>
   </g>
 </svg>
 
 </g>
 </g>
-<g data-drawing-index="9" data-label="true" data-device-label="P0">
+<g data-drawing-index="10" data-label="true" data-device-label="P0">
 <text x="132" y="104" xml:space="preserve" fill="#000">P0</text>
 </g>
-<g data-drawing-index="10" data-label="true" data-terminal="G" data-terminal-device="P0" data-terminal-side="L" text-anchor="end" dominant-baseline="text-after-edge" data-x="0" data-y="60" data-terminal-net="A">
+<g data-drawing-index="11" data-label="true" data-terminal="G" data-terminal-device="P0" data-terminal-side="L" text-anchor="end" dominant-baseline="text-after-edge" data-x="0" data-y="60" data-terminal-net="A">
 <text x="-4" y="56" xml:space="preserve" fill="#000">G</text>
 </g>
-<g data-drawing-index="11" data-label="true" data-terminal="S" data-terminal-device="P0" data-terminal-side="T" text-anchor="start" dominant-baseline="text-after-edge" data-x="90" data-y="0" data-terminal-net="VDD">
+<g data-drawing-index="12" data-label="true" data-terminal="S" data-terminal-device="P0" data-terminal-side="T" text-anchor="start" dominant-baseline="text-after-edge" data-x="90" data-y="0" data-terminal-net="VDD">
 <text x="94" y="-4" xml:space="preserve" fill="#000">S</text>
 </g>
-<g data-drawing-index="12" data-label="true" data-terminal="D" data-terminal-device="P0" data-terminal-side="B" text-anchor="start" dominant-baseline="hanging" data-x="90" data-y="120" data-terminal-net="OUT">
+<g data-drawing-index="13" data-label="true" data-terminal="D" data-terminal-device="P0" data-terminal-side="B" text-anchor="start" dominant-baseline="hanging" data-x="90" data-y="120" data-terminal-net="OUT">
 <text x="94" y="124" xml:space="preserve" fill="#000">D</text>
 </g>
-<g data-drawing-index="13" data-device="N0" data-type="nmos" data-stage-index="0">
+<g data-drawing-index="14" data-device="N0" data-type="nmos" data-stage-index="0">
 <g transform="matrix(1 0 0 1 0 360)">
 
 <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
-  <g id="fixture-cmos-inverter-element-13-nmos" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M 90 16.8 L 90 40.8 L 51.6 40.8 L 51.6 79.2 L 90 79.2 L 90 103.2" id="fixture-cmos-inverter-element-13-reference-0" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-    <path d="M 42 40.8 L 42 79.2" id="fixture-cmos-inverter-element-13-reference-1" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-    <path d="M 42 60 L 11.28 60" id="fixture-cmos-inverter-element-13-reference-2" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-    <line id="fixture-cmos-inverter-element-13-gate-extension" x1="0" y1="60" x2="11.28" y2="60"></line>
-    <line id="fixture-cmos-inverter-element-13-upper-extension" x1="90" y1="0" x2="90" y2="16.8"></line>
-    <line id="fixture-cmos-inverter-element-13-lower-extension" x1="90" y1="103.2" x2="90" y2="120"></line>
+  <g id="fixture-cmos-inverter-element-14-nmos" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 90 16.8 L 90 40.8 L 51.6 40.8 L 51.6 79.2 L 90 79.2 L 90 103.2" id="fixture-cmos-inverter-element-14-reference-0" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path d="M 42 40.8 L 42 79.2" id="fixture-cmos-inverter-element-14-reference-1" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path d="M 42 60 L 11.28 60" id="fixture-cmos-inverter-element-14-reference-2" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <line id="fixture-cmos-inverter-element-14-gate-extension" x1="0" y1="60" x2="11.28" y2="60"></line>
+    <line id="fixture-cmos-inverter-element-14-upper-extension" x1="90" y1="0" x2="90" y2="16.8"></line>
+    <line id="fixture-cmos-inverter-element-14-lower-extension" x1="90" y1="103.2" x2="90" y2="120"></line>
   </g>
 </svg>
 
 </g>
 </g>
-<g data-drawing-index="14" data-label="true" data-device-label="N0">
+<g data-drawing-index="15" data-label="true" data-device-label="N0">
 <text x="132" y="464" xml:space="preserve" fill="#000">N0</text>
 </g>
-<g data-drawing-index="15" data-label="true" data-terminal="G" data-terminal-device="N0" data-terminal-side="L" text-anchor="end" dominant-baseline="text-after-edge" data-x="0" data-y="420" data-terminal-net="A">
+<g data-drawing-index="16" data-label="true" data-terminal="G" data-terminal-device="N0" data-terminal-side="L" text-anchor="end" dominant-baseline="text-after-edge" data-x="0" data-y="420" data-terminal-net="A">
 <text x="-4" y="416" xml:space="preserve" fill="#000">G</text>
 </g>
-<g data-drawing-index="16" data-label="true" data-terminal="D" data-terminal-device="N0" data-terminal-side="T" text-anchor="start" dominant-baseline="text-after-edge" data-x="90" data-y="360" data-terminal-net="OUT">
+<g data-drawing-index="17" data-label="true" data-terminal="D" data-terminal-device="N0" data-terminal-side="T" text-anchor="start" dominant-baseline="text-after-edge" data-x="90" data-y="360" data-terminal-net="OUT">
 <text x="94" y="356" xml:space="preserve" fill="#000">D</text>
 </g>
-<g data-drawing-index="17" data-label="true" data-terminal="S" data-terminal-device="N0" data-terminal-side="B" text-anchor="start" dominant-baseline="hanging" data-x="90" data-y="480" data-terminal-net="VSS">
+<g data-drawing-index="18" data-label="true" data-terminal="S" data-terminal-device="N0" data-terminal-side="B" text-anchor="start" dominant-baseline="hanging" data-x="90" data-y="480" data-terminal-net="VSS">
 <text x="94" y="484" xml:space="preserve" fill="#000">S</text>
 </g>
-<g data-drawing-index="18" data-net-occurrence="0" data-net="VDD" data-type="supplyNet" data-branches="1">
+<g data-drawing-index="19" data-net-occurrence="0" data-net="VDD" data-type="supplyNet" data-branches="1">
 <g transform="matrix(1 0 0 1 30 -180)">
 
 <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
-  <g id="fixture-cmos-inverter-element-18-supplyNet" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M 60 120 L 60 74.4" id="fixture-cmos-inverter-element-18-reference-0" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-    <path d="M 60 74.4 L 33 74.4" id="fixture-cmos-inverter-element-18-reference-1" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-    <path d="M 60 74.4 L 87 74.4" id="fixture-cmos-inverter-element-18-reference-2" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+  <g id="fixture-cmos-inverter-element-19-supplyNet" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 60 120 L 60 74.4" id="fixture-cmos-inverter-element-19-reference-0" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path d="M 60 74.4 L 33 74.4" id="fixture-cmos-inverter-element-19-reference-1" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path d="M 60 74.4 L 87 74.4" id="fixture-cmos-inverter-element-19-reference-2" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
   </g>
 </svg>
 
 </g>
 </g>
-<g data-drawing-index="19" data-label="true" data-net-label="VDD" text-anchor="middle">
+<g data-drawing-index="20" data-label="true" data-net-label="VDD" text-anchor="middle">
 <text x="90" y="-117.6" xml:space="preserve" fill="#000">VDD</text>
 </g>
-<g data-drawing-index="20" data-net-occurrence="1" data-net="A" data-type="pinIn" data-branches="2">
-<g transform="matrix(1 0 0 1 -330 0)">
+<g data-drawing-index="21" data-net-occurrence="1" data-net="A" data-type="pinIn" data-branches="2">
+<g transform="matrix(1 0 0 1 -330 180)">
 
 <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
-  <g id="fixture-cmos-inverter-element-20-pin-in" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <polygon id="fixture-cmos-inverter-element-20-body" points="44,42 104,42 116,60 104,78 44,78"></polygon>
-    <line id="fixture-cmos-inverter-element-20-stem" x1="116" y1="60" x2="120" y2="60"></line>
+  <g id="fixture-cmos-inverter-element-21-pin-in" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polygon id="fixture-cmos-inverter-element-21-body" points="44,42 104,42 116,60 104,78 44,78"></polygon>
+    <line id="fixture-cmos-inverter-element-21-stem" x1="116" y1="60" x2="120" y2="60"></line>
   </g>
 </svg>
 
 </g>
 </g>
-<g data-drawing-index="21" data-label="true" data-net-label="A" text-anchor="middle">
-<text x="-248" y="65" xml:space="preserve" fill="#000">A</text>
+<g data-drawing-index="22" data-label="true" data-net-label="A" text-anchor="middle">
+<text x="-248" y="245" xml:space="preserve" fill="#000">A</text>
 </g>
-<g data-drawing-index="22" data-net-occurrence="2" data-net="OUT" data-type="pinOut" data-branches="2">
+<g data-drawing-index="23" data-net-occurrence="2" data-net="OUT" data-type="pinOut" data-branches="2">
 <g transform="matrix(1 0 0 1 300 180)">
 
 <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
-  <g id="fixture-cmos-inverter-element-22-pin-out" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <line id="fixture-cmos-inverter-element-22-stem" x1="0" y1="60" x2="4" y2="60"></line>
-    <polygon id="fixture-cmos-inverter-element-22-body" points="4,42 64,42 76,60 64,78 4,78"></polygon>
+  <g id="fixture-cmos-inverter-element-23-pin-out" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <line id="fixture-cmos-inverter-element-23-stem" x1="0" y1="60" x2="4" y2="60"></line>
+    <polygon id="fixture-cmos-inverter-element-23-body" points="4,42 64,42 76,60 64,78 4,78"></polygon>
   </g>
 </svg>
 
 </g>
 </g>
-<g data-drawing-index="23" data-label="true" data-net-label="OUT" text-anchor="middle">
+<g data-drawing-index="24" data-label="true" data-net-label="OUT" text-anchor="middle">
 <text x="338" y="245" xml:space="preserve" fill="#000">OUT</text>
 </g>
-<g data-drawing-index="24" data-net-occurrence="3" data-net="VSS" data-type="ground" data-branches="1">
+<g data-drawing-index="25" data-net-occurrence="3" data-net="VSS" data-type="ground" data-branches="1">
 <g transform="matrix(1 0 0 1 30 540)">
 
 <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
-  <g id="fixture-cmos-inverter-element-24-ground" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M 60 0 L 60 45.6 L 24 45.6 L 96 45.6 M 34.8 62.88 L 85.2 62.88 M 52.8 80.16 L 67.2 80.16" id="fixture-cmos-inverter-element-24-reference-0" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+  <g id="fixture-cmos-inverter-element-25-ground" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 60 0 L 60 45.6 L 24 45.6 L 96 45.6 M 34.8 62.88 L 85.2 62.88 M 52.8 80.16 L 67.2 80.16" id="fixture-cmos-inverter-element-25-reference-0" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
   </g>
 </svg>
 
 </g>
 </g>
-<g data-drawing-index="25" data-label="true" data-net-label="VSS" text-anchor="middle">
+<g data-drawing-index="26" data-label="true" data-net-label="VSS" text-anchor="middle">
 <text x="90" y="642.16" xml:space="preserve" fill="#000">VSS</text>
 </g>
-<g data-drawing-index="26" data-junction="true" data-net="A">
-<circle cx="0" cy="0" r="3" stroke="#000" stroke-width="2" fill="#000" transform="matrix(1 0 0 1 -90 60)"></circle>
+<g data-drawing-index="27" data-junction="true" data-net="A">
+<circle cx="0" cy="0" r="3" stroke="#000" stroke-width="2" fill="#000" transform="matrix(1 0 0 1 -90 240)"></circle>
 </g>
-<g data-drawing-index="27" data-junction="true" data-net="OUT">
+<g data-drawing-index="28" data-junction="true" data-net="OUT">
 <circle cx="0" cy="0" r="3" stroke="#000" stroke-width="2" fill="#000" transform="matrix(1 0 0 1 90 240)"></circle>
 </g>
 </svg>
