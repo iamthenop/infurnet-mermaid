@@ -34,7 +34,7 @@ M1 |B| --- |A| S1
 
 The motor is a circle with `M` inside. The solenoid is a circle with a straight arrow through its center. This arrow shows motion; it adds no electrical rule.
 
-The five new catalog-only shapes are `lamp`, `lamp2`, `breaker`, `antenna`, and `opamp`. They work with the standalone drawing core but cannot be declared in circuit notation.
+The four catalog-only additions are `lamp`, `lamp2`, `breaker`, and `opamp`. They work with the standalone drawing core but cannot be declared in circuit notation. The `antenna` device is authorable in mode `A`.
 
 Existing diode assets are unchanged. Use `diode` for an ordinary rectifier diode.
 

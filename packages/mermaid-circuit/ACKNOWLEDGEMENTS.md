@@ -18,7 +18,7 @@ The port uses SVG coordinates. X points right and Y points down. One matrix tran
 
 The drawing core reuses the existing TypeScript transforms, primitives, and catalog lookup. It supports manual composition and standalone SVG output. It does not port automatic lead extension, the full label API, other wire variants, or other backends.
 
-It is not connected to the Mermaid renderer.
+The drawing core is connected to the Mermaid circuit renderer through the package's floorplanner and router.
 
 Catalog arc bounds use the endpoint-to-center conversion in the [SVG implementation notes](https://www.w3.org/TR/SVG/implnote.html#ArcConversionEndpointToCenter), with extrema calculated after the drawing transform. Bounds cover geometry rather than measured text or stroke extents.
 
