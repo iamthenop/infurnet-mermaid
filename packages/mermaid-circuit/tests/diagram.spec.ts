@@ -11,6 +11,7 @@ describe('circuit diagram parser', () => {
     expect(diagram.db.clear).toBeTypeOf('function');
     expect(diagram.parser.parse).toBeTypeOf('function');
     expect(diagram.renderer.draw).toBeTypeOf('function');
+    expect(diagram.styles).toBeTypeOf('function');
     expect(() => diagram.parser.parse('circuitDiagram D')).not.toThrow();
   });
 

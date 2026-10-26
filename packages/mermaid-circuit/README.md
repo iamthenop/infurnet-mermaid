@@ -179,6 +179,55 @@ Mermaid remains a peer dependency; the library does not bundle a second copy. In
 
 ## Browser example and tests
 
+### Circuit colours
+
+Select circuit colours through [Mermaid's theme configuration](https://mermaid.js.org/config/theming.html). The exact palettes and class mappings are defined in [Drawing style](spec/style.md#colour-appearances). Colour selection leaves the drawing's geometry, connections, and fonts unchanged.
+
+For standard black on white:
+
+```ts
+mermaid.initialize({ startOnLoad: false, theme: 'default' });
+```
+
+For the inverse appearance:
+
+```ts
+mermaid.initialize({ startOnLoad: false, theme: 'dark' });
+```
+
+For the KiCad-inspired coloured appearance:
+
+```ts
+mermaid.initialize({
+  startOnLoad: false,
+  theme: 'base',
+  themeVariables: {
+    background: '#FFFFFF',
+    lineColor: '#009600',
+    primaryBorderColor: '#840000',
+    primaryTextColor: '#006464',
+    textColor: '#0F0F0F',
+  },
+});
+```
+
+The circuit names `default-inverse` and `colored` are not built-in Mermaid theme names. Use `dark` or `base` as shown above. No circuit notation or configuration key is added.
+
+Diagram frontmatter can override the host setting using the same configuration fields:
+
+```text
+---
+config:
+  theme: dark
+---
+circuitDiagram A
+R["R"]:::resistor
+```
+
+Exported SVGs carry their background and scoped styles. They retain their colours outside the host page, including when different circuit themes share one page.
+
+### Run the browser example
+
 From the repository root:
 
 ```sh
@@ -186,6 +235,8 @@ npm run dev --workspace mermaid-circuit
 ```
 
 Open the local URL printed by Vite. The page registers the compiled package, loads `examples/basic.mmd`, and displays the returned SVG with a completion status. The fixture renders a connected CMOS inverter.
+
+Use the circuit and appearance selectors to inspect all five fixtures in all three palettes. A preview can also be selected with `?fixture=cmos-nand2&appearance=colored` on that local URL.
 
 ```sh
 npm run typecheck --workspace mermaid-circuit
@@ -203,15 +254,15 @@ Browser tests register the compiled package with real Mermaid in Chromium. They 
 
 Each SVG is produced by the registered Mermaid plugin from its source fixture. The generator prints device, terminal, occurrence, proxy, bend, and crossing counts, plus placement and routing times. Proxy counts include only copies after a net’s first occurrence.
 
-| Circuit | Source | Generated SVG |
-| --- | --- | --- |
-| Wireless solenoid controller | [Mermaid](examples/fixtures/wireless-solenoid.mmd) | [Drawing](examples/fixtures/wireless-solenoid.svg) |
-| CMOS inverter | [Mermaid](examples/fixtures/cmos-inverter.mmd) | [Drawing](examples/fixtures/cmos-inverter.svg) |
-| CMOS NAND2 | [Mermaid](examples/fixtures/cmos-nand2.mmd) | [Drawing](examples/fixtures/cmos-nand2.svg) |
-| CMOS XOR, twelve transistors | [Mermaid](examples/fixtures/cmos-xor12.mmd) | [Drawing](examples/fixtures/cmos-xor12.svg) |
-| XOR, four NAND gates | [Mermaid](examples/fixtures/xor-nand4.mmd) | [Drawing](examples/fixtures/xor-nand4.svg) |
+| Circuit | Source | Default | Inverse | Coloured |
+| --- | --- | --- | --- | --- |
+| Wireless solenoid controller | [Mermaid](examples/fixtures/wireless-solenoid.mmd) | [SVG](examples/fixtures/wireless-solenoid.svg) | [SVG](examples/fixtures/wireless-solenoid-inverse.svg) | [SVG](examples/fixtures/wireless-solenoid-colored.svg) |
+| CMOS inverter | [Mermaid](examples/fixtures/cmos-inverter.mmd) | [SVG](examples/fixtures/cmos-inverter.svg) | [SVG](examples/fixtures/cmos-inverter-inverse.svg) | [SVG](examples/fixtures/cmos-inverter-colored.svg) |
+| CMOS NAND2 | [Mermaid](examples/fixtures/cmos-nand2.mmd) | [SVG](examples/fixtures/cmos-nand2.svg) | [SVG](examples/fixtures/cmos-nand2-inverse.svg) | [SVG](examples/fixtures/cmos-nand2-colored.svg) |
+| CMOS XOR, twelve transistors | [Mermaid](examples/fixtures/cmos-xor12.mmd) | [SVG](examples/fixtures/cmos-xor12.svg) | [SVG](examples/fixtures/cmos-xor12-inverse.svg) | [SVG](examples/fixtures/cmos-xor12-colored.svg) |
+| XOR, four NAND gates | [Mermaid](examples/fixtures/xor-nand4.mmd) | [SVG](examples/fixtures/xor-nand4.svg) | [SVG](examples/fixtures/xor-nand4-inverse.svg) | [SVG](examples/fixtures/xor-nand4-colored.svg) |
 
-Regenerate all five with the existing Node and Chromium environment:
+Regenerate all fifteen SVGs with the existing Node and Chromium environment:
 
 ```sh
 npm run render:fixtures --workspace mermaid-circuit

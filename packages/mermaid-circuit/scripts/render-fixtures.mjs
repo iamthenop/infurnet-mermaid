@@ -3,6 +3,14 @@ import { chromium } from 'playwright';
 import { createServer } from 'vite';
 
 const names = ['wireless-solenoid', 'cmos-inverter', 'cmos-nand2', 'cmos-xor12', 'xor-nand4'];
+const appearances = [
+  { name: 'default', suffix: '', config: { theme: 'default' } },
+  { name: 'default-inverse', suffix: '-inverse', config: { theme: 'dark' } },
+  { name: 'colored', suffix: '-colored', config: { theme: 'base', themeVariables: {
+    background: '#FFFFFF', lineColor: '#009600', primaryBorderColor: '#840000',
+    primaryTextColor: '#006464', textColor: '#0F0F0F',
+  } } },
+];
 const server = await createServer({ root: new URL('../examples/browser/', import.meta.url).pathname,
   server: { host: '127.0.0.1', port: 0 } });
 let browser;
@@ -14,17 +22,17 @@ try {
   await page.waitForFunction(() => document.getElementById('status')?.textContent === 'Circuit rendered successfully.');
   await page.addScriptTag({ type: 'module', content: "import { renderNamedFixture } from '/main.ts'; window.renderNamedFixture = renderNamedFixture;" });
   await page.waitForFunction(() => typeof window.renderNamedFixture === 'function');
-  for (const name of names) {
-    const result = await page.evaluate(async (name) => {
-      const { svg, report } = await window.renderNamedFixture(name);
+  for (const name of names) for (const appearance of appearances) {
+    const result = await page.evaluate(async ({ name, config }) => {
+      const { svg, report } = await window.renderNamedFixture(name, config);
       const doc = new DOMParser().parseFromString(svg, 'image/svg+xml');
       if (doc.querySelector('parsererror') || !doc.querySelector('[data-device]') || !doc.querySelector('[data-wire]')) {
         throw new Error(`Incomplete SVG for ${name}.`);
       }
       return { svg, report };
-    }, name);
-    await writeFile(new URL(`../examples/fixtures/${name}.svg`, import.meta.url), result.svg + '\n');
-    console.log(JSON.stringify({ fixture: name, ...result.report }));
+    }, { name, config: appearance.config });
+    await writeFile(new URL(`../examples/fixtures/${name}${appearance.suffix}.svg`, import.meta.url), result.svg + '\n');
+    console.log(JSON.stringify({ fixture: name, appearance: appearance.name, ...result.report }));
   }
 } finally {
   await browser?.close();
