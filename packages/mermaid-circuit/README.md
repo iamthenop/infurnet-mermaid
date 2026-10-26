@@ -252,6 +252,8 @@ Browser tests register the compiled package with real Mermaid in Chromium. They 
 
 ## Generated circuit examples
 
+See [Remote Control Trap](examples/remote-control-trap.md) for a complete Markdown example with an embedded schematic, Mermaid source code, and links to other themes.
+
 Each SVG is produced by the registered Mermaid plugin from its source fixture. The generator prints device, terminal, occurrence, proxy, bend, and crossing counts, plus placement and routing times. Proxy counts include only copies after a net’s first occurrence.
 
 | Circuit | Source | Default | Inverse | Coloured |
