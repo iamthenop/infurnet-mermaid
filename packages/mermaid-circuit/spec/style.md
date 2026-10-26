@@ -187,13 +187,17 @@ Repeated occurrences retain their source net identifier. No planar wire connects
 
 An input occurrence serves at most three branches. If that limit requires a proxy forbidden by the threshold, routing fails explicitly. Junction dots mark actual branch points within a shared net; crossings of unrelated nets receive no dot.
 
+Every junction is T-shaped: three orthogonal arms with one pair extending in opposite directions. Four-way connected junctions are rejected. Crossings between unrelated nets remain unconnected crossings.
+
 Parallel branches visibly share both endpoint conductors, including branches in separate stages. Stages containing parallel chains of the same device type sit side by side within their block, while their device membership stays intact.
 
 Common conductors for parallel groups remain straight. Their branch feed points use the midpoint between the outermost conduction terminals, so the split and rejoin centerlines agree. Terminal branches reach that conductor without bending the shared line.
 
 At parallel splits and joins, the two branch arms extend in opposite directions (180°) from their midpoint. The feed or return stem meets that midpoint perpendicularly. A stem must not overlap a branch arm and move the visible junction away from the center.
 
-The same centered split rule applies to shared IC pin branches. Aligned two-terminal devices use equal wire lengths between the split, their terminals, and the join.
+Feeds into parallel branches default to entering from above, with the two branch arms extending left and right. The same rule applies to shared IC pin branches. Return joins and other junctions may rotate the T while retaining three arms.
+
+Aligned two-terminal devices use equal wire lengths between the split, their terminals, and the join.
 
 Parallel two-terminal loads sit below a connected controller output to allow a centered feed stem. Parallel joins reach the return conductor through a centered stem. These stems take precedence over reducing the bend count.
 

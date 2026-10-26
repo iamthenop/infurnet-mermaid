@@ -68,14 +68,14 @@
 <g data-drawing-index="22" data-net="@implicit:Fuse:A" data-wire="|-" data-points="[[-300,195],[-300,60],[0,60]]">
 <polyline points="-300,195 -300,60 0,60" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
 </g>
-<g data-drawing-index="23" data-net="@implicit:Fuse:B" data-wire="-|" data-points="[[810,150],[570,150],[570,195]]">
-<polyline points="810,150 570,150 570,195" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+<g data-drawing-index="23" data-net="@implicit:Fuse:B" data-wire="|-" data-points="[[810,150],[810,90],[765,90]]">
+<polyline points="810,150 810,90 765,90" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
 </g>
-<g data-drawing-index="24" data-net="@implicit:Fuse:B" data-wire="-|" data-points="[[720,240],[570,240],[570,195]]">
-<polyline points="720,240 570,240 570,195" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+<g data-drawing-index="24" data-net="@implicit:Fuse:B" data-wire="|-" data-points="[[720,240],[720,90],[765,90]]">
+<polyline points="720,240 720,90 765,90" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
 </g>
-<g data-drawing-index="25" data-net="@implicit:Fuse:B" data-wire="|-" data-points="[[120,60],[120,195],[570,195]]">
-<polyline points="120,60 120,195 570,195" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+<g data-drawing-index="25" data-net="@implicit:Fuse:B" data-wire="-|" data-points="[[120,60],[765,60],[765,90]]">
+<polyline points="120,60 765,60 765,90" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
 </g>
 <g data-drawing-index="26" data-device="Fuse" data-type="fuse" data-stage-index="0">
 <g transform="matrix(1 0 0 1 0 0)">
@@ -219,6 +219,6 @@
 <circle cx="0" cy="0" r="3" stroke="#000" stroke-width="2" fill="#000" transform="matrix(1 0 0 1 1710 330)"></circle>
 </g>
 <g data-drawing-index="57" data-junction="true" data-net="@implicit:Fuse:B">
-<circle cx="0" cy="0" r="3" stroke="#000" stroke-width="2" fill="#000" transform="matrix(1 0 0 1 570 195)"></circle>
+<circle cx="0" cy="0" r="3" stroke="#000" stroke-width="2" fill="#000" transform="matrix(1 0 0 1 765 90)"></circle>
 </g>
 </svg>

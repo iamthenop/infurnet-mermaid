@@ -108,7 +108,8 @@ function junctions(routes: readonly Route[], attachments: readonly Attachment[])
       for (const attachment of attachments) if (attachment.net === net && equal(attachment.point, point)) {
         directions.add(({ T: 'B', B: 'T', L: 'R', R: 'L' } as const)[attachment.side]);
       }
-      if (directions.size >= 3) result.push({ net, point });
+      if (directions.size > 3) throw new Error(`Routing failure for net "${net}": junction at (${point}) must be T-shaped.`);
+      if (directions.size === 3) result.push({ net, point });
     }
   }
   return result;
@@ -145,7 +146,7 @@ function groupJoint(items: readonly Attachment[], layout: Layout, input: boolean
   if (items.some((item) => item.side !== items[0].side)) {
     if (items.every((item) => item.device === items[0].device) && items.some((item) => item.side === 'L')
       && items.some((item) => item.side === 'T')) {
-      return [Math.min(...xs) - 150, y];
+      return [x, Math.min(...ys) - 60];
     }
     return [x, y];
   }
@@ -157,11 +158,11 @@ function groupJoint(items: readonly Attachment[], layout: Layout, input: boolean
   }
 }
 
-function conductorAxis(group: readonly Attachment[]): 0 | 1 | undefined {
+function conductorAxis(group: readonly Attachment[]): 0 | undefined {
   if (group.length < 2) return undefined;
   if (group.every((item) => item.side === group[0].side) && ['T', 'B'].includes(group[0].side)) return 0;
   if (group.every((item) => item.device === group[0].device) && group.some((item) => item.side === 'T')
-    && group.some((item) => item.side === 'L')) return 1;
+    && group.some((item) => item.side === 'L')) return 0;
   return undefined;
 }
 
@@ -171,6 +172,7 @@ export function mayProxy(net: Net, policy: Layout['proxyPolicy']): boolean {
 }
 
 export function validateConnectivity(layout: Layout, drawing: Routing): void {
+  junctions(drawing.routes, layout.attachments);
   const known = new Set(layout.nets.map((net) => net.id));
   if (drawing.routes.some((route) => !known.has(route.net)) || drawing.occurrences.some((item) => !known.has(item.net.id))) {
     throw new Error('Rendered connectivity contains an unknown net.');
@@ -218,7 +220,21 @@ export function routeLayout(layout: Layout): Routing {
     const added: Route[] = [];
     for (const item of group) if (!equal(item.point, joint)) {
       const side = item.side;
-      if (group.length > 1 && group.every((other) => other.side === side) && ['T', 'B'].includes(side)) {
+      const axis = conductorAxis(group) ?? (group.every((other) => other.side === side) && ['L', 'R'].includes(side) ? 1 : undefined);
+      if (axis !== undefined) {
+        const lower = group.filter((other) => other.point[axis] < joint[axis] - EPS);
+        const higher = group.filter((other) => other.point[axis] > joint[axis] + EPS);
+        if (Math.abs(item.point[axis] - joint[axis]) < EPS && lower.length && higher.length) {
+          const offset = Math.min(30, ...higher.map((other) => (other.point[axis] - joint[axis]) / 2));
+          const tap: Point = axis === 0 ? [joint[0] + offset, joint[1]] : [joint[0], joint[1] + offset];
+          const bend: Point = axis === 0 ? [tap[0], item.point[1]] : [item.point[0], tap[1]];
+          const route: Route = { net, points: [item.point, bend, tap], shape: axis === 0 ? '-|' : '|-' };
+          if (!acceptsRoute(route, [...initial, ...added], obstacles())) throw new Error(`Routing failure for T-shaped branch on net "${net}".`);
+          added.push(route);
+          continue;
+        }
+      }
+      if (conductorAxis(group) === 0) {
         const bend: Point = [item.point[0], joint[1]];
         const points = equal(bend, joint) || equal(bend, item.point) ? [item.point, joint] : [item.point, bend, joint];
         const route: Route = { net, points, shape: points.length === 2 ? '-' : '|-' };
@@ -267,7 +283,7 @@ export function routeLayout(layout: Layout): Routing {
         const start = attachments.find((item) => equal(item.point, joints[i - 1]));
         const end = attachments.find((item) => equal(item.point, joints[i]));
         const startAxis = conductorAxis(groups[i - 1]), endAxis = conductorAxis(groups[i]);
-        const verticalFirst = endAxis === 1 || startAxis === 0 || start?.side === 'T' && end?.side === 'L'
+        const verticalFirst = startAxis === 0 || start?.side === 'T' && end?.side === 'L'
           || start?.side === 'R' && end?.side === 'B';
         const route = chooseRoute(net.id, joints[i - 1], joints[i], [...routes, ...added], obstacles(), verticalFirst);
         const departure = route.points[1], arrival = route.points.at(-2)!;
@@ -286,14 +302,17 @@ export function routeLayout(layout: Layout): Routing {
     function addOccurrence(group: readonly Attachment[], connectedAt?: Point): boolean {
       const joint = connectedAt ?? groupJoint(group, layout, input);
       const first = group[0], stage = layout.stageBounds[first.stage];
-      const commonConductor = group.length > 1 && ['T', 'B'].includes(first.side) && group.every((item) => item.side === first.side);
+      const commonConductor = conductorAxis(group) === 0;
       const left = net.type === 'pinIn' || net.type === 'pinInOut' && first.side === 'L';
+      const pinY = input && group.length === 1 && first.side === 'T'
+        ? Math.min(joint[1] - 60, ...occurrences.filter((item) => item.net.id === net.id).map((item) => item.placed.bounds.minY - 60))
+        : joint[1] + (commonConductor ? group.every((item) => item.side === 'B') ? 60 : -60 : 0);
       const base: Point = net.type === 'supplyNet'
         ? [joint[0] + (first.side === 'B' ? 180 : first.side === 'L' ? -120 : 0), first.side === 'T' ? joint[1] - 30 : Math.min(stage.minY - 60, joint[1] - 60)]
         : net.type === 'ground'
           ? [joint[0] + (first.side === 'T' ? 180 : first.side === 'L' ? -120 : 0), first.side === 'B' ? joint[1] + 30 : Math.max(stage.maxY + 60, joint[1] + 60)]
           : [left ? Math.min(joint[0] - 120, stage.minX - 120) : Math.max(joint[0] + 120, stage.maxX + 120),
-            joint[1] + (commonConductor ? first.side === 'T' ? -60 : 60 : 0)];
+            pinY];
       for (const distance of [0, 120, 240, 360]) {
         const at: Point = net.type === 'supplyNet' ? [base[0], base[1] - distance]
           : net.type === 'ground' ? [base[0], base[1] + distance]
@@ -308,6 +327,7 @@ export function routeLayout(layout: Layout): Routing {
           const trunk = chooseRoute(net.id, at, joint, [...routes, ...added], [...obstacles(), placed.bounds]);
           if (commonConductor && Math.abs(trunk.points.at(-2)![0] - joint[0]) > EPS) continue;
           if (routes.some((route) => route.net !== net.id && hitsBox(route.points, placed.bounds))) continue;
+          junctions([...routes, ...added, trunk], layout.attachments);
           routes.push(...added, trunk);
           occurrences.push({ net, element, placed, branches: group.length, isProxy: occurrences.some((item) => item.net.id === net.id) });
           return true;

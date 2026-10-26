@@ -53,6 +53,7 @@ describe('orthogonal routing', () => {
     }
     if (_name.endsWith('wireless-solenoid.mmd')) expect(routing.occurrences).toEqual([]);
     for (const junction of routing.junctions) {
+      const directions = new Set<string>();
       expect(model.nets.some((net) => net.id === junction.net)).toBe(true);
       const touches = routing.routes.filter((route) => route.points.slice(1).some((b, index) => {
         const a = route.points[index], p = junction.point;
@@ -62,6 +63,20 @@ describe('orthogonal routing', () => {
       }));
       expect(touches.length).toBeGreaterThanOrEqual(2);
       expect(new Set(touches.map((route) => route.net))).toEqual(new Set([junction.net]));
+      for (const route of touches) for (let i = 1; i < route.points.length; i++) {
+        const a = route.points[i - 1], b = route.points[i], p = junction.point;
+        if (Math.abs((b[0] - a[0]) * (p[1] - a[1]) - (b[1] - a[1]) * (p[0] - a[0])) > 1e-5
+          || p[0] < Math.min(a[0], b[0]) - 1e-7 || p[0] > Math.max(a[0], b[0]) + 1e-7
+          || p[1] < Math.min(a[1], b[1]) - 1e-7 || p[1] > Math.max(a[1], b[1]) + 1e-7) continue;
+        for (const end of [a, b]) if (Math.hypot(end[0] - p[0], end[1] - p[1]) > 1e-7) {
+          directions.add(Math.abs(end[0] - p[0]) > 1e-7 ? end[0] < p[0] ? 'L' : 'R' : end[1] < p[1] ? 'T' : 'B');
+        }
+      }
+      for (const item of layout.attachments) if (item.net === junction.net
+        && Math.hypot(item.point[0] - junction.point[0], item.point[1] - junction.point[1]) < 1e-7) {
+        directions.add(({ T: 'B', B: 'T', L: 'R', R: 'L' } as const)[item.side]);
+      }
+      expect(directions.size).toBe(3);
     }
     expect(routeLayout(floorplan(model))).toEqual(routing);
   });
@@ -118,6 +133,27 @@ describe('orthogonal routing', () => {
     const four = routeLayout(floorplan(parseCircuit(source(4))));
     expect(three.occurrences.filter((proxy) => proxy.net.id === 'A')).toHaveLength(1);
     expect(four.occurrences.filter((proxy) => proxy.net.id === 'A')).toHaveLength(2);
+    expect(three.junctions).toHaveLength(2);
+    expect(four.junctions).toHaveLength(2);
+  });
+
+  it('rejects a connected four-way crossing instead of rendering a junction dot', () => {
+    const layout = floorplan(parseCircuit(fixtures['../examples/fixtures/cmos-inverter.mmd']));
+    const drawing = routeLayout(layout);
+    const wire = drawing.routes.find((route) => route.shape === '-' && route.points[0][1] === route.points[1][1])!;
+    const x = (wire.points[0][0] + wire.points[1][0]) / 2, y = wire.points[0][1];
+    const cross: Route = { net: wire.net, points: [[x, y - 30], [x, y + 30]], shape: '-' };
+    expect(() => validateConnectivity(layout, { ...drawing, routes: [...drawing.routes, cross] })).toThrow('must be T-shaped');
+  });
+
+  it('routes a centered three-way gate fanout through two T-junctions', () => {
+    const source = 'circuitDiagram D\n' + Array.from({ length: 4 }, (_, i) => `G${i}[G${i}]:::buffer`).join('\n')
+      + '\n' + [1, 2, 3].map((i) => `G0 |O| --- G${i} |I|`).join('\n');
+    const layout = floorplan(parseCircuit(source)), drawing = routeLayout(layout);
+    expect(drawing.attachments).toHaveLength(4);
+    expect(drawing.junctions).toHaveLength(2);
+    expect(drawing.occurrences).toHaveLength(0);
+    expect(() => validateConnectivity(layout, drawing)).not.toThrow();
   });
 
   it('centers parallel split and rejoin points on straight common conductors', () => {
@@ -182,7 +218,8 @@ describe('orthogonal routing', () => {
     const powerSplit = centeredPair(power, control);
     const powerFeed = routing.routes.find((route) => route.net === power.net && !powerSplit.wires.includes(route))!;
     expect(powerFeed.points.at(-1)).toEqual(powerSplit.joint);
-    expect(powerFeed.points.at(-2)![1]).toBe(powerSplit.joint[1]);
+    expect(powerFeed.points.at(-2)![0]).toBe(powerSplit.joint[0]);
+    expect(powerFeed.points.at(-2)![1]).toBeLessThan(powerSplit.joint[1]);
     expect(routing.occurrences).toEqual([]);
     expect(routing.crossings).toBe(0);
   });
