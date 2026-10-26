@@ -138,20 +138,40 @@ describe('orthogonal routing', () => {
     }
   });
 
-  it('shares continuous load and controller branches around the explicit DC source', () => {
+  it('centers opposite branch arms and perpendicular feeds around the explicit DC source', () => {
     const layout = floorplan(parseCircuit(fixtures['../examples/fixtures/wireless-solenoid.mmd']));
     const routing = routeLayout(layout);
     const terminal = (device: string, name: string) => layout.attachments.find((item) => item.device === device && item.terminal === name)!;
     const outgoing = terminal('remote', 'no'), top = terminal('Solenoid', 'A'), bottom = terminal('Solenoid', 'B');
     const upperBranch = routing.routes.find((route) => route.net === top.net && route.points[0] === top.point)!;
     const feed = routing.routes.find((route) => route.net === outgoing.net && route.points[0] === outgoing.point)!;
-    expect(feed.shape).toBe('-');
+    expect(feed.shape).toBe('-|');
     expect(feed.points.at(-1)![1]).toBe(top.point[1] - 60);
     expect(upperBranch.points.at(-1)![1]).toBe(feed.points.at(-1)![1]);
-    const returnWire = routing.routes.filter((route) => route.net === bottom.net);
-    const horizontalLevels = new Set(returnWire.flatMap((route) => route.points.slice(1).flatMap((end, i) =>
-      Math.abs(route.points[i][1] - end[1]) < 1e-7 ? [end[1]] : [])));
-    expect([...horizontalLevels]).toEqual([bottom.point[1] + 60]);
+    expect(feed.points.at(-2)![0]).toBe(feed.points.at(-1)![0]);
+    expect(feed.points.at(-2)![1]).toBeLessThan(feed.points.at(-1)![1]);
+    const centeredPair = (a: ReturnType<typeof terminal>, b: ReturnType<typeof terminal>) => {
+      const wires = [a, b].map((item) => routing.routes.find((route) => route.net === item.net && route.points[0] === item.point)!);
+      const joint = wires[0].points.at(-1)!;
+      expect(wires[1].points.at(-1)).toEqual(joint);
+      const arms = wires.map((wire) => wire.points.at(-2)!);
+      expect(joint).toEqual([(arms[0][0] + arms[1][0]) / 2, (arms[0][1] + arms[1][1]) / 2]);
+      const vectors = arms.map((point) => [point[0] - joint[0], point[1] - joint[1]]);
+      expect(vectors[0][0] * vectors[1][0] + vectors[0][1] * vectors[1][1])
+        .toBeCloseTo(-Math.hypot(...vectors[0]) * Math.hypot(...vectors[1]));
+      expect(Math.hypot(...vectors[0])).toBeGreaterThan(0);
+      expect(routing.junctions).toContainEqual({ net: a.net, point: joint });
+      return { joint, wires };
+    };
+    const split = centeredPair(top, terminal('Diode', 'K'));
+    const join = centeredPair(bottom, terminal('Diode', 'A'));
+    expect(split.joint[0]).toBe(join.joint[0]);
+    const length = (wire: Route) => wire.points.slice(1).reduce((sum, point, i) => sum
+      + Math.hypot(point[0] - wire.points[i][0], point[1] - wire.points[i][1]), 0);
+    for (const pair of [split, join]) expect(length(pair.wires[0])).toBeCloseTo(length(pair.wires[1]));
+    const returnStem = routing.routes.find((route) => route.net === bottom.net && route.points[0] === join.joint)!;
+    expect(returnStem.points[1][0]).toBe(join.joint[0]);
+    expect(returnStem.points[1][1]).toBeGreaterThan(join.joint[1]);
     const supply = terminal('Source', 'P');
     const sourceWire = routing.routes.find((route) => route.net === supply.net)!;
     expect(sourceWire.points[0]).toEqual(supply.point);
@@ -159,10 +179,10 @@ describe('orthogonal routing', () => {
     expect(sourceWire.points[1][1]).toBeLessThan(supply.point[1]);
     expect(sourceWire.points.at(-1)![0]).toBeGreaterThan(supply.point[0]);
     const power = terminal('remote', 'v+'), control = terminal('remote', 'ctl');
-    const powerWire = routing.routes.find((route) => route.points[0] === power.point)!;
-    const controlWire = routing.routes.find((route) => route.points[0] === control.point)!;
-    expect(powerWire.points.at(-1)).toEqual(controlWire.points.at(-1));
-    expect(routing.junctions).toContainEqual({ net: power.net, point: powerWire.points.at(-1)! });
+    const powerSplit = centeredPair(power, control);
+    const powerFeed = routing.routes.find((route) => route.net === power.net && !powerSplit.wires.includes(route))!;
+    expect(powerFeed.points.at(-1)).toEqual(powerSplit.joint);
+    expect(powerFeed.points.at(-2)![1]).toBe(powerSplit.joint[1]);
     expect(routing.occurrences).toEqual([]);
     expect(routing.crossings).toBe(0);
   });

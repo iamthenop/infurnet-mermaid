@@ -191,7 +191,11 @@ Parallel branches visibly share both endpoint conductors, including branches in 
 
 Common conductors for parallel groups remain straight. Their branch feed points use the midpoint between the outermost conduction terminals, so the split and rejoin centerlines agree. Terminal branches reach that conductor without bending the shared line.
 
-Parallel two-terminal loads align below a connected controller output so their common input conductor meets that output horizontally. Shared IC pins use a common junction and continuous wires. Return branches share one conductor instead of adding a second return level.
+At parallel splits and joins, the two branch arms extend in opposite directions (180°) from their midpoint. The feed or return stem meets that midpoint perpendicularly. A stem must not overlap a branch arm and move the visible junction away from the center.
+
+The same centered split rule applies to shared IC pin branches. Aligned two-terminal devices use equal wire lengths between the split, their terminals, and the join.
+
+Parallel two-terminal loads sit below a connected controller output to allow a centered feed stem. Parallel joins reach the return conductor through a centered stem. These stems take precedence over reducing the bend count.
 
 Routing tries an orthogonal straight connection first, then horizontal-first and vertical-first one-bend connections. A straight wire may cross at most two unrelated wires, and a bent wire at most one. Overlapping unrelated wires, reverse turns, and traversal through symbol bodies are rejected.
 

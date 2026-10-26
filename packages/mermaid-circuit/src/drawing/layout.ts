@@ -109,7 +109,7 @@ function refineAnalogPlacement(model: CircuitModel, devices: DevicePlacement[], 
       ? item.device.terminals.filter((terminal) => item.device.pinSides?.[terminal] === 'R' && netAt(item.device, terminal) === nets[0][0])
         .map((terminal) => item.placed.anchors[terminal]) : []);
     if (feeds.length !== 1 || feeds[0][0] >= Math.min(...tops.map((point) => point[0]))) continue;
-    const dy = feeds[0][1] + 60 - Math.min(...tops.map((point) => point[1]));
+    const dy = feeds[0][1] + 150 - Math.min(...tops.map((point) => point[1]));
     for (const item of members) move(item, 0, dy);
   }
   for (const source of devices.filter((item) => item.device.type === 'voltageSource')) {

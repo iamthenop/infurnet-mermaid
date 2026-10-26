@@ -145,8 +145,7 @@ function groupJoint(items: readonly Attachment[], layout: Layout, input: boolean
   if (items.some((item) => item.side !== items[0].side)) {
     if (items.every((item) => item.device === items[0].device) && items.some((item) => item.side === 'L')
       && items.some((item) => item.side === 'T')) {
-      const feeds = layout.attachments.filter((item) => item.net === items[0].net && item.device !== items[0].device && item.side === 'R');
-      return [Math.min(...xs) - 120, Math.min(Math.min(...ys) - 60, ...feeds.map((item) => item.point[1]))];
+      return [Math.min(...xs) - 150, y];
     }
     return [x, y];
   }
@@ -156,6 +155,14 @@ function groupJoint(items: readonly Attachment[], layout: Layout, input: boolean
     case 'L': return [input ? Math.min(...items.map((item) => layout.stageBounds[item.stage].minX)) - 60 : Math.min(...xs) - 120, input ? items[0].point[1] : y];
     case 'R': return [Math.max(...xs) + 120, y];
   }
+}
+
+function conductorAxis(group: readonly Attachment[]): 0 | 1 | undefined {
+  if (group.length < 2) return undefined;
+  if (group.every((item) => item.side === group[0].side) && ['T', 'B'].includes(group[0].side)) return 0;
+  if (group.every((item) => item.device === group[0].device) && group.some((item) => item.side === 'T')
+    && group.some((item) => item.side === 'L')) return 1;
+  return undefined;
 }
 
 export function mayProxy(net: Net, policy: Layout['proxyPolicy']): boolean {
@@ -254,13 +261,21 @@ export function routeLayout(layout: Layout): Routing {
       for (let i = 0; i < groups.length; i++) added.push(...branches(net.id, groups[i], joints[i], [...routes, ...added]));
       if (net.type === 'net' && groups.length > 1 && attachments.every((item) => item.side === 'B')) {
         const bus: Point = [(Math.min(...joints.map((point) => point[0])) + Math.max(...joints.map((point) => point[0]))) / 2,
-          Math.max(...attachments.map((item) => item.point[1])) + 60];
+          Math.max(...joints.map((point) => point[1])) + 90];
         added.push(...branches(net.id, groups.map((group, index) => ({ ...group[0], point: joints[index] })), bus, [...routes, ...added]));
       } else for (let i = 1; i < joints.length; i++) if (!equal(joints[i - 1], joints[i])) {
         const start = attachments.find((item) => equal(item.point, joints[i - 1]));
         const end = attachments.find((item) => equal(item.point, joints[i]));
-        const verticalFirst = start?.side === 'T' && end?.side === 'L' || start?.side === 'R' && end?.side === 'B';
-        added.push(chooseRoute(net.id, joints[i - 1], joints[i], [...routes, ...added], obstacles(), verticalFirst));
+        const startAxis = conductorAxis(groups[i - 1]), endAxis = conductorAxis(groups[i]);
+        const verticalFirst = endAxis === 1 || startAxis === 0 || start?.side === 'T' && end?.side === 'L'
+          || start?.side === 'R' && end?.side === 'B';
+        const route = chooseRoute(net.id, joints[i - 1], joints[i], [...routes, ...added], obstacles(), verticalFirst);
+        const departure = route.points[1], arrival = route.points.at(-2)!;
+        if (startAxis !== undefined && Math.abs(departure[startAxis] - joints[i - 1][startAxis]) > EPS
+          || endAxis !== undefined && Math.abs(arrival[endAxis] - joints[i][endAxis]) > EPS) {
+          throw new Error(`Routing failure for centered branch feed on net "${net.id}".`);
+        }
+        added.push(route);
       }
       routes.push(...added);
       if (net.type === 'net') continue;

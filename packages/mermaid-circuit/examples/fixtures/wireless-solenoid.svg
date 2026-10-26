@@ -1,6 +1,6 @@
-<svg id="fixture-wireless-solenoid" width="3030" xmlns="http://www.w3.org/2000/svg" viewBox="-660 -300 3030 1020" height="1020" overflow="visible" font-family="sans-serif" font-size="14" role="graphics-document document" aria-roledescription="circuitDiagram">
+<svg id="fixture-wireless-solenoid" width="3030" xmlns="http://www.w3.org/2000/svg" viewBox="-660 -300 3030 1143" height="1143" overflow="visible" font-family="sans-serif" font-size="14" role="graphics-document document" aria-roledescription="circuitDiagram">
 <g data-drawing-index="0" data-block="power" stroke-width="1">
-<polyline points="-480,-120 270,-120 270,390 -480,390 -480,-120" stroke="#777" stroke-width="1" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+<polyline points="-480,-120 270,-120 270,435 -480,435 -480,-120" stroke="#777" stroke-width="1" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
 </g>
 <g data-drawing-index="1" data-label="true" data-frame-label="block">
 <text x="-468" y="-98" xml:space="preserve" fill="#000">power</text>
@@ -12,10 +12,10 @@
 <text x="612" y="52" xml:space="preserve" fill="#000">control</text>
 </g>
 <g data-drawing-index="4" data-block="load" stroke-width="1">
-<polyline points="1380,180 2190,180 2190,540 1380,540 1380,180" stroke="#777" stroke-width="1" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+<polyline points="1380,270 2190,270 2190,630 1380,630 1380,270" stroke="#777" stroke-width="1" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
 </g>
 <g data-drawing-index="5" data-label="true" data-frame-label="block">
-<text x="1392" y="202" xml:space="preserve" fill="#000">load</text>
+<text x="1392" y="292" xml:space="preserve" fill="#000">load</text>
 </g>
 <g data-drawing-index="6" data-stage="protection" stroke-dasharray="8 6">
 <polyline points="-30,-30 180,-30 180,150 -30,150 -30,-30" stroke="#777" stroke-width="1" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
@@ -24,10 +24,10 @@
 <text x="-18" y="-72" xml:space="preserve" fill="#000">protection</text>
 </g>
 <g data-drawing-index="8" data-stage="battery" stroke-dasharray="8 6">
-<polyline points="-390,120 -60,120 -60,300 -390,300 -390,120" stroke="#777" stroke-width="1" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+<polyline points="-390,165 -60,165 -60,345 -390,345 -390,165" stroke="#777" stroke-width="1" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
 </g>
 <g data-drawing-index="9" data-label="true" data-frame-label="stage">
-<text x="-378" y="78" xml:space="preserve" fill="#000">battery</text>
+<text x="-378" y="123" xml:space="preserve" fill="#000">battery</text>
 </g>
 <g data-drawing-index="10" data-stage="receiver" stroke-dasharray="8 6">
 <polyline points="690,120 1050,120 1050,360 690,360 690,120" stroke="#777" stroke-width="1" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
@@ -36,46 +36,46 @@
 <text x="702" y="78" xml:space="preserve" fill="#000">receiver</text>
 </g>
 <g data-drawing-index="12" data-stage="actuator" stroke-dasharray="8 6">
-<polyline points="1470,270 2100,270 2100,450 1470,450 1470,270" stroke="#777" stroke-width="1" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+<polyline points="1470,360 2100,360 2100,540 1470,540 1470,360" stroke="#777" stroke-width="1" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
 </g>
 <g data-drawing-index="13" data-label="true" data-frame-label="stage">
-<text x="1482" y="228" xml:space="preserve" fill="#000">actuator</text>
+<text x="1482" y="318" xml:space="preserve" fill="#000">actuator</text>
 </g>
-<g data-drawing-index="14" data-net="@implicit:Diode:A" data-wire="|-" data-points="[[1560,420],[1560,480],[1710,480]]">
-<polyline points="1560,420 1560,480 1710,480" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+<g data-drawing-index="14" data-net="@implicit:Diode:A" data-wire="|-" data-points="[[1560,510],[1560,570],[1710,570]]">
+<polyline points="1560,510 1560,570 1710,570" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
 </g>
-<g data-drawing-index="15" data-net="@implicit:Diode:A" data-wire="|-" data-points="[[1860,420],[1860,480],[1710,480]]">
-<polyline points="1860,420 1860,480 1710,480" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+<g data-drawing-index="15" data-net="@implicit:Diode:A" data-wire="|-" data-points="[[1860,510],[1860,570],[1710,570]]">
+<polyline points="1860,510 1860,570 1710,570" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
 </g>
-<g data-drawing-index="16" data-net="@implicit:Diode:A" data-wire="|-" data-points="[[810,330],[810,480],[705,480]]">
-<polyline points="810,330 810,480 705,480" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+<g data-drawing-index="16" data-net="@implicit:Diode:A" data-wire="|-" data-points="[[810,330],[810,660],[705,660]]">
+<polyline points="810,330 810,660 705,660" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
 </g>
-<g data-drawing-index="17" data-net="@implicit:Diode:A" data-wire="|-" data-points="[[-300,270],[-300,480],[705,480]]">
-<polyline points="-300,270 -300,480 705,480" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+<g data-drawing-index="17" data-net="@implicit:Diode:A" data-wire="|-" data-points="[[-300,315],[-300,660],[705,660]]">
+<polyline points="-300,315 -300,660 705,660" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
 </g>
-<g data-drawing-index="18" data-net="@implicit:Diode:A" data-wire="-" data-points="[[1710,480],[705,480]]">
-<polyline points="1710,480 705,480" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+<g data-drawing-index="18" data-net="@implicit:Diode:A" data-wire="|-" data-points="[[1710,570],[1710,660],[705,660]]">
+<polyline points="1710,570 1710,660 705,660" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
 </g>
-<g data-drawing-index="19" data-net="@implicit:Diode:K" data-wire="|-" data-points="[[1560,300],[1560,240],[1710,240]]">
-<polyline points="1560,300 1560,240 1710,240" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+<g data-drawing-index="19" data-net="@implicit:Diode:K" data-wire="|-" data-points="[[1560,390],[1560,330],[1710,330]]">
+<polyline points="1560,390 1560,330 1710,330" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
 </g>
-<g data-drawing-index="20" data-net="@implicit:Diode:K" data-wire="|-" data-points="[[1860,300],[1860,240],[1710,240]]">
-<polyline points="1860,300 1860,240 1710,240" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+<g data-drawing-index="20" data-net="@implicit:Diode:K" data-wire="|-" data-points="[[1860,390],[1860,330],[1710,330]]">
+<polyline points="1860,390 1860,330 1710,330" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
 </g>
-<g data-drawing-index="21" data-net="@implicit:Diode:K" data-wire="-" data-points="[[900,240],[1710,240]]">
-<polyline points="900,240 1710,240" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+<g data-drawing-index="21" data-net="@implicit:Diode:K" data-wire="-|" data-points="[[900,240],[1710,240],[1710,330]]">
+<polyline points="900,240 1710,240 1710,330" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
 </g>
-<g data-drawing-index="22" data-net="@implicit:Fuse:A" data-wire="|-" data-points="[[-300,150],[-300,60],[0,60]]">
-<polyline points="-300,150 -300,60 0,60" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+<g data-drawing-index="22" data-net="@implicit:Fuse:A" data-wire="|-" data-points="[[-300,195],[-300,60],[0,60]]">
+<polyline points="-300,195 -300,60 0,60" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
 </g>
-<g data-drawing-index="23" data-net="@implicit:Fuse:B" data-wire="|-" data-points="[[810,150],[810,60],[600,60]]">
-<polyline points="810,150 810,60 600,60" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+<g data-drawing-index="23" data-net="@implicit:Fuse:B" data-wire="-|" data-points="[[810,150],[570,150],[570,195]]">
+<polyline points="810,150 570,150 570,195" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
 </g>
-<g data-drawing-index="24" data-net="@implicit:Fuse:B" data-wire="-|" data-points="[[720,240],[600,240],[600,60]]">
-<polyline points="720,240 600,240 600,60" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+<g data-drawing-index="24" data-net="@implicit:Fuse:B" data-wire="-|" data-points="[[720,240],[570,240],[570,195]]">
+<polyline points="720,240 570,240 570,195" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
 </g>
-<g data-drawing-index="25" data-net="@implicit:Fuse:B" data-wire="-" data-points="[[120,60],[600,60]]">
-<polyline points="120,60 600,60" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+<g data-drawing-index="25" data-net="@implicit:Fuse:B" data-wire="|-" data-points="[[120,60],[120,195],[570,195]]">
+<polyline points="120,60 120,195 570,195" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
 </g>
 <g data-drawing-index="26" data-device="Fuse" data-type="fuse" data-stage-index="0">
 <g transform="matrix(1 0 0 1 0 0)">
@@ -102,7 +102,7 @@
 <text x="128" y="51" xml:space="preserve" fill="#000">B</text>
 </g>
 <g data-drawing-index="31" data-device="Source" data-type="voltageSource" data-stage-index="1">
-<g transform="matrix(1 0 0 1 -360 150)">
+<g transform="matrix(1 0 0 1 -360 195)">
 
 <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
   <g id="fixture-wireless-solenoid-element-31-voltageSource" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -117,16 +117,16 @@
 </g>
 </g>
 <g data-drawing-index="32" data-label="true" data-device-label="Source">
-<text x="-228" y="234" xml:space="preserve" fill="#000">Source</text>
+<text x="-228" y="279" xml:space="preserve" fill="#000">Source</text>
 </g>
 <g data-drawing-index="33" data-label="true" data-device-label="Source">
-<text x="-228" y="254" xml:space="preserve" fill="#000">Milwaukee M12 12 V</text>
+<text x="-228" y="299" xml:space="preserve" fill="#000">Milwaukee M12 12 V</text>
 </g>
-<g data-drawing-index="34" data-label="true" data-terminal="P" data-terminal-device="Source" data-x="-300" data-y="150" data-terminal-net="@implicit:Fuse:A">
-<text x="-292" y="141" xml:space="preserve" fill="#000">P</text>
+<g data-drawing-index="34" data-label="true" data-terminal="P" data-terminal-device="Source" data-x="-300" data-y="195" data-terminal-net="@implicit:Fuse:A">
+<text x="-292" y="186" xml:space="preserve" fill="#000">P</text>
 </g>
-<g data-drawing-index="35" data-label="true" data-terminal="N" data-terminal-device="Source" data-x="-300" data-y="270" data-terminal-net="@implicit:Diode:A">
-<text x="-292" y="261" xml:space="preserve" fill="#000">N</text>
+<g data-drawing-index="35" data-label="true" data-terminal="N" data-terminal-device="Source" data-x="-300" data-y="315" data-terminal-net="@implicit:Diode:A">
+<text x="-292" y="306" xml:space="preserve" fill="#000">N</text>
 </g>
 <g data-drawing-index="36" data-device="remote" data-type="ic" data-stage-index="2">
 <polyline points="30,30 150,30 150,150 30,150 30,30" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 720 150)"></polyline>
@@ -157,7 +157,7 @@
 <text x="908" y="231" xml:space="preserve" fill="#000">no</text>
 </g>
 <g data-drawing-index="44" data-device="Solenoid" data-type="solenoid" data-stage-index="3">
-<g transform="matrix(6.123233995736766e-17 1 -1 6.123233995736766e-17 1620 300)">
+<g transform="matrix(6.123233995736766e-17 1 -1 6.123233995736766e-17 1620 390)">
 
 <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
   <g id="fixture-wireless-solenoid-element-44-solenoid" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -174,19 +174,19 @@
 </g>
 </g>
 <g data-drawing-index="45" data-label="true" data-device-label="Solenoid">
-<text x="1632" y="384" xml:space="preserve" fill="#000">Solenoid</text>
+<text x="1632" y="474" xml:space="preserve" fill="#000">Solenoid</text>
 </g>
 <g data-drawing-index="46" data-label="true" data-device-label="Solenoid">
-<text x="1632" y="404" xml:space="preserve" fill="#000">uxcell 12 V 20 N</text>
+<text x="1632" y="494" xml:space="preserve" fill="#000">uxcell 12 V 20 N</text>
 </g>
-<g data-drawing-index="47" data-label="true" data-terminal="A" data-terminal-device="Solenoid" data-x="1560" data-y="300" data-terminal-net="@implicit:Diode:K">
-<text x="1568" y="291" xml:space="preserve" fill="#000">A</text>
+<g data-drawing-index="47" data-label="true" data-terminal="A" data-terminal-device="Solenoid" data-x="1560" data-y="390" data-terminal-net="@implicit:Diode:K">
+<text x="1568" y="381" xml:space="preserve" fill="#000">A</text>
 </g>
-<g data-drawing-index="48" data-label="true" data-terminal="B" data-terminal-device="Solenoid" data-x="1560" data-y="420" data-terminal-net="@implicit:Diode:A">
-<text x="1568" y="411" xml:space="preserve" fill="#000">B</text>
+<g data-drawing-index="48" data-label="true" data-terminal="B" data-terminal-device="Solenoid" data-x="1560" data-y="510" data-terminal-net="@implicit:Diode:A">
+<text x="1568" y="501" xml:space="preserve" fill="#000">B</text>
 </g>
 <g data-drawing-index="49" data-device="Diode" data-type="diode" data-stage-index="3">
-<g transform="matrix(-1.8369701987210297e-16 -1 1 -1.8369701987210297e-16 1800 420)">
+<g transform="matrix(-1.8369701987210297e-16 -1 1 -1.8369701987210297e-16 1800 510)">
 
 <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
   <g id="fixture-wireless-solenoid-element-49-diode" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -198,27 +198,27 @@
 </g>
 </g>
 <g data-drawing-index="50" data-label="true" data-device-label="Diode">
-<text x="1932" y="384" xml:space="preserve" fill="#000">Diode</text>
+<text x="1932" y="474" xml:space="preserve" fill="#000">Diode</text>
 </g>
 <g data-drawing-index="51" data-label="true" data-device-label="Diode">
-<text x="1932" y="404" xml:space="preserve" fill="#000">1N5408</text>
+<text x="1932" y="494" xml:space="preserve" fill="#000">1N5408</text>
 </g>
-<g data-drawing-index="52" data-label="true" data-terminal="A" data-terminal-device="Diode" data-x="1860" data-y="420" data-terminal-net="@implicit:Diode:A">
-<text x="1868" y="411" xml:space="preserve" fill="#000">A</text>
+<g data-drawing-index="52" data-label="true" data-terminal="A" data-terminal-device="Diode" data-x="1860" data-y="510" data-terminal-net="@implicit:Diode:A">
+<text x="1868" y="501" xml:space="preserve" fill="#000">A</text>
 </g>
-<g data-drawing-index="53" data-label="true" data-terminal="K" data-terminal-device="Diode" data-x="1860" data-y="300" data-terminal-net="@implicit:Diode:K">
-<text x="1868" y="291" xml:space="preserve" fill="#000">K</text>
+<g data-drawing-index="53" data-label="true" data-terminal="K" data-terminal-device="Diode" data-x="1860" data-y="390" data-terminal-net="@implicit:Diode:K">
+<text x="1868" y="381" xml:space="preserve" fill="#000">K</text>
 </g>
 <g data-drawing-index="54" data-junction="true" data-net="@implicit:Diode:A">
-<circle cx="0" cy="0" r="3" stroke="#000" stroke-width="2" fill="#000" transform="matrix(1 0 0 1 1560 480)"></circle>
+<circle cx="0" cy="0" r="3" stroke="#000" stroke-width="2" fill="#000" transform="matrix(1 0 0 1 1710 570)"></circle>
 </g>
 <g data-drawing-index="55" data-junction="true" data-net="@implicit:Diode:A">
-<circle cx="0" cy="0" r="3" stroke="#000" stroke-width="2" fill="#000" transform="matrix(1 0 0 1 810 480)"></circle>
+<circle cx="0" cy="0" r="3" stroke="#000" stroke-width="2" fill="#000" transform="matrix(1 0 0 1 810 660)"></circle>
 </g>
 <g data-drawing-index="56" data-junction="true" data-net="@implicit:Diode:K">
-<circle cx="0" cy="0" r="3" stroke="#000" stroke-width="2" fill="#000" transform="matrix(1 0 0 1 1560 240)"></circle>
+<circle cx="0" cy="0" r="3" stroke="#000" stroke-width="2" fill="#000" transform="matrix(1 0 0 1 1710 330)"></circle>
 </g>
 <g data-drawing-index="57" data-junction="true" data-net="@implicit:Fuse:B">
-<circle cx="0" cy="0" r="3" stroke="#000" stroke-width="2" fill="#000" transform="matrix(1 0 0 1 600 60)"></circle>
+<circle cx="0" cy="0" r="3" stroke="#000" stroke-width="2" fill="#000" transform="matrix(1 0 0 1 570 195)"></circle>
 </g>
 </svg>
