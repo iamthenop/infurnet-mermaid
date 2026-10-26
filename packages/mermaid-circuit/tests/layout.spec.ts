@@ -65,22 +65,32 @@ describe('basic floorplanning', () => {
     expect(layout.parallelStages).toEqual([{ stages: [4, 5], nets: ['OUT', 'VSS'] }]);
   });
 
-  it('uses the approved fixed IC body and one centered terminal per side', () => {
+  it('expands the IC body for multiple pins and preserves parallel load alignment', () => {
     const layout = floorplan(fixture('wireless-solenoid'));
-    const remote = layout.devices.find((item) => item.device.id === 'remote')!;
+    const remote = layout.devices.find((item) => item.device.id === 'Remote')!;
     expect(remote.pane.maxX - remote.pane.minX).toBe(180);
-    expect(remote.pane.maxY - remote.pane.minY).toBe(180);
+    expect(remote.pane.maxY - remote.pane.minY).toBe(240);
     const center = remote.placed.anchors.center;
-    expect(remote.placed.anchors['v+']).toEqual([center[0], center[1] - 90]);
-    expect(remote.placed.anchors.ctl).toEqual([center[0] - 90, center[1]]);
-    expect(remote.placed.anchors['v-']).toEqual([center[0], center[1] + 90]);
+    expect(remote.placed.anchors['v+']).toEqual([center[0], center[1] - 120]);
+    expect(remote.placed.anchors.ctl).toEqual([center[0] - 90, center[1] - 30]);
+    expect(remote.placed.anchors['v-']).toEqual([center[0], center[1] + 120]);
     expect(remote.placed.anchors.no).toEqual([center[0] + 90, center[1]]);
+    expect(remote.placed.anchors.A).toEqual([center[0] - 90, center[1] + 30]);
     const diode = layout.devices.find((item) => item.device.id === 'Diode')!;
     expect(diode.placed.anchors.K[1]).toBeLessThan(diode.placed.anchors.A[1]);
     const load = layout.devices.find((item) => item.device.id === 'Solenoid')!;
     expect(load.placed.anchors.A[1]).toBeCloseTo(diode.placed.anchors.K[1]);
     expect(load.placed.anchors.B[1]).toBeCloseTo(diode.placed.anchors.A[1]);
     expect(load.placed.anchors.A[1]).toBeGreaterThan(remote.placed.anchors.no[1]);
+  });
+
+  it('retains the fixed four-pin IC geometry when each side has one pin', () => {
+    const model = parseCircuit('circuitDiagram A\nU[U]:::ic\nN([N]):::pinInOut\nN --- |top| T:U\nN --- |left| L:U\nU:B |bottom| --- N\nU:R |right| --- N');
+    const ic = floorplan(model).devices[0];
+    const [x, y] = ic.placed.anchors.center;
+    expect(ic.pane.maxX - ic.pane.minX).toBe(180);
+    expect(ic.pane.maxY - ic.pane.minY).toBe(180);
+    expect(ic.placed.anchors).toMatchObject({ top: [x, y - 90], bottom: [x, y + 90], left: [x - 90, y], right: [x + 90, y] });
   });
 
   it('centers a voltage source left of its connected local circuit without changing polarity', () => {

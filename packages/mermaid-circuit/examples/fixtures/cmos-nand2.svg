@@ -1,15 +1,15 @@
 <svg id="fixture-cmos-nand2" width="1382" xmlns="http://www.w3.org/2000/svg" viewBox="-526 -327.6 1382 1569.76" height="1569.76" overflow="visible" font-family="sans-serif" font-size="14" role="graphics-document document" aria-roledescription="circuitDiagram">
 <g data-drawing-index="0" data-stage="pullUp" stroke-dasharray="8 6">
-<polyline points="-30,-30 480,-30 480,240 -30,240 -30,-30" stroke="#777" stroke-width="1" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+<polyline points="-30,-90 480,-90 480,300 -30,300 -30,-90" stroke="#777" stroke-width="1" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
 </g>
 <g data-drawing-index="1" data-label="true" data-frame-label="stage">
-<text x="-18" y="-72" xml:space="preserve" fill="#000">pullUp</text>
+<text x="-18" y="-102" xml:space="preserve" fill="#000">pullUp</text>
 </g>
 <g data-drawing-index="2" data-stage="pullDown" stroke-dasharray="8 6">
 <polyline points="120,420 330,420 330,960 120,960 120,420" stroke="#777" stroke-width="1" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
 </g>
 <g data-drawing-index="3" data-label="true" data-frame-label="stage">
-<text x="132" y="378" xml:space="preserve" fill="#000">pullDown</text>
+<text x="132" y="408" xml:space="preserve" fill="#000">pullDown</text>
 </g>
 <g data-drawing-index="4" data-net="@implicit:N0:S" data-wire="-" data-points="[[240,810],[240,690]]">
 <polyline points="240,810 240,690" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>

@@ -51,6 +51,7 @@ export function parseCircuit(text: string): CircuitModel {
   const pending: { left: string; right: string; leftSide?: PinSide; rightSide?: PinSide;
     leftTerminal: string | undefined; rightTerminal: string | undefined; line: number }[] = [];
   const outside: number[] = [];
+  const blockDefaults = new Map<number, number>();
 
   for (const { text, line } of statements.slice(1)) {
     const scope = scopes.at(-1);
@@ -83,15 +84,17 @@ export function parseCircuit(text: string): CircuitModel {
       stages[scope.index]!.explicitDirection = true;
       continue;
     }
-    const connection = text.match(/^((?:[TBLR]:)?[A-Za-z0-9]+)(?:\s*\|([A-Za-z0-9+\-]+)\|)?\s*---\s*(?:\|([A-Za-z0-9+\-]+)\|\s*)?((?:[TBLR]:)?[A-Za-z0-9]+)(?:\s*\|([A-Za-z0-9+\-]+)\|)?$/u);
+    const connection = text.match(/^([A-Za-z0-9]+(?::[TBLR])?)(?:\s*\|([A-Za-z0-9+\-]+)\|)?\s*---\s*(?:\|([A-Za-z0-9+\-]+)\|\s*)?((?:[TBLR]:)?[A-Za-z0-9]+)(?:\s*\|([A-Za-z0-9+\-]+)\|)?$/u);
     if (connection) {
       const leftTerminal = connection[2], rightTerminal = connection[3] ?? connection[5];
-      if ((!leftTerminal && !rightTerminal) || (connection[3] && connection[5])) {
+      if (connection[3] && connection[5]) {
         fail(line, 'A device endpoint requires exactly one terminal label.');
       }
-      const endpoint = (value: string) => value.includes(':')
-        ? { id: value.slice(2), side: value[0] as PinSide } : { id: value, side: undefined };
-      const left = endpoint(connection[1]!), right = endpoint(connection[4]!);
+      const leftValue = connection[1]!, rightValue = connection[4]!;
+      const left = leftValue.includes(':') ? { id: leftValue.slice(0, -2), side: leftValue.at(-1) as PinSide }
+        : { id: leftValue, side: undefined };
+      const right = rightValue.includes(':') ? { id: rightValue.slice(2), side: rightValue[0] as PinSide }
+        : { id: rightValue, side: undefined };
       pending.push({ left: left.id, leftSide: left.side, right: right.id, rightSide: right.side,
         leftTerminal, rightTerminal, line });
       continue;
@@ -112,14 +115,23 @@ export function parseCircuit(text: string): CircuitModel {
     const entry = type === 'ic' ? undefined : catalog[type as Exclude<NetType, 'net'> | Exclude<DeviceType, 'ic'>];
     if (type === 'ic' ? mode !== 'A' : !entry!.allowedModes.includes(mode)) fail(line, `Type "${type}" is not eligible in mode ${mode}.`);
     if (isDevice) {
-      if (scope?.kind === 'block') fail(line, 'Blocks contain stages, not direct device declarations.');
+      let stageIndex = scope?.index ?? -1;
+      if (scope?.kind === 'block') {
+        if (!blockDefaults.has(scope.index)) {
+          const index = stages.length;
+          blockDefaults.set(scope.index, index);
+          stages.push({ name: null, implicit: true, order: index, direction: 'LR', mode, block: scope.index, devices: [] });
+          blocks[scope.index]!.stages.push(index);
+        }
+        stageIndex = blockDefaults.get(scope.index)!;
+      }
       const deviceType = type as DeviceType;
       const device: Device = { id, type: deviceType, label: displayLabel,
-        terminals: entry ? Object.keys(entry.terminals) : [], stage: scope?.index ?? -1,
+        terminals: entry ? Object.keys(entry.terminals) : [], stage: stageIndex,
         ...(type === 'ic' ? { pinSides: {} } : {}),
         ...(type === 'pmos' || type === 'nmos' ? { bulk: { kind: 'implicit' as const, sourceTerminal: 'S' as const } }
           : type === 'pmosBlk' || type === 'nmosBlk' ? { bulk: { kind: 'explicit' as const, terminal: 'B' as const } } : {}) };
-      if (scope) stages[scope.index]!.devices.push(id);
+      if (scope) stages[stageIndex]!.devices.push(id);
       else outside.push(devices.length);
       devices.push(device); nodes.set(id, device); deviceIds.add(id);
     } else {
@@ -130,6 +142,9 @@ export function parseCircuit(text: string): CircuitModel {
   }
   if (scopes.length) fail(scopes.at(-1)!.line, 'Unclosed subgraph.');
   for (const connection of pending) {
+    if (connection.leftTerminal === undefined && nodes.get(connection.left)?.type === 'antenna') connection.leftTerminal = 'A';
+    if (connection.rightTerminal === undefined && nodes.get(connection.right)?.type === 'antenna') connection.rightTerminal = 'A';
+    if (!connection.leftTerminal && !connection.rightTerminal) fail(connection.line, 'A device endpoint requires exactly one terminal label.');
     for (const [id, terminal, side] of [[connection.left, connection.leftTerminal, connection.leftSide],
       [connection.right, connection.rightTerminal, connection.rightSide]] as const) {
       const device = nodes.get(id) as Device | undefined;
@@ -138,14 +153,11 @@ export function parseCircuit(text: string): CircuitModel {
       if (!side || !terminal) fail(connection.line, 'IC terminals require a named pin and side qualifier.');
       const pins = device.pinSides as Record<string, PinSide>;
       if (pins[terminal] && pins[terminal] !== side) fail(connection.line, `IC pin "${terminal}" has conflicting sides.`);
-      if (Object.entries(pins).some(([name, value]) => value === side && name !== terminal)) {
-        fail(connection.line, 'This release supports one IC pin per side only.');
-      }
       if (!pins[terminal]) { pins[terminal] = side; (device.terminals as string[]).push(terminal); }
     }
   }
   for (const device of devices) {
-    if (device.type === 'ic' && device.terminals.length !== 4) fail(header!.line, 'This release requires one IC pin on each of T, B, L and R.');
+    if (device.type === 'ic' && device.terminals.length === 0) fail(header!.line, 'An IC requires at least one named pin connection.');
   }
   if (outside.length) {
     const index = stages.length;

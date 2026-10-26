@@ -2,30 +2,28 @@ circuitDiagram A
 %% Owner circuit reference; physical module labels and ratings are not verified here.
 subgraph block power
     subgraph stage protection
-        direction LR
-        Fuse["Fuse<br/>2 A"]:::fuse
+        Fuse["Fuse<br/>2A"]:::fuse
     end
     subgraph stage battery
-        Source["Source<br/>Milwaukee M12 12 V"]:::voltageSource
+        Source["Source<br/>12 V"]:::voltageSource
     end
 end
 subgraph block control
     subgraph stage receiver
-        remote["remote<br/>QIACHIP 433 MHz"]:::ic
+        Remote["Relay Switch<br/>Momentary"]:::ic
+        Antenna["Antenna<br/>OOF 433 MHz"]:::antenna
     end
 end
 subgraph block load
-    subgraph stage actuator
-        direction LR
-        Solenoid["Solenoid<br/>uxcell 12 V 20 N"]:::solenoid
-        Diode["Diode<br/>1N5408"]:::diode
-    end
+    Diode["Diode<br/>1N5408"]:::diode
+    Solenoid["Solenoid<br/>12V 20N 1A"]:::solenoid
 end
 Source |P| --- |A| Fuse
-Fuse |B| --- |v+| T:remote
-Fuse |B| --- |ctl| L:remote
-B:remote |v-| --- |N| Source
-R:remote |no| --- |A| Solenoid
-R:remote |no| --- |K| Diode
+Fuse |B| --- |v+| T:Remote
+Fuse |B| --- |ctl| L:Remote
+Antenna --- |A| L:Remote
+Remote:B |v-| --- |N| Source
+Remote:R |no| --- |A| Solenoid
+Remote:R |no| --- |K| Diode
 Solenoid |B| --- |N| Source
 Diode |A| --- |N| Source

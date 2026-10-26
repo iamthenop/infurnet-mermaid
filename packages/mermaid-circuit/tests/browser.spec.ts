@@ -26,8 +26,8 @@ it.each(Object.entries(fixtures))('renders all assignments and exact artwork tra
   const model = parseCircuit(source), layout = floorplan(model);
   const planned = routeLayout(layout);
   const expected = layout.devices.map((item) => ({ id: item.device.id, type: item.device.type,
-    terminals: item.device.type === 'ic' ? Object.fromEntries(Object.entries(item.device.pinSides!).map(([name, side]) =>
-      [name, ({ T: [90, 0], B: [90, 180], L: [0, 90], R: [180, 90] } as const)[side]])) : catalog[item.device.type].terminals,
+    terminals: item.device.type === 'ic' ? Object.fromEntries(Object.entries(item.device.pinSides!).map(([name]) =>
+      [name, ({ 'v+': [90, 0], 'v-': [90, 240], ctl: [0, 90], A: [0, 150], no: [180, 120] } as Record<string, readonly number[]>)[name]])) : catalog[item.device.type].terminals,
     anchors: item.placed.anchors, nets: Object.fromEntries(model.connections.filter((connection) => connection.device === item.device.id)
       .map((connection) => [connection.terminal, connection.net])) }));
   try {
@@ -35,7 +35,7 @@ it.each(Object.entries(fixtures))('renders all assignments and exact artwork tra
     await page.waitForFunction(() => document.getElementById('status')?.textContent === 'Circuit rendered successfully.');
     await page.addScriptTag({ type: 'module', content: "import { renderFixture } from '/main.ts'; window.renderFixture = renderFixture;" });
     await page.waitForFunction(() => typeof (window as unknown as { renderFixture?: unknown }).renderFixture === 'function');
-    const result = await page.evaluate(async ({ source, expected, expectedRoutes, expectedOccurrences }) => {
+    const result = await page.evaluate(async ({ source, expected, expectedRoutes, expectedOccurrences, expectedJunctions }) => {
       const { renderFixture } = window as unknown as { renderFixture: typeof import('../examples/browser/main.js')['renderFixture'] };
       const first = await renderFixture('verified-fixture', source);
       const second = await renderFixture('verified-fixture', source);
@@ -68,6 +68,15 @@ it.each(Object.entries(fixtures))('renders all assignments and exact artwork tra
           errors.push('rendered occurrence violates proxy policy');
         }
       });
+      for (const joint of expectedJunctions) {
+        if (!joint.kind) continue;
+        const frame = [...root.querySelectorAll<SVGGElement>(`[data-${joint.kind}]`)]
+          .find((element) => element.getAttribute(`data-${joint.kind}`) === joint.name)!;
+        if (!frame) { errors.push('missing junction scope'); continue; }
+        const box = frame.getBBox();
+        if (joint.point[0] <= box.x || joint.point[0] >= box.x + box.width
+          || joint.point[1] <= box.y || joint.point[1] >= box.y + box.height) errors.push('junction outside nearest shared scope');
+      }
       for (const device of expected) {
         const group = [...root.querySelectorAll<SVGGElement>('[data-device]')].find((group) => group.getAttribute('data-device') === device.id)!;
         if (!group) { errors.push(`missing ${device.id}`); continue; }
@@ -108,6 +117,13 @@ it.each(Object.entries(fixtures))('renders all assignments and exact artwork tra
         stages: root.querySelectorAll('[data-stage]').length, blocks: root.querySelectorAll('[data-block]').length,
         report: second.report, viewBox: root.getAttribute('viewBox')!.split(/\s+/u).map(Number) };
     }, { source, expected, expectedRoutes: planned.routes,
+      expectedJunctions: planned.junctionScopes.map((joint) => {
+        const stage = joint.stages.length === 1 ? model.stages[joint.stages[0]] : undefined;
+        const block = model.stages[joint.stages[0]]?.block;
+        const commonBlock = block !== null && block !== undefined && joint.stages.every((index) => model.stages[index].block === block);
+        return { point: joint.point, kind: stage && !stage.implicit ? 'stage' : commonBlock ? 'block' : null,
+          name: stage && !stage.implicit ? stage.name : commonBlock ? model.blocks[block!].name : null };
+      }),
       expectedOccurrences: planned.occurrences.map((item) => ({ net: item.net.id, isProxy: item.isProxy })) });
     expect(result.errors, path).toEqual([]);
     expect(result.deterministic).toBe(true);

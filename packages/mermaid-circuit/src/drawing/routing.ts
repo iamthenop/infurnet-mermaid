@@ -12,6 +12,7 @@ export interface Routing {
   readonly attachments: readonly Attachment[];
   readonly bends: number;
   readonly crossings: number;
+  readonly junctionScopes: readonly { readonly net: string; readonly point: Point; readonly stages: readonly number[] }[];
 }
 const EPS = 1e-7;
 const equal = (a: Point, b: Point) => Math.abs(a[0] - b[0]) < EPS && Math.abs(a[1] - b[1]) < EPS;
@@ -214,10 +215,12 @@ export function validateConnectivity(layout: Layout, drawing: Routing): void {
 
 export function routeLayout(layout: Layout): Routing {
   const routes: Route[] = [], occurrences: NetOccurrence[] = [];
+  const scopes: { net: string; point: Point; stages: number[] }[] = [];
   const bodies = layout.devices.map((item) => item.placed.bounds);
   const obstacles = () => [...bodies, ...occurrences.map((proxy) => proxy.placed.bounds)];
   function branches(net: string, group: readonly Attachment[], joint: Point, initial: readonly Route[]): Route[] {
     const added: Route[] = [];
+    if (group.length > 1) scopes.push({ net, point: joint, stages: [...new Set(group.map((item) => item.stage))] });
     for (const item of group) if (!equal(item.point, joint)) {
       const side = item.side;
       const axis = conductorAxis(group) ?? (group.every((other) => other.side === side) && ['L', 'R'].includes(side) ? 1 : undefined);
@@ -231,6 +234,7 @@ export function routeLayout(layout: Layout): Routing {
           const route: Route = { net, points: [item.point, bend, tap], shape: axis === 0 ? '-|' : '|-' };
           if (!acceptsRoute(route, [...initial, ...added], obstacles())) throw new Error(`Routing failure for T-shaped branch on net "${net}".`);
           added.push(route);
+          scopes.push({ net, point: tap, stages: [...new Set(group.map((item) => item.stage))] });
           continue;
         }
       }
@@ -283,7 +287,7 @@ export function routeLayout(layout: Layout): Routing {
         const start = attachments.find((item) => equal(item.point, joints[i - 1]));
         const end = attachments.find((item) => equal(item.point, joints[i]));
         const startAxis = conductorAxis(groups[i - 1]), endAxis = conductorAxis(groups[i]);
-        const verticalFirst = startAxis === 0 || start?.side === 'T' && end?.side === 'L'
+        const verticalFirst = startAxis === 0 || (start?.side === 'T' || start?.side === 'B') && end?.side === 'L'
           || start?.side === 'R' && end?.side === 'B';
         const route = chooseRoute(net.id, joints[i - 1], joints[i], [...routes, ...added], obstacles(), verticalFirst);
         const departure = route.points[1], arrival = route.points.at(-2)!;
@@ -354,7 +358,11 @@ export function routeLayout(layout: Layout): Routing {
   }
   const crossings = new Set(routes.flatMap((route) => (crossingPoints(route, routes) ?? []).map(key)));
   const result: Routing = { routes, occurrences, junctions: junctions(routes, layout.attachments), attachments: layout.attachments,
-    bends: routes.filter((route) => route.shape !== '-').length, crossings: crossings.size };
+    bends: routes.filter((route) => route.shape !== '-').length, crossings: crossings.size, junctionScopes: [] };
+  const junctionScopes = result.junctions.map((joint) => {
+    const candidates = scopes.filter((scope) => scope.net === joint.net && equal(scope.point, joint.point)).sort((a, b) => a.stages.length - b.stages.length);
+    return candidates[0] ?? { ...joint, stages: [...new Set(layout.attachments.filter((item) => item.net === joint.net).map((item) => item.stage))] };
+  });
   validateConnectivity(layout, result);
-  return result;
+  return { ...result, junctionScopes };
 }

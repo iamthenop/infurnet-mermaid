@@ -3,6 +3,8 @@ import { Element, Graphic, type ElementOptions, type PlacedElement } from './cor
 import { bounds, unionBounds, type Bounds, type Point } from './geometry.js';
 import type { SymbolId } from './symbols.js';
 
+export const BLOCK_PADDING = 45;
+
 export interface DevicePlacement {
   readonly device: Device;
   readonly element: Element;
@@ -59,24 +61,40 @@ function defaultRotation(device: Device): number {
   return conduction(device)?.[0] === 'A' ? 90 : 0;
 }
 
+export function icGeometry(device: Device): { width: number; height: number; anchors: Record<string, Point> } {
+  const pins = (side: PinSide) => device.terminals.filter((name) => device.pinSides?.[name] === side);
+  const width = Math.max(120, (Math.max(pins('T').length, pins('B').length) + 1) * 60) + 60;
+  const height = Math.max(120, (Math.max(pins('L').length, pins('R').length) + 1) * 60) + 60;
+  const anchors: Record<string, Point> = { center: [width / 2, height / 2] };
+  for (const side of ['T', 'B', 'L', 'R'] as const) {
+    const names = pins(side);
+    names.forEach((name, index) => {
+      const along = (side === 'T' || side === 'B' ? width : height) / 2 + (index - (names.length - 1) / 2) * 60;
+      anchors[name] = side === 'T' ? [along, 0] : side === 'B' ? [along, height] : side === 'L' ? [0, along] : [width, along];
+    });
+  }
+  return { width, height, anchors };
+}
+
 export function deviceElement(device: Device, options: ElementOptions): Element {
   if (device.type !== 'ic') return new Element(device.type as SymbolId, options);
-  const sides: Record<PinSide, Point> = { T: [90, 0], B: [90, 180], L: [0, 90], R: [180, 90] };
-  const anchors = Object.fromEntries(Object.entries(device.pinSides ?? {}).map(([name, side]) => [name, sides[side]]));
+  const { width, height, anchors } = icGeometry(device);
   return new Graphic([
-    { kind: 'polyline', points: [[30, 30], [150, 30], [150, 150], [30, 150], [30, 30]] },
-    { kind: 'line', start: [90, 0], end: [90, 30] },
-    { kind: 'line', start: [90, 150], end: [90, 180] },
-    { kind: 'line', start: [0, 90], end: [30, 90] },
-    { kind: 'line', start: [150, 90], end: [180, 90] },
-  ], { ...anchors, center: [90, 90] }, options);
+    { kind: 'polyline', points: [[30, 30], [width - 30, 30], [width - 30, height - 30], [30, height - 30], [30, 30]] },
+    ...device.terminals.map((name) => {
+      const start = anchors[name], side = device.pinSides![name];
+      const end: Point = side === 'T' ? [start[0], 30] : side === 'B' ? [start[0], height - 30]
+        : side === 'L' ? [30, start[1]] : [width - 30, start[1]];
+      return { kind: 'line' as const, start, end };
+    }),
+  ], anchors, options);
 }
 
 function placement(device: Device, at: Point, rotation: number, anchor: string, flip = false): DevicePlacement {
   const element = deviceElement(device, { at, rotation, anchor, flip });
   const placed = element.place();
-  const size = device.type === 'ic' ? 180 : 120;
-  const pane = bounds(placed.transform.applyAll([[0, 0], [size, 0], [size, size], [0, size]]));
+  const { width, height } = device.type === 'ic' ? icGeometry(device) : { width: 120, height: 120 };
+  const pane = bounds(placed.transform.applyAll([[0, 0], [width, 0], [width, height], [0, height]]));
   return { device, element, placed, pane, rotation, flip };
 }
 
@@ -98,6 +116,15 @@ function refineAnalogPlacement(model: CircuitModel, devices: DevicePlacement[], 
     const center = item.placed.anchors.center;
     devices[devices.indexOf(item)] = placement(item.device, [center[0] + dx, center[1] + dy], item.rotation, 'center', item.flip);
   };
+  for (const controller of devices.filter((item) => item.device.type === 'ic')) {
+    const topPins = controller.device.terminals.filter((pin) => controller.device.pinSides![pin] === 'T' && netAt(controller.device, pin) !== undefined);
+    const inputs = topPins.flatMap((pin) => devices.filter((item) => item.device.stage !== controller.device.stage)
+      .flatMap((item) => item.device.terminals.filter((terminal) => netAt(item.device, terminal) === netAt(controller.device, pin))
+        .map((terminal) => item.placed.anchors[terminal])));
+    if (!inputs.length) continue;
+    const dy = Math.max(0, Math.max(...inputs.map((point) => point[1])) + 90 - controller.pane.minY);
+    for (const item of devices.filter((item) => item.device.stage === controller.device.stage)) move(item, 0, dy);
+  }
   for (const stage of model.stages) {
     const members = devices.filter((item) => stage.devices.includes(item.device.id));
     if (members.length < 2 || !members.every((item) => item.device.terminals.length === 2 && conduction(item.device))) continue;
@@ -191,6 +218,16 @@ export function floorplan(model: CircuitModel): Layout {
         (defaultRotation(device) + (transpose ? 270 : 0)) % 360, conduction(device)?.[0] ?? 'center');
     }));
   });
+  if (model.mode === 'A') for (const local of stageLayouts) {
+    for (const antenna of local.filter((item) => item.device.type === 'antenna')) {
+      const net = netAt(antenna.device, 'A');
+      const target = local.find((item) => item.device.type === 'ic' && item.device.terminals.some((pin) => net !== undefined
+        && netAt(item.device, pin) === net && item.device.pinSides![pin] === 'L'));
+      if (!target) continue;
+      const pin = target.device.terminals.find((pin) => netAt(target.device, pin) === net)!;
+      local[local.indexOf(antenna)] = placement(antenna.device, [target.pane.minX - 180, target.placed.anchors[pin][1] - 60], 0, 'A');
+    }
+  }
   const groupStages: number[][] = model.blocks.map((block) => [...block.stages]);
   const ungrouped = model.stages.flatMap((stage, index) => stage.block === null ? [index] : []);
   if (ungrouped.length) groupStages.push(ungrouped);
@@ -245,8 +282,8 @@ export function floorplan(model: CircuitModel): Layout {
       y += rowHeight(row) + 240;
     }
     if (groupIndex < model.blocks.length) frames.push({ kind: 'block', name: model.blocks[groupIndex].name,
-      bounds: pad(unionBounds(groupStages[groupIndex].map((index) => stageBounds[index])), 90) });
-    groupX += groupWidth + 600;
+      bounds: pad(unionBounds(groupStages[groupIndex].map((index) => stageBounds[index])), BLOCK_PADDING) });
+    groupX += groupWidth + 300;
   });
   if (model.mode === 'A') {
     refineAnalogPlacement(model, devices, netAt);
@@ -260,7 +297,7 @@ export function floorplan(model: CircuitModel): Layout {
     });
     frames.forEach((frame, index) => {
       const box = frame.kind === 'stage' ? stageBounds[model.stages.findIndex((stage) => stage.name === frame.name)]
-        : pad(unionBounds(model.blocks.find((block) => block.name === frame.name)!.stages.map((stage) => stageBounds[stage])), 90);
+        : pad(unionBounds(model.blocks.find((block) => block.name === frame.name)!.stages.map((stage) => stageBounds[stage])), BLOCK_PADDING);
       frames[index] = { ...frame, bounds: box };
     });
   }

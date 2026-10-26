@@ -18,21 +18,58 @@ function topology(model: CircuitModel): string[][] {
 }
 
 describe('circuit parser', () => {
-  it('preserves the controller topology and the four IC pin sides', () => {
+  it('preserves the controller topology and IC pin sides and antenna connection', () => {
     const source = drawingFixtures['../examples/fixtures/wireless-solenoid.mmd'];
     const model = parseCircuit(source);
     expect(topology(model)).toEqual([
-      ['Source.P', 'Fuse.A'], ['Fuse.B', 'remote.v+', 'remote.ctl'],
-      ['Source.N', 'remote.v-', 'Solenoid.B', 'Diode.A'], ['remote.no', 'Solenoid.A', 'Diode.K'],
+      ['Antenna.A', 'Remote.A'], ['Source.P', 'Fuse.A'], ['Fuse.B', 'Remote.v+', 'Remote.ctl'],
+      ['Source.N', 'Remote.v-', 'Solenoid.B', 'Diode.A'], ['Remote.no', 'Solenoid.A', 'Diode.K'],
     ].map((group) => group.sort()).sort());
-    expect(model.devices.find((device) => device.id === 'remote')!.pinSides)
-      .toEqual({ 'v+': 'T', ctl: 'L', 'v-': 'B', no: 'R' });
+    expect(model.devices.find((device) => device.id === 'Remote')!.pinSides)
+      .toEqual({ 'v+': 'T', ctl: 'L', A: 'L', 'v-': 'B', no: 'R' });
     expect(model.nets.every((net) => net.type === 'net' && net.implicit)).toBe(true);
-    expect(model.devices.map((device) => device.id).sort()).toEqual(['Diode', 'Fuse', 'Solenoid', 'Source', 'remote']);
-    expect(() => parseCircuit(source.replace('L:remote', 'T:remote'))).toThrow('one IC pin per side');
-    expect(() => parseCircuit(source.replace('T:remote', 'remote'))).toThrow('side qualifier');
-    expect(() => parseCircuit(source + '\nVDD --- |v+| R:remote')).toThrow('conflicting sides');
-    expect(() => parseCircuit('circuitDiagram A\nremote[remote]:::ic')).toThrow('one IC pin on each');
+    expect(model.devices.map((device) => device.id).sort()).toEqual(['Antenna', 'Diode', 'Fuse', 'Remote', 'Solenoid', 'Source']);
+    expect(parseCircuit(source.replace('L:Remote', 'T:Remote')).devices.find((device) => device.id === 'Remote')!.pinSides!.ctl).toBe('T');
+    expect(() => parseCircuit(source.replace('T:Remote', 'Remote'))).toThrow('side qualifier');
+    expect(() => parseCircuit(source + '\nVDD --- |v+| R:Remote')).toThrow('conflicting sides');
+    expect(() => parseCircuit('circuitDiagram A\nRemote[Remote]:::ic')).toThrow('at least one named pin');
+  });
+
+  it('places IC side markers next to the connection according to written direction', () => {
+    const declarations = 'circuitDiagram A\nU[U]:::ic\nN([N]):::pinInOut';
+    expect(parseCircuit(`${declarations}\nU:R |out| --- N`).devices[0].pinSides).toEqual({ out: 'R' });
+    expect(parseCircuit(`${declarations}\nN --- |in| L:U`).devices[0].pinSides).toEqual({ in: 'L' });
+    for (const link of ['R:U |out| --- N', 'N --- |in| U:L']) {
+      expect(() => parseCircuit(`${declarations}\n${link}`)).toThrow('Unsupported');
+    }
+  });
+
+  it('infers the sole antenna terminal in either position, including forward declarations', () => {
+    for (const link of ['A --- |in| L:U', 'U:R |out| --- A']) {
+      const model = parseCircuit(`circuitDiagram A\n${link}\nA[A]:::antenna\nU[U]:::ic`);
+      expect(model.connections.find((connection) => connection.device === 'A')!.terminal).toBe('A');
+      expect(model.nets).toHaveLength(1);
+    }
+    for (const link of ['A --- N', 'N --- A']) {
+      expect(parseCircuit(`circuitDiagram A\n${link}\nA[A]:::antenna\nN([N]):::pinInOut`).connections)
+        .toEqual([{ device: 'A', terminal: 'A', net: 'N' }]);
+    }
+    expect(() => parseCircuit('circuitDiagram A\nA[A]:::antenna\nU[U]:::ic\nA |B| --- |in| L:U')).toThrow('Unknown terminal');
+  });
+
+  it('keeps direct block devices in a shared implicit stage inside that block', () => {
+    const model = parseCircuit(`circuitDiagram A
+subgraph block load
+R1[R1]:::resistor
+subgraph stage named
+R2[R2]:::resistor
+end
+R3[R3]:::resistor
+end`);
+    expect(model.blocks[0].stages).toEqual([0, 1]);
+    expect(model.stages[0]).toMatchObject({ name: null, implicit: true, block: 0, devices: ['R1', 'R3'] });
+    expect(model.stages[1]).toMatchObject({ name: 'named', block: 0, devices: ['R2'] });
+    expect(model.devices.map((device) => device.stage)).toEqual([0, 1, 0]);
   });
 
   it('retains all twelve XOR devices and the specified terminal groups', () => {
@@ -87,7 +124,7 @@ describe('circuit parser', () => {
     const model = parseCircuit(`circuitDiagram ${mode}\nU1["display<br/>value=1"]:::${type}`);
     const terminals = type.endsWith('Blk') ? ['G', 'D', 'S', 'B']
       : ['pmos', 'nmos'].includes(type) ? ['G', 'D', 'S']
-        : type === 'diode' ? ['A', 'K'] : type.endsWith('Source') ? ['P', 'N']
+        : type === 'antenna' ? ['A'] : type === 'diode' ? ['A', 'K'] : type.endsWith('Source') ? ['P', 'N']
           : type === 'nand' ? ['I1', 'I2', 'O'] : ['inverter', 'buffer'].includes(type) ? ['I', 'O'] : ['A', 'B'];
     expect(model.devices[0]).toMatchObject({ id: 'U1', type, label: 'display<br/>value=1', stage: 0 });
     expect([...model.devices[0]!.terminals].sort()).toEqual(terminals.sort());
@@ -160,7 +197,7 @@ describe('circuit parser', () => {
     expect(() => parseCircuit(`${declarations}\nVDD --- M1 |A|`)).toThrow('Declare endpoint "VDD" explicitly');
   });
 
-  it.each(['lamp', 'lamp2', 'breaker', 'antenna', 'opamp'])('keeps %s catalog-only', (type) => {
+  it.each(['lamp', 'lamp2', 'breaker', 'opamp'])('keeps %s catalog-only', (type) => {
     for (const mode of ['A', 'D']) {
       expect(() => parseCircuit(`circuitDiagram ${mode}\nU1["U1"]:::${type}`)).toThrow('Unknown authorable');
     }
@@ -444,7 +481,6 @@ end`);
     ['circuitDiagram D\nsubgraph stage first\nsubgraph stage second', 'Stages cannot'],
     ['circuitDiagram D\nsubgraph stage first\nsubgraph block nested', 'Blocks may only'],
     ['circuitDiagram D\nsubgraph block first\nsubgraph block nested', 'Blocks may only'],
-    ['circuitDiagram D\nsubgraph block first\nU1["U1"]:::buffer\nend', 'Blocks contain stages'],
     ['circuitDiagram D\nsubgraph stage first\nN(["N"]):::pinInOut\nend', 'outside subgraphs'],
     ['circuitDiagram D\nsubgraph block first\nN(["N"]):::pinInOut\nend', 'outside subgraphs'],
     ['circuitDiagram D\ndirection LR', 'inside a stage'],

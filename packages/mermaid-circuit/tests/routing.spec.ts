@@ -178,7 +178,7 @@ describe('orthogonal routing', () => {
     const layout = floorplan(parseCircuit(fixtures['../examples/fixtures/wireless-solenoid.mmd']));
     const routing = routeLayout(layout);
     const terminal = (device: string, name: string) => layout.attachments.find((item) => item.device === device && item.terminal === name)!;
-    const outgoing = terminal('remote', 'no'), top = terminal('Solenoid', 'A'), bottom = terminal('Solenoid', 'B');
+    const outgoing = terminal('Remote', 'no'), top = terminal('Solenoid', 'A'), bottom = terminal('Solenoid', 'B');
     const upperBranch = routing.routes.find((route) => route.net === top.net && route.points[0] === top.point)!;
     const feed = routing.routes.find((route) => route.net === outgoing.net && route.points[0] === outgoing.point)!;
     expect(feed.shape).toBe('-|');
@@ -214,8 +214,13 @@ describe('orthogonal routing', () => {
     expect(sourceWire.points[1][0]).toBe(supply.point[0]);
     expect(sourceWire.points[1][1]).toBeLessThan(supply.point[1]);
     expect(sourceWire.points.at(-1)![0]).toBeGreaterThan(supply.point[0]);
-    const power = terminal('remote', 'v+'), control = terminal('remote', 'ctl');
+    const power = terminal('Remote', 'v+'), control = terminal('Remote', 'ctl');
     const powerSplit = centeredPair(power, control);
+    expect(routing.junctionScopes).toContainEqual({ net: power.net, point: powerSplit.joint, stages: [power.stage] });
+    for (const pair of [split, join]) {
+      expect(routing.junctionScopes.find((scope) => scope.point === pair.joint || scope.point.every((value, index) => value === pair.joint[index]))!.stages)
+        .toEqual([top.stage]);
+    }
     const powerFeed = routing.routes.find((route) => route.net === power.net && !powerSplit.wires.includes(route))!;
     expect(powerFeed.points.at(-1)).toEqual(powerSplit.joint);
     expect(powerFeed.points.at(-2)![0]).toBe(powerSplit.joint[0]);

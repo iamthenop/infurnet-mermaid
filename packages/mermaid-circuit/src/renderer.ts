@@ -2,9 +2,9 @@ import type { ExternalDiagramDefinition } from 'mermaid';
 import { ScaffoldDb } from './db.js';
 import type { CircuitModel } from './circuitTypes.js';
 import { Drawing, Graphic, Wire, Dot } from './drawing/core.js';
-import { floorplan } from './drawing/layout.js';
+import { BLOCK_PADDING, floorplan, pad } from './drawing/layout.js';
 import { routeLayout } from './drawing/routing.js';
-import type { Point } from './drawing/geometry.js';
+import { unionBounds, type Point } from './drawing/geometry.js';
 
 type DiagramDefinition = Awaited<ReturnType<ExternalDiagramDefinition['loader']>>['diagram'];
 
@@ -26,6 +26,24 @@ export function getLastRenderReport(): RenderReport | undefined { return lastRep
 function compose(model: CircuitModel) {
   const start = performance.now(), layout = floorplan(model), placedAt = performance.now();
   const routing = routeLayout(layout), routedAt = performance.now();
+  const stageBounds = [...layout.stageBounds];
+  const blockJunctions = model.blocks.map(() => [] as Point[]);
+  for (const scope of routing.junctionScopes) {
+    if (scope.stages.length === 1) {
+      const index = scope.stages[0], [x, y] = scope.point;
+      stageBounds[index] = unionBounds([stageBounds[index], pad({ minX: x, maxX: x, minY: y, maxY: y }, 30)]);
+    } else {
+      const block = model.stages[scope.stages[0]]?.block;
+      if (block !== null && block !== undefined && scope.stages.every((stage) => model.stages[stage].block === block)) blockJunctions[block].push(scope.point);
+    }
+  }
+  const frames = layout.frames.map((frame) => {
+    if (frame.kind === 'stage') return { ...frame, bounds: stageBounds[model.stages.findIndex((stage) => stage.name === frame.name)] };
+    const index = model.blocks.findIndex((block) => block.name === frame.name);
+    const content = [...model.blocks[index].stages.map((stage) => stageBounds[stage]), ...blockJunctions[index]
+      .map(([x, y]) => ({ minX: x, maxX: x, minY: y, maxY: y }))];
+    return { ...frame, bounds: pad(unionBounds(content), BLOCK_PADDING) };
+  });
   for (const attachment of layout.attachments) {
     if (!routing.routes.some((route) => route.net === attachment.net && [route.points[0], route.points.at(-1)!]
       .some((point) => Math.hypot(point[0] - attachment.point[0], point[1] - attachment.point[1]) < 1e-7))) {
@@ -38,12 +56,12 @@ function compose(model: CircuitModel) {
   };
   const text = (content: string, at: Point, attrs: Record<string, string>) =>
     add(new Graphic([], {}, { at: [0, 0], rotation: 0, labels: [{ text: content, at }] }), { 'data-label': 'true', ...attrs });
-  for (const frame of [...layout.frames].sort((a, b) => Number(a.kind === 'stage') - Number(b.kind === 'stage'))) {
+  for (const frame of [...frames].sort((a, b) => Number(a.kind === 'stage') - Number(b.kind === 'stage'))) {
     const b = frame.bounds;
     add(new Graphic([{ kind: 'polyline', points: [[b.minX, b.minY], [b.maxX, b.minY], [b.maxX, b.maxY],
       [b.minX, b.maxY], [b.minX, b.minY]] }], {}, { at: [0, 0], rotation: 0, stroke: '#777', strokeWidth: 1 }),
     { [`data-${frame.kind}`]: frame.name });
-    text(frame.name, [b.minX + 12, b.minY + (frame.kind === 'stage' ? -42 : 22)], { 'data-frame-label': frame.kind });
+    text(frame.name, [b.minX + 12, b.minY + (frame.kind === 'stage' ? -12 : 14)], { 'data-frame-label': frame.kind });
   }
   for (const route of routing.routes) add(new Wire({ at: route.points[0], to: route.points.at(-1)!, shape: route.shape }),
     { 'data-net': route.net, 'data-wire': route.shape, 'data-points': JSON.stringify(route.points) });

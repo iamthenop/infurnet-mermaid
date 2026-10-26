@@ -11,8 +11,8 @@ The basic renderer implements the placement and routing subset described here. T
 3. Signals flow from left to right.
 4. Inputs appear on the left and outputs on the right.
 5. Stage frames follow the [stage presentation](#stage-presentation) convention.
-6. Signals stay outside stage frames except for branches crossing the borders to reach device terminals.
-7. Input signals split at junctions outside stage frames.
+6. Signals cross stage and block frames as required to reach their terminals.
+7. Junction placement follows the nearest shared scope in [Routing and junction presentation](#routing-and-junction-presentation).
 8. The first gate driven by an input is aligned horizontally with that input pin.
 9. Analog devices with separate control terminals retain a vertical stagger for input access in a left-to-right row. Parallel two-terminal devices align their conduction endpoints. Digital stages use signal-dependency levels: gates at the same level share a column in LR, or a row in TB, in declaration order.
 10. Additional gate connections branch from the corresponding input line using orthogonal routing.
@@ -25,13 +25,15 @@ Structural membership and diagram-mode inheritance are defined in [Circuit struc
 
 ### Stage presentation
 
-Each stage is enclosed by a dashed frame labelled with its name. Stage placement remains governed by its declared direction, as defined in the [syntax rules](notation.md#syntax-rules).
+Each explicit stage is enclosed by a dashed frame labelled with its name. Stage placement remains governed by its declared direction, as defined in the [syntax rules](notation.md#syntax-rules).
 
 ### Block presentation
 
-A block visually groups its contained stages. A block does not draw new electrical connections or alter existing wire topology.
+A block visually groups its contained stages and direct devices. A block does not draw new electrical connections or alter existing wire topology.
 
 Blocks use solid outlines around dashed stage frames; neither frame creates an electrical connection. Blocks default to side-by-side placement with aligned vertical midpoints. Component alignment for explicit DC connections may move frames with their contents.
+
+Block frames use 45 units of inner padding. The default horizontal gap between block placement groups is 300 units, before frame and label extents.
 
 ## Symbols
 
@@ -60,13 +62,15 @@ Internal IC circuitry is not rendered merely because an IC body is present.
 
 The nine existing [IC templates](../shapes/ic-templates/) provide visual references. The templates do not establish pin ordering, package numbering, or electrical connectivity.
 
-The supported four-pin IC has a fixed 120 × 120 rectangular body with one centered pin per side. Each lead is 30 units long, giving a 180 × 180 extent. This geometry applies only to the approved one-pin-per-side case.
+IC bodies have a minimum width and height of 120 units. Pins on each side are centered as a group, 60 units apart in their [notation order](notation.md#dynamic-ic-connection-example). Top and bottom pins run left to right; left and right pins run top to bottom.
 
-General IC resizing and pin ordering remain outside this release.
+For each dimension, the body span is `max(120, (n + 1) × 60)`, where `n` is the larger pin count on the two corresponding sides. Leads extend 30 units beyond the body. One pin per side retains the approved 120 × 120 body and 180 × 180 extent.
 
 ## Routing and junction presentation
 
-Wires use orthogonal routing. Junction markers are placed according to the [junction contract](notation.md#junctions), with input splits positioned outside stage frames as specified above. Routes and crossings must not redefine electrical connectivity.
+Wires use orthogonal routing. Junction markers follow the [junction contract](notation.md#junctions). A junction belongs to the nearest shared scope of the branches it joins: their stage, then their block, then the diagram.
+
+Stage frames enclose their junctions with at least 30 units of clearance; block frames enclose shared block junctions within their inner padding. Routes and crossings must not redefine electrical connectivity.
 
 ## Labels
 

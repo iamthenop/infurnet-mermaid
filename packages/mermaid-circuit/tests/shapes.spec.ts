@@ -199,7 +199,7 @@ describe('shape catalog', () => {
       Object.keys(assets).map((path) => path.split('/').at(-1)!).sort(),
     );
     const definitions = [...notation.matchAll(/^\| `([^`]+)` \| (Device|Net) \| ([^|]+) \|$/gmu)];
-    expect(definitions).toHaveLength(21);
+    expect(definitions).toHaveLength(22);
     expect(definitions.map((match) => match[1])).not.toContain('net');
     const existing = definitions.map((match) => match[1]!).filter((key) => key !== 'net' && key !== 'ic');
     expect(Object.keys(shapes)).toEqual(expect.arrayContaining(existing));
@@ -399,7 +399,7 @@ describe('shape catalog', () => {
       .toHaveLength(2);
     expect(elements(readSvg(shapes.breaker.file), 'circle')).toHaveLength(2);
     expect(referencePaths('breaker').some(({ d }) => d!.includes(' A '))).toBe(true);
-    expect(shapes.antenna.terminals).toEqual({});
+    expect(shapes.antenna.terminals).toEqual({ A: [60, 90] });
     expect(shapes.antenna.anchor).toEqual([60, 90]);
     expect(shapes.opamp.terminals).toEqual({ in1: [0, 40], in2: [0, 80], out: [120, 60], vd: [60, 0], vs: [60, 120] });
     const body = pathSubpaths(referencePaths('opamp')[0]!.d!)[0]!;

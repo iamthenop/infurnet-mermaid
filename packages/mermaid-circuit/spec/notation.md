@@ -1,8 +1,8 @@
 # Notation for circuit diagrams
 
-This specification records the approved syntax and electrical semantics of `circuitDiagram`. The parser implements the 21 authorable object types, diagram modes, typed subgraphs, and fixed-terminal connections described here. The NAND2 example is a parser acceptance fixture.
+This specification records the approved syntax and electrical semantics of `circuitDiagram`. The parser implements the 22 authorable object types, diagram modes, typed subgraphs, and fixed-terminal connections described here. The NAND2 example is a parser acceptance fixture.
 
-Basic placement, orthogonal wiring, and symbol rendering are implemented. IC support is limited to the one-pin-per-side case described below.
+Basic placement, orthogonal wiring, and symbol rendering are implemented. Mode `A` supports named IC pins on any side, including multiple pins per side.
 
 The notation is a deliberately restricted Mermaid flowchart-like syntax. Compatibility with the complete Mermaid flowchart grammar is not promised. Geometry and presentation are governed by [Drawing style](style.md).
 
@@ -42,7 +42,7 @@ The parser records the diagram mode and enforces registered-shape eligibility fo
 
 ## Object types
 
-The authorable object vocabulary is closed and contains these 21 types. Generic nets remain internal connectivity groups and cannot be declared with `:::net`.
+The authorable object vocabulary is closed and contains these 22 types. Generic nets remain internal connectivity groups and cannot be declared with `:::net`.
 
 | Type | Kind | Terminals |
 | --- | --- | --- |
@@ -58,6 +58,7 @@ The authorable object vocabulary is closed and contains these 21 types. Generic 
 | `motor` | Device | A, B |
 | `solenoid` | Device | A, B |
 | `fuse` | Device | A, B |
+| `antenna` | Device | A |
 | `nand` | Device | I1, I2, O |
 | `ic` | Device | Dynamic |
 | `inverter` | Device | I, O |
@@ -105,6 +106,7 @@ These references preserve the existing asset filenames in the [shape library](..
 | `motor` | `motor.svg` |
 | `solenoid` | `solenoid.svg` |
 | `fuse` | `fuse.svg` |
+| `antenna` | `antenna.svg` |
 | `nand` | `nand.svg` |
 | `inverter` | `inverter.svg` |
 | `buffer` | `buffer.svg` |
@@ -175,12 +177,12 @@ subgraph block datapath
 end
 ```
 
-This example illustrates structural membership only. It does not authorize the new logic gates in the currently closed object-type table. The existing 21-type vocabulary remains unchanged.
+This example illustrates structural membership only. It does not authorize the new logic gates in the currently closed object-type table. The existing 22-type vocabulary remains unchanged.
 
 ### Membership and hierarchy
 
 1. A stage contains devices.
-2. A block groups stages.
+2. A block groups stages and may contain direct device declarations.
 3. A stage may appear at diagram level or inside a block.
 4. Stages do not contain other stages or blocks.
 5. Blocks do not contain other blocks.
@@ -190,7 +192,7 @@ This example illustrates structural membership only. It does not authorize the n
 9. All subgraphs inherit the enclosing diagram's `D` or `A` mode.
 10. A subgraph cannot override diagram-mode eligibility.
 
-These rules define the initial two-level grouping model, not reusable modules or arbitrary hierarchical circuits. Devices outside all explicit stages retain the implicit final-stage behavior defined in the [syntax rules](#syntax-rules).
+These rules define the initial two-level grouping model, not reusable modules or arbitrary hierarchical circuits. Devices declared directly in a block share an implicit local stage, created at the first such declaration. Devices outside all subgraphs retain the implicit final-stage behavior defined in the [syntax rules](#syntax-rules).
 
 A block groups its child stages. It does not introduce an electrical ordering rule.
 
@@ -216,13 +218,13 @@ A block groups its child stages. It does not introduce an electrical ordering ru
 
 The approved connection notation provides side assignment for connected IC pins. A separate pin-placement declaration is not required for those pins.
 
-The ordering of multiple pins on one side, unconnected pin declarations, physical package numbering, IC definition and instance syntax, and automatic body sizing remain future design work.
+Unconnected pin declarations, physical package numbering, and reusable IC definition and instance syntax remain future design work.
 
-The `ic` type is authorable in mode `A` for a single device with exactly one connected pin on each of T, B, L, and R. Connections define the pin names and sides; repeated assignments must agree. This release rejects missing sides, multiple pins on a side, and side qualifiers on catalog devices.
+The `ic` type is authorable in mode `A`. Connections define its pin names and sides; repeated assignments must agree. Side qualifiers on catalog devices remain invalid.
 
 Pin names may contain letters, digits, `+`, and `-`. Side qualifiers also apply to IC endpoints in direct device-to-device connections. No reusable IC definitions, package numbering, or arbitrary pin-order rules are implemented.
 
-Typed subgraph parsing and structural validation remain unchanged. The renderer draws stage and block groups with their actual devices.
+The renderer draws stage and block groups with their actual devices.
 
 ## Connection syntax
 
@@ -322,6 +324,14 @@ A group connected to one named external endpoint uses that endpoint's identity. 
 
 Junction placement belongs to rendering and is outside the parser's responsibility.
 
+### Antenna connections
+
+Mode `A` accepts `antenna`. Its sole terminal `A` may be omitted on either endpoint, including forward references to its declaration. This resolves a device terminal; it does not infer a new external endpoint type.
+
+```text
+Antenna --- |A| L:Remote
+```
+
 ### IC pin connections
 
 An IC connection uses the same net-to-terminal notation as other devices.
@@ -330,7 +340,7 @@ The IC endpoint additionally identifies the side on which the named terminal app
 
 ```text
 net --- |pinName| side:device
-side:device |pinName| --- net
+device:side |pinName| --- net
 ```
 
 The permitted side identifiers are:
@@ -342,7 +352,7 @@ The permitted side identifiers are:
 | `L` | Left |
 | `R` | Right |
 
-The side identifier is written directly before the IC device identifier, separated by one colon.
+The side marker faces the connection. A source endpoint on the left uses `device:side`; a destination endpoint on the right uses `side:device`. The opposite marker position is invalid.
 
 The side qualifier is part of the connection endpoint notation. It is not part of the device identifier or terminal name.
 
@@ -352,7 +362,7 @@ For example:
 
 ```text
 A --- |IN1| L:U1
-L:U1 |IN1| --- A
+U1:L |IN1| --- A
 ```
 
 Both statements describe terminal `IN1` on the left side of IC `U1`, connected to net `A`.
@@ -384,7 +394,7 @@ This demonstrates that a device may appear on the left side of a connection. Bot
 ### Dynamic IC connection example
 
 ```text
-circuitDiagram D
+circuitDiagram A
 
 A(["A"]):::pinIn
 B(["B"]):::pinIn
@@ -399,17 +409,17 @@ end
 
 A --- |IN1| L:U1
 B --- |IN2| L:U1
-R:U1 |OUT| --- Y
+U1:R |OUT| --- Y
 
 VDD --- |VCC| T:U1
-B:U1 |GND| --- VSS
+U1:B |GND| --- VSS
 ```
 
-This example illustrates the approved connection notation for a future dynamic IC device. The current parser supports only the four-pin, one-pin-per-side subset; this five-pin example remains illustrative.
+This five-pin example is accepted in mode `A`. Each IC requires at least one connected named pin; unused sides need no pin. Repeated uses of a pin must retain its original side.
 
 The five named terminals belong to the IC instance. Their sides are specified by their connection endpoints. Electrical connectivity is established by the corresponding nets.
 
-The example does not establish physical package pin numbers, ordering among multiple pins on one side, or IC internal behavior.
+Pins on each side retain their first connection-statement order. Their spacing and body dimensions follow [IC presentation](style.md#integrated-circuit-presentation). The example does not define physical package pin numbers or internal behavior.
 
 ## Syntax rules
 
@@ -432,7 +442,7 @@ The example does not establish physical package pin numbers, ordering among mult
 17. Stages stack vertically in declaration order, except for parallel branches placed together under [Basic automatic drawing](style.md#basic-automatic-drawing).
 18. `direction LR` selects left-to-right stage placement. It is the stored default when no direction is written; connectivity-based defaults are defined in [Basic automatic drawing](style.md#basic-automatic-drawing).
 19. `direction TB` selects top-to-bottom stage placement. Digital dependency levels follow the [orientation rules](style.md#orientation).
-20. Devices declared outside all explicit stages occupy an implicit final stage.
+20. Devices declared outside all subgraphs occupy an implicit final stage. Direct block devices follow the [membership rules](#membership-and-hierarchy).
 21. There are no notation-level style declarations.
 
 ## Bulk semantics

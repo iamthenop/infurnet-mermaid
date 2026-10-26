@@ -4,7 +4,7 @@ An external Mermaid circuit renderer with identifier `circuitDiagram`. The packa
 
 ## Implemented behavior
 
-The parser accepts `circuitDiagram D` and `circuitDiagram A`, followed by declarations and connections from the closed 21-type vocabulary in [the notation specification](spec/notation.md).
+The parser accepts `circuitDiagram D` and `circuitDiagram A`, followed by declarations and connections from the closed 22-type vocabulary in [the notation specification](spec/notation.md).
 
 ```text
 circuitDiagram D
@@ -19,7 +19,9 @@ U1 |O| --- Y
 
 Blank lines and Mermaid `%%` comments are accepted. The parser validates mode eligibility, declaration brackets, object identity, device terminals, terminal-qualified connections, and typed stage/block membership. Optional device parameters remain uninterpreted label content.
 
-The full 110-shape catalog is not an authorable device vocabulary. The parser now admits `fuse` in mode `A` and `nand` in mode `D`. Mode `A` also accepts a limited `ic`: four named pins, one per side, using the [IC pin notation](spec/notation.md#integrated-circuit-pins).
+The full 110-shape catalog is not an authorable device vocabulary. The parser now admits `fuse` in mode `A` and `nand` in mode `D`.
+
+Mode `A` also accepts `antenna` and dynamic `ic` devices using the [IC pin notation](spec/notation.md#integrated-circuit-pins). Multiple pins may share a side.
 
 Mode `A` accepts `motor` and `solenoid`. Both use terminals `A` and `B`:
 
@@ -65,7 +67,9 @@ The registered renderer places devices from the accepted model, routes orthogona
 
 Routing supports straight wires and the two one-bend forms. Named-net copies follow the [proxy policy](spec/style.md#basic-automatic-drawing); generic internal nets have no proxy symbols. An unsupported route fails explicitly instead of dropping a connection.
 
-The floorplanner recognizes supported series and parallel groups from their conduction terminals. Digital gates follow dependency levels, so the four-NAND XOR occupies three columns. This is a basic renderer, with no global layout search or general IC sizing policy.
+The floorplanner recognizes supported series and parallel groups from their conduction terminals. Digital gates follow dependency levels, so the four-NAND XOR occupies three columns.
+
+This is a basic renderer, with no global layout search. IC bodies grow to fit their named pins.
 
 The JSON shape catalog supplies mode eligibility and fixed terminal names. It is included with the compiled package; no Python or parser-generator runtime is required.
 
@@ -142,7 +146,7 @@ JS
 
 This draws two registered symbols, one wire, a dot, and labels. It tests drawing mechanics; it neither creates nor validates electrical connectivity.
 
-The manual API excludes other wire shapes, arrow options, and Schemdraw's other backends and full fluent API. Automatic junction detection and the limited four-pin IC belong to the circuit renderer.
+The manual API excludes other wire shapes, arrow options, and Schemdraw's other backends and full fluent API. Automatic junction detection and dynamic IC bodies belong to the circuit renderer.
 
 ## Local consumption
 
@@ -191,7 +195,7 @@ npx playwright install chromium
 npm run test:browser --workspace mermaid-circuit
 ```
 
-Unit tests cover the 21 notation types, device connections, hierarchy, parser failures, and database isolation. They also check placement, routing limits, and the NAND and XOR truth tables.
+Unit tests cover the 22 notation types, device connections, hierarchy, parser failures, and database isolation. They also check placement, routing limits, and the NAND and XOR truth tables.
 
 Browser tests register the compiled package with real Mermaid in Chromium. They check all five drawings, their symbol transforms and wire endpoints, failed input, and recovery after failure. See the [root README](../../README.md) for `.venv/` runtime activation and CI commands.
 
@@ -215,4 +219,4 @@ npm run render:fixtures --workspace mermaid-circuit
 
 The controller preserves the supplied `ctl` terminal and explicit DC connections to the voltage source. Its `ctl` and `no` pins represent the relay interface without invented internal contacts.
 
-Its IC uses the fixed geometry in [IC presentation](spec/style.md#integrated-circuit-presentation). The drawing does not verify physical module labels or battery, fuse, and wiring selection.
+Its IC uses the pin-dependent geometry in [IC presentation](spec/style.md#integrated-circuit-presentation). The drawing does not verify physical module labels or battery, fuse, and wiring selection.

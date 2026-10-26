@@ -1,9 +1,9 @@
-<svg id="fixture-xor-nand4" width="1742" xmlns="http://www.w3.org/2000/svg" viewBox="-466 -252 1742 822" height="822" overflow="visible" font-family="sans-serif" font-size="14" role="graphics-document document" aria-roledescription="circuitDiagram">
+<svg id="fixture-xor-nand4" width="1742" xmlns="http://www.w3.org/2000/svg" viewBox="-466 -222 1742 792" height="792" overflow="visible" font-family="sans-serif" font-size="14" role="graphics-document document" aria-roledescription="circuitDiagram">
 <g data-drawing-index="0" data-stage="xorNands" stroke-dasharray="8 6">
-<polyline points="-30,-30 900,-30 900,390 -30,390 -30,-30" stroke="#777" stroke-width="1" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+<polyline points="-120,-30 900,-30 900,390 -120,390 -120,-30" stroke="#777" stroke-width="1" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
 </g>
 <g data-drawing-index="1" data-label="true" data-frame-label="stage">
-<text x="-18" y="-72" xml:space="preserve" fill="#000">xorNands</text>
+<text x="-108" y="-42" xml:space="preserve" fill="#000">xorNands</text>
 </g>
 <g data-drawing-index="2" data-net="@implicit:N1:O" data-wire="-|" data-points="[[360,80],[240,80],[240,180]]">
 <polyline points="360,80 240,80 240,180" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
