@@ -179,6 +179,55 @@ Mermaid remains a peer dependency; the library does not bundle a second copy. In
 
 ## Browser example and tests
 
+### Circuit colours
+
+Select circuit colours through [Mermaid's theme configuration](https://mermaid.js.org/config/theming.html). The exact palettes and class mappings are defined in [Drawing style](spec/style.md#colour-appearances). Colour selection leaves the drawing's geometry, connections, and fonts unchanged.
+
+For standard black on white:
+
+```ts
+mermaid.initialize({ startOnLoad: false, theme: 'default' });
+```
+
+For the inverse appearance:
+
+```ts
+mermaid.initialize({ startOnLoad: false, theme: 'dark' });
+```
+
+For the KiCad-inspired coloured appearance:
+
+```ts
+mermaid.initialize({
+  startOnLoad: false,
+  theme: 'base',
+  themeVariables: {
+    background: '#FFFFFF',
+    lineColor: '#009600',
+    primaryBorderColor: '#840000',
+    primaryTextColor: '#006464',
+    textColor: '#0F0F0F',
+  },
+});
+```
+
+The circuit names `default-inverse` and `colored` are not built-in Mermaid theme names. Use `dark` or `base` as shown above. No circuit notation or configuration key is added.
+
+Diagram frontmatter can override the host setting using the same configuration fields:
+
+```text
+---
+config:
+  theme: dark
+---
+circuitDiagram A
+R["R"]:::resistor
+```
+
+Exported SVGs carry their background and scoped styles. They retain their colours outside the host page, including when different circuit themes share one page.
+
+### Run the browser example
+
 From the repository root:
 
 ```sh
@@ -186,6 +235,8 @@ npm run dev --workspace mermaid-circuit
 ```
 
 Open the local URL printed by Vite. The page registers the compiled package, loads `examples/basic.mmd`, and displays the returned SVG with a completion status. The fixture renders a connected CMOS inverter.
+
+Use the circuit and appearance selectors to inspect all five fixtures in all three palettes. A preview can also be selected with `?fixture=cmos-nand2&appearance=colored` on that local URL.
 
 ```sh
 npm run typecheck --workspace mermaid-circuit

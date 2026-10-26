@@ -47,11 +47,40 @@ Rules 1–7 describe the default CMOS MOSFET representations: `nmos`, `pmos`, `n
 7. NMOS has no gate bubble.
 8. The default IEEE zigzag resistor is drawn horizontally. Source-symbol orientation follows the selected shape and its terminal coordinates in `shapes/shapes.json`. The existing `voltageSource` and `currentSource` symbols have vertical terminals; generic, waveform, controlled-source, and battery variants may use horizontal terminals.
 9. A voltage source has its positive terminal at the top.
-10. Symbols use black strokes with a nominal width of 2 units.
+10. Symbols use the selected [colour appearance](#colour-appearances), with a nominal stroke width of 2 units.
 11. Terminals lie on established snap points.
 12. Wires join terminal coordinates without unintended jogs.
 
 Bulk connectivity is governed by [bulk semantics](notation.md#bulk-semantics), not by symbol positioning.
+
+## Colour appearances
+
+Circuit colours follow graphical classes, not electrical roles. Theme selection changes only presentation: electrical connections, placement, routes, symbol transforms, labels, and bounds remain fixed. Fonts, stroke widths, and line styles retain their existing values.
+
+| Graphical class | `default` | `default-inverse` | `colored` |
+| --- | --- | --- | --- |
+| Background | `#FFFFFF` | `#101215` | `#FFFFFF` |
+| Wires and junction dots | `#000000` | `#F2F2F2` | `#009600` |
+| Device strokes | `#000000` | `#F2F2F2` | `#840000` |
+| Device and terminal labels | `#000000` | `#F2F2F2` | `#006464` |
+| Net and frame labels | `#000000` | `#F2F2F2` | `#0F0F0F` |
+| Stage and block frames | `#000000` | `#F2F2F2` | `#777777` |
+
+The circuit appearance names map to Mermaid's supported configuration:
+
+| Circuit appearance | Mermaid configuration |
+| --- | --- |
+| `default` | `theme: default` |
+| `default-inverse` | `theme: dark` |
+| `colored` | `theme: base` with the palette variables below |
+
+For `colored`, set `background`, `lineColor`, `primaryBorderColor`, `primaryTextColor`, and `textColor` to the corresponding table values. Resolved variables control the background, wires and dots, device strokes, device/terminal labels, and net/frame labels, respectively. Frame strokes use the explicit frame colour above.
+
+`default-inverse` and `colored` are circuit palette names, not Mermaid theme identifiers or circuit notation. Host configuration and diagram frontmatter use Mermaid's own precedence. The three mappings above are the supported circuit appearances; other Mermaid themes have no circuit palette.
+
+The diagram styles contract supplies colours scoped to each circuit SVG. Exported SVGs include their styles and a background behind the drawing. Theme changes must not recolour other diagrams or retain colours from an earlier render.
+
+Graphical pin, supply, and ground symbols use the device-stroke colour. Symbol interiors stay transparent where the artwork is transparent; filled marks use the device colour. Background knockout fills match the selected background, without altering the source artwork or adding body fills.
 
 ## Integrated circuit presentation
 

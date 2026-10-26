@@ -126,7 +126,12 @@ export const renderer: DiagramDefinition['renderer'] = {
       if (attrs['data-net-label'] || attrs['data-ic-label']) group.setAttribute('text-anchor', 'middle');
     }
     for (const element of root.querySelectorAll('[id]')) element.id = `${id}-${element.id}`;
-    svg.replaceChildren(...[...root.childNodes].map((node) => document.importNode(node, true)));
+    const background = document.createElementNS(svg.namespaceURI, 'rect');
+    background.setAttribute('data-circuit-background', 'true');
+    const viewBox = root.getAttribute('viewBox')!.split(/\s+/u);
+    ['x', 'y', 'width', 'height'].forEach((name, index) => background.setAttribute(name, viewBox[index]));
+    const styles = [...svg.children].filter((element) => element.localName === 'style');
+    svg.replaceChildren(...styles, background, ...[...root.childNodes].map((node) => document.importNode(node, true)));
     for (const name of ['viewBox', 'width', 'height', 'overflow']) svg.setAttribute(name, root.getAttribute(name)!);
     svg.setAttribute('font-family', 'sans-serif');
     svg.setAttribute('font-size', '14');
