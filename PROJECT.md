@@ -1,9 +1,5 @@
 # PROJECT.md — repository bindings
 
-<!-- Copy this template to the consuming repository root as PROJECT.md.
-Keep the preamble, remove uninstalled-skill sections, and replace or retain
-each *not yet defined* value. -->
-
 This file is the single home for repository-specific facts referenced
 by the installed skills. Skills state form and conduct; this file binds
 them to one repository. A skill or document that restates a binding is
@@ -19,7 +15,7 @@ infer it.
 
 | Binding | Value |
 | :--- | :--- |
-| Project name | *not yet defined* |
+| Project name | infurnet-mermaid |
 
 ## Build authority
 
