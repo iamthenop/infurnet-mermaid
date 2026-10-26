@@ -36,6 +36,17 @@ describe('orthogonal routing', () => {
       expect(routing.routes.some((route) => route.net === attachment.net && [route.points[0], route.points.at(-1)]
         .some((point) => point && Math.hypot(point[0] - attachment.point[0], point[1] - attachment.point[1]) < 1e-7))).toBe(true);
     }
+    for (const attachment of layout.attachments) {
+      const vector = ({ T: [0, -1], B: [0, 1], L: [-1, 0], R: [1, 0] } as const)[attachment.side];
+      const target = [attachment.point[0] + vector[0] * 60, attachment.point[1] + vector[1] * 60];
+      const covered = routing.routes.filter((route) => route.net === attachment.net).some((route) => route.points.slice(1).some((end, i) => {
+        const start = route.points[i];
+        return Math.abs((end[0] - start[0]) * (target[1] - start[1]) - (end[1] - start[1]) * (target[0] - start[0])) < 1e-5
+          && target[0] >= Math.min(start[0], end[0]) - 1e-5 && target[0] <= Math.max(start[0], end[0]) + 1e-5
+          && target[1] >= Math.min(start[1], end[1]) - 1e-5 && target[1] <= Math.max(start[1], end[1]) + 1e-5;
+      }));
+      expect(covered, `${attachment.device}.${attachment.terminal} lead`).toBe(true);
+    }
     for (const route of routing.routes) {
       expect(validPath(route.points)).toBe(true);
       expect(crossingPoints(route, routing.routes)!.length).toBeLessThanOrEqual(route.shape === '-' ? 2 : 1);
@@ -52,6 +63,10 @@ describe('orthogonal routing', () => {
       expect(routing.occurrences.filter((item) => item.net.id === net.id)).toHaveLength(1);
     }
     if (_name.endsWith('wireless-solenoid.mmd')) expect(routing.occurrences).toEqual([]);
+    if (_name.endsWith('cmos-xor12.mmd')) {
+      const pin = routing.occurrences.find((item) => item.net.id === 'B' && !item.isProxy)!;
+      expect(pin.placed.anchors.anchor[1]).toBe(layout.devices.find((item) => item.device.id === 'PB')!.placed.anchors.G[1]);
+    }
     for (const junction of routing.junctions) {
       const directions = new Set<string>();
       expect(model.nets.some((net) => net.id === junction.net)).toBe(true);
@@ -187,7 +202,12 @@ describe('orthogonal routing', () => {
     expect(feed.points.at(-2)![0]).toBe(feed.points.at(-1)![0]);
     expect(feed.points.at(-2)![1]).toBeLessThan(feed.points.at(-1)![1]);
     const centeredPair = (a: ReturnType<typeof terminal>, b: ReturnType<typeof terminal>) => {
-      const wires = [a, b].map((item) => routing.routes.find((route) => route.net === item.net && route.points[0] === item.point)!);
+      const wires = [a, b].map((item) => {
+        const first = routing.routes.find((route) => route.net === item.net && route.points[0] === item.point)!;
+        const next = routing.routes.find((route) => route.net === item.net && route.points[0] === first.points.at(-1));
+        return next && !routing.junctions.some((joint) => joint.net === item.net && joint.point.every((value, i) => value === first.points.at(-1)![i]))
+          ? { ...first, points: [...first.points, ...next.points.slice(1)] } : first;
+      });
       const joint = wires[0].points.at(-1)!;
       expect(wires[1].points.at(-1)).toEqual(joint);
       const arms = wires.map((wire) => wire.points.at(-2)!);
@@ -221,7 +241,7 @@ describe('orthogonal routing', () => {
       expect(routing.junctionScopes.find((scope) => scope.point === pair.joint || scope.point.every((value, index) => value === pair.joint[index]))!.stages)
         .toEqual([top.stage]);
     }
-    const powerFeed = routing.routes.find((route) => route.net === power.net && !powerSplit.wires.includes(route))!;
+    const powerFeed = routing.routes.find((route) => route.net === power.net && route.points[0] === terminal('Fuse', 'B').point)!;
     expect(powerFeed.points.at(-1)).toEqual(powerSplit.joint);
     expect(powerFeed.points.at(-2)![0]).toBe(powerSplit.joint[0]);
     expect(powerFeed.points.at(-2)![1]).toBeLessThan(powerSplit.joint[1]);
@@ -243,6 +263,20 @@ describe('orthogonal routing', () => {
       .toEqual(reflect(routing.junctions.find((item) => item.net === 'A')!.point));
     expect(routing.occurrences.some((item) => item.isProxy)).toBe(false);
     expect(routing.crossings).toBe(0);
+  });
+
+  it.each(['pinIn', 'pinOut', 'pinInOut'])('mirrors equivalent %s branches even when their declarations run in the same order', (type) => {
+    const terminal = type === 'pinOut' ? 'O' : 'I';
+    const source = `circuitDiagram D\nA([A]):::${type}\nB([B]):::${type}\n`
+      + Array.from({ length: 4 }, (_, i) => `G${i}[G${i}]:::buffer`).join('\n') + '\n'
+      + [0, 1, 2, 3].map((i) => `${i < 2 ? 'A' : 'B'} --- G${i} |${terminal}|`).join('\n');
+    const layout = floorplan(parseCircuit(source)), routing = routeLayout(layout);
+    const center = (Math.min(...layout.attachments.map((item) => item.point[1])) + Math.max(...layout.attachments.map((item) => item.point[1]))) / 2;
+    const pins = routing.occurrences.map((item) => item.placed.anchors.anchor);
+    expect(pins).toHaveLength(2);
+    expect(pins[1]).toEqual([pins[0][0], 2 * center - pins[0][1]]);
+    expect(routing.junctions[1].point).toEqual([routing.junctions[0].point[0], 2 * center - routing.junctions[0].point[1]]);
+    expect(routing.occurrences.some((item) => item.isProxy)).toBe(false);
   });
 
   it('keeps interleaved input branches on separate conductors ahead of symmetry', () => {

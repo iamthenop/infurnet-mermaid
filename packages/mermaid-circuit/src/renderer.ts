@@ -73,7 +73,16 @@ function compose(model: CircuitModel) {
     for (const terminal of item.device.terminals) {
       const point = item.placed.anchors[terminal];
       const attached = layout.attachments.find((attachment) => attachment.device === item.device.id && attachment.terminal === terminal);
-      text(terminal, [point[0] + 8, point[1] - 9], { 'data-terminal': terminal, 'data-terminal-device': item.device.id,
+      const side = attached?.side ?? ([['L', Math.abs(point[0] - item.pane.minX)], ['R', Math.abs(point[0] - item.pane.maxX)],
+        ['T', Math.abs(point[1] - item.pane.minY)], ['B', Math.abs(point[1] - item.pane.maxY)]] as ['L' | 'R' | 'T' | 'B', number][])
+        .sort((a, b) => a[1] - b[1])[0][0];
+      const vertical = item.device.type === 'ic' && (side === 'T' || side === 'B');
+      const at: Point = vertical ? [point[0] + 4, point[1]]
+        : [point[0] + (side === 'L' ? -4 : 4), point[1] + (side === 'B' ? 4 : -4)];
+      text(terminal, at, { 'data-terminal': terminal, 'data-terminal-device': item.device.id,
+        'data-terminal-side': side, 'text-anchor': side === 'L' || vertical && side === 'B' ? 'end' : 'start',
+        'dominant-baseline': vertical || side === 'B' ? 'hanging' : 'text-after-edge',
+        ...(vertical ? { transform: `rotate(-90 ${at[0]} ${at[1]})` } : {}),
         'data-x': String(point[0]), 'data-y': String(point[1]), ...(attached ? { 'data-terminal-net': attached.net } : {}) });
     }
   }

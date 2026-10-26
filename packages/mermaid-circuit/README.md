@@ -220,3 +220,7 @@ npm run render:fixtures --workspace mermaid-circuit
 The controller preserves the supplied `ctl` terminal and explicit DC connections to the voltage source. Its `ctl` and `no` pins represent the relay interface without invented internal contacts.
 
 Its IC uses the pin-dependent geometry in [IC presentation](spec/style.md#integrated-circuit-presentation). The drawing does not verify physical module labels or battery, fuse, and wiring selection.
+
+## Designer follow-up: recommended circuit size
+
+A recommended terminal-count limit has not been measured. A later layout evaluation should identify when clarity or render time starts to degrade, using both analog and digital circuits. The designer can then add a size recommendation based on those results; no maximum is claimed in this release.

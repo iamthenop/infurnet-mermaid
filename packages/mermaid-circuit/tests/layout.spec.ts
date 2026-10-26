@@ -67,6 +67,9 @@ describe('basic floorplanning', () => {
 
   it('expands the IC body for multiple pins and preserves parallel load alignment', () => {
     const layout = floorplan(fixture('wireless-solenoid'));
+    const fuse = layout.devices.find((item) => item.device.type === 'fuse')!;
+    expect(fuse.placed.anchors.A[1]).toBe(fuse.placed.anchors.B[1]);
+    expect(fuse.placed.anchors.A[0]).toBeLessThan(fuse.placed.anchors.B[0]);
     const remote = layout.devices.find((item) => item.device.id === 'Remote')!;
     expect(remote.pane.maxX - remote.pane.minX).toBe(180);
     expect(remote.pane.maxY - remote.pane.minY).toBe(240);

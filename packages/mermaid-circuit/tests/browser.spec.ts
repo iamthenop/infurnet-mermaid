@@ -28,6 +28,7 @@ it.each(Object.entries(fixtures))('renders all assignments and exact artwork tra
   const expected = layout.devices.map((item) => ({ id: item.device.id, type: item.device.type,
     terminals: item.device.type === 'ic' ? Object.fromEntries(Object.entries(item.device.pinSides!).map(([name]) =>
       [name, ({ 'v+': [90, 0], 'v-': [90, 240], ctl: [0, 90], A: [0, 150], no: [180, 120] } as Record<string, readonly number[]>)[name]])) : catalog[item.device.type].terminals,
+    sides: Object.fromEntries(layout.attachments.filter((attachment) => attachment.device === item.device.id).map((attachment) => [attachment.terminal, attachment.side])),
     anchors: item.placed.anchors, nets: Object.fromEntries(model.connections.filter((connection) => connection.device === item.device.id)
       .map((connection) => [connection.terminal, connection.net])) }));
   try {
@@ -88,7 +89,16 @@ it.each(Object.entries(fixtures))('renders all assignments and exact artwork tra
           const marker = [...root.querySelectorAll('[data-terminal]')].find((element) =>
             element.getAttribute('data-terminal-device') === device.id && element.getAttribute('data-terminal') === terminal)!;
           const label = marker.querySelector('text')!;
-          if (!close([Number(label.getAttribute('x')) - 8, Number(label.getAttribute('y')) + 9], [actual.x, actual.y])) errors.push('label transform');
+          const side = device.sides[terminal];
+          const vertical = device.type === 'ic' && ['T', 'B'].includes(side);
+          const offset = vertical ? [4, 0] : ({ L: [-4, -4], R: [4, -4], T: [4, -4], B: [4, 4] } as Record<string, number[]>)[side];
+          const anchor = side === 'L' || vertical && side === 'B' ? 'end' : 'start';
+          const baseline = vertical || side === 'B' ? 'hanging' : 'text-after-edge';
+          if (marker.getAttribute('text-anchor') !== anchor || marker.getAttribute('dominant-baseline') !== baseline) errors.push('label alignment');
+          const labelMatrix = root.getScreenCTM()!.inverse().multiply(label.getScreenCTM()!);
+          const labelPoint = new DOMPoint(Number(label.getAttribute('x')), Number(label.getAttribute('y'))).matrixTransform(labelMatrix);
+          if (!close([labelPoint.x, labelPoint.y], [actual.x + offset[0], actual.y + offset[1]])) errors.push('label position');
+          if (Math.abs(labelMatrix.a - (vertical ? 0 : 1)) > 1e-5 || Math.abs(labelMatrix.b - (vertical ? -1 : 0)) > 1e-5) errors.push('label rotation');
           const net = marker.getAttribute('data-terminal-net');
           if (net !== (device.nets[terminal] ?? null)) errors.push(`changed net ${device.id}.${terminal}`);
           if (net && !wires.some((wire) => wire.net === net && [wire.points[0], wire.points.at(-1)!]

@@ -86,7 +86,16 @@ Stage frames enclose their junctions with at least 30 units of clearance; block 
 
 A named-net connection label identifies the named terminal of its device endpoint.
 
-The terminal label is drawn adjacent to the device attachment point, rather than at the midpoint of the connecting wire.
+Terminal labels anchor to the transformed snap point on the symbol pane, with a four-unit gap from the wire. Standard 120 × 120 symbols use these alignments:
+
+| Terminal side | Label position | Text alignment |
+| --- | --- | --- |
+| Left | Above and left of the snap | Bottom right |
+| Right | Above and right of the snap | Bottom left |
+| Top | Above and right of the snap | Bottom left |
+| Bottom | Below and right of the snap | Top left |
+
+Custom IC left and right labels use the same side alignments. Top and bottom IC labels rotate 90° counterclockwise, with their relative top edge beside the snap. Top labels use their top-left anchor; bottom labels use their top-right anchor.
 
 Terminal-label placement is independent of the written order of the net and device endpoints.
 
@@ -205,13 +214,19 @@ Aligned two-terminal devices use equal wire lengths between the split, their ter
 
 Parallel two-terminal loads sit below a connected controller output to allow a centered feed stem. Parallel joins reach the return conductor through a centered stem. These stems take precedence over reducing the bend count.
 
-Routing tries an orthogonal straight connection first, then horizontal-first and vertical-first one-bend connections. A straight wire may cross at most two unrelated wires, and a bent wire at most one. Overlapping unrelated wires, reverse turns, and traversal through symbol bodies are rejected.
+Every connected device terminal has a straight outward wire approach of at least 60 units beyond its snap point. The symbol geometry and terminal coordinates stay fixed.
+
+Routing tries a straight connection first, then the two orthogonal one-bend forms. A separate straight approach segment precedes that route when needed for terminal clearance.
+
+A straight wire may cross at most two unrelated wires, and a bent wire at most one. Overlapping unrelated wires, reverse turns, and traversal through symbol bodies are rejected.
 
 Prefer moving components to introducing detours. Equivalent one-bend routes follow the terminal entry direction where feasible. Avoid unnecessary U-turns and doubling back; shorter wires must not displace clearer routing.
 
 Supply and ground occurrences never rotate or reflect. Pins may rotate only with a connected device. Every symbol transformation also transforms its terminal attachments without changing their identities.
 
-A lower NAND sharing its second input with an upper NAND supports vertical mirroring to align the shared-input branches. Symmetry extends to corresponding input pins, split junctions, and wire entry directions where feasible. Symmetry does not justify additional proxies.
+A lower NAND sharing its second input with an upper NAND supports vertical mirroring to align the shared-input branches. Symmetry extends to corresponding `pinIn`, `pinOut`, and `pinInOut` occurrences, split junctions, and wire entry directions where feasible.
+
+Equivalent reflected branches match device types and terminal sides, then prefer reflected pin positions. Connection declaration order does not override that match. Symmetry does not justify additional proxies.
 
 Exact group centering may translate a whole symbol by a fractional grid offset, including 15 units. Symbol-local attachments remain authoritative; artwork and attachment points move together. Routing meets those exact transformed positions.
 
@@ -222,3 +237,5 @@ Rendered connectivity is checked against the source model. Wire segments must co
 DC circuits retain explicit wires to source terminals when the source defines those connections. Rendering does not add supply rails, ground references, component labels, or internal relay contacts absent from the source.
 
 A `voltageSource` defaults to the left of its local connected circuit, vertically centered against the other components' extents. Its outgoing conventional-current path runs clockwise when the source topology permits that arrangement. Placement preserves polarity and connectivity; it does not invent a return path.
+
+A fuse on the positive supply path defaults to horizontal placement when no explicit stage direction prevents it. Adjacent stages reserve space for their supply and ground symbols, including the minimum terminal approaches.

@@ -116,6 +116,12 @@ function refineAnalogPlacement(model: CircuitModel, devices: DevicePlacement[], 
     const center = item.placed.anchors.center;
     devices[devices.indexOf(item)] = placement(item.device, [center[0] + dx, center[1] + dy], item.rotation, 'center', item.flip);
   };
+  for (const fuse of devices.filter((item) => item.device.type === 'fuse')) {
+    const source = devices.find((item) => item.device.type === 'voltageSource'
+      && netAt(item.device, 'P') !== undefined && netAt(item.device, 'P') === netAt(fuse.device, 'A'));
+    if (!source || model.stages[fuse.device.stage].explicitDirection) continue;
+    devices[devices.indexOf(fuse)] = placement(fuse.device, fuse.placed.anchors.center, 0, 'center');
+  }
   for (const controller of devices.filter((item) => item.device.type === 'ic')) {
     const topPins = controller.device.terminals.filter((pin) => controller.device.pinSides![pin] === 'T' && netAt(controller.device, pin) !== undefined);
     const inputs = topPins.flatMap((pin) => devices.filter((item) => item.device.stage !== controller.device.stage)
@@ -225,7 +231,9 @@ export function floorplan(model: CircuitModel): Layout {
         && netAt(item.device, pin) === net && item.device.pinSides![pin] === 'L'));
       if (!target) continue;
       const pin = target.device.terminals.find((pin) => netAt(target.device, pin) === net)!;
-      local[local.indexOf(antenna)] = placement(antenna.device, [target.pane.minX - 180, target.placed.anchors[pin][1] - 60], 0, 'A');
+      const labelWidth = Math.max(...antenna.device.label.split(/<br\s*\/?\s*>/iu).map((line) => line.length * 8));
+      const distance = Math.max(180, Math.ceil((labelWidth + 180) / 30) * 30);
+      local[local.indexOf(antenna)] = placement(antenna.device, [target.pane.minX - distance, target.placed.anchors[pin][1] - 60], 0, 'A');
     }
   }
   const groupStages: number[][] = model.blocks.map((block) => [...block.stages]);
@@ -255,14 +263,18 @@ export function floorplan(model: CircuitModel): Layout {
   });
   const rowWidth = (row: readonly number[]) => row.reduce((width, index) => width + stageBoxes[index].maxX - stageBoxes[index].minX, 0) + (row.length - 1) * 300;
   const rowHeight = (row: readonly number[]) => Math.max(0, ...row.map((index) => stageBoxes[index].maxY - stageBoxes[index].minY));
-  const groupHeights = groupRows.map((rows) => rows.reduce((height, row) => height + rowHeight(row) + 240, 0));
+  const hasNetType = (row: readonly number[], type: Net['type']) => model.connections.some((connection) =>
+    row.includes(deviceById.get(connection.device)!.stage) && model.nets.some((net) => net.id === connection.net && net.type === type));
+  const rowGap = (row: readonly number[], next: readonly number[] = []) =>
+    hasNetType(row, 'ground') && hasNetType(next, 'supplyNet') ? 300 : 240;
+  const groupHeights = groupRows.map((rows) => rows.reduce((height, row, index) => height + rowHeight(row) + rowGap(row, rows[index + 1]), 0));
   const fullHeight = Math.max(0, ...groupHeights);
   const devices: DevicePlacement[] = [], frames: Frame[] = [], stageBounds: Bounds[] = [];
   let groupX = 0;
   groupRows.forEach((rows, groupIndex) => {
     const groupWidth = Math.max(0, ...rows.map(rowWidth));
     let y = (fullHeight - groupHeights[groupIndex]) / 2;
-    for (const row of rows) {
+    for (const [rowIndex, row] of rows.entries()) {
       let x = groupX + (groupWidth - rowWidth(row)) / 2;
       for (const index of row) {
         const local = stageLayouts[index], box = stageBoxes[index];
@@ -279,7 +291,7 @@ export function floorplan(model: CircuitModel): Layout {
         if (!model.stages[index].implicit) frames.push({ kind: 'stage', name: model.stages[index].name!, bounds: stageBounds[index] });
         x += box.maxX - box.minX + 300;
       }
-      y += rowHeight(row) + 240;
+      y += rowHeight(row) + rowGap(row, rows[rowIndex + 1]);
     }
     if (groupIndex < model.blocks.length) frames.push({ kind: 'block', name: model.blocks[groupIndex].name,
       bounds: pad(unionBounds(groupStages[groupIndex].map((index) => stageBounds[index])), BLOCK_PADDING) });
