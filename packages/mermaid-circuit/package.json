@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "license": "MIT",
-  "description": "Circuit notation parser and validated model with empty SVG rendering for Mermaid",
+  "description": "Circuit notation, connectivity, and basic schematic drawing for Mermaid",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -11,10 +11,11 @@
   "files": ["dist", "shapes/shapes.json", "LICENSE", "ACKNOWLEDGEMENTS.md"],
   "scripts": {
     "build": "node scripts/build-shape-assets.mjs && tsc -p tsconfig.json",
-    "typecheck": "npm run build && tsc --ignoreConfig --noEmit --strict --skipLibCheck --target ES2022 --module NodeNext --moduleResolution NodeNext tests/detector.spec.ts tests/diagram.spec.ts tests/circuitParser.spec.ts tests/browser.spec.ts tests/shapes.spec.ts tests/drawing.spec.ts examples/browser/main.ts",
-    "test": "node scripts/build-shape-assets.mjs && vitest run tests/detector.spec.ts tests/diagram.spec.ts tests/circuitParser.spec.ts tests/shapes.spec.ts tests/drawing.spec.ts",
+    "typecheck": "npm run build && tsc --ignoreConfig --noEmit --strict --skipLibCheck --target ES2022 --module NodeNext --moduleResolution NodeNext tests/detector.spec.ts tests/diagram.spec.ts tests/circuitParser.spec.ts tests/browser.spec.ts tests/shapes.spec.ts tests/drawing.spec.ts tests/layout.spec.ts tests/routing.spec.ts examples/browser/main.ts",
+    "test": "node scripts/build-shape-assets.mjs && vitest run tests/detector.spec.ts tests/diagram.spec.ts tests/circuitParser.spec.ts tests/shapes.spec.ts tests/drawing.spec.ts tests/layout.spec.ts tests/routing.spec.ts",
     "test:browser": "npm run build && vitest run tests/browser.spec.ts",
-    "dev": "npm run build && vite examples/browser --host 127.0.0.1"
+    "dev": "npm run build && vite examples/browser --host 127.0.0.1",
+    "render:fixtures": "npm run build && node scripts/render-fixtures.mjs"
   },
   "peerDependencies": { "mermaid": "12.2.0" },
   "devDependencies": {

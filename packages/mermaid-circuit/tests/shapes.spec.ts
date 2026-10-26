@@ -199,15 +199,15 @@ describe('shape catalog', () => {
       Object.keys(assets).map((path) => path.split('/').at(-1)!).sort(),
     );
     const definitions = [...notation.matchAll(/^\| `([^`]+)` \| (Device|Net) \| ([^|]+) \|$/gmu)];
-    expect(definitions).toHaveLength(18);
+    expect(definitions).toHaveLength(22);
     expect(definitions.map((match) => match[1])).not.toContain('net');
-    const existing = definitions.map((match) => match[1]!).filter((key) => key !== 'net');
+    const existing = definitions.map((match) => match[1]!).filter((key) => key !== 'net' && key !== 'ic');
     expect(Object.keys(shapes)).toEqual(expect.arrayContaining(existing));
     const approved = new Set([...existing, ...Object.values(variants).flat(), ...digitalAdditions, ...electricalAdditions]);
     for (const key of Object.keys(shapes)) expect(approved.has(key), key).toBe(true);
     expect(existing).not.toContain('source');
     for (const [, key, , terminals] of definitions) {
-      if (key === 'net') continue;
+      if (key === 'net' || key === 'ic') continue;
       const shape: ShapeEntry = shapes[key as ShapeType];
       expect(Object.keys(shape.terminals).sort()).toEqual(terminals === 'None' ? [] : terminals!.split(', ').sort());
     }
@@ -278,7 +278,8 @@ describe('shape catalog', () => {
     expect(svg).not.toMatch(/<(?:text|tspan|use)\b|(?:href|font-family)=/u);
     const authorableTypes = [...notation.matchAll(/^\| `([^`]+)` \| (Device|Net) \| ([^|]+) \|$/gmu)]
       .map((match) => match[1]);
-    expect(authorableTypes).not.toContain(key);
+    if (key === 'nand') expect(authorableTypes).toContain(key);
+    else expect(authorableTypes).not.toContain(key);
   });
 
   it.each(Object.entries(shapes))('%s has grid-aligned attachments and geometry inside its pane', (_key, entry) => {
@@ -398,7 +399,7 @@ describe('shape catalog', () => {
       .toHaveLength(2);
     expect(elements(readSvg(shapes.breaker.file), 'circle')).toHaveLength(2);
     expect(referencePaths('breaker').some(({ d }) => d!.includes(' A '))).toBe(true);
-    expect(shapes.antenna.terminals).toEqual({});
+    expect(shapes.antenna.terminals).toEqual({ A: [60, 90] });
     expect(shapes.antenna.anchor).toEqual([60, 90]);
     expect(shapes.opamp.terminals).toEqual({ in1: [0, 40], in2: [0, 80], out: [120, 60], vd: [60, 0], vs: [60, 120] });
     const body = pathSubpaths(referencePaths('opamp')[0]!.d!)[0]!;

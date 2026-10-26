@@ -1,10 +1,10 @@
 # mermaid-circuit
 
-An external Mermaid diagram parser with identifier `circuitDiagram`. The package is private and has not been published.
+An external Mermaid circuit renderer with identifier `circuitDiagram`. The package is private and has not been published.
 
 ## Implemented behavior
 
-The parser accepts `circuitDiagram D` and `circuitDiagram A`, followed by declarations and connections from the closed 18-type vocabulary in [the notation specification](spec/notation.md).
+The parser accepts `circuitDiagram D` and `circuitDiagram A`, followed by declarations and connections from the closed 22-type vocabulary in [the notation specification](spec/notation.md).
 
 ```text
 circuitDiagram D
@@ -19,7 +19,9 @@ U1 |O| --- Y
 
 Blank lines and Mermaid `%%` comments are accepted. The parser validates mode eligibility, declaration brackets, object identity, device terminals, terminal-qualified connections, and typed stage/block membership. Optional device parameters remain uninterpreted label content.
 
-Catalog-only shapes and dynamic ICs are not authorable. The full 110-shape catalog is not an authorable device vocabulary.
+The full 110-shape catalog is not an authorable device vocabulary. The parser now admits `fuse` in mode `A` and `nand` in mode `D`.
+
+Mode `A` also accepts `antenna` and dynamic `ic` devices using the [IC pin notation](spec/notation.md#integrated-circuit-pins). Multiple pins may share a side.
 
 Mode `A` accepts `motor` and `solenoid`. Both use terminals `A` and `B`:
 
@@ -61,13 +63,19 @@ The parsed model records devices, nets, normalized terminal-to-net connections, 
 
 The public default export conforms to Mermaid's `ExternalDiagramDefinition`. Its detector checks the complete declaration token and its asynchronous loader imports the implementation only when requested. Each parse clears the database before validation and stores a complete model only on success. A failed parse leaves no accepted model, and independent databases remain isolated.
 
-The existing renderer checks the accepted model and sizes Mermaid's supplied SVG. It still produces an empty SVG. Layout, wire routing, junction drawing, dynamic ICs, and device rendering are unimplemented. The specifications distinguish implemented notation from approved future drawing and IC requirements.
+The registered renderer places devices from the accepted model, routes orthogonal wires, and draws catalog artwork through the TypeScript drawing core. It preserves terminal and net identities, adds junction dots at shared-net branches, and shows stage and block frames. The [drawing specification](spec/style.md#basic-automatic-drawing) defines the supported placement and routing rules.
 
-The JSON shape catalog supplies mode eligibility and fixed terminal names. It is included with the compiled package; no Python or parser-generator runtime is required. Optional diagram styles are omitted because the renderer draws no marks.
+Routing supports straight wires and the two one-bend forms. Named-net copies follow the [proxy policy](spec/style.md#basic-automatic-drawing); generic internal nets have no proxy symbols. An unsupported route fails explicitly instead of dropping a connection.
+
+The floorplanner recognizes supported series and parallel groups from their conduction terminals. Digital gates follow dependency levels, so the four-NAND XOR occupies three columns.
+
+This is a basic renderer, with no global layout search. IC bodies grow to fit their named pins.
+
+The JSON shape catalog supplies mode eligibility and fixed terminal names. It is included with the compiled package; no Python or parser-generator runtime is required.
 
 ## Drawing foundation
 
-The TypeScript modules in `src/drawing/` provide a small, standalone drawing core adapted from Schemdraw. They support manual composition with `Drawing`, `Element`, `Line`, `Wire`, and `Dot`. They do not consume the circuit model or choose device positions.
+The TypeScript modules in `src/drawing/` provide a small, standalone drawing core adapted from Schemdraw. They support manual composition with `Drawing`, `Element`, `Line`, `Wire`, and `Dot`. The floorplanner and router now connect this core to the circuit model and Mermaid renderer.
 
 Source links, credit, and the upstream notice appear in [ACKNOWLEDGEMENTS.md](ACKNOWLEDGEMENTS.md). The package uses the [MIT license](LICENSE).
 
@@ -81,7 +89,7 @@ The 110 source SVGs retain their artwork and license notices. `shapes/shapes.jso
 
 `resolveSymbol` returns SVG content, pane dimensions, transformed attachment points, and the matching SVG matrix. `resolveTerminal` checks a named terminal. Catalog lookup does not make a shape authorable in circuit notation.
 
-The generated module is derived data; it must not be edited or committed. These drawing tools are not connected to Mermaid's renderer, which still returns an empty SVG. Automatic placement, routing, and circuit rendering remain unimplemented.
+The generated module is derived data; it must not be edited or committed. The automatic renderer uses the same bundled artwork as manual drawings.
 
 ### Manual drawing
 
@@ -136,7 +144,9 @@ console.log(drawing.toSVG(12));
 JS
 ```
 
-This draws two registered symbols, one wire, a dot, and labels. It tests drawing mechanics; it neither creates nor validates electrical connectivity. The port excludes other wire shapes, arrow options, automatic junctions, IC construction, and Schemdraw's other backends and full fluent API.
+This draws two registered symbols, one wire, a dot, and labels. It tests drawing mechanics; it neither creates nor validates electrical connectivity.
+
+The manual API excludes other wire shapes, arrow options, and Schemdraw's other backends and full fluent API. Automatic junction detection and dynamic IC bodies belong to the circuit renderer.
 
 ## Local consumption
 
@@ -175,7 +185,7 @@ From the repository root:
 npm run dev --workspace mermaid-circuit
 ```
 
-Open the local URL printed by Vite. The page registers the compiled package, loads `examples/basic.mmd`, and displays the returned SVG with a completion status. The fixture parses a connected inverter circuit; its SVG is empty because graphical rendering is not implemented.
+Open the local URL printed by Vite. The page registers the compiled package, loads `examples/basic.mmd`, and displays the returned SVG with a completion status. The fixture renders a connected CMOS inverter.
 
 ```sh
 npm run typecheck --workspace mermaid-circuit
@@ -185,4 +195,32 @@ npx playwright install chromium
 npm run test:browser --workspace mermaid-circuit
 ```
 
-Unit tests cover detection, lazy loading, parser and definition interfaces, all 18 notation types, mode eligibility, structural membership, normalized connections, NAND2 topology, invalid input, and database reset and isolation. Browser tests use Vite and Playwright Chromium to register the compiled package with real Mermaid, inspect valid empty SVG output, reject unsupported notation, and render again after failure. See the [root README](../../README.md) for `.venv/` runtime activation and CI commands.
+Unit tests cover the 22 notation types, device connections, hierarchy, parser failures, and database isolation. They also check placement, routing limits, and the NAND and XOR truth tables.
+
+Browser tests register the compiled package with real Mermaid in Chromium. They check all five drawings, their symbol transforms and wire endpoints, failed input, and recovery after failure. See the [root README](../../README.md) for `.venv/` runtime activation and CI commands.
+
+## Generated circuit examples
+
+Each SVG is produced by the registered Mermaid plugin from its source fixture. The generator prints device, terminal, occurrence, proxy, bend, and crossing counts, plus placement and routing times. Proxy counts include only copies after a net’s first occurrence.
+
+| Circuit | Source | Generated SVG |
+| --- | --- | --- |
+| Wireless solenoid controller | [Mermaid](examples/fixtures/wireless-solenoid.mmd) | [Drawing](examples/fixtures/wireless-solenoid.svg) |
+| CMOS inverter | [Mermaid](examples/fixtures/cmos-inverter.mmd) | [Drawing](examples/fixtures/cmos-inverter.svg) |
+| CMOS NAND2 | [Mermaid](examples/fixtures/cmos-nand2.mmd) | [Drawing](examples/fixtures/cmos-nand2.svg) |
+| CMOS XOR, twelve transistors | [Mermaid](examples/fixtures/cmos-xor12.mmd) | [Drawing](examples/fixtures/cmos-xor12.svg) |
+| XOR, four NAND gates | [Mermaid](examples/fixtures/xor-nand4.mmd) | [Drawing](examples/fixtures/xor-nand4.svg) |
+
+Regenerate all five with the existing Node and Chromium environment:
+
+```sh
+npm run render:fixtures --workspace mermaid-circuit
+```
+
+The controller preserves the supplied `ctl` terminal and explicit DC connections to the voltage source. Its `ctl` and `no` pins represent the relay interface without invented internal contacts.
+
+Its IC uses the pin-dependent geometry in [IC presentation](spec/style.md#integrated-circuit-presentation). The drawing does not verify physical module labels or battery, fuse, and wiring selection.
+
+## Designer follow-up: recommended circuit size
+
+A recommended terminal-count limit has not been measured. A later layout evaluation should identify when clarity or render time starts to degrade, using both analog and digital circuits. The designer can then add a size recommendation based on those results; no maximum is claimed in this release.

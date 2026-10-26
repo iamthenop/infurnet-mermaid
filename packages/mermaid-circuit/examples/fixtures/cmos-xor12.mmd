@@ -1,0 +1,75 @@
+circuitDiagram A
+A(["A"]):::pinIn
+B(["B"]):::pinIn
+Abar(["¬A"]):::pinInOut
+Bbar(["¬B"]):::pinInOut
+OUT(["OUT"]):::pinOut
+VDD{{"VDD"}}:::supplyNet
+VSS{{"VSS"}}:::ground
+subgraph block inputInverters
+    subgraph stage invertA
+        direction TB
+        PA["PA"]:::pmos
+        NA["NA"]:::nmos
+    end
+    subgraph stage invertB
+        direction TB
+        PB["PB"]:::pmos
+        NB["NB"]:::nmos
+    end
+end
+subgraph block xorCore
+    subgraph stage pullUpInputs
+        direction LR
+        P0["P0"]:::pmos
+        P1["P1"]:::pmos
+    end
+    subgraph stage pullUpComplements
+        direction LR
+        P2["P2"]:::pmos
+        P3["P3"]:::pmos
+    end
+    subgraph stage pullDownHigh
+        direction TB
+        N0["N0"]:::nmos
+        N1["N1"]:::nmos
+    end
+    subgraph stage pullDownLow
+        direction TB
+        N2["N2"]:::nmos
+        N3["N3"]:::nmos
+    end
+end
+A --- PA |G|
+A --- NA |G|
+A --- P0 |G|
+A --- N0 |G|
+B --- PB |G|
+B --- NB |G|
+B --- P1 |G|
+B --- N1 |G|
+VDD --- PA |S|
+VDD --- PB |S|
+VDD --- P0 |S|
+VDD --- P1 |S|
+NA |S| --- VSS
+NB |S| --- VSS
+N1 |S| --- VSS
+N3 |S| --- VSS
+PA |D| --- Abar
+NA |D| --- Abar
+Abar --- P2 |G|
+Abar --- N2 |G|
+PB |D| --- Bbar
+NB |D| --- Bbar
+Bbar --- P3 |G|
+Bbar --- N3 |G|
+P0 |D| --- P2 |S|
+P1 |D| --- P2 |S|
+P0 |D| --- P3 |S|
+P2 |D| --- OUT
+P3 |D| --- OUT
+OUT --- N0 |D|
+OUT --- N2 |D|
+N1 |D| --- N0 |S|
+N3 |D| --- N2 |S|

@@ -2131,7 +2131,7 @@
     "file": "antenna.svg",
     "width": 120,
     "height": 120,
-    "terminals": {},
+    "terminals": { "A": [60, 90] },
     "anchor": [
       60,
       90

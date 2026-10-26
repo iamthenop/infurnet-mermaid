@@ -1,9 +1,9 @@
-circuitDiagram D
-
-A(["A"]):::pinIn
-Y(["Y"]):::pinOut
-subgraph stage logic
-    U1["U1"]:::inverter
-end
-A --- U1 |I|
-U1 |O| --- Y
+circuitDiagram A
+P0["P0"]:::pmos
+N0["N0"]:::nmos
+VDD --- P0 |S|
+A --- P0 |G|
+P0 |D| --- OUT
+OUT --- N0 |D|
+A --- N0 |G|
+N0 |S| --- VSS

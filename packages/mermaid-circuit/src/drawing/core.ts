@@ -170,6 +170,18 @@ export class Dot extends Element {
   }
 }
 
+export class Graphic extends Element {
+  constructor(private readonly parts: readonly GeometryPrimitive[],
+    private readonly localAnchors: Readonly<Record<string, Point>> = {}, options: ElementOptions = {}) {
+    super(undefined, options);
+  }
+
+  protected override geometry(position: Point, direction: number): LocalElement {
+    return { primitives: this.parts, anchors: this.localAnchors, at: this.options.at ?? position,
+      rotation: this.options.rotation ?? direction, drop: this.options.drop };
+  }
+}
+
 export class Drawing {
   private placed: PlacedElement[] = [];
   private position: Point = [0, 0];
@@ -206,9 +218,9 @@ export class Drawing {
   }
 
   toSVG(margin = 4): string {
-    const content = this.placed.map((element, index) => [
+    const content = this.placed.map((element, index) => `<g data-drawing-index="${index}">\n` + [
       element.symbol ? serializeSymbol(element.symbol, index) : '', serializePrimitives(element.primitives),
-    ].filter(Boolean).join('\n')).join('\n');
+    ].filter(Boolean).join('\n') + '\n</g>').join('\n');
     return serializeSvg(content, this.bounds, margin);
   }
 }

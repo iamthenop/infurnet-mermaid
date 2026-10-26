@@ -1,0 +1,31 @@
+circuitDiagram A
+%% Owner circuit reference; physical module labels and ratings are not verified here.
+subgraph block power
+    subgraph stage protection
+        Fuse["Fuse<br/>2A"]:::fuse
+    end
+    subgraph stage battery
+        Source["Source<br/>12 V"]:::voltageSource
+    end
+end
+subgraph block control
+    subgraph stage receiver
+        Remote["Relay Switch<br/>Momentary"]:::ic
+        Antenna["Antenna<br/>OOF 433 MHz"]:::antenna
+    end
+end
+subgraph block load
+    subgraph stage actuator
+        Diode["Diode<br/>1N5408"]:::diode
+        Solenoid["Solenoid<br/>12V 20N 1A"]:::solenoid
+    end
+end
+Source |P| --- |A| Fuse
+Fuse |B| --- |v+| T:Remote
+Fuse |B| --- |ctl| L:Remote
+Antenna --- |A| L:Remote
+Remote:B |v-| --- |N| Source
+Remote:R |no| --- |A| Solenoid
+Remote:R |no| --- |K| Diode
+Solenoid |B| --- |N| Source
+Diode |A| --- |N| Source

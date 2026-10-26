@@ -2,7 +2,7 @@
 
 This specification governs how a renderer draws `circuitDiagram`. Circuit syntax, device types, terminal names, and electrical semantics are defined in [Notation for circuit diagrams](notation.md).
 
-These are approved drawing requirements, not a claim that schematic rendering is implemented. They define the established CMOS schematic convention, not a universal placement policy for all analog and digital circuits.
+The basic renderer implements the placement and routing subset described here. The CMOS conventions are not a general layout policy for every electrical circuit.
 
 ## Orientation
 
@@ -11,11 +11,10 @@ These are approved drawing requirements, not a claim that schematic rendering is
 3. Signals flow from left to right.
 4. Inputs appear on the left and outputs on the right.
 5. Stage frames follow the [stage presentation](#stage-presentation) convention.
-6. Signals stay outside stage frames except for branches crossing the borders to reach device terminals.
-7. Input signals split at junctions outside stage frames.
-8. The first gate driven by an input is aligned horizontally with that input pin.
-9. In a left-to-right stage, each successive device sits lower than the device to its left.
-10. Additional gate connections branch from the corresponding input line using orthogonal routing.
+6. Signals cross stage and block frames as required to reach their terminals.
+7. Junction placement follows the nearest shared scope in [Routing and junction presentation](#routing-and-junction-presentation).
+8. Analog devices with separate control terminals retain a vertical stagger for input access in a left-to-right row. Parallel two-terminal devices align their conduction endpoints. Digital stages use signal-dependency levels: gates at the same level share a column in LR, or a row in TB, in declaration order.
+9. Gate connections branch from the corresponding input line using orthogonal routing.
 
 The expression *supply rail* describes graphical placement, not an electrical object type. Stage ordering, membership, and direction declarations are defined in [the syntax rules](notation.md#syntax-rules).
 
@@ -25,13 +24,15 @@ Structural membership and diagram-mode inheritance are defined in [Circuit struc
 
 ### Stage presentation
 
-Each stage is enclosed by a dashed frame labelled with its name. Stage placement remains governed by its declared direction, as defined in the [syntax rules](notation.md#syntax-rules).
+Each explicit stage is enclosed by a dashed frame labelled with its name. Stage placement remains governed by its declared direction, as defined in the [syntax rules](notation.md#syntax-rules).
 
 ### Block presentation
 
-A block visually groups its contained stages. A block does not draw new electrical connections or alter existing wire topology.
+A block visually groups its contained stages and direct devices. A block does not draw new electrical connections or alter existing wire topology.
 
-The precise block-border styling, padding, and treatment of routes crossing its boundary remain for the placement and rendering implementation.
+Blocks use solid outlines around dashed stage frames; neither frame creates an electrical connection. Blocks default to side-by-side placement with aligned vertical midpoints. Component alignment for explicit DC connections may move frames with their contents.
+
+Block frames use 45 units of inner padding. The default horizontal gap between block placement groups is 300 units, before frame and label extents.
 
 ## Symbols
 
@@ -60,11 +61,15 @@ Internal IC circuitry is not rendered merely because an IC body is present.
 
 The nine existing [IC templates](../shapes/ic-templates/) provide visual references. The templates do not establish pin ordering, package numbering, or electrical connectivity.
 
-Dynamic ICs do not inherit the fixed 120 × 120 symbol-pane requirement. The exact resizing, spacing, pin ordering, and routing methodology remains future work. Dynamic IC rendering is not implemented by the current plugin.
+IC bodies have a minimum width and height of 120 units. Pins on each side are centered as a group, 60 units apart in their [notation order](notation.md#dynamic-ic-connection-example). Top and bottom pins run left to right; left and right pins run top to bottom.
+
+For each dimension, the body span is `max(120, (n + 1) × 60)`, where `n` is the larger pin count on the two corresponding sides. Leads extend 30 units beyond the body. One pin per side retains the approved 120 × 120 body and 180 × 180 extent.
 
 ## Routing and junction presentation
 
-Wires use orthogonal routing. Junction markers are placed according to the [junction contract](notation.md#junctions), with input splits positioned outside stage frames as specified above. Routes and crossings must not redefine electrical connectivity.
+Wires use orthogonal routing. Junction markers follow the [junction contract](notation.md#junctions). A junction belongs to the nearest shared scope of the branches it joins: their stage, then their block, then the diagram.
+
+Stage frames enclose their junctions with at least 30 units of clearance; block frames enclose shared block junctions within their inner padding. Routes and crossings must not redefine electrical connectivity.
 
 ## Labels
 
@@ -80,7 +85,16 @@ Wires use orthogonal routing. Junction markers are placed according to the [junc
 
 A named-net connection label identifies the named terminal of its device endpoint.
 
-The terminal label is drawn adjacent to the device attachment point, rather than at the midpoint of the connecting wire.
+Terminal labels anchor to the transformed snap point on the symbol pane, with a four-unit gap from the wire. Standard 120 × 120 symbols use these alignments:
+
+| Terminal side | Label position | Text alignment |
+| --- | --- | --- |
+| Left | Above and left of the snap | Bottom right |
+| Right | Above and right of the snap | Bottom left |
+| Top | Above and right of the snap | Bottom left |
+| Bottom | Below and right of the snap | Top left |
+
+Custom IC left and right labels use the same side alignments. Top and bottom IC labels rotate 90° counterclockwise, with their relative top edge beside the snap. Top labels use their top-left anchor; bottom labels use their top-right anchor.
 
 Terminal-label placement is independent of the written order of the net and device endpoints.
 
@@ -155,3 +169,78 @@ The resistor default uses the IEEE zigzag. The diode default is an ordinary junc
 Alternative representations require explicit shape keys. Shape selection does not change electrical connectivity.
 
 The shape catalog may contain symbols that the current circuit notation cannot yet express. Catalog availability does not imply parser, renderer, or electrical-model support.
+
+## Basic automatic drawing
+
+Layout objectives follow this priority order:
+
+1. Electrical topology and net identity.
+2. Source notation fidelity.
+3. Proxy eligibility restrictions.
+4. Recognizable circuit structure.
+5. Parallel-branch representation.
+6. Symmetry and component alignment.
+7. Minimal bends and crossings.
+8. Wire length.
+
+Higher-priority constraints prevail when objectives conflict.
+
+Placement and routing are separate operations. Placement uses terminal-to-net membership to detect series chains and parallel groups. Parallel membership requires both conduction nets; a single shared net is insufficient.
+
+Series devices default to top-to-bottom placement, while parallel devices default to left-to-right placement. Explicit stage directions are retained. Declaration order breaks ties and places devices whose connections do not establish a supported arrangement.
+
+Supply occurrences default above their group, ground below, input pins left, and output pins right. A net's first symbol is its original graphical occurrence; further copies are proxies. The counts reported by the renderer distinguish occurrences from proxies.
+
+Proxy eligibility is evaluated on the original circuit graph, before adding graphical copies. Let I count the original `pinIn` nodes. Let D count all original nodes except `pinIn`, `supplyNet`, `ground`, and `pinOut`; this includes `pinInOut` and `voltageSource`.
+
+The same counts also apply within each block. Count its original devices and each distinct connected net once, using the same exclusions. A block's first input occurrence can serve its local branches; extra copies require both the diagram and that block to satisfy D ≥ 4 × I.
+
+A `pinOut` has one graphical occurrence and is never proxied. A `pinIn` may be proxied only when D ≥ 4 × I; reaching that threshold permits copies but does not require them. Supply, ground, and bidirectional-pin eligibility remains unchanged.
+
+Repeated occurrences retain their source net identifier. No planar wire connects separate occurrences used as proxies. Generic internal nets have no graphical proxy type, and proxies must not obscure a parallel branch's shared endpoints.
+
+An input occurrence serves at most three branches. If that limit requires a proxy forbidden by the threshold, routing fails explicitly. Junction dots mark actual branch points within a shared net; crossings of unrelated nets receive no dot.
+
+Every junction is T-shaped: three orthogonal arms with one pair extending in opposite directions. Four-way connected junctions are rejected. Crossings between unrelated nets remain unconnected crossings.
+
+Parallel branches visibly share both endpoint conductors, including branches in separate stages. Stages containing parallel chains of the same device type sit side by side within their block, while their device membership stays intact.
+
+Common conductors for parallel groups remain straight. Their branch feed points use the midpoint between the outermost conduction terminals, so the split and rejoin centerlines agree. Terminal branches reach that conductor without bending the shared line.
+
+At parallel splits and joins, the two branch arms extend in opposite directions (180°) from their midpoint. The feed or return stem meets that midpoint perpendicularly. A stem must not overlap a branch arm and move the visible junction away from the center.
+
+Feeds into parallel branches default to entering from above, with the two branch arms extending left and right. The same rule applies to shared IC pin branches. Return joins and other junctions may rotate the T while retaining three arms.
+
+Aligned two-terminal devices use equal wire lengths between the split, their terminals, and the join.
+
+Parallel two-terminal loads sit below a connected controller output to allow a centered feed stem. Parallel joins reach the return conductor through a centered stem. These stems take precedence over reducing the bend count.
+
+Every connected device terminal has a straight outward wire approach of at least 60 units beyond its snap point. The symbol geometry and terminal coordinates stay fixed.
+
+Routing tries a straight connection first, then the two orthogonal one-bend forms. A separate straight approach segment precedes that route when needed for terminal clearance.
+
+A straight wire may cross at most two unrelated wires, and a bent wire at most one. Overlapping unrelated wires, reverse turns, and traversal through symbol bodies are rejected.
+
+Prefer moving components to introducing detours. Equivalent one-bend routes follow the terminal entry direction where feasible. Avoid unnecessary U-turns and doubling back; shorter wires must not displace clearer routing.
+
+Supply and ground occurrences never rotate or reflect. Pins may rotate only with a connected device. Every symbol transformation also transforms its terminal attachments without changing their identities.
+
+A lower NAND sharing its second input with an upper NAND supports vertical mirroring to align the shared-input branches. Symmetry extends to corresponding `pinIn`, `pinOut`, and `pinInOut` occurrences, split junctions, and wire entry directions where feasible.
+
+Pins of the same type and side prefer a shared column within their block, or at diagram level when ungrouped. Their wire junctions retain any needed staggering. A column moves as a group only when topology, body clearance, and crossing limits remain valid.
+
+Equivalent reflected branches match device types and terminal sides, then prefer reflected pin positions. Connection declaration order does not override that match. Symmetry does not justify additional proxies.
+
+An input pin prefers the midpoint of its connected branch group, subject to wire clearance. A single connection aligns naturally with its terminal.
+
+Exact group centering may translate a whole symbol by a fractional grid offset, including 15 units. Symbol-local attachments remain authoritative; artwork and attachment points move together. Routing meets those exact transformed positions.
+
+The router reports a failure if the permitted wire shapes and net occurrences cannot connect a net. It does not discard assignments or run a global layout search. The fixed spacing favors clear routes over a small bounding box.
+
+Rendered connectivity is checked against the source model. Wire segments must connect every assigned terminal; only eligible named-net proxies may join separate drawn components by identity. A crossing between unrelated nets does not join those nets.
+
+DC circuits retain explicit wires to source terminals when the source defines those connections. Rendering does not add supply rails, ground references, component labels, or internal relay contacts absent from the source.
+
+A `voltageSource` defaults to the left of its local connected circuit, vertically centered against the other components' extents. Its outgoing conventional-current path runs clockwise when the source topology permits that arrangement. Placement preserves polarity and connectivity; it does not invent a return path.
+
+A fuse on the positive supply path defaults to horizontal placement when no explicit stage direction prevents it. Adjacent stages reserve space for their supply and ground symbols, including the minimum terminal approaches.
