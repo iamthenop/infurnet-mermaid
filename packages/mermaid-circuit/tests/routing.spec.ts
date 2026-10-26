@@ -137,4 +137,60 @@ describe('orthogonal routing', () => {
       }
     }
   });
+
+  it('shares continuous load and controller branches around the explicit DC source', () => {
+    const layout = floorplan(parseCircuit(fixtures['../examples/fixtures/wireless-solenoid.mmd']));
+    const routing = routeLayout(layout);
+    const terminal = (device: string, name: string) => layout.attachments.find((item) => item.device === device && item.terminal === name)!;
+    const outgoing = terminal('remote', 'no'), top = terminal('Solenoid', 'A'), bottom = terminal('Solenoid', 'B');
+    const upperBranch = routing.routes.find((route) => route.net === top.net && route.points[0] === top.point)!;
+    const feed = routing.routes.find((route) => route.net === outgoing.net && route.points[0] === outgoing.point)!;
+    expect(feed.shape).toBe('-');
+    expect(feed.points.at(-1)![1]).toBe(top.point[1] - 60);
+    expect(upperBranch.points.at(-1)![1]).toBe(feed.points.at(-1)![1]);
+    const returnWire = routing.routes.filter((route) => route.net === bottom.net);
+    const horizontalLevels = new Set(returnWire.flatMap((route) => route.points.slice(1).flatMap((end, i) =>
+      Math.abs(route.points[i][1] - end[1]) < 1e-7 ? [end[1]] : [])));
+    expect([...horizontalLevels]).toEqual([bottom.point[1] + 60]);
+    const supply = terminal('Source', 'P');
+    const sourceWire = routing.routes.find((route) => route.net === supply.net)!;
+    expect(sourceWire.points[0]).toEqual(supply.point);
+    expect(sourceWire.points[1][0]).toBe(supply.point[0]);
+    expect(sourceWire.points[1][1]).toBeLessThan(supply.point[1]);
+    expect(sourceWire.points.at(-1)![0]).toBeGreaterThan(supply.point[0]);
+    const power = terminal('remote', 'v+'), control = terminal('remote', 'ctl');
+    const powerWire = routing.routes.find((route) => route.points[0] === power.point)!;
+    const controlWire = routing.routes.find((route) => route.points[0] === control.point)!;
+    expect(powerWire.points.at(-1)).toEqual(controlWire.points.at(-1));
+    expect(routing.junctions).toContainEqual({ net: power.net, point: powerWire.points.at(-1)! });
+    expect(routing.occurrences).toEqual([]);
+    expect(routing.crossings).toBe(0);
+  });
+
+  it('mirrors XOR input pins, splits and entry routes without additional occurrences', () => {
+    const layout = floorplan(parseCircuit(fixtures['../examples/fixtures/xor-nand4.mmd']));
+    const routing = routeLayout(layout);
+    const axis = layout.devices.find((item) => item.device.id === 'N1')!.placed.anchors.center[1];
+    const reflect = (point: readonly number[]) => [point[0], 2 * axis - point[1]];
+    const upper = routing.routes.filter((route) => route.net === 'A');
+    const lower = routing.routes.filter((route) => route.net === 'B');
+    expect(lower.map((route) => route.points)).toEqual(upper.map((route) => route.points.map(reflect)));
+    const pin = (net: string) => routing.occurrences.find((item) => item.net.id === net)!.placed.anchors.anchor;
+    expect(pin('B')).toEqual(reflect(pin('A')));
+    expect(routing.junctions.find((item) => item.net === 'B')!.point)
+      .toEqual(reflect(routing.junctions.find((item) => item.net === 'A')!.point));
+    expect(routing.occurrences.some((item) => item.isProxy)).toBe(false);
+    expect(routing.crossings).toBe(0);
+  });
+
+  it('keeps interleaved input branches on separate conductors ahead of symmetry', () => {
+    const source = 'circuitDiagram D\nA([A]):::pinIn\nB([B]):::pinIn\n'
+      + Array.from({ length: 4 }, (_, index) => `G${index}[G${index}]:::buffer`).join('\n') + '\n'
+      + Array.from({ length: 4 }, (_, index) => `${index % 2 ? 'B' : 'A'} --- G${index} |I|`).join('\n');
+    const layout = floorplan(parseCircuit(source)), routing = routeLayout(layout);
+    expect(routing.occurrences).toHaveLength(2);
+    expect(routing.occurrences.some((item) => item.isProxy)).toBe(false);
+    for (const route of routing.routes) expect(crossingPoints(route, routing.routes)).toBeDefined();
+    expect(() => validateConnectivity(layout, routing)).not.toThrow();
+  });
 });

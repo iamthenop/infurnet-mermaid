@@ -93,6 +93,47 @@ function levels(edges: readonly (readonly number[])[]): number[] {
   return edges.map((_, index) => visit(index));
 }
 
+function refineAnalogPlacement(model: CircuitModel, devices: DevicePlacement[], netAt: (device: Device, terminal: string) => string | undefined): void {
+  const move = (item: DevicePlacement, dx: number, dy: number) => {
+    const center = item.placed.anchors.center;
+    devices[devices.indexOf(item)] = placement(item.device, [center[0] + dx, center[1] + dy], item.rotation, 'center', item.flip);
+  };
+  for (const stage of model.stages) {
+    const members = devices.filter((item) => stage.devices.includes(item.device.id));
+    if (members.length < 2 || !members.every((item) => item.device.terminals.length === 2 && conduction(item.device))) continue;
+    const nets = members.map((item) => conduction(item.device)!.map((terminal) => netAt(item.device, terminal)));
+    if (!nets[0].every((net) => net !== undefined) || !nets.every((pair) => pair.every((net, i) => net === nets[0][i]))) continue;
+    const tops = members.map((item) => item.placed.anchors[conduction(item.device)![0]]);
+    if (!tops.every((point, i) => Math.abs(point[1] - members[i].pane.minY) < 1e-7)) continue;
+    const feeds = devices.flatMap((item) => item.device.type === 'ic'
+      ? item.device.terminals.filter((terminal) => item.device.pinSides?.[terminal] === 'R' && netAt(item.device, terminal) === nets[0][0])
+        .map((terminal) => item.placed.anchors[terminal]) : []);
+    if (feeds.length !== 1 || feeds[0][0] >= Math.min(...tops.map((point) => point[0]))) continue;
+    const dy = feeds[0][1] + 60 - Math.min(...tops.map((point) => point[1]));
+    for (const item of members) move(item, 0, dy);
+  }
+  for (const source of devices.filter((item) => item.device.type === 'voltageSource')) {
+    const connected = new Set([source.device.id]);
+    let previousSize = 0;
+    while (previousSize !== connected.size) {
+      previousSize = connected.size;
+      const nets = new Set(model.connections.filter((item) => connected.has(item.device)).map((item) => item.net));
+      for (const connection of model.connections) if (nets.has(connection.net)) connected.add(connection.device);
+    }
+    const peers = devices.filter((item) => connected.has(item.device.id) && item !== source);
+    if (!peers.length || peers.some((item) => item.device.type === 'voltageSource') || source.rotation !== 0) continue;
+    const box = unionBounds(peers.map((item) => item.pane)), centerY = (box.minY + box.maxY) / 2;
+    const positive = netAt(source.device, 'P'), negative = netAt(source.device, 'N');
+    const targets = (net: string | undefined) => peers.flatMap((item) => item.device.terminals
+      .filter((terminal) => net !== undefined && netAt(item.device, terminal) === net).map((terminal) => item.placed.anchors[terminal]));
+    const outgoing = targets(positive), returning = targets(negative);
+    if (!outgoing.length || !returning.length || outgoing.some((point) => point[1] > centerY - 60)
+      || returning.some((point) => point[1] < centerY + 60)) continue;
+    const labelRoom = Math.ceil(Math.max(...source.device.label.split(/<br\s*\/?\s*>/iu).map((line) => line.length * 8 + 24)) / 30) * 30;
+    move(source, box.minX - Math.max(240, labelRoom + 120) - source.placed.anchors.center[0], centerY - source.placed.anchors.center[1]);
+  }
+}
+
 export function floorplan(model: CircuitModel): Layout {
   const deviceById = new Map(model.devices.map((device) => [device.id, device]));
   const membership = new Map(model.connections.map((connection) => [`${connection.device}:${connection.terminal}`, connection.net]));
@@ -145,7 +186,7 @@ export function floorplan(model: CircuitModel): Layout {
     });
     return groups.flatMap((group, index) => group.map((device, member) => {
       const cross = (rows[index] + member - ((occupied.get(depth[index]) ?? 1) - 1) / 2) * 300;
-      const along = depth[index] * 360 + (group.length > 1 ? member * 90 : 0);
+      const along = depth[index] * 360 + (group.length > 1 && group.some((item) => item.terminals.length > 2) ? member * 90 : 0);
       return placement(device, transpose ? [along, cross] : [cross, along],
         (defaultRotation(device) + (transpose ? 270 : 0)) % 360, conduction(device)?.[0] ?? 'center');
     }));
@@ -207,6 +248,22 @@ export function floorplan(model: CircuitModel): Layout {
       bounds: pad(unionBounds(groupStages[groupIndex].map((index) => stageBounds[index])), 90) });
     groupX += groupWidth + 600;
   });
+  if (model.mode === 'A') {
+    refineAnalogPlacement(model, devices, netAt);
+    model.stages.forEach((stage, index) => {
+      const members = devices.filter((item) => stage.devices.includes(item.device.id));
+      if (!members.length) return;
+      const box = unionBounds(members.map((item) => item.pane));
+      const labelRoom = Math.ceil(Math.max(60, ...members.flatMap((item) => item.device.label.split(/<br\s*\/?\s*>/iu)
+        .map((line) => line.length * 8 + 24))) / 30) * 30;
+      stageBounds[index] = { ...pad(box, 30), maxX: box.maxX + labelRoom };
+    });
+    frames.forEach((frame, index) => {
+      const box = frame.kind === 'stage' ? stageBounds[model.stages.findIndex((stage) => stage.name === frame.name)]
+        : pad(unionBounds(model.blocks.find((block) => block.name === frame.name)!.stages.map((stage) => stageBounds[stage])), 90);
+      frames[index] = { ...frame, bounds: box };
+    });
+  }
   const positioned = new Map(devices.map((item) => [item.device.id, item]));
   const attachments = model.connections.map((connection): Attachment => {
     const item = positioned.get(connection.device)!, point = item.placed.anchors[connection.terminal], box = item.pane;

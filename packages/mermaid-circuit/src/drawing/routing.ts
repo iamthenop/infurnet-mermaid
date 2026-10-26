@@ -74,12 +74,13 @@ export function acceptsRoute(route: Route, existing: readonly Route[], obstacles
   });
 }
 
-export function chooseRoute(net: string, start: Point, end: Point, existing: readonly Route[], obstacles: readonly Bounds[]): Route {
+export function chooseRoute(net: string, start: Point, end: Point, existing: readonly Route[], obstacles: readonly Bounds[], verticalFirst = false): Route {
   const candidates: Route[] = [];
   if (Math.abs(start[0] - end[0]) < EPS || Math.abs(start[1] - end[1]) < EPS) candidates.push({ net, points: [start, end], shape: '-' });
   else {
     candidates.push({ net, points: [start, [end[0], start[1]], end], shape: '-|' });
     candidates.push({ net, points: [start, [start[0], end[1]], end], shape: '|-' });
+    if (verticalFirst) candidates.reverse();
   }
   const route = candidates.find((candidate) => acceptsRoute(candidate, existing, obstacles));
   if (!route) throw new Error(`Routing failure for net "${net}" from (${start}) to (${end}): no permitted wire shape satisfies obstacles and crossing limits.`);
@@ -124,7 +125,9 @@ function groupsFor(attachments: readonly Attachment[], input: boolean, layout: L
     const facing = items.length === 2 && items[0].side !== items[1].side
       && ['T', 'B'].includes(items[0].side) && ['T', 'B'].includes(items[1].side)
       && Math.abs(items[0].point[0] - items[1].point[0]) < EPS;
-    if (facing) { groups.push(items); continue; }
+    const corner = items.length === 2 && items[0].device === items[1].device
+      && items.some((item) => item.side === 'T') && items.some((item) => item.side === 'L');
+    if (facing || corner) { groups.push(items); continue; }
     for (const side of new Set(items.map((item) => item.side))) {
       const sameSide = items.filter((item) => item.side === side);
       for (let i = 0; i < sameSide.length; i += input ? 3 : sameSide.length) {
@@ -139,7 +142,14 @@ function groupJoint(items: readonly Attachment[], layout: Layout, input: boolean
   if (items.length === 1) return items[0].point;
   const xs = items.map((item) => item.point[0]), ys = items.map((item) => item.point[1]);
   const x = (Math.min(...xs) + Math.max(...xs)) / 2, y = (Math.min(...ys) + Math.max(...ys)) / 2;
-  if (items.some((item) => item.side !== items[0].side)) return [x, y];
+  if (items.some((item) => item.side !== items[0].side)) {
+    if (items.every((item) => item.device === items[0].device) && items.some((item) => item.side === 'L')
+      && items.some((item) => item.side === 'T')) {
+      const feeds = layout.attachments.filter((item) => item.net === items[0].net && item.device !== items[0].device && item.side === 'R');
+      return [Math.min(...xs) - 120, Math.min(Math.min(...ys) - 60, ...feeds.map((item) => item.point[1]))];
+    }
+    return [x, y];
+  }
   switch (items[0].side) {
     case 'T': return [x, Math.min(...ys) - 60];
     case 'B': return [x, Math.max(...ys) + 60];
@@ -207,7 +217,7 @@ export function routeLayout(layout: Layout): Routing {
         const route: Route = { net, points, shape: points.length === 2 ? '-' : '|-' };
         if (!acceptsRoute(route, [...initial, ...added], obstacles())) throw new Error(`Routing failure for centered parallel conductor on net "${net}".`);
         added.push(route);
-      } else added.push(chooseRoute(net, item.point, joint, [...initial, ...added], obstacles()));
+      } else added.push(chooseRoute(net, item.point, joint, [...initial, ...added], obstacles(), side === 'T' || side === 'B'));
     }
     return added;
   }
@@ -226,17 +236,31 @@ export function routeLayout(layout: Layout): Routing {
       const joints = groups.map((group) => groupJoint(group, layout, input));
       if (singleOccurrence && input && attachments.length > 1) {
         const inputs = layout.nets.filter((item) => item.type === 'pinIn');
-        const extra = inputs.indexOf(net) * 60;
+        const mirrored = inputs.some((other) => {
+          if (other === net) return false;
+          const peers = layout.attachments.filter((item) => item.net === other.id);
+          if (peers.length !== attachments.length) return false;
+          const low = Math.min(...attachments.map((item) => item.point[1])), high = Math.max(...attachments.map((item) => item.point[1]));
+          const peerLow = Math.min(...peers.map((item) => item.point[1])), peerHigh = Math.max(...peers.map((item) => item.point[1]));
+          if (low <= peerHigh && peerLow <= high) return false;
+          const axis = (Math.min(...attachments.map((item) => item.point[1])) + Math.max(...peers.map((item) => item.point[1]))) / 2;
+          return equal(peers[0].point, [attachments[0].point[0], 2 * axis - attachments[0].point[1]])
+            && attachments.every((item) => peers.some((peer) => peer.side === item.side && equal(peer.point, [item.point[0], 2 * axis - item.point[1]])));
+        });
+        const extra = mirrored ? 0 : inputs.indexOf(net) * 60;
         joints[0] = [joints[0][0] - extra, joints[0][1]];
       }
       const added: Route[] = [];
       for (let i = 0; i < groups.length; i++) added.push(...branches(net.id, groups[i], joints[i], [...routes, ...added]));
       if (net.type === 'net' && groups.length > 1 && attachments.every((item) => item.side === 'B')) {
         const bus: Point = [(Math.min(...joints.map((point) => point[0])) + Math.max(...joints.map((point) => point[0]))) / 2,
-          Math.max(...joints.map((point) => point[1])) + 60];
+          Math.max(...attachments.map((item) => item.point[1])) + 60];
         added.push(...branches(net.id, groups.map((group, index) => ({ ...group[0], point: joints[index] })), bus, [...routes, ...added]));
       } else for (let i = 1; i < joints.length; i++) if (!equal(joints[i - 1], joints[i])) {
-        added.push(chooseRoute(net.id, joints[i - 1], joints[i], [...routes, ...added], obstacles()));
+        const start = attachments.find((item) => equal(item.point, joints[i - 1]));
+        const end = attachments.find((item) => equal(item.point, joints[i]));
+        const verticalFirst = start?.side === 'T' && end?.side === 'L' || start?.side === 'R' && end?.side === 'B';
+        added.push(chooseRoute(net.id, joints[i - 1], joints[i], [...routes, ...added], obstacles(), verticalFirst));
       }
       routes.push(...added);
       if (net.type === 'net') continue;

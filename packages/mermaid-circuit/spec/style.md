@@ -14,7 +14,7 @@ The basic renderer implements the placement and routing subset described here. T
 6. Signals stay outside stage frames except for branches crossing the borders to reach device terminals.
 7. Input signals split at junctions outside stage frames.
 8. The first gate driven by an input is aligned horizontally with that input pin.
-9. Analog devices in a left-to-right row retain a vertical stagger for input access. Digital stages use signal-dependency levels: gates at the same level share a column in LR, or a row in TB, in declaration order.
+9. Analog devices with separate control terminals retain a vertical stagger for input access in a left-to-right row. Parallel two-terminal devices align their conduction endpoints. Digital stages use signal-dependency levels: gates at the same level share a column in LR, or a row in TB, in declaration order.
 10. Additional gate connections branch from the corresponding input line using orthogonal routing.
 
 The expression *supply rail* describes graphical placement, not an electrical object type. Stage ordering, membership, and direction declarations are defined in [the syntax rules](notation.md#syntax-rules).
@@ -31,7 +31,7 @@ Each stage is enclosed by a dashed frame labelled with its name. Stage placement
 
 A block visually groups its contained stages. A block does not draw new electrical connections or alter existing wire topology.
 
-Blocks use a solid outline around their stage frames. Blocks sit side by side, with their vertical midpoints aligned. Stage frames are dashed; neither kind of frame creates an electrical connection.
+Blocks use solid outlines around dashed stage frames; neither frame creates an electrical connection. Blocks default to side-by-side placement with aligned vertical midpoints. Component alignment for explicit DC connections may move frames with their contents.
 
 ## Symbols
 
@@ -160,6 +160,19 @@ The shape catalog may contain symbols that the current circuit notation cannot y
 
 ## Basic automatic drawing
 
+Layout objectives follow this priority order:
+
+1. Electrical topology and net identity.
+2. Source notation fidelity.
+3. Proxy eligibility restrictions.
+4. Recognizable circuit structure.
+5. Parallel-branch representation.
+6. Symmetry and component alignment.
+7. Minimal bends and crossings.
+8. Wire length.
+
+Higher-priority constraints prevail when objectives conflict.
+
 Placement and routing are separate operations. Placement uses terminal-to-net membership to detect series chains and parallel groups. Parallel membership requires both conduction nets; a single shared net is insufficient.
 
 Series devices default to top-to-bottom placement, while parallel devices default to left-to-right placement. Explicit stage directions are retained. Declaration order breaks ties and places devices whose connections do not establish a supported arrangement.
@@ -178,11 +191,15 @@ Parallel branches visibly share both endpoint conductors, including branches in 
 
 Common conductors for parallel groups remain straight. Their branch feed points use the midpoint between the outermost conduction terminals, so the split and rejoin centerlines agree. Terminal branches reach that conductor without bending the shared line.
 
+Parallel two-terminal loads align below a connected controller output so their common input conductor meets that output horizontally. Shared IC pins use a common junction and continuous wires. Return branches share one conductor instead of adding a second return level.
+
 Routing tries an orthogonal straight connection first, then horizontal-first and vertical-first one-bend connections. A straight wire may cross at most two unrelated wires, and a bent wire at most one. Overlapping unrelated wires, reverse turns, and traversal through symbol bodies are rejected.
+
+Prefer moving components to introducing detours. Equivalent one-bend routes follow the terminal entry direction where feasible. Avoid unnecessary U-turns and doubling back; shorter wires must not displace clearer routing.
 
 Supply and ground occurrences never rotate or reflect. Pins may rotate only with a connected device. Every symbol transformation also transforms its terminal attachments without changing their identities.
 
-A lower NAND sharing its second input with an upper NAND supports vertical mirroring to align the shared-input branches.
+A lower NAND sharing its second input with an upper NAND supports vertical mirroring to align the shared-input branches. Symmetry extends to corresponding input pins, split junctions, and wire entry directions where feasible. Symmetry does not justify additional proxies.
 
 Exact group centering may translate a whole symbol by a fractional grid offset, including 15 units. Symbol-local attachments remain authoritative; artwork and attachment points move together. Routing meets those exact transformed positions.
 
@@ -191,3 +208,5 @@ The router reports a failure if the permitted wire shapes and net occurrences ca
 Rendered connectivity is checked against the source model. Wire segments must connect every assigned terminal; only eligible named-net proxies may join separate drawn components by identity. A crossing between unrelated nets does not join those nets.
 
 DC circuits retain explicit wires to source terminals when the source defines those connections. Rendering does not add supply rails, ground references, component labels, or internal relay contacts absent from the source.
+
+A `voltageSource` defaults to the left of its local connected circuit, vertically centered against the other components' extents. Its outgoing conventional-current path runs clockwise when the source topology permits that arrangement. Placement preserves polarity and connectivity; it does not invent a return path.

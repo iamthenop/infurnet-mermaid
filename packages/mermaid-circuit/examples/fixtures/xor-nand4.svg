@@ -1,4 +1,4 @@
-<svg id="fixture-xor-nand4" width="1802" xmlns="http://www.w3.org/2000/svg" viewBox="-526 -252 1802 822" height="822" overflow="visible" font-family="sans-serif" font-size="14" role="graphics-document document" aria-roledescription="circuitDiagram">
+<svg id="fixture-xor-nand4" width="1742" xmlns="http://www.w3.org/2000/svg" viewBox="-466 -252 1742 822" height="822" overflow="visible" font-family="sans-serif" font-size="14" role="graphics-document document" aria-roledescription="circuitDiagram">
 <g data-drawing-index="0" data-stage="xorNands" stroke-dasharray="8 6">
 <polyline points="-30,-30 900,-30 900,390 -30,390 -30,-30" stroke="#777" stroke-width="1" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
 </g>
@@ -29,14 +29,14 @@
 <g data-drawing-index="9" data-net="A" data-wire="-" data-points="[[-210,160],[-90,160]]">
 <polyline points="-210,160 -90,160" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
 </g>
-<g data-drawing-index="10" data-net="B" data-wire="-" data-points="[[0,200],[-150,200]]">
-<polyline points="0,200 -150,200" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+<g data-drawing-index="10" data-net="B" data-wire="-" data-points="[[0,200],[-90,200]]">
+<polyline points="0,200 -90,200" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
 </g>
-<g data-drawing-index="11" data-net="B" data-wire="-|" data-points="[[360,320],[-150,320],[-150,200]]">
-<polyline points="360,320 -150,320 -150,200" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+<g data-drawing-index="11" data-net="B" data-wire="-|" data-points="[[360,320],[-90,320],[-90,200]]">
+<polyline points="360,320 -90,320 -90,200" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
 </g>
-<g data-drawing-index="12" data-net="B" data-wire="-" data-points="[[-270,200],[-150,200]]">
-<polyline points="-270,200 -150,200" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+<g data-drawing-index="12" data-net="B" data-wire="-" data-points="[[-210,200],[-90,200]]">
+<polyline points="-210,200 -90,200" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
 </g>
 <g data-drawing-index="13" data-net="Y" data-wire="-" data-points="[[1020,180],[840,180]]">
 <polyline points="1020,180 840,180" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
@@ -165,7 +165,7 @@
 <text x="-248" y="165" xml:space="preserve" fill="#000">A</text>
 </g>
 <g data-drawing-index="36" data-net-occurrence="1" data-net="B" data-type="pinIn" data-branches="2">
-<g transform="matrix(1 0 0 1 -390 140)">
+<g transform="matrix(1 0 0 1 -330 140)">
 
 <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
   <g id="fixture-xor-nand4-element-36-pin-in" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -177,7 +177,7 @@
 </g>
 </g>
 <g data-drawing-index="37" data-label="true" data-net-label="B" text-anchor="middle">
-<text x="-308" y="205" xml:space="preserve" fill="#000">B</text>
+<text x="-248" y="205" xml:space="preserve" fill="#000">B</text>
 </g>
 <g data-drawing-index="38" data-net-occurrence="2" data-net="Y" data-type="pinOut" data-branches="1">
 <g transform="matrix(1 0 0 1 1020 120)">
@@ -201,6 +201,6 @@
 <circle cx="0" cy="0" r="3" stroke="#000" stroke-width="2" fill="#000" transform="matrix(1 0 0 1 -90 160)"></circle>
 </g>
 <g data-drawing-index="42" data-junction="true" data-net="B">
-<circle cx="0" cy="0" r="3" stroke="#000" stroke-width="2" fill="#000" transform="matrix(1 0 0 1 -150 200)"></circle>
+<circle cx="0" cy="0" r="3" stroke="#000" stroke-width="2" fill="#000" transform="matrix(1 0 0 1 -90 200)"></circle>
 </g>
 </svg>

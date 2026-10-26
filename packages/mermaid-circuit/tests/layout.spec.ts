@@ -77,6 +77,23 @@ describe('basic floorplanning', () => {
     expect(remote.placed.anchors.no).toEqual([center[0] + 90, center[1]]);
     const diode = layout.devices.find((item) => item.device.id === 'Diode')!;
     expect(diode.placed.anchors.K[1]).toBeLessThan(diode.placed.anchors.A[1]);
+    const load = layout.devices.find((item) => item.device.id === 'Solenoid')!;
+    expect(load.placed.anchors.A[1]).toBeCloseTo(diode.placed.anchors.K[1]);
+    expect(load.placed.anchors.B[1]).toBeCloseTo(diode.placed.anchors.A[1]);
+    expect(load.placed.anchors.A[1]).toBeGreaterThan(remote.placed.anchors.no[1]);
+  });
+
+  it('centers a voltage source left of its connected local circuit without changing polarity', () => {
+    const source = fixtures['../examples/fixtures/wireless-solenoid.mmd'];
+    const layout = floorplan(parseCircuit(source));
+    const supply = layout.devices.find((item) => item.device.type === 'voltageSource')!;
+    const peers = layout.devices.filter((item) => item !== supply);
+    expect(supply.pane.maxX).toBeLessThan(Math.min(...peers.map((item) => item.pane.minX)));
+    expect(supply.placed.anchors.center[1]).toBe((Math.min(...peers.map((item) => item.pane.minY))
+      + Math.max(...peers.map((item) => item.pane.maxY))) / 2);
+    expect(supply.placed.anchors.P[1]).toBeLessThan(supply.placed.anchors.N[1]);
+    const disconnected = floorplan(parseCircuit(source + '\nsubgraph block separate\nsubgraph stage unused\nR[R]:::resistor\nend\nend'));
+    expect(disconnected.devices.find((item) => item.device.id === supply.device.id)!.placed.anchors).toEqual(supply.placed.anchors);
   });
 
   it('rejects prohibited symbol orientation and permits pins only with device rotation', () => {
