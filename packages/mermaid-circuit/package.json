@@ -1,9 +1,16 @@
 {
   "name": "mermaid-circuit",
-  "version": "0.0.0",
-  "private": true,
+  "version": "0.1.0",
   "license": "MIT",
   "description": "Circuit notation, connectivity, and basic schematic drawing for Mermaid",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/iamthenop/infurnet-mermaid",
+    "directory": "packages/mermaid-circuit"
+  },
+  "homepage": "https://github.com/iamthenop/infurnet-mermaid/tree/main/packages/mermaid-circuit",
+  "bugs": { "url": "https://github.com/iamthenop/infurnet-mermaid/issues" },
+  "engines": { "node": "24.22.1" },
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -15,7 +22,8 @@
     "test": "node scripts/build-shape-assets.mjs && vitest run tests/detector.spec.ts tests/diagram.spec.ts tests/circuitParser.spec.ts tests/shapes.spec.ts tests/drawing.spec.ts tests/layout.spec.ts tests/routing.spec.ts",
     "test:browser": "npm run build && vitest run tests/browser.spec.ts",
     "dev": "npm run build && vite examples/browser --host 127.0.0.1",
-    "render:fixtures": "npm run build && node scripts/render-fixtures.mjs"
+    "render:fixtures": "npm run build && node scripts/render-fixtures.mjs",
+    "verify:distribution": "node scripts/verify-distribution.mjs"
   },
   "peerDependencies": { "mermaid": "12.2.0" },
   "devDependencies": {

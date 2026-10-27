@@ -1,0 +1,36 @@
+name: Verify package
+
+on:
+  pull_request:
+    paths:
+      - 'packages/mermaid-circuit/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'tsconfig.base.json'
+      - '.github/workflows/package-verify.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-package:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24.22.1'
+          cache: npm
+      - run: npm ci
+      - run: npm run build --workspace mermaid-circuit
+      - run: npx playwright install --with-deps chromium
+      - name: Verify the installed tarball
+        run: npm run verify:distribution --workspace mermaid-circuit -- --tarball-output "$RUNNER_TEMP/mermaid-circuit-0.1.0.tgz"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: mermaid-circuit-0.1.0-${{ github.sha }}
+          path: ${{ runner.temp }}/mermaid-circuit-0.1.0.tgz
+          if-no-files-found: error
+          compression-level: 0
