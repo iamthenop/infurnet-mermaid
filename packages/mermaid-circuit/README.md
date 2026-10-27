@@ -1,6 +1,6 @@
 # mermaid-circuit
 
-An external Mermaid circuit renderer with identifier `circuitDiagram`. The package is private and has not been published.
+An external Mermaid circuit renderer with identifier `circuitDiagram`. Version `0.1.0` is a release candidate; it has not been published to npm. The package is prepared for tarball installation, while the repository-root workspace remains private.
 
 ## Implemented behavior
 
@@ -147,6 +147,51 @@ JS
 This draws two registered symbols, one wire, a dot, and labels. It tests drawing mechanics; it neither creates nor validates electrical connectivity.
 
 The manual API excludes other wire shapes, arrow options, and Schemdraw's other backends and full fluent API. Automatic junction detection and dynamic IC bodies belong to the circuit renderer.
+
+## Distribution candidate
+
+The tested runtime is Node.js 24.22.1 with its bundled npm. Other Node.js versions have not been verified. Mermaid 12.2.0 remains a peer dependency.
+
+From a repository checkout, build and inspect the package:
+
+```sh
+npm ci
+npm run build --workspace mermaid-circuit
+npm pack --dry-run --json --workspace mermaid-circuit
+npm pack --workspace mermaid-circuit
+tar -tzf mermaid-circuit-0.1.0.tgz
+```
+
+The tarball contains compiled ESM, TypeScript declarations, the shape catalog, bundled symbol artwork, this README, the MIT license, and acknowledgements. The 110 registered symbols are bundled in JavaScript; runtime rendering does not read source SVG files. The nine unregistered IC templates are excluded.
+
+Run the isolated consumer check from the checkout:
+
+```sh
+npx playwright install chromium
+npm run verify:distribution --workspace mermaid-circuit
+```
+
+The check builds and packs the package, audits the actual archive, and installs it into a temporary app outside the repository. It compiles a TypeScript consumer, checks all 110 symbols, and renders all five reference circuits in all three appearances. It checks geometry, connectivity, and colours against the saved SVGs, with network requests blocked during rendering.
+
+Imports must resolve inside the isolated app. The check uses Node.js and existing JavaScript tooling; no Python runtime is needed. It removes its temporary app and tarball on success or failure.
+
+To retain the exact tarball that passed verification, supply an output path outside the repository:
+
+```sh
+npm run verify:distribution --workspace mermaid-circuit -- --tarball-output /absolute/output/mermaid-circuit-0.1.0.tgz
+```
+
+The output directory must already exist. The verifier prints the tarball's filename, byte size, SHA-256 digest, content inventory, and each circuit/theme result. Delete locally generated tarballs after use; do not commit them.
+
+In an independent ESM app, install that verified tarball alongside Mermaid:
+
+```sh
+npm install /absolute/output/mermaid-circuit-0.1.0.tgz mermaid@12.2.0
+```
+
+Use the [host registration example](#local-consumption) below. The public ESM entry point, declaration files, and export map are unchanged.
+
+The [package workflow](../../.github/workflows/package-verify.yml) runs on relevant pull requests and supports manual execution. It retains a verified tarball as a GitHub Actions artifact. It does not publish, tag, or create a release; a passing run establishes a validated release candidate only for the checked commit.
 
 ## Local consumption
 
