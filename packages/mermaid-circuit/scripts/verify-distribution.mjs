@@ -23,6 +23,7 @@ assert.equal(process.versions.node, '24.22.1', 'Use the tested Node.js runtime.'
 const args = process.argv.slice(2);
 assert(args.length === 0 || args.length === 2 && args[0] === '--tarball-output',
   'Usage: npm run verify:distribution -- [--tarball-output /absolute/path/package.tgz]');
+assert(args.length === 0 || isAbsolute(args[1]), '--tarball-output requires an absolute path.');
 const output = args.length ? resolve(args[1]) : undefined;
 const inside = (root, path) => path === root || path.startsWith(root + sep);
 const sha256 = (bytes) => createHash('sha256').update(bytes).digest('hex');
@@ -262,7 +263,7 @@ window.distributionReady = true;
   await writeFile(join(workspace, 'verify.mjs'), `${browserChecks.toString()}\n${verifyConsumer.toString()}\nawait verifyConsumer();\n`);
   run(process.execPath, ['verify.mjs'], workspace);
   if (output) {
-    assert(isAbsolute(output) && !inside(repository, await realpath(dirname(output))), 'Retained tarball must be outside the repository.');
+    assert(!inside(repository, await realpath(dirname(output))), 'Retained tarball must be outside the repository.');
     await copyFile(tarball, output);
     console.log(JSON.stringify({ verifiedTarball: output, sha256: sha256(bytes) }));
   }
