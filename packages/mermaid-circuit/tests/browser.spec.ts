@@ -54,7 +54,10 @@ const controlledSelectorCases = selectorCases.filter(([name]) => name.endsWith('
     `${terminal}([${terminal}]):::pinIn\n${terminal} --- U |${terminal}|`).join('\n')}`] as const;
 });
 
-it.each([...Object.entries(fixtures), ...mosfetCases, ...selectorCases, ...controlledSelectorCases].flatMap(([path, source]) => appearances.map((appearance) => ({ path, source, ...appearance }))))
+const capacitorFeedback = fixtures['../examples/fixtures/opamp-noninverting-amplifier.mmd']
+  .replace('RF["Rf<br/>90k"]:::resistor', 'RF["Cf<br/>10n"]:::capacitor');
+
+it.each([...Object.entries(fixtures), ['capacitor-feedback', capacitorFeedback] as const, ...mosfetCases, ...selectorCases, ...controlledSelectorCases].flatMap(([path, source]) => appearances.map((appearance) => ({ path, source, ...appearance }))))
 ('renders exact geometry and standalone colours for $path in $name', async ({ path, source, config, colors }) => {
   const page = await browser!.newPage();
   const model = parseCircuit(source), layout = floorplan(model);

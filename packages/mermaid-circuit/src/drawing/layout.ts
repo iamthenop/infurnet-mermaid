@@ -1,4 +1,4 @@
-import { mosfetTypes, mosfetChannel, type CircuitModel, type Device, type Net, type PinSide } from '../circuitTypes.js';
+import { mosfetTypes, mosfetChannel, type CircuitModel, type Connection, type Device, type Net, type PinSide } from '../circuitTypes.js';
 import { Element, Graphic, type ElementOptions, type PlacedElement } from './core.js';
 import { bounds, unionBounds, type Bounds, type Point } from './geometry.js';
 import type { SymbolId } from './symbols.js';
@@ -46,6 +46,21 @@ export function validateOrientation(type: string, rotation: number, reverse = fa
   if (['pinIn', 'pinOut', 'pinInOut'].includes(type) && rotation !== 0 && rotation !== connectedRotation) {
     throw new Error('A pin may rotate only with its connected device.');
   }
+}
+
+export function localFeedback(devices: readonly Device[], connections: readonly Connection[], nets: readonly Net[]) {
+  const netAt = (device: Device, terminal: string) => connections.find((item) => item.device === device.id && item.terminal === terminal)?.net;
+  return devices.filter((device) => device.type === 'opamp').flatMap((opamp) => {
+    const output = netAt(opamp, 'out'), input = netAt(opamp, 'in1');
+    if (output === undefined || input === undefined) return [];
+    const candidates = devices.filter((device) => ['resistor', 'capacitor'].includes(device.type)
+      && netAt(device, 'A') === output && netAt(device, 'B') === input);
+    if (output !== input && candidates.length !== 1) return [];
+    const passive = output === input ? undefined : candidates[0];
+    const legs = passive ? devices.filter((device) => device !== passive && device.type === 'resistor'
+      && netAt(device, 'A') === input && nets.some((net) => net.type === 'ground' && net.id === netAt(device, 'B'))) : [];
+    return [{ opamp, output, input, passive, groundLeg: legs.length === 1 ? legs[0] : undefined }];
+  });
 }
 
 function conduction(device: Device): [string, string] | undefined {
@@ -180,6 +195,9 @@ export function floorplan(model: CircuitModel): Layout {
   const deviceById = new Map(model.devices.map((device) => [device.id, device]));
   const membership = new Map(model.connections.map((connection) => [`${connection.device}:${connection.terminal}`, connection.net]));
   const netAt = (device: Device, terminal: string) => membership.get(`${device.id}:${terminal}`);
+  const feedback = localFeedback(model.devices, model.connections, model.nets);
+  const feedbackDevices = new Set(feedback.flatMap(({ passive, groundLeg }) => [passive?.id, groundLeg?.id]));
+  const ordinaryConduction = (device: Device) => feedbackDevices.has(device.id) ? undefined : conduction(device);
   const stageLayouts = model.stages.map((stage) => {
     const devices = stage.devices.map((id) => deviceById.get(id)!);
     if (model.mode === 'D') {
@@ -208,14 +226,14 @@ export function floorplan(model: CircuitModel): Layout {
     const groups: Device[][] = [];
     const keys = new Map<string, number>();
     for (const device of devices) {
-      const pair = conduction(device), first = pair && netAt(device, pair[0]), second = pair && netAt(device, pair[1]);
+      const pair = ordinaryConduction(device), first = pair && netAt(device, pair[0]), second = pair && netAt(device, pair[1]);
       const key = first && second ? JSON.stringify([first, second]) : device.id;
       let group = keys.get(key);
       if (group === undefined) { group = groups.length; keys.set(key, group); groups.push([]); }
       groups[group].push(device);
     }
     const edges = groups.map(([target], i) => groups.flatMap(([source], j) => {
-      const from = conduction(source), to = conduction(target);
+      const from = ordinaryConduction(source), to = ordinaryConduction(target);
       return i !== j && from && to && netAt(source, from[1]) !== undefined
         && netAt(source, from[1]) === netAt(target, to[0]) ? [j] : [];
     }));
@@ -223,8 +241,8 @@ export function floorplan(model: CircuitModel): Layout {
     if (!linked && groups.every((group) => group.length === 1)) {
       return devices.map((device, index) => placement(device,
         stage.direction === 'TB' ? [0, index * 300] : [index * 300, index * 90],
-        devices.length === 1 && stage.explicitDirection && stage.direction === 'LR' && conduction(device)?.[0] === 'A'
-          ? 0 : defaultRotation(device), conduction(device)?.[0] ?? 'center'));
+        devices.length === 1 && stage.explicitDirection && stage.direction === 'LR' && ordinaryConduction(device)?.[0] === 'A'
+          ? 0 : defaultRotation(device), ordinaryConduction(device)?.[0] ?? 'center'));
     }
     const transpose = stage.explicitDirection && (linked ? stage.direction === 'LR' : stage.direction === 'TB');
     const occupied = new Map<number, number>();
@@ -237,7 +255,7 @@ export function floorplan(model: CircuitModel): Layout {
       const cross = (rows[index] + member - ((occupied.get(depth[index]) ?? 1) - 1) / 2) * 300;
       const along = depth[index] * 360 + (group.length > 1 && group.some((item) => item.terminals.length > 2) ? member * 90 : 0);
       return placement(device, transpose ? [along, cross] : [cross, along],
-        (defaultRotation(device) + (transpose ? 270 : 0)) % 360, conduction(device)?.[0] ?? 'center');
+        (defaultRotation(device) + (transpose ? 270 : 0)) % 360, ordinaryConduction(device)?.[0] ?? 'center');
     }));
   });
   if (model.mode === 'A') for (const local of stageLayouts) {
@@ -315,6 +333,25 @@ export function floorplan(model: CircuitModel): Layout {
   });
   if (model.mode === 'A') {
     refineAnalogPlacement(model, devices, netAt);
+    for (const { opamp, passive, groundLeg } of feedback) {
+      const amplifier = devices.find((item) => item.device.id === opamp.id)!;
+      const [x, y] = amplifier.placed.anchors.in1;
+      if (passive) {
+        const index = devices.findIndex((item) => item.device.id === passive.id);
+        devices[index] = placement(passive, [x + 120, amplifier.pane.minY - 180], 180, 'A');
+      }
+      if (groundLeg) {
+        const index = devices.findIndex((item) => item.device.id === groundLeg.id);
+        devices[index] = placement(groundLeg, [x - 360, y + 120], 90, 'A');
+      }
+    }
+    for (const moved of devices.filter((item) => feedbackDevices.has(item.device.id))) {
+      const box = moved.placed.bounds;
+      if (devices.some((other) => other !== moved && box.minX < other.placed.bounds.maxX && box.maxX > other.placed.bounds.minX
+        && box.minY < other.placed.bounds.maxY && box.maxY > other.placed.bounds.minY)) {
+        throw new Error(`Unsupported local feedback placement: ${moved.device.id} overlaps another device.`);
+      }
+    }
     model.stages.forEach((stage, index) => {
       const members = devices.filter((item) => stage.devices.includes(item.device.id));
       if (!members.length) return;

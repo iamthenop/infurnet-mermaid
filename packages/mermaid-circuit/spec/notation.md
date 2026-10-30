@@ -407,6 +407,29 @@ P0 |D| --- P1 |S|
 
 Both forms connect `P0.D` to `P1.S` with the same stated direction. The reversed source-to-drain form, `P1 |S| --- |D| P0`, is invalid. Reordering whole statements in the document does not change electrical membership.
 
+### Local op-amp negative feedback
+
+The sole permitted direct same-device connection is an op-amp output to its own inverting input, written in this direction:
+
+```text
+U1 |out| --- |in1| U1
+```
+
+Both terminals belong to one implied net. Repeated declarations do not duplicate membership. All other direct same-device terminal pairs remain invalid, including the reversed form and connections to `in2` or either supply terminal.
+
+A local return may instead pass through one explicitly connected `resistor` or `capacitor`:
+
+```text
+U1 |out| --- |A| RF
+RF |B| --- |in1| U1
+```
+
+The passive component retains its ordinary device identity and two distinct terminal nets. Its position does not establish feedback. The return must connect the output and inverting input of the same op-amp.
+
+A resistor from the inverting-input net to an explicitly declared ground forms the divider's ground leg. Neither that leg nor an external output is inferred. The [feedback presentation rules](style.md#local-op-amp-feedback) change drawing geometry without creating electrical connections.
+
+This contract does not introduce positive feedback, arbitrary passive networks, general cycle routing, or electrical simulation.
+
 ### External endpoints
 
 External endpoints use their identifiers without terminal labels:

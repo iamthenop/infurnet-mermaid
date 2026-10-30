@@ -112,6 +112,18 @@ Wires use orthogonal routing. Junction markers follow the [junction contract](no
 
 Stage frames enclose their junctions with at least 30 units of clearance; block frames enclose shared block junctions within their inner padding. Routes and crossings must not redefine electrical connectivity.
 
+## Local op-amp feedback
+
+The [notation contract](notation.md#local-op-amp-negative-feedback) defines recognized direct and passive returns. Only the local route from one op-amp's output back to its own inverting input may double back around the body. Ordinary input, output, supply, and unrelated routes retain their existing constraints.
+
+A recognized return uses orthogonal segments with the existing 60-unit outward approach at both op-amp terminals. It avoids device bodies and terminal labels. Where multiple ordinary segments form the return, their shared net identity and assembled connectivity must be validated.
+
+Place the return resistor or capacitor above the op-amp on the returning path. Place the divider's ground resistor on its separate ground leg. Adjust only recognized feedback components; unrelated devices retain their placement, and an obstructed local arrangement must fail rather than move them.
+
+Keep the op-amp's normal orientation and the external output proceeding rightward. Branch the return near the output, after its terminal approach. Prefer a clear return with fewer bends; this exception does not permit unrestricted multi-bend routing.
+
+Draw a junction dot at a genuine three-way output or divider branch. Two-way return bends and unrelated wire crossings receive no dot. Supply wires receive no feedback U-turn exemption.
+
 ## Labels
 
 1. The instance name appears at the bottom right of a device.

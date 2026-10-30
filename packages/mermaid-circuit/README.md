@@ -38,7 +38,7 @@ The motor is a circle with `M` inside. The solenoid is a circle with a straight 
 
 The capacitor and load additions are `capacitor2`, `capacitorPolar`, `capacitor2Polar`, `capacitorVar`, `capacitorTrim`, `lamp`, `lamp2`, `breaker`, and `diac`. See [the notation specification](spec/notation.md#object-types) for their terminal contracts and mode restrictions.
 
-The `opamp` device supports open-loop schematics in mode `A`, using its [registered terminal contract](spec/notation.md#object-types). Declare external endpoints explicitly. Feedback support remains deferred.
+The `opamp` device supports open-loop schematics and [local negative feedback](spec/notation.md#local-op-amp-negative-feedback) in mode `A`. Declare external endpoints explicitly. The return may connect `out` directly to its own `in1`, or pass through one ordinary resistor or capacitor.
 
 Use `diode` for an ordinary rectifier diode. The authorable variants are `diodeFilled`, `schottky`, `diodeTunnel`, `diodeShockley`, `zener`, `diodeTVS`, `varactor`, `led`, `led2`, and `photodiode`. Their terminal contracts and mode restrictions are defined in [the notation specification](spec/notation.md#object-types).
 
@@ -301,7 +301,7 @@ npm run test:browser --workspace mermaid-circuit
 
 Unit tests cover the 83 notation types, device connections, hierarchy, parser failures, and database isolation. They also check placement, routing limits, and the NAND and XOR truth tables.
 
-Browser tests register the compiled package with real Mermaid in Chromium. They check all thirteen drawings, their symbol transforms and wire endpoints, failed input, and recovery after failure. See the [root README](../../README.md) for `.venv/` runtime activation and CI commands.
+Browser tests register the compiled package with real Mermaid in Chromium. They check all fifteen drawings, their symbol transforms and wire endpoints, failed input, and recovery after failure. See the [root README](../../README.md) for `.venv/` runtime activation and CI commands.
 
 ## Generated circuit examples
 
@@ -323,6 +323,8 @@ Each SVG is produced by the registered Mermaid plugin from its source fixture. T
 | Diode variants | [Mermaid](examples/fixtures/diode-variants.mmd) | [SVG](examples/fixtures/diode-variants.svg) | [SVG](examples/fixtures/diode-variants-inverse.svg) | [SVG](examples/fixtures/diode-variants-colored.svg) |
 | MOSFET variants | [Mermaid](examples/fixtures/mosfet-variants.mmd) | [SVG](examples/fixtures/mosfet-variants.svg) | [SVG](examples/fixtures/mosfet-variants-inverse.svg) | [SVG](examples/fixtures/mosfet-variants-colored.svg) |
 | Open-loop op-amp | [Mermaid](examples/fixtures/opamp-open-loop.mmd) | [SVG](examples/fixtures/opamp-open-loop.svg) | [SVG](examples/fixtures/opamp-open-loop-inverse.svg) | [SVG](examples/fixtures/opamp-open-loop-colored.svg) |
+| Unity-gain voltage follower | [Mermaid](examples/fixtures/opamp-voltage-follower.mmd) | [SVG](examples/fixtures/opamp-voltage-follower.svg) | [SVG](examples/fixtures/opamp-voltage-follower-inverse.svg) | [SVG](examples/fixtures/opamp-voltage-follower-colored.svg) |
+| Non-inverting amplifier | [Mermaid](examples/fixtures/opamp-noninverting-amplifier.mmd) | [SVG](examples/fixtures/opamp-noninverting-amplifier.svg) | [SVG](examples/fixtures/opamp-noninverting-amplifier-inverse.svg) | [SVG](examples/fixtures/opamp-noninverting-amplifier-colored.svg) |
 | MUX and DEMUX | [Mermaid](examples/fixtures/mux-demux.mmd) | [SVG](examples/fixtures/mux-demux.svg) | [SVG](examples/fixtures/mux-demux-inverse.svg) | [SVG](examples/fixtures/mux-demux-colored.svg) |
 
 The MUX/DEMUX fixture connects all four configurations and holds each select at an explicitly named ground reference. Its DEMUX data outputs retain independent nets.
@@ -331,7 +333,11 @@ The capacitor and load fixture tests schematic rendering with series and paralle
 
 The open-loop op-amp fixture has independent inputs and an output, with explicit positive-supply and lower-supply reference connections. Its `vs` terminal connects to the declared `VSS` ground reference. The schematic does not assert amplifier stability or physical design validity.
 
-Generate the three op-amp SVGs and verify the thirty-six existing references without rewriting them:
+The voltage follower connects the output directly to the inverting input while `Vin` enters the non-inverting input. The non-inverting amplifier uses a 90 kΩ return resistor and a 10 kΩ ground-leg resistor. Both fixtures retain separate +15 V and −15 V supply nets.
+
+The resistor values illustrate the ideal nominal relationship `Av ≈ 1 + Rf/Rg = 1 + 90k/10k = 10`. The plugin draws the authored topology; it does not calculate gain, output voltage, or stability. The capacitor test exercises the same local return geometry without adding another permanent fixture.
+
+Generate the six feedback SVGs and verify the thirty-nine existing references without rewriting them:
 
 ```sh
 npm run render:fixtures --workspace mermaid-circuit

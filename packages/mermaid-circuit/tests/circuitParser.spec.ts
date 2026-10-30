@@ -343,9 +343,41 @@ end`);
       expect(() => parseCircuit(`${source}\nU1 |${terminal}| --- Output`)).toThrow('Unknown terminal');
     }
     expect(() => parseCircuit(`${declaration}\nX([X]):::pinIn\nX --- |in1| L:U1`)).toThrow('side qualifier');
-    for (const [from, to] of [['out', 'in1'], ['out', 'in2'], ['vd', 'vs']]) {
-      expect(() => parseCircuit(`${declaration}\nU1 |${from}| --- |${to}| U1`)).toThrow('two distinct devices');
+  });
+
+  it('accepts only the output-to-inverting-input op-amp self-connection and deduplicates membership', () => {
+    const declaration = 'circuitDiagram A\nU1[U1]:::opamp';
+    const link = 'U1 |out| --- |in1| U1';
+    const model = parseCircuit(`${declaration}\n${link}\n${link}`);
+    expect(topology(model)).toEqual([['U1.in1', 'U1.out']]);
+    expect(model.nets).toHaveLength(1);
+    expect(model.connections).toHaveLength(2);
+    for (const first of ['in1', 'in2', 'out', 'vd', 'vs']) for (const second of ['in1', 'in2', 'out', 'vd', 'vs']) {
+      if (first === 'out' && second === 'in1') continue;
+      expect(() => parseCircuit(`${declaration}\nU1 |${first}| --- |${second}| U1`)).toThrow('two distinct devices');
     }
+    const follower = parseCircuit(drawingFixtures['../examples/fixtures/opamp-voltage-follower.mmd']);
+    expect(follower.nets).toHaveLength(4);
+    expect(follower.connections.filter((item) => item.net === 'VOUT')).toEqual([
+      { device: 'U1', terminal: 'out', net: 'VOUT' }, { device: 'U1', terminal: 'in1', net: 'VOUT' },
+    ]);
+    expect(follower.connections.find((item) => item.terminal === 'vs')!.net).toBe('VMINUS');
+    expect(follower.connections.find((item) => item.terminal === 'vd')!.net).toBe('VPLUS');
+  });
+
+  it.each(['resistor', 'capacitor'])('preserves the six separate amplifier nets with a %s return', (type) => {
+    const source = drawingFixtures['../examples/fixtures/opamp-noninverting-amplifier.mmd'].replace(':::resistor', `:::${type}`);
+    const model = parseCircuit(source);
+    expect(topology(model)).toEqual([
+      ['U1.in2'], ['U1.out', 'RF.A'], ['RF.B', 'U1.in1', 'RG.A'], ['RG.B'], ['U1.vd'], ['U1.vs'],
+    ].map((group) => group.sort()).sort());
+    expect(model.nets).toHaveLength(6);
+    expect(model.connections).toHaveLength(9);
+    expect(model.devices.find((device) => device.id === 'RF')!.type).toBe(type);
+    for (const [terminal, net] of [['in2', 'VIN'], ['out', 'VOUT'], ['vd', 'VPLUS'], ['vs', 'VMINUS']]) {
+      expect(model.connections.find((item) => item.device === 'U1' && item.terminal === terminal)!.net).toBe(net);
+    }
+    expect(model.connections.find((item) => item.device === 'RG' && item.terminal === 'B')!.net).toBe('GND');
   });
 
   it.each(diodeTypes)('preserves %s anode and cathode connections and rejects non-diode terminal names', (type) => {

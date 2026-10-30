@@ -233,7 +233,9 @@ export function parseCircuit(text: string): CircuitModel {
   for (const { left, right, leftTerminal, rightTerminal, line } of pending) {
     if (leftTerminal !== undefined && rightTerminal !== undefined) {
       if (!nodes.has(left) || !nodes.has(right)) fail(line, `Connection references an undeclared device: ${left}, ${right}.`);
-      if (!deviceIds.has(left) || !deviceIds.has(right) || left === right) {
+      const negativeFeedback = left === right && (nodes.get(left) as Device).type === 'opamp'
+        && leftTerminal === 'out' && rightTerminal === 'in1';
+      if (!deviceIds.has(left) || !deviceIds.has(right) || left === right && !negativeFeedback) {
         fail(line, 'A direct connection requires two distinct devices.');
       }
       const first = endpoint(left, leftTerminal, line), second = endpoint(right, rightTerminal, line);

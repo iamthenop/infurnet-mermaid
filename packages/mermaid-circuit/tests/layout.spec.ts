@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
 import { describe, expect, it } from 'vitest';
 import { parseCircuit } from '../src/parser/circuitParser.js';
-import { floorplan, validateOrientation, icGeometry } from '../src/drawing/layout.js';
+import { floorplan, validateOrientation, icGeometry, localFeedback } from '../src/drawing/layout.js';
 import { mosfetTypes } from '../src/circuitTypes.js';
 import catalog from '../shapes/shapes.json' with { type: 'json' };
 
@@ -33,6 +33,38 @@ describe('basic floorplanning', () => {
       const layout = floorplan(parseCircuit(`${declaration}\n${links}`));
       expect(layout.devices.map((item) => item.placed.anchors)).toEqual(baseline);
       expect(layout.devices.every((item) => item.rotation === 0)).toBe(true);
+    }
+  });
+
+  it.each(['resistor', 'capacitor'])('places the local %s return above the op-amp and the ground leg separately', (type) => {
+    const source = fixtures['../examples/fixtures/opamp-noninverting-amplifier.mmd'].replace(':::resistor', `:::${type}`);
+    const model = parseCircuit(source), layout = floorplan(model);
+    const opamp = layout.devices.find((item) => item.device.id === 'U1')!;
+    const feedback = layout.devices.find((item) => item.device.id === 'RF')!;
+    const ground = layout.devices.find((item) => item.device.id === 'RG')!;
+    expect(localFeedback(model.devices, model.connections, model.nets)).toHaveLength(1);
+    expect(opamp.rotation).toBe(0);
+    expect(feedback.rotation).toBe(180);
+    expect(feedback.pane.maxY).toBeLessThan(opamp.pane.minY);
+    expect(feedback.placed.anchors.A[0]).toBeGreaterThan(feedback.placed.anchors.B[0]);
+    expect(ground.rotation).toBe(90);
+    expect(ground.placed.anchors.A[1]).toBeLessThan(ground.placed.anchors.B[1]);
+    expect(ground.pane.maxX).toBeLessThan(opamp.pane.minX - 120);
+    expect(ground.pane.minY).toBeGreaterThan(opamp.placed.anchors.in1[1]);
+    const extra = source.replace('    RG[', '    ROTHER[ROTHER]:::resistor\n    RG[');
+    const connected = parseCircuit(extra);
+    const disconnected = { ...connected, connections: [] };
+    const other = (input: typeof model) => floorplan(input).devices.find((item) => item.device.id === 'ROTHER')!;
+    expect(other(connected).placed.anchors).toEqual(other(disconnected).placed.anchors);
+  });
+
+  it('recognizes feedback only from the same op-amp output and inverting-input nets', () => {
+    const source = fixtures['../examples/fixtures/opamp-noninverting-amplifier.mmd'];
+    for (const modified of [source.replace('RF |B| --- |in1| U1', 'RF |B| --- |in2| U1'),
+      source.replace('RF |B| --- |in1| U1', 'RF |B| --- |in1| U2') + '\nU2[U2]:::opamp',
+      source.replace(':::resistor', ':::resistorIEC'), source.replace('U1 |out| --- |A| RF', '')]) {
+      const model = parseCircuit(modified);
+      expect(localFeedback(model.devices, model.connections, model.nets)).toEqual([]);
     }
   });
 
