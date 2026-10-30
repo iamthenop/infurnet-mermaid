@@ -4,7 +4,7 @@ An external Mermaid circuit renderer with identifier `circuitDiagram`. Version `
 
 ## Implemented behavior
 
-The parser accepts `circuitDiagram D` and `circuitDiagram A`, followed by declarations and connections from the closed 22-type vocabulary in [the notation specification](spec/notation.md).
+The parser accepts `circuitDiagram D` and `circuitDiagram A`, followed by declarations and connections from the closed 32-type vocabulary in [the notation specification](spec/notation.md).
 
 ```text
 circuitDiagram D
@@ -19,7 +19,7 @@ U1 |O| --- Y
 
 Blank lines and Mermaid `%%` comments are accepted. The parser validates mode eligibility, declaration brackets, object identity, device terminals, terminal-qualified connections, and typed stage/block membership. Optional device parameters remain uninterpreted label content.
 
-The full 110-shape catalog is not an authorable device vocabulary. The parser now admits `fuse` in mode `A` and `nand` in mode `D`.
+The full 110-shape catalog is not an authorable device vocabulary. The digital vocabulary includes `and`, `or`, `nor`, `xor`, `xnor`, `notNot`, `schmitt`, `schmittNot`, `schmittAnd`, and `schmittNand`, alongside `nand`, `inverter`, and `buffer`. Their terminals and mode restrictions are defined in [the notation specification](spec/notation.md#object-types).
 
 Mode `A` also accepts `antenna` and dynamic `ic` devices using the [IC pin notation](spec/notation.md#integrated-circuit-pins). Multiple pins may share a side.
 
@@ -281,7 +281,7 @@ npm run dev --workspace mermaid-circuit
 
 Open the local URL printed by Vite. The page registers the compiled package, loads `examples/basic.mmd`, and displays the returned SVG with a completion status. The fixture renders a connected CMOS inverter.
 
-Use the circuit and appearance selectors to inspect all five fixtures in all three palettes. A preview can also be selected with `?fixture=cmos-nand2&appearance=colored` on that local URL.
+Use the circuit and appearance selectors to inspect all seven fixtures in all three palettes. A preview can also be selected with `?fixture=cmos-nand2&appearance=colored` on that local URL.
 
 ```sh
 npm run typecheck --workspace mermaid-circuit
@@ -291,9 +291,9 @@ npx playwright install chromium
 npm run test:browser --workspace mermaid-circuit
 ```
 
-Unit tests cover the 22 notation types, device connections, hierarchy, parser failures, and database isolation. They also check placement, routing limits, and the NAND and XOR truth tables.
+Unit tests cover the 32 notation types, device connections, hierarchy, parser failures, and database isolation. They also check placement, routing limits, and the NAND and XOR truth tables.
 
-Browser tests register the compiled package with real Mermaid in Chromium. They check all five drawings, their symbol transforms and wire endpoints, failed input, and recovery after failure. See the [root README](../../README.md) for `.venv/` runtime activation and CI commands.
+Browser tests register the compiled package with real Mermaid in Chromium. They check all seven drawings, their symbol transforms and wire endpoints, failed input, and recovery after failure. See the [root README](../../README.md) for `.venv/` runtime activation and CI commands.
 
 ## Generated circuit examples
 
@@ -308,8 +308,10 @@ Each SVG is produced by the registered Mermaid plugin from its source fixture. T
 | CMOS NAND2 | [Mermaid](examples/fixtures/cmos-nand2.mmd) | [SVG](examples/fixtures/cmos-nand2.svg) | [SVG](examples/fixtures/cmos-nand2-inverse.svg) | [SVG](examples/fixtures/cmos-nand2-colored.svg) |
 | CMOS XOR, twelve transistors | [Mermaid](examples/fixtures/cmos-xor12.mmd) | [SVG](examples/fixtures/cmos-xor12.svg) | [SVG](examples/fixtures/cmos-xor12-inverse.svg) | [SVG](examples/fixtures/cmos-xor12-colored.svg) |
 | XOR, four NAND gates | [Mermaid](examples/fixtures/xor-nand4.mmd) | [SVG](examples/fixtures/xor-nand4.svg) | [SVG](examples/fixtures/xor-nand4-inverse.svg) | [SVG](examples/fixtures/xor-nand4-colored.svg) |
+| Logic variants | [Mermaid](examples/fixtures/logic-variants.mmd) | [SVG](examples/fixtures/logic-variants.svg) | [SVG](examples/fixtures/logic-variants-inverse.svg) | [SVG](examples/fixtures/logic-variants-colored.svg) |
+| Schmitt variants | [Mermaid](examples/fixtures/schmitt-variants.mmd) | [SVG](examples/fixtures/schmitt-variants.svg) | [SVG](examples/fixtures/schmitt-variants-inverse.svg) | [SVG](examples/fixtures/schmitt-variants-colored.svg) |
 
-Regenerate all fifteen SVGs with the existing Node and Chromium environment:
+Generate the six logic and Schmitt SVGs and verify the fifteen existing references without rewriting them:
 
 ```sh
 npm run render:fixtures --workspace mermaid-circuit

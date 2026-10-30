@@ -199,7 +199,7 @@ describe('shape catalog', () => {
       Object.keys(assets).map((path) => path.split('/').at(-1)!).sort(),
     );
     const definitions = [...notation.matchAll(/^\| `([^`]+)` \| (Device|Net) \| ([^|]+) \|$/gmu)];
-    expect(definitions).toHaveLength(22);
+    expect(definitions).toHaveLength(32);
     expect(definitions.map((match) => match[1])).not.toContain('net');
     const existing = definitions.map((match) => match[1]!).filter((key) => key !== 'net' && key !== 'ic');
     expect(Object.keys(shapes)).toEqual(expect.arrayContaining(existing));
@@ -278,8 +278,8 @@ describe('shape catalog', () => {
     expect(svg).not.toMatch(/<(?:text|tspan|use)\b|(?:href|font-family)=/u);
     const authorableTypes = [...notation.matchAll(/^\| `([^`]+)` \| (Device|Net) \| ([^|]+) \|$/gmu)]
       .map((match) => match[1]);
-    if (key === 'nand') expect(authorableTypes).toContain(key);
-    else expect(authorableTypes).not.toContain(key);
+    if (key === 'tgate' || key === 'tristate') expect(authorableTypes).not.toContain(key);
+    else expect(authorableTypes).toContain(key);
   });
 
   it.each(Object.entries(shapes))('%s has grid-aligned attachments and geometry inside its pane', (_key, entry) => {

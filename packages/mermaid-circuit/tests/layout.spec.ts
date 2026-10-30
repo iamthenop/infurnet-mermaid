@@ -51,6 +51,33 @@ describe('basic floorplanning', () => {
     expect(lower.O[1]).toBe(lower.center[1]);
   });
 
+  it.each(['logic-variants', 'schmitt-variants'].flatMap((name) => ['LR', 'TB'].map((direction) => ({ name, direction }))))
+  ('places connected $name by dependency in $direction regardless of declaration order', ({ name, direction }) => {
+    const source = fixtures[`../examples/fixtures/${name}.mmd`].replace('direction LR', `direction ${direction}`);
+    const declarations = source.match(/^    U\d+.*$/gmu)!;
+    const reordered = source.replace(declarations.join('\n'), [...declarations].reverse().join('\n'));
+    const model = parseCircuit(reordered), layout = floorplan(model);
+    const axis = direction === 'LR' ? 0 : 1;
+    const at = (id: string) => layout.devices.find((item) => item.device.id === id)!;
+    for (let index = 1; index <= declarations.length; index++) {
+      const item = at(`U${index}`);
+      expect(item.rotation).toBe(direction === 'LR' ? 0 : 90);
+      expect(item.flip).toBe(false);
+      for (const terminal of item.device.terminals.filter((terminal) => terminal !== 'O')) {
+        expect(item.placed.anchors[terminal][axis]).toBeLessThan(item.placed.anchors.O[axis]);
+      }
+    }
+    expect(at('U1').placed.anchors.center[axis]).toBe(at('U2').placed.anchors.center[axis]);
+    expect(at('U1').placed.anchors.center[1 - axis]).toBeGreaterThan(at('U2').placed.anchors.center[1 - axis]);
+    for (const output of model.connections.filter((item) => item.terminal === 'O')) {
+      for (const input of model.connections.filter((item) => item.net === output.net && item.terminal !== 'O')) {
+        expect(at(output.device).placed.anchors.center[axis]).toBeLessThan(at(input.device).placed.anchors.center[axis]);
+      }
+    }
+    expect(layout.attachments.map(({ device, terminal, net }) => ({ device, terminal, net })))
+      .toEqual(model.connections);
+  });
+
   it('preserves blocks and centers the input-inverter block beside the XOR core', () => {
     const model = fixture('cmos-xor12'), layout = floorplan(model);
     const blocks = layout.frames.filter((frame) => frame.kind === 'block');

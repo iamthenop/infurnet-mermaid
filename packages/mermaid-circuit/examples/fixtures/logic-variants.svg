@@ -1,0 +1,319 @@
+<svg id="fixture-logic-variants" width="2042" xmlns="http://www.w3.org/2000/svg" viewBox="-406 -222 2042 1032" height="1032" overflow="visible" font-family="sans-serif" font-size="14" role="graphics-document document" aria-roledescription="circuitDiagram"><style>#fixture-logic-variants{font-family:"trebuchet ms",verdana,arial,sans-serif;font-size:16px;fill:#333;}@keyframes edge-animation-frame{from{stroke-dashoffset:0;}}@keyframes dash{to{stroke-dashoffset:0;}}#fixture-logic-variants .edge-animation-slow{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 50s linear infinite;stroke-linecap:round;}#fixture-logic-variants .edge-animation-fast{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 20s linear infinite;stroke-linecap:round;}#fixture-logic-variants .error-icon{fill:#552222;}#fixture-logic-variants .error-text{fill:#552222;stroke:#552222;}#fixture-logic-variants .edge-thickness-normal{stroke-width:1px;}#fixture-logic-variants .edge-thickness-thick{stroke-width:3.5px;}#fixture-logic-variants .edge-pattern-solid{stroke-dasharray:0;}#fixture-logic-variants .edge-thickness-invisible{stroke-width:0;fill:none;}#fixture-logic-variants .edge-pattern-dashed{stroke-dasharray:3;}#fixture-logic-variants .edge-pattern-dotted{stroke-dasharray:2;}#fixture-logic-variants .marker{fill:#333333;stroke:#333333;}#fixture-logic-variants .marker.cross{stroke:#333333;}#fixture-logic-variants svg{font-family:"trebuchet ms",verdana,arial,sans-serif;font-size:16px;}#fixture-logic-variants p{margin:0;}#fixture-logic-variants,#fixture-logic-variants svg{font-family:sans-serif;font-size:14px;}#fixture-logic-variants [data-circuit-background]{fill:#FFFFFF;}#fixture-logic-variants [data-wire] polyline{stroke:#000000;}#fixture-logic-variants [data-junction] circle{stroke:#000000;fill:#000000;}#fixture-logic-variants [data-device] [stroke]:not([stroke="none"]),#fixture-logic-variants [data-net-occurrence] [stroke]:not([stroke="none"]){stroke:#000000;}#fixture-logic-variants [data-device] [fill="#000"],#fixture-logic-variants [data-net-occurrence] [fill="#000"]{fill:#000000;}#fixture-logic-variants [data-device] [fill="#fff"],#fixture-logic-variants [data-device] [fill="white"],#fixture-logic-variants [data-net-occurrence] [fill="#fff"],#fixture-logic-variants [data-net-occurrence] [fill="white"]{fill:#FFFFFF;}#fixture-logic-variants [data-stage] polyline,#fixture-logic-variants [data-block] polyline{stroke:#000000;}#fixture-logic-variants [data-device-label] text,#fixture-logic-variants [data-ic-label] text,#fixture-logic-variants [data-terminal] text{fill:#000000;}#fixture-logic-variants [data-net-label] text,#fixture-logic-variants [data-frame-label] text{fill:#000000;}#fixture-logic-variants .node .neo-node{stroke:#9370DB;}#fixture-logic-variants [data-look="neo"].node rect,#fixture-logic-variants [data-look="neo"].cluster rect,#fixture-logic-variants [data-look="neo"].node polygon{stroke:#9370DB;filter:drop-shadow(1px 2px 2px rgba(185, 185, 185, 1));}#fixture-logic-variants [data-look="neo"].swimlane.cluster rect{filter:none;}#fixture-logic-variants [data-look="neo"].node path{stroke:#9370DB;stroke-width:1px;}#fixture-logic-variants [data-look="neo"].node .outer-path{filter:drop-shadow(1px 2px 2px rgba(185, 185, 185, 1));}#fixture-logic-variants [data-look="neo"].node .neo-line path{stroke:#9370DB;filter:none;}#fixture-logic-variants [data-look="neo"].node circle{stroke:#9370DB;filter:drop-shadow(1px 2px 2px rgba(185, 185, 185, 1));}#fixture-logic-variants [data-look="neo"].node circle .state-start{fill:#000000;}#fixture-logic-variants [data-look="neo"].icon-shape .icon{fill:#9370DB;filter:drop-shadow(1px 2px 2px rgba(185, 185, 185, 1));}#fixture-logic-variants [data-look="neo"].icon-shape .icon-neo path{stroke:#9370DB;filter:drop-shadow(1px 2px 2px rgba(185, 185, 185, 1));}#fixture-logic-variants :root{--mermaid-font-family:"trebuchet ms",verdana,arial,sans-serif;}</style><rect data-circuit-background="true" x="-406" y="-222" width="2042" height="1032"></rect>
+<g data-drawing-index="0" data-stage="logicVariants" stroke-dasharray="8 6">
+<polyline points="-30,-30 1260,-30 1260,630 -30,630 -30,-30" stroke="#777" stroke-width="1" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="1" data-label="true" data-frame-label="stage">
+<text x="-18" y="-42" xml:space="preserve" fill="#000">logicVariants</text>
+</g>
+<g data-drawing-index="2" data-net="@implicit:U1:O" data-wire="-|" data-points="[[120,60],[300,60],[300,280]]">
+<polyline points="120,60 300,60 300,280" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="3" data-net="@implicit:U1:O" data-wire="-" data-points="[[300,280],[360,280]]">
+<polyline points="300,280 360,280" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="4" data-net="@implicit:U2:O" data-wire="-|" data-points="[[120,300],[300,300],[300,320]]">
+<polyline points="120,300 300,300 300,320" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="5" data-net="@implicit:U2:O" data-wire="-" data-points="[[300,320],[360,320]]">
+<polyline points="300,320 360,320" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="6" data-net="@implicit:U3:O" data-wire="-|" data-points="[[120,540],[660,540],[660,320]]">
+<polyline points="120,540 660,540 660,320" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="7" data-net="@implicit:U3:O" data-wire="-" data-points="[[660,320],[720,320]]">
+<polyline points="660,320 720,320" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="8" data-net="@implicit:U4:O" data-wire="-|" data-points="[[480,300],[660,300],[660,280]]">
+<polyline points="480,300 660,300 660,280" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="9" data-net="@implicit:U4:O" data-wire="-" data-points="[[660,280],[720,280]]">
+<polyline points="660,280 720,280" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="10" data-net="@implicit:U5:O" data-wire="-" data-points="[[840,300],[1080,300]]">
+<polyline points="840,300 1080,300" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="11" data-net="A" data-wire="-" data-points="[[-150,40],[0,40]]">
+<polyline points="-150,40 0,40" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="12" data-net="B" data-wire="-" data-points="[[-150,80],[0,80]]">
+<polyline points="-150,80 0,80" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="13" data-net="C" data-wire="-" data-points="[[-150,280],[0,280]]">
+<polyline points="-150,280 0,280" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="14" data-net="D" data-wire="-" data-points="[[-150,320],[0,320]]">
+<polyline points="-150,320 0,320" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="15" data-net="E" data-wire="-" data-points="[[-150,520],[0,520]]">
+<polyline points="-150,520 0,520" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="16" data-net="F" data-wire="-" data-points="[[-150,560],[0,560]]">
+<polyline points="-150,560 0,560" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="17" data-net="Y" data-wire="-" data-points="[[1380,300],[1200,300]]">
+<polyline points="1380,300 1200,300" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="18" data-device="U1" data-type="and" data-stage-index="0">
+<g transform="matrix(1 0 0 1 0 0)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-logic-variants-element-18-and" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path id="fixture-logic-variants-element-18-body" d="M 64.8 92.4 L 66.8754 92.3334 L 68.9436 92.1336 L 70.9938 91.8024 L 73.0188 91.3398 L 75.0096 90.7494 L 76.959 90.033 L 78.858 89.1906 L 80.6994 88.2312 L 82.476 87.1548 L 84.1788 85.965 L 85.8024 84.6708 L 87.3396 83.274 L 88.785 81.7818 L 90.1314 80.2014 L 91.3734 78.5364 L 92.5074 76.7958 L 93.5262 74.9868 L 94.4262 73.1148 L 95.2056 71.1906 L 95.8608 69.2178 L 96.3882 67.209 L 96.7842 65.1714 L 97.0506 63.1104 L 97.1838 61.0386 L 97.1838 58.9614 L 97.0506 56.8896 L 96.7842 54.8286 L 96.3882 52.791 L 95.8608 50.7822 L 95.2056 48.8094 L 94.4262 46.8852 L 93.5262 45.0132 L 92.5074 43.2042 L 91.3734 41.4636 L 90.1314 39.7986 L 88.785 38.2182 L 87.3396 36.726 L 85.8024 35.3292 L 84.1788 34.035 L 82.476 32.8452 L 80.6994 31.7688 L 78.858 30.8094 L 76.959 29.967 L 75.0096 29.2506 L 73.0188 28.6602 L 70.9938 28.1976 L 68.9436 27.8664 L 66.8754 27.6666 L 64.8 27.6 L 64.8 27.6 L 22.68 27.6 L 22.68 60 L 22.68 92.4 L 64.8 92.4"></path>
+    <path id="fixture-logic-variants-element-18-lead-I1" d="M 0 40 L 22.68 40"></path>
+    <path id="fixture-logic-variants-element-18-lead-I2" d="M 0 80 L 22.68 80"></path>
+    <path id="fixture-logic-variants-element-18-lead-O" d="M 97.2 60 L 120 60"></path>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="19" data-label="true" data-device-label="U1">
+<text x="132" y="104" xml:space="preserve" fill="#000">U1</text>
+</g>
+<g data-drawing-index="20" data-label="true" data-terminal="I1" data-terminal-device="U1" data-terminal-side="L" text-anchor="end" dominant-baseline="text-after-edge" data-x="0" data-y="40" data-terminal-net="A">
+<text x="-4" y="36" xml:space="preserve" fill="#000">I1</text>
+</g>
+<g data-drawing-index="21" data-label="true" data-terminal="I2" data-terminal-device="U1" data-terminal-side="L" text-anchor="end" dominant-baseline="text-after-edge" data-x="0" data-y="80" data-terminal-net="B">
+<text x="-4" y="76" xml:space="preserve" fill="#000">I2</text>
+</g>
+<g data-drawing-index="22" data-label="true" data-terminal="O" data-terminal-device="U1" data-terminal-side="R" text-anchor="start" dominant-baseline="text-after-edge" data-x="120" data-y="60" data-terminal-net="@implicit:U1:O">
+<text x="124" y="56" xml:space="preserve" fill="#000">O</text>
+</g>
+<g data-drawing-index="23" data-device="U2" data-type="or" data-stage-index="0">
+<g transform="matrix(1 0 0 1 0 240)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-logic-variants-element-23-or" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path id="fixture-logic-variants-element-23-body" d="M 22.68 91.752 L 55.08 91.752 L 56.0052 91.7394 L 56.9322 91.6998 L 57.8574 91.6332 L 58.7826 91.5396 L 59.7078 91.4208 L 60.6348 91.2768 L 61.56 91.104 L 62.4852 90.906 L 63.4122 90.681 L 64.3374 90.429 L 65.2626 90.1518 L 66.1878 89.8476 L 67.1148 89.5164 L 68.04 89.16 L 68.9652 88.7766 L 69.8922 88.3662 L 70.8174 87.9306 L 71.7426 87.468 L 72.6678 86.9784 L 73.5948 86.4618 L 74.52 85.92 L 75.4452 85.3512 L 76.3722 84.7554 L 77.2974 84.1344 L 78.2226 83.4864 L 79.1478 82.8114 L 80.0748 82.1112 L 81 81.384 L 81.9252 80.6298 L 82.8522 79.8504 L 83.7774 79.044 L 84.7026 78.2106 L 85.6278 77.3502 L 86.5548 76.4646 L 87.48 75.552 L 88.4052 74.6124 L 89.3322 73.6476 L 90.2574 72.6558 L 91.1826 71.637 L 92.1078 70.593 L 93.0348 69.522 L 93.96 68.424 L 94.8852 67.3008 L 95.8122 66.1488 L 96.7374 64.9716 L 97.6626 63.7692 L 98.5878 62.5398 L 99.5148 61.2834 L 100.44 60 L 100.44 60 L 99.5148 58.7166 L 98.5878 57.4602 L 97.6626 56.2308 L 96.7374 55.0284 L 95.8122 53.8512 L 94.8852 52.6992 L 93.96 51.576 L 93.0348 50.478 L 92.1078 49.407 L 91.1826 48.363 L 90.2574 47.3442 L 89.3322 46.3524 L 88.4052 45.3876 L 87.48 44.448 L 86.5548 43.5354 L 85.6278 42.6498 L 84.7026 41.7894 L 83.7774 40.956 L 82.8522 40.1496 L 81.9252 39.3702 L 81 38.616 L 80.0748 37.8888 L 79.1478 37.1886 L 78.2226 36.5136 L 77.2974 35.8656 L 76.3722 35.2446 L 75.4452 34.6488 L 74.52 34.08 L 73.5948 33.5382 L 72.6678 33.0216 L 71.7426 32.532 L 70.8174 32.0694 L 69.8922 31.6338 L 68.9652 31.2234 L 68.04 30.84 L 67.1148 30.4836 L 66.1878 30.1524 L 65.2626 29.8482 L 64.3374 29.571 L 63.4122 29.319 L 62.4852 29.094 L 61.56 28.896 L 60.6348 28.7232 L 59.7078 28.5792 L 58.7826 28.4604 L 57.8574 28.3668 L 56.9322 28.3002 L 56.0052 28.2606 L 55.08 28.248 L 22.68 28.248 L 22.68 28.248 L 23.9238 29.544 L 25.1172 30.84 L 26.2566 32.136 L 27.3456 33.432 L 28.3824 34.728 L 29.367 36.024 L 30.3012 37.32 L 31.1814 38.616 L 32.0112 39.912 L 32.7888 41.208 L 33.5142 42.504 L 34.1892 43.8 L 34.8102 45.096 L 35.3808 46.392 L 35.8992 47.688 L 36.3654 48.984 L 36.7812 50.28 L 37.143 51.576 L 37.4544 52.872 L 37.7136 54.168 L 37.9206 55.464 L 38.0772 56.76 L 38.1798 58.056 L 38.232 59.352 L 38.232 60.648 L 38.1798 61.944 L 38.0772 63.24 L 37.9206 64.536 L 37.7136 65.832 L 37.4544 67.128 L 37.143 68.424 L 36.7812 69.72 L 36.3654 71.016 L 35.8992 72.312 L 35.3808 73.608 L 34.8102 74.904 L 34.1892 76.2 L 33.5142 77.496 L 32.7888 78.792 L 32.0112 80.088 L 31.1814 81.384 L 30.3012 82.68 L 29.367 83.976 L 28.3824 85.272 L 27.3456 86.568 L 26.2566 87.864 L 25.1172 89.16 L 23.9238 90.456 L 22.68 91.752"></path>
+    <path id="fixture-logic-variants-element-23-lead-I1" d="M 0 40 L 32.064 40"></path>
+    <path id="fixture-logic-variants-element-23-lead-I2" d="M 0 80 L 32.064 80"></path>
+    <path id="fixture-logic-variants-element-23-lead-O" d="M 100.44 60 L 120 60"></path>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="24" data-label="true" data-device-label="U2">
+<text x="132" y="344" xml:space="preserve" fill="#000">U2</text>
+</g>
+<g data-drawing-index="25" data-label="true" data-terminal="I1" data-terminal-device="U2" data-terminal-side="L" text-anchor="end" dominant-baseline="text-after-edge" data-x="0" data-y="280" data-terminal-net="C">
+<text x="-4" y="276" xml:space="preserve" fill="#000">I1</text>
+</g>
+<g data-drawing-index="26" data-label="true" data-terminal="I2" data-terminal-device="U2" data-terminal-side="L" text-anchor="end" dominant-baseline="text-after-edge" data-x="0" data-y="320" data-terminal-net="D">
+<text x="-4" y="316" xml:space="preserve" fill="#000">I2</text>
+</g>
+<g data-drawing-index="27" data-label="true" data-terminal="O" data-terminal-device="U2" data-terminal-side="R" text-anchor="start" dominant-baseline="text-after-edge" data-x="120" data-y="300" data-terminal-net="@implicit:U2:O">
+<text x="124" y="296" xml:space="preserve" fill="#000">O</text>
+</g>
+<g data-drawing-index="28" data-device="U3" data-type="nor" data-stage-index="0">
+<g transform="matrix(1 0 0 1 0 480)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-logic-variants-element-28-nor" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path id="fixture-logic-variants-element-28-body" d="M 22.68 91.752 L 55.08 91.752 L 56.0052 91.7394 L 56.9322 91.6998 L 57.8574 91.6332 L 58.7826 91.5396 L 59.7078 91.4208 L 60.6348 91.2768 L 61.56 91.104 L 62.4852 90.906 L 63.4122 90.681 L 64.3374 90.429 L 65.2626 90.1518 L 66.1878 89.8476 L 67.1148 89.5164 L 68.04 89.16 L 68.9652 88.7766 L 69.8922 88.3662 L 70.8174 87.9306 L 71.7426 87.468 L 72.6678 86.9784 L 73.5948 86.4618 L 74.52 85.92 L 75.4452 85.3512 L 76.3722 84.7554 L 77.2974 84.1344 L 78.2226 83.4864 L 79.1478 82.8114 L 80.0748 82.1112 L 81 81.384 L 81.9252 80.6298 L 82.8522 79.8504 L 83.7774 79.044 L 84.7026 78.2106 L 85.6278 77.3502 L 86.5548 76.4646 L 87.48 75.552 L 88.4052 74.6124 L 89.3322 73.6476 L 90.2574 72.6558 L 91.1826 71.637 L 92.1078 70.593 L 93.0348 69.522 L 93.96 68.424 L 94.8852 67.3008 L 95.8122 66.1488 L 96.7374 64.9716 L 97.6626 63.7692 L 98.5878 62.5398 L 99.5148 61.2834 L 100.44 60 L 100.44 60 L 99.5148 58.7166 L 98.5878 57.4602 L 97.6626 56.2308 L 96.7374 55.0284 L 95.8122 53.8512 L 94.8852 52.6992 L 93.96 51.576 L 93.0348 50.478 L 92.1078 49.407 L 91.1826 48.363 L 90.2574 47.3442 L 89.3322 46.3524 L 88.4052 45.3876 L 87.48 44.448 L 86.5548 43.5354 L 85.6278 42.6498 L 84.7026 41.7894 L 83.7774 40.956 L 82.8522 40.1496 L 81.9252 39.3702 L 81 38.616 L 80.0748 37.8888 L 79.1478 37.1886 L 78.2226 36.5136 L 77.2974 35.8656 L 76.3722 35.2446 L 75.4452 34.6488 L 74.52 34.08 L 73.5948 33.5382 L 72.6678 33.0216 L 71.7426 32.532 L 70.8174 32.0694 L 69.8922 31.6338 L 68.9652 31.2234 L 68.04 30.84 L 67.1148 30.4836 L 66.1878 30.1524 L 65.2626 29.8482 L 64.3374 29.571 L 63.4122 29.319 L 62.4852 29.094 L 61.56 28.896 L 60.6348 28.7232 L 59.7078 28.5792 L 58.7826 28.4604 L 57.8574 28.3668 L 56.9322 28.3002 L 56.0052 28.2606 L 55.08 28.248 L 22.68 28.248 L 22.68 28.248 L 23.9238 29.544 L 25.1172 30.84 L 26.2566 32.136 L 27.3456 33.432 L 28.3824 34.728 L 29.367 36.024 L 30.3012 37.32 L 31.1814 38.616 L 32.0112 39.912 L 32.7888 41.208 L 33.5142 42.504 L 34.1892 43.8 L 34.8102 45.096 L 35.3808 46.392 L 35.8992 47.688 L 36.3654 48.984 L 36.7812 50.28 L 37.143 51.576 L 37.4544 52.872 L 37.7136 54.168 L 37.9206 55.464 L 38.0772 56.76 L 38.1798 58.056 L 38.232 59.352 L 38.232 60.648 L 38.1798 61.944 L 38.0772 63.24 L 37.9206 64.536 L 37.7136 65.832 L 37.4544 67.128 L 37.143 68.424 L 36.7812 69.72 L 36.3654 71.016 L 35.8992 72.312 L 35.3808 73.608 L 34.8102 74.904 L 34.1892 76.2 L 33.5142 77.496 L 32.7888 78.792 L 32.0112 80.088 L 31.1814 81.384 L 30.3012 82.68 L 29.367 83.976 L 28.3824 85.272 L 27.3456 86.568 L 26.2566 87.864 L 25.1172 89.16 L 23.9238 90.456 L 22.68 91.752"></path>
+    <circle id="fixture-logic-variants-element-28-output-bubble" cx="108.216" cy="60" r="7.776"></circle>
+    <path id="fixture-logic-variants-element-28-lead-I1" d="M 0 40 L 32.064 40"></path>
+    <path id="fixture-logic-variants-element-28-lead-I2" d="M 0 80 L 32.064 80"></path>
+    <path id="fixture-logic-variants-element-28-lead-O" d="M 115.992 60 L 120 60"></path>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="29" data-label="true" data-device-label="U3">
+<text x="132" y="584" xml:space="preserve" fill="#000">U3</text>
+</g>
+<g data-drawing-index="30" data-label="true" data-terminal="I1" data-terminal-device="U3" data-terminal-side="L" text-anchor="end" dominant-baseline="text-after-edge" data-x="0" data-y="520" data-terminal-net="E">
+<text x="-4" y="516" xml:space="preserve" fill="#000">I1</text>
+</g>
+<g data-drawing-index="31" data-label="true" data-terminal="I2" data-terminal-device="U3" data-terminal-side="L" text-anchor="end" dominant-baseline="text-after-edge" data-x="0" data-y="560" data-terminal-net="F">
+<text x="-4" y="556" xml:space="preserve" fill="#000">I2</text>
+</g>
+<g data-drawing-index="32" data-label="true" data-terminal="O" data-terminal-device="U3" data-terminal-side="R" text-anchor="start" dominant-baseline="text-after-edge" data-x="120" data-y="540" data-terminal-net="@implicit:U3:O">
+<text x="124" y="536" xml:space="preserve" fill="#000">O</text>
+</g>
+<g data-drawing-index="33" data-device="U4" data-type="xor" data-stage-index="0">
+<g transform="matrix(1 0 0 1 360 240)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-logic-variants-element-33-xor" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path id="fixture-logic-variants-element-33-body" d="M 22.68 91.752 L 55.08 91.752 L 56.0052 91.7394 L 56.9322 91.6998 L 57.8574 91.6332 L 58.7826 91.5396 L 59.7078 91.4208 L 60.6348 91.2768 L 61.56 91.104 L 62.4852 90.906 L 63.4122 90.681 L 64.3374 90.429 L 65.2626 90.1518 L 66.1878 89.8476 L 67.1148 89.5164 L 68.04 89.16 L 68.9652 88.7766 L 69.8922 88.3662 L 70.8174 87.9306 L 71.7426 87.468 L 72.6678 86.9784 L 73.5948 86.4618 L 74.52 85.92 L 75.4452 85.3512 L 76.3722 84.7554 L 77.2974 84.1344 L 78.2226 83.4864 L 79.1478 82.8114 L 80.0748 82.1112 L 81 81.384 L 81.9252 80.6298 L 82.8522 79.8504 L 83.7774 79.044 L 84.7026 78.2106 L 85.6278 77.3502 L 86.5548 76.4646 L 87.48 75.552 L 88.4052 74.6124 L 89.3322 73.6476 L 90.2574 72.6558 L 91.1826 71.637 L 92.1078 70.593 L 93.0348 69.522 L 93.96 68.424 L 94.8852 67.3008 L 95.8122 66.1488 L 96.7374 64.9716 L 97.6626 63.7692 L 98.5878 62.5398 L 99.5148 61.2834 L 100.44 60 L 100.44 60 L 99.5148 58.7166 L 98.5878 57.4602 L 97.6626 56.2308 L 96.7374 55.0284 L 95.8122 53.8512 L 94.8852 52.6992 L 93.96 51.576 L 93.0348 50.478 L 92.1078 49.407 L 91.1826 48.363 L 90.2574 47.3442 L 89.3322 46.3524 L 88.4052 45.3876 L 87.48 44.448 L 86.5548 43.5354 L 85.6278 42.6498 L 84.7026 41.7894 L 83.7774 40.956 L 82.8522 40.1496 L 81.9252 39.3702 L 81 38.616 L 80.0748 37.8888 L 79.1478 37.1886 L 78.2226 36.5136 L 77.2974 35.8656 L 76.3722 35.2446 L 75.4452 34.6488 L 74.52 34.08 L 73.5948 33.5382 L 72.6678 33.0216 L 71.7426 32.532 L 70.8174 32.0694 L 69.8922 31.6338 L 68.9652 31.2234 L 68.04 30.84 L 67.1148 30.4836 L 66.1878 30.1524 L 65.2626 29.8482 L 64.3374 29.571 L 63.4122 29.319 L 62.4852 29.094 L 61.56 28.896 L 60.6348 28.7232 L 59.7078 28.5792 L 58.7826 28.4604 L 57.8574 28.3668 L 56.9322 28.3002 L 56.0052 28.2606 L 55.08 28.248 L 22.68 28.248 L 22.68 28.248 L 23.9238 29.544 L 25.1172 30.84 L 26.2566 32.136 L 27.3456 33.432 L 28.3824 34.728 L 29.367 36.024 L 30.3012 37.32 L 31.1814 38.616 L 32.0112 39.912 L 32.7888 41.208 L 33.5142 42.504 L 34.1892 43.8 L 34.8102 45.096 L 35.3808 46.392 L 35.8992 47.688 L 36.3654 48.984 L 36.7812 50.28 L 37.143 51.576 L 37.4544 52.872 L 37.7136 54.168 L 37.9206 55.464 L 38.0772 56.76 L 38.1798 58.056 L 38.232 59.352 L 38.232 60.648 L 38.1798 61.944 L 38.0772 63.24 L 37.9206 64.536 L 37.7136 65.832 L 37.4544 67.128 L 37.143 68.424 L 36.7812 69.72 L 36.3654 71.016 L 35.8992 72.312 L 35.3808 73.608 L 34.8102 74.904 L 34.1892 76.2 L 33.5142 77.496 L 32.7888 78.792 L 32.0112 80.088 L 31.1814 81.384 L 30.3012 82.68 L 29.367 83.976 L 28.3824 85.272 L 27.3456 86.568 L 26.2566 87.864 L 25.1172 89.16 L 23.9238 90.456 L 22.68 91.752"></path>
+    <path id="fixture-logic-variants-element-33-exclusive-input" d="M 12.96 91.752 L 14.2038 90.456 L 15.3972 89.16 L 16.5366 87.864 L 17.6256 86.568 L 18.6624 85.272 L 19.647 83.976 L 20.5812 82.68 L 21.4614 81.384 L 22.2912 80.088 L 23.0688 78.792 L 23.7942 77.496 L 24.4692 76.2 L 25.0902 74.904 L 25.6608 73.608 L 26.1792 72.312 L 26.6454 71.016 L 27.0612 69.72 L 27.423 68.424 L 27.7344 67.128 L 27.9936 65.832 L 28.2006 64.536 L 28.3572 63.24 L 28.4598 61.944 L 28.512 60.648 L 28.512 59.352 L 28.4598 58.056 L 28.3572 56.76 L 28.2006 55.464 L 27.9936 54.168 L 27.7344 52.872 L 27.423 51.576 L 27.0612 50.28 L 26.6454 48.984 L 26.1792 47.688 L 25.6608 46.392 L 25.0902 45.096 L 24.4692 43.8 L 23.7942 42.504 L 23.0688 41.208 L 22.2912 39.912 L 21.4614 38.616 L 20.5812 37.32 L 19.647 36.024 L 18.6624 34.728 L 17.6256 33.432 L 16.5366 32.136 L 15.3972 30.84 L 14.2038 29.544 L 12.96 28.248"></path>
+    <path id="fixture-logic-variants-element-33-lead-I1" d="M 0 40 L 22.344 40"></path>
+    <path id="fixture-logic-variants-element-33-lead-I2" d="M 0 80 L 22.344 80"></path>
+    <path id="fixture-logic-variants-element-33-lead-O" d="M 100.44 60 L 120 60"></path>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="34" data-label="true" data-device-label="U4">
+<text x="492" y="344" xml:space="preserve" fill="#000">U4</text>
+</g>
+<g data-drawing-index="35" data-label="true" data-terminal="I1" data-terminal-device="U4" data-terminal-side="L" text-anchor="end" dominant-baseline="text-after-edge" data-x="360" data-y="280" data-terminal-net="@implicit:U1:O">
+<text x="356" y="276" xml:space="preserve" fill="#000">I1</text>
+</g>
+<g data-drawing-index="36" data-label="true" data-terminal="I2" data-terminal-device="U4" data-terminal-side="L" text-anchor="end" dominant-baseline="text-after-edge" data-x="360" data-y="320" data-terminal-net="@implicit:U2:O">
+<text x="356" y="316" xml:space="preserve" fill="#000">I2</text>
+</g>
+<g data-drawing-index="37" data-label="true" data-terminal="O" data-terminal-device="U4" data-terminal-side="R" text-anchor="start" dominant-baseline="text-after-edge" data-x="480" data-y="300" data-terminal-net="@implicit:U4:O">
+<text x="484" y="296" xml:space="preserve" fill="#000">O</text>
+</g>
+<g data-drawing-index="38" data-device="U5" data-type="xnor" data-stage-index="0">
+<g transform="matrix(1 0 0 1 720 240)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-logic-variants-element-38-xnor" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path id="fixture-logic-variants-element-38-body" d="M 22.68 91.752 L 55.08 91.752 L 56.0052 91.7394 L 56.9322 91.6998 L 57.8574 91.6332 L 58.7826 91.5396 L 59.7078 91.4208 L 60.6348 91.2768 L 61.56 91.104 L 62.4852 90.906 L 63.4122 90.681 L 64.3374 90.429 L 65.2626 90.1518 L 66.1878 89.8476 L 67.1148 89.5164 L 68.04 89.16 L 68.9652 88.7766 L 69.8922 88.3662 L 70.8174 87.9306 L 71.7426 87.468 L 72.6678 86.9784 L 73.5948 86.4618 L 74.52 85.92 L 75.4452 85.3512 L 76.3722 84.7554 L 77.2974 84.1344 L 78.2226 83.4864 L 79.1478 82.8114 L 80.0748 82.1112 L 81 81.384 L 81.9252 80.6298 L 82.8522 79.8504 L 83.7774 79.044 L 84.7026 78.2106 L 85.6278 77.3502 L 86.5548 76.4646 L 87.48 75.552 L 88.4052 74.6124 L 89.3322 73.6476 L 90.2574 72.6558 L 91.1826 71.637 L 92.1078 70.593 L 93.0348 69.522 L 93.96 68.424 L 94.8852 67.3008 L 95.8122 66.1488 L 96.7374 64.9716 L 97.6626 63.7692 L 98.5878 62.5398 L 99.5148 61.2834 L 100.44 60 L 100.44 60 L 99.5148 58.7166 L 98.5878 57.4602 L 97.6626 56.2308 L 96.7374 55.0284 L 95.8122 53.8512 L 94.8852 52.6992 L 93.96 51.576 L 93.0348 50.478 L 92.1078 49.407 L 91.1826 48.363 L 90.2574 47.3442 L 89.3322 46.3524 L 88.4052 45.3876 L 87.48 44.448 L 86.5548 43.5354 L 85.6278 42.6498 L 84.7026 41.7894 L 83.7774 40.956 L 82.8522 40.1496 L 81.9252 39.3702 L 81 38.616 L 80.0748 37.8888 L 79.1478 37.1886 L 78.2226 36.5136 L 77.2974 35.8656 L 76.3722 35.2446 L 75.4452 34.6488 L 74.52 34.08 L 73.5948 33.5382 L 72.6678 33.0216 L 71.7426 32.532 L 70.8174 32.0694 L 69.8922 31.6338 L 68.9652 31.2234 L 68.04 30.84 L 67.1148 30.4836 L 66.1878 30.1524 L 65.2626 29.8482 L 64.3374 29.571 L 63.4122 29.319 L 62.4852 29.094 L 61.56 28.896 L 60.6348 28.7232 L 59.7078 28.5792 L 58.7826 28.4604 L 57.8574 28.3668 L 56.9322 28.3002 L 56.0052 28.2606 L 55.08 28.248 L 22.68 28.248 L 22.68 28.248 L 23.9238 29.544 L 25.1172 30.84 L 26.2566 32.136 L 27.3456 33.432 L 28.3824 34.728 L 29.367 36.024 L 30.3012 37.32 L 31.1814 38.616 L 32.0112 39.912 L 32.7888 41.208 L 33.5142 42.504 L 34.1892 43.8 L 34.8102 45.096 L 35.3808 46.392 L 35.8992 47.688 L 36.3654 48.984 L 36.7812 50.28 L 37.143 51.576 L 37.4544 52.872 L 37.7136 54.168 L 37.9206 55.464 L 38.0772 56.76 L 38.1798 58.056 L 38.232 59.352 L 38.232 60.648 L 38.1798 61.944 L 38.0772 63.24 L 37.9206 64.536 L 37.7136 65.832 L 37.4544 67.128 L 37.143 68.424 L 36.7812 69.72 L 36.3654 71.016 L 35.8992 72.312 L 35.3808 73.608 L 34.8102 74.904 L 34.1892 76.2 L 33.5142 77.496 L 32.7888 78.792 L 32.0112 80.088 L 31.1814 81.384 L 30.3012 82.68 L 29.367 83.976 L 28.3824 85.272 L 27.3456 86.568 L 26.2566 87.864 L 25.1172 89.16 L 23.9238 90.456 L 22.68 91.752"></path>
+    <path id="fixture-logic-variants-element-38-exclusive-input" d="M 12.96 91.752 L 14.2038 90.456 L 15.3972 89.16 L 16.5366 87.864 L 17.6256 86.568 L 18.6624 85.272 L 19.647 83.976 L 20.5812 82.68 L 21.4614 81.384 L 22.2912 80.088 L 23.0688 78.792 L 23.7942 77.496 L 24.4692 76.2 L 25.0902 74.904 L 25.6608 73.608 L 26.1792 72.312 L 26.6454 71.016 L 27.0612 69.72 L 27.423 68.424 L 27.7344 67.128 L 27.9936 65.832 L 28.2006 64.536 L 28.3572 63.24 L 28.4598 61.944 L 28.512 60.648 L 28.512 59.352 L 28.4598 58.056 L 28.3572 56.76 L 28.2006 55.464 L 27.9936 54.168 L 27.7344 52.872 L 27.423 51.576 L 27.0612 50.28 L 26.6454 48.984 L 26.1792 47.688 L 25.6608 46.392 L 25.0902 45.096 L 24.4692 43.8 L 23.7942 42.504 L 23.0688 41.208 L 22.2912 39.912 L 21.4614 38.616 L 20.5812 37.32 L 19.647 36.024 L 18.6624 34.728 L 17.6256 33.432 L 16.5366 32.136 L 15.3972 30.84 L 14.2038 29.544 L 12.96 28.248"></path>
+    <circle id="fixture-logic-variants-element-38-output-bubble" cx="108.216" cy="60" r="7.776"></circle>
+    <path id="fixture-logic-variants-element-38-lead-I1" d="M 0 40 L 22.344 40"></path>
+    <path id="fixture-logic-variants-element-38-lead-I2" d="M 0 80 L 22.344 80"></path>
+    <path id="fixture-logic-variants-element-38-lead-O" d="M 115.992 60 L 120 60"></path>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="39" data-label="true" data-device-label="U5">
+<text x="852" y="344" xml:space="preserve" fill="#000">U5</text>
+</g>
+<g data-drawing-index="40" data-label="true" data-terminal="I1" data-terminal-device="U5" data-terminal-side="L" text-anchor="end" dominant-baseline="text-after-edge" data-x="720" data-y="280" data-terminal-net="@implicit:U4:O">
+<text x="716" y="276" xml:space="preserve" fill="#000">I1</text>
+</g>
+<g data-drawing-index="41" data-label="true" data-terminal="I2" data-terminal-device="U5" data-terminal-side="L" text-anchor="end" dominant-baseline="text-after-edge" data-x="720" data-y="320" data-terminal-net="@implicit:U3:O">
+<text x="716" y="316" xml:space="preserve" fill="#000">I2</text>
+</g>
+<g data-drawing-index="42" data-label="true" data-terminal="O" data-terminal-device="U5" data-terminal-side="R" text-anchor="start" dominant-baseline="text-after-edge" data-x="840" data-y="300" data-terminal-net="@implicit:U5:O">
+<text x="844" y="296" xml:space="preserve" fill="#000">O</text>
+</g>
+<g data-drawing-index="43" data-device="U6" data-type="notNot" data-stage-index="0">
+<g transform="matrix(1 0 0 1 1080 240)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-logic-variants-element-43-notNot" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path id="fixture-logic-variants-element-43-body" d="M 38.94 27.6 L 81.06 60 L 38.94 92.4 L 38.94 27.6"></path>
+    <circle id="fixture-logic-variants-element-43-output-bubble" cx="88.836" cy="60" r="7.776"></circle>
+    <circle id="fixture-logic-variants-element-43-input-bubble" cx="31.164" cy="60" r="7.776"></circle>
+    <path id="fixture-logic-variants-element-43-lead-I" d="M 0 60 L 23.388 60"></path>
+    <path id="fixture-logic-variants-element-43-lead-O" d="M 96.612 60 L 120 60"></path>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="44" data-label="true" data-device-label="U6">
+<text x="1212" y="344" xml:space="preserve" fill="#000">U6</text>
+</g>
+<g data-drawing-index="45" data-label="true" data-terminal="I" data-terminal-device="U6" data-terminal-side="L" text-anchor="end" dominant-baseline="text-after-edge" data-x="1080" data-y="300" data-terminal-net="@implicit:U5:O">
+<text x="1076" y="296" xml:space="preserve" fill="#000">I</text>
+</g>
+<g data-drawing-index="46" data-label="true" data-terminal="O" data-terminal-device="U6" data-terminal-side="R" text-anchor="start" dominant-baseline="text-after-edge" data-x="1200" data-y="300" data-terminal-net="Y">
+<text x="1204" y="296" xml:space="preserve" fill="#000">O</text>
+</g>
+<g data-drawing-index="47" data-net-occurrence="0" data-net="A" data-type="pinIn" data-branches="1">
+<g transform="matrix(1 0 0 1 -270 -20)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-logic-variants-element-47-pin-in" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polygon id="fixture-logic-variants-element-47-body" points="44,42 104,42 116,60 104,78 44,78"></polygon>
+    <line id="fixture-logic-variants-element-47-stem" x1="116" y1="60" x2="120" y2="60"></line>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="48" data-label="true" data-net-label="A" text-anchor="middle">
+<text x="-188" y="45" xml:space="preserve" fill="#000">A</text>
+</g>
+<g data-drawing-index="49" data-net-occurrence="1" data-net="B" data-type="pinIn" data-branches="1">
+<g transform="matrix(1 0 0 1 -270 20)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-logic-variants-element-49-pin-in" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polygon id="fixture-logic-variants-element-49-body" points="44,42 104,42 116,60 104,78 44,78"></polygon>
+    <line id="fixture-logic-variants-element-49-stem" x1="116" y1="60" x2="120" y2="60"></line>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="50" data-label="true" data-net-label="B" text-anchor="middle">
+<text x="-188" y="85" xml:space="preserve" fill="#000">B</text>
+</g>
+<g data-drawing-index="51" data-net-occurrence="2" data-net="C" data-type="pinIn" data-branches="1">
+<g transform="matrix(1 0 0 1 -270 220)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-logic-variants-element-51-pin-in" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polygon id="fixture-logic-variants-element-51-body" points="44,42 104,42 116,60 104,78 44,78"></polygon>
+    <line id="fixture-logic-variants-element-51-stem" x1="116" y1="60" x2="120" y2="60"></line>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="52" data-label="true" data-net-label="C" text-anchor="middle">
+<text x="-188" y="285" xml:space="preserve" fill="#000">C</text>
+</g>
+<g data-drawing-index="53" data-net-occurrence="3" data-net="D" data-type="pinIn" data-branches="1">
+<g transform="matrix(1 0 0 1 -270 260)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-logic-variants-element-53-pin-in" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polygon id="fixture-logic-variants-element-53-body" points="44,42 104,42 116,60 104,78 44,78"></polygon>
+    <line id="fixture-logic-variants-element-53-stem" x1="116" y1="60" x2="120" y2="60"></line>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="54" data-label="true" data-net-label="D" text-anchor="middle">
+<text x="-188" y="325" xml:space="preserve" fill="#000">D</text>
+</g>
+<g data-drawing-index="55" data-net-occurrence="4" data-net="E" data-type="pinIn" data-branches="1">
+<g transform="matrix(1 0 0 1 -270 460)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-logic-variants-element-55-pin-in" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polygon id="fixture-logic-variants-element-55-body" points="44,42 104,42 116,60 104,78 44,78"></polygon>
+    <line id="fixture-logic-variants-element-55-stem" x1="116" y1="60" x2="120" y2="60"></line>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="56" data-label="true" data-net-label="E" text-anchor="middle">
+<text x="-188" y="525" xml:space="preserve" fill="#000">E</text>
+</g>
+<g data-drawing-index="57" data-net-occurrence="5" data-net="F" data-type="pinIn" data-branches="1">
+<g transform="matrix(1 0 0 1 -270 500)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-logic-variants-element-57-pin-in" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polygon id="fixture-logic-variants-element-57-body" points="44,42 104,42 116,60 104,78 44,78"></polygon>
+    <line id="fixture-logic-variants-element-57-stem" x1="116" y1="60" x2="120" y2="60"></line>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="58" data-label="true" data-net-label="F" text-anchor="middle">
+<text x="-188" y="565" xml:space="preserve" fill="#000">F</text>
+</g>
+<g data-drawing-index="59" data-net-occurrence="6" data-net="Y" data-type="pinOut" data-branches="1">
+<g transform="matrix(1 0 0 1 1380 240)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-logic-variants-element-59-pin-out" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <line id="fixture-logic-variants-element-59-stem" x1="0" y1="60" x2="4" y2="60"></line>
+    <polygon id="fixture-logic-variants-element-59-body" points="4,42 64,42 76,60 64,78 4,78"></polygon>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="60" data-label="true" data-net-label="Y" text-anchor="middle">
+<text x="1418" y="305" xml:space="preserve" fill="#000">Y</text>
+</g>
+</svg>

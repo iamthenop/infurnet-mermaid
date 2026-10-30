@@ -1,6 +1,6 @@
 # Notation for circuit diagrams
 
-This specification records the approved syntax and electrical semantics of `circuitDiagram`. The parser implements the 22 authorable object types, diagram modes, typed subgraphs, and fixed-terminal connections described here. The NAND2 example is a parser acceptance fixture.
+This specification records the approved syntax and electrical semantics of `circuitDiagram`. The parser implements the 32 authorable object types, diagram modes, typed subgraphs, and fixed-terminal connections described here. The NAND2 example is a parser acceptance fixture.
 
 Basic placement, orthogonal wiring, and symbol rendering are implemented. Mode `A` supports named IC pins on any side, including multiple pins per side.
 
@@ -42,7 +42,7 @@ The parser records the diagram mode and enforces registered-shape eligibility fo
 
 ## Object types
 
-The authorable object vocabulary is closed and contains these 22 types. Generic nets remain internal connectivity groups and cannot be declared with `:::net`.
+The authorable object vocabulary is closed and contains these 32 types. Generic nets remain internal connectivity groups and cannot be declared with `:::net`.
 
 | Type | Kind | Terminals |
 | --- | --- | --- |
@@ -60,6 +60,16 @@ The authorable object vocabulary is closed and contains these 22 types. Generic 
 | `fuse` | Device | A, B |
 | `antenna` | Device | A |
 | `nand` | Device | I1, I2, O |
+| `and` | Device | I1, I2, O |
+| `or` | Device | I1, I2, O |
+| `nor` | Device | I1, I2, O |
+| `xor` | Device | I1, I2, O |
+| `xnor` | Device | I1, I2, O |
+| `schmittAnd` | Device | I1, I2, O |
+| `schmittNand` | Device | I1, I2, O |
+| `notNot` | Device | I, O |
+| `schmitt` | Device | I, O |
+| `schmittNot` | Device | I, O |
 | `ic` | Device | Dynamic |
 | `inverter` | Device | I, O |
 | `buffer` | Device | I, O |
@@ -68,6 +78,8 @@ The authorable object vocabulary is closed and contains these 22 types. Generic 
 | `pinIn` | Net | None |
 | `pinOut` | Net | None |
 | `pinInOut` | Net | None |
+
+The logic types `nand`, `and`, `or`, `nor`, `xor`, `xnor`, `inverter`, `buffer`, `notNot`, `schmitt`, `schmittNot`, `schmittAnd`, and `schmittNand` are authorable only in mode `D`. They select conventional logic symbols; Schmitt symbols also denote hysteresis. The renderer draws their connections without logic simulation, threshold calculations, or hysteresis simulation.
 
 ### Supply terminology and semantics
 
@@ -108,6 +120,16 @@ These references preserve the existing asset filenames in the [shape library](..
 | `fuse` | `fuse.svg` |
 | `antenna` | `antenna.svg` |
 | `nand` | `nand.svg` |
+| `and` | `and.svg` |
+| `or` | `or.svg` |
+| `nor` | `nor.svg` |
+| `xor` | `xor.svg` |
+| `xnor` | `xnor.svg` |
+| `notNot` | `not-not.svg` |
+| `schmitt` | `schmitt.svg` |
+| `schmittNot` | `schmitt-not.svg` |
+| `schmittAnd` | `schmitt-and.svg` |
+| `schmittNand` | `schmitt-nand.svg` |
 | `inverter` | `inverter.svg` |
 | `buffer` | `buffer.svg` |
 | `supplyNet` | `vdd.svg` |
@@ -158,7 +180,7 @@ end
 
 `stage` and `block` are structural keywords. There is no initial `module` subgraph type.
 
-The following is an intended structural example, not an implemented parser fixture:
+The following accepted notation illustrates structural membership:
 
 ```text
 circuitDiagram D
@@ -177,7 +199,7 @@ subgraph block datapath
 end
 ```
 
-This example illustrates structural membership only. It does not authorize the new logic gates in the currently closed object-type table. The existing 22-type vocabulary remains unchanged.
+This example groups devices without defining electrical connections.
 
 ### Membership and hierarchy
 

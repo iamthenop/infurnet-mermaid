@@ -116,6 +116,7 @@ it.each(Object.entries(fixtures).flatMap(([path, source]) => appearances.map((ap
       for (const device of expected) {
         const group = [...root.querySelectorAll<SVGGElement>('[data-device]')].find((group) => group.getAttribute('data-device') === device.id)!;
         if (!group) { errors.push(`missing ${device.id}`); continue; }
+        if (group.getAttribute('data-type') !== device.type) errors.push(`wrong symbol type ${device.id}`);
         const artwork = group.querySelector<SVGGraphicsElement>('[transform]')!;
         const matrix = root.getScreenCTM()!.inverse().multiply(artwork.getScreenCTM()!);
         for (const [terminal, local] of Object.entries(device.terminals)) {

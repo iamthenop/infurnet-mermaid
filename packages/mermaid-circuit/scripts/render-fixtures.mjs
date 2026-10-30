@@ -1,8 +1,10 @@
-import { writeFile } from 'node:fs/promises';
+import assert from 'node:assert/strict';
+import { readFile, writeFile } from 'node:fs/promises';
 import { chromium } from 'playwright';
 import { createServer } from 'vite';
 
-const names = ['wireless-solenoid', 'cmos-inverter', 'cmos-nand2', 'cmos-xor12', 'xor-nand4'];
+const existingNames = ['wireless-solenoid', 'cmos-inverter', 'cmos-nand2', 'cmos-xor12', 'xor-nand4'];
+const names = [...existingNames, 'logic-variants', 'schmitt-variants'];
 const appearances = [
   { name: 'default', suffix: '', config: { theme: 'default' } },
   { name: 'default-inverse', suffix: '-inverse', config: { theme: 'dark' } },
@@ -31,7 +33,12 @@ try {
       }
       return { svg, report };
     }, { name, config: appearance.config });
-    await writeFile(new URL(`../examples/fixtures/${name}${appearance.suffix}.svg`, import.meta.url), result.svg + '\n');
+    const reference = new URL(`../examples/fixtures/${name}${appearance.suffix}.svg`, import.meta.url);
+    if (existingNames.includes(name)) {
+      assert.equal(result.svg + '\n', await readFile(reference, 'utf8'), `${name}/${appearance.name}: reference changed.`);
+    } else {
+      await writeFile(reference, result.svg + '\n');
+    }
     console.log(JSON.stringify({ fixture: name, appearance: appearance.name, ...result.report }));
   }
 } finally {

@@ -1,0 +1,32 @@
+circuitDiagram D
+
+A(["A"]):::pinIn
+B(["B"]):::pinIn
+C(["C"]):::pinIn
+D(["D"]):::pinIn
+E(["E"]):::pinIn
+F(["F"]):::pinIn
+Y(["Y"]):::pinOut
+
+subgraph stage logicVariants
+    direction LR
+    U1["U1"]:::and
+    U2["U2"]:::or
+    U3["U3"]:::nor
+    U4["U4"]:::xor
+    U5["U5"]:::xnor
+    U6["U6"]:::notNot
+end
+
+A --- |I1| U1
+B --- |I2| U1
+C --- |I1| U2
+D --- |I2| U2
+E --- |I1| U3
+F --- |I2| U3
+U1 |O| --- |I1| U4
+U2 |O| --- |I2| U4
+U4 |O| --- |I1| U5
+U3 |O| --- |I2| U5
+U5 |O| --- |I| U6
+U6 |O| --- Y

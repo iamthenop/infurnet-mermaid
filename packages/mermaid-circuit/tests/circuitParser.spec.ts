@@ -6,6 +6,10 @@ import { ScaffoldDb } from '../src/db.js';
 import { createParser } from '../src/parser.js';
 import notation from '../spec/notation.md?raw';
 
+const twoInputLogic = ['nand', 'and', 'or', 'nor', 'xor', 'xnor', 'schmittAnd', 'schmittNand'];
+const singleInputLogic = ['inverter', 'buffer', 'notNot', 'schmitt', 'schmittNot'];
+const logicTypes = [...twoInputLogic, ...singleInputLogic];
+
 const digital = 'circuitDiagram D\nA(["A"]):::pinIn\nY(["Y"]):::pinOut\nU1["U1"]:::inverter';
 const electrical = 'circuitDiagram A\nN(["N"]):::pinInOut\nM["M"]:::nmos';
 const resistors = 'circuitDiagram A\nR1["R1"]:::resistor\nR2["R2"]:::resistor\nR3["R3"]:::resistor';
@@ -120,12 +124,12 @@ end`);
   });
 
   it.each(deviceTypes.filter((type) => type !== 'ic'))('retains the approved %s device and its terminal contract', (type) => {
-    const mode = ['buffer', 'inverter', 'nand'].includes(type) ? 'D' : 'A';
+    const mode = logicTypes.includes(type) ? 'D' : 'A';
     const model = parseCircuit(`circuitDiagram ${mode}\nU1["display<br/>value=1"]:::${type}`);
     const terminals = type.endsWith('Blk') ? ['G', 'D', 'S', 'B']
       : ['pmos', 'nmos'].includes(type) ? ['G', 'D', 'S']
         : type === 'antenna' ? ['A'] : type === 'diode' ? ['A', 'K'] : type.endsWith('Source') ? ['P', 'N']
-          : type === 'nand' ? ['I1', 'I2', 'O'] : ['inverter', 'buffer'].includes(type) ? ['I', 'O'] : ['A', 'B'];
+          : twoInputLogic.includes(type) ? ['I1', 'I2', 'O'] : singleInputLogic.includes(type) ? ['I', 'O'] : ['A', 'B'];
     expect(model.devices[0]).toMatchObject({ id: 'U1', type, label: 'display<br/>value=1', stage: 0 });
     expect([...model.devices[0]!.terminals].sort()).toEqual(terminals.sort());
     expect(model.nets).toEqual([]);
@@ -138,8 +142,39 @@ end`);
     expect(model.devices).toEqual([]);
   });
 
+  it.each(logicTypes)('preserves each %s terminal connection and rejects invalid terminal names', (type) => {
+    const terminals = twoInputLogic.includes(type) ? ['I1', 'I2', 'O'] : ['I', 'O'];
+    const declarations = `circuitDiagram D\nU[U]:::${type}\n${terminals.map((terminal) => `N${terminal}([${terminal}]):::pinInOut`).join('\n')}`;
+    const source = `${declarations}\n${terminals.map((terminal) => `U |${terminal}| --- N${terminal}`).join('\n')}`;
+    expect(parseCircuit(source).connections).toEqual(terminals.map((terminal) => ({ device: 'U', terminal, net: `N${terminal}` })));
+    for (const terminal of ['G', 'bad', ...(twoInputLogic.includes(type) ? ['I', 'I3'] : ['I1', 'I2'])]) {
+      expect(() => parseCircuit(`${declarations}\nU |${terminal}| --- NO`)).toThrow('Unknown terminal');
+    }
+  });
+
+  it.each([
+    { name: 'logic-variants', types: ['and', 'or', 'nor', 'xor', 'xnor', 'notNot'], groups: [
+      ['U1.I1'], ['U1.I2'], ['U2.I1'], ['U2.I2'], ['U3.I1'], ['U3.I2'], ['U6.O'],
+      ['U1.O', 'U4.I1'], ['U2.O', 'U4.I2'], ['U4.O', 'U5.I1'], ['U3.O', 'U5.I2'], ['U5.O', 'U6.I'],
+    ] },
+    { name: 'schmitt-variants', types: ['schmitt', 'schmittNot', 'schmittAnd', 'schmittNand'], groups: [
+      ['U1.I'], ['U2.I'], ['U4.O'], ['U1.O', 'U3.I1'], ['U2.O', 'U3.I2'], ['U3.O', 'U4.I1', 'U4.I2'],
+    ] },
+  ])('connects every terminal in $name without merging distinct signals', ({ name, types, groups }) => {
+    const model = parseCircuit(drawingFixtures[`../examples/fixtures/${name}.mmd`]);
+    expect(model.devices.map((device) => device.type)).toEqual(types);
+    expect(topology(model)).toEqual(groups.map((group) => group.sort()).sort());
+    const netAt = (device: string, terminal: string) => model.connections.find((item) => item.device === device && item.terminal === terminal)!.net;
+    for (const device of model.devices) {
+      const connections = model.connections.filter((item) => item.device === device.id);
+      expect(connections.map((item) => item.terminal).sort()).toEqual([...device.terminals].sort());
+    }
+    expect(netAt('U1', name === 'logic-variants' ? 'I1' : 'I')).toBe('A');
+    expect(netAt(model.devices.at(-1)!.id, 'O')).toBe('Y');
+  });
+
   it.each(deviceTypes)('rejects %s in its ineligible mode', (type) => {
-    const mode = ['buffer', 'inverter', 'nand'].includes(type) ? 'A' : 'D';
+    const mode = logicTypes.includes(type) ? 'A' : 'D';
     expect(() => parseCircuit(`circuitDiagram ${mode}\nU1["U1"]:::${type}`)).toThrow('Line 2: Type');
   });
 
@@ -466,7 +501,7 @@ end`);
   it.each([
     ['', 'Line 1'], ['circuitDiagram', 'Line 1'], ['circuitDiagram X', 'Line 1'], ['flowchart D', 'Line 1'],
     ['circuitDiagram D extra', 'Line 1'], ['circuitDiagram D\nU["U"]:::ic', 'not eligible'],
-    ['circuitDiagram D\nU["U"]:::and', 'Unknown authorable'], ['circuitDiagram A\nU["U"]:::jfet', 'Unknown authorable'],
+    ['circuitDiagram D\nU["U"]:::tgate', 'Unknown authorable'], ['circuitDiagram A\nU["U"]:::jfet', 'Unknown authorable'],
     ['circuitDiagram D\nM["M"]:::pmos', 'not eligible'], ['circuitDiagram A\nU["U"]:::inverter', 'not eligible'],
     [`${digital}\nU1["again"]:::buffer`, 'Duplicate'], [`${digital}\nU1(["again"]):::pinInOut`, 'Duplicate'],
     [`${digital}\nA ---|I| Missing`, 'undeclared'], [`${digital}\nMissing ---|I| U1`, 'Declare endpoint'],
