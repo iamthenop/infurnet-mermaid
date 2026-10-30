@@ -53,7 +53,8 @@ function conduction(device: Device): [string, string] | undefined {
   if (device.type.startsWith('nmos')) return ['D', 'S'];
   if (device.type === 'diode') return ['K', 'A'];
   if (device.type.endsWith('Source')) return ['P', 'N'];
-  if (['resistor', 'capacitor', 'fuse', 'motor', 'solenoid'].includes(device.type)) return ['A', 'B'];
+  if (['resistor', 'capacitor', 'fuse', 'motor', 'solenoid', 'resistorIEC', 'resistorVar', 'resistorVarIEC',
+    'thermistor', 'photoresistor', 'photoresistorIEC', 'fuseIEC', 'fuseUs'].includes(device.type)) return ['A', 'B'];
   return undefined;
 }
 
@@ -117,7 +118,7 @@ function refineAnalogPlacement(model: CircuitModel, devices: DevicePlacement[], 
     const center = item.placed.anchors.center;
     devices[devices.indexOf(item)] = placement(item.device, [center[0] + dx, center[1] + dy], item.rotation, 'center', item.flip);
   };
-  for (const fuse of devices.filter((item) => item.device.type === 'fuse')) {
+  for (const fuse of devices.filter((item) => ['fuse', 'fuseIEC', 'fuseUs'].includes(item.device.type))) {
     const source = devices.find((item) => item.device.type === 'voltageSource'
       && netAt(item.device, 'P') !== undefined && netAt(item.device, 'P') === netAt(fuse.device, 'A'));
     if (!source || model.stages[fuse.device.stage].explicitDirection) continue;

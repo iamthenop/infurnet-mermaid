@@ -1,6 +1,6 @@
 # Notation for circuit diagrams
 
-This specification records the approved syntax and electrical semantics of `circuitDiagram`. The parser implements the 32 authorable object types, diagram modes, typed subgraphs, and fixed-terminal connections described here. The NAND2 example is a parser acceptance fixture.
+This specification records the approved syntax and electrical semantics of `circuitDiagram`. The parser implements the 40 authorable object types, diagram modes, typed subgraphs, and fixed-terminal connections described here. The NAND2 example is a parser acceptance fixture.
 
 Basic placement, orthogonal wiring, and symbol rendering are implemented. Mode `A` supports named IC pins on any side, including multiple pins per side.
 
@@ -42,7 +42,7 @@ The parser records the diagram mode and enforces registered-shape eligibility fo
 
 ## Object types
 
-The authorable object vocabulary is closed and contains these 32 types. Generic nets remain internal connectivity groups and cannot be declared with `:::net`.
+The authorable object vocabulary is closed and contains these 40 types. Generic nets remain internal connectivity groups and cannot be declared with `:::net`.
 
 | Type | Kind | Terminals |
 | --- | --- | --- |
@@ -51,6 +51,14 @@ The authorable object vocabulary is closed and contains these 32 types. Generic 
 | `pmosBlk` | Device | G, S, D, B |
 | `nmosBlk` | Device | G, D, S, B |
 | `resistor` | Device | A, B |
+| `resistorIEC` | Device | A, B |
+| `resistorVar` | Device | A, B |
+| `resistorVarIEC` | Device | A, B |
+| `thermistor` | Device | A, B |
+| `photoresistor` | Device | A, B |
+| `photoresistorIEC` | Device | A, B |
+| `fuseIEC` | Device | A, B |
+| `fuseUs` | Device | A, B |
 | `capacitor` | Device | A, B |
 | `diode` | Device | A, K |
 | `voltageSource` | Device | P, N |
@@ -80,6 +88,10 @@ The authorable object vocabulary is closed and contains these 32 types. Generic 
 | `pinInOut` | Net | None |
 
 The logic types `nand`, `and`, `or`, `nor`, `xor`, `xnor`, `inverter`, `buffer`, `notNot`, `schmitt`, `schmittNot`, `schmittAnd`, and `schmittNand` are authorable only in mode `D`. They select conventional logic symbols; Schmitt symbols also denote hysteresis. The renderer draws their connections without logic simulation, threshold calculations, or hysteresis simulation.
+
+The types `resistorIEC`, `resistorVar`, `resistorVarIEC`, `thermistor`, `photoresistor`, `photoresistorIEC`, `fuseIEC`, and `fuseUs` are authorable only in mode `A`. Their arrows and markings add no electrical terminals.
+
+These shapes convey conventional schematic meanings without simulating resistance, adjustment, temperature response, light response, or fuse operation.
 
 ### Supply terminology and semantics
 
@@ -111,6 +123,14 @@ These references preserve the existing asset filenames in the [shape library](..
 | `pmosBlk` | `pmos4.svg` |
 | `nmosBlk` | `nmos4.svg` |
 | `resistor` | `resistor.svg` |
+| `resistorIEC` | `resistor-iec.svg` |
+| `resistorVar` | `resistor-var.svg` |
+| `resistorVarIEC` | `resistor-var-iec.svg` |
+| `thermistor` | `thermistor.svg` |
+| `photoresistor` | `photoresistor.svg` |
+| `photoresistorIEC` | `photoresistor-iec.svg` |
+| `fuseIEC` | `fuse-iec.svg` |
+| `fuseUs` | `fuse-us.svg` |
 | `capacitor` | `capacitor.svg` |
 | `diode` | `diode.svg` |
 | `voltageSource` | `vsource.svg` |

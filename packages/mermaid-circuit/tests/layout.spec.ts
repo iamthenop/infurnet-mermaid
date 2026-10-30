@@ -26,6 +26,36 @@ describe('basic floorplanning', () => {
     expect(layout.attachments).toHaveLength(2);
   });
 
+  it.each(['resistorIEC', 'resistorVar', 'resistorVarIEC', 'thermistor', 'photoresistor', 'photoresistorIEC', 'fuseIEC', 'fuseUs'])
+  ('uses existing series and parallel placement for %s with default and explicit directions', (type) => {
+    for (const parallel of [false, true]) for (const direction of ['', 'LR', 'TB']) {
+      const links = parallel ? 'R1 |A| --- |A| R2\nR1 |B| --- |B| R2' : 'R1 |B| --- |A| R2';
+      const source = `circuitDiagram A\nsubgraph stage pair\n${direction ? `direction ${direction}\n` : ''}R1[R1]:::resistor\nR2[R2]:::resistor\nend\n${links}`;
+      const baseline = floorplan(parseCircuit(source));
+      const model = parseCircuit(source.replaceAll(':::resistor', `:::${type}`)), layout = floorplan(model);
+      expect(layout.devices.map((item) => item.placed.anchors)).toEqual(baseline.devices.map((item) => item.placed.anchors));
+      const axis = parallel ? direction === 'TB' ? 1 : 0 : direction === 'LR' ? 0 : 1;
+      const [first, second] = layout.devices.map((item) => item.placed.anchors.center);
+      expect(first[axis]).toBeLessThan(second[axis]);
+      expect(first[1 - axis]).toBe(second[1 - axis]);
+      expect(layout.attachments.map(({ device, terminal, net }) => ({ device, terminal, net }))).toEqual(model.connections);
+    }
+  });
+
+  it.each(['fuse', 'fuseIEC', 'fuseUs'])('applies the positive-source fuse orientation to %s while respecting explicit stage directions', (type) => {
+    const source = fixtures['../examples/fixtures/wireless-solenoid.mmd'].replace(':::fuse', `:::${type}`);
+    for (const direction of ['', 'LR', 'TB']) {
+      const directed = source.replace('subgraph stage protection\n', `subgraph stage protection\n${direction ? `direction ${direction}\n` : ''}`);
+      const fuse = floorplan(parseCircuit(directed)).devices.find((item) => item.device.id === 'Fuse')!;
+      expect(fuse.rotation).toBe(direction === 'TB' ? 90 : 0);
+      const axis = direction === 'TB' ? 1 : 0;
+      expect(fuse.placed.anchors.A[axis]).toBeLessThan(fuse.placed.anchors.B[axis]);
+      expect(fuse.placed.anchors.A[1 - axis]).toBeCloseTo(fuse.placed.anchors.B[1 - axis], 10);
+    }
+    const negative = floorplan(parseCircuit(source.replace('Source |P| --- |A| Fuse', 'Source |N| --- |A| Fuse')));
+    expect(negative.devices.find((item) => item.device.id === 'Fuse')!.rotation).toBe(90);
+  });
+
   it('preserves explicit TB parallel and LR series stage directions', () => {
     const source = fixtures['../examples/fixtures/cmos-nand2.mmd'].replace('direction LR', 'direction TB').replace('stage pullDown\n    direction TB', 'stage pullDown\n    direction LR');
     const layout = floorplan(parseCircuit(source));

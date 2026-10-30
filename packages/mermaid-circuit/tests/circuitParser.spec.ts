@@ -9,6 +9,8 @@ import notation from '../spec/notation.md?raw';
 const twoInputLogic = ['nand', 'and', 'or', 'nor', 'xor', 'xnor', 'schmittAnd', 'schmittNand'];
 const singleInputLogic = ['inverter', 'buffer', 'notNot', 'schmitt', 'schmittNot'];
 const logicTypes = [...twoInputLogic, ...singleInputLogic];
+const resistorFuseVariants = ['resistorIEC', 'resistorVar', 'resistorVarIEC', 'thermistor',
+  'photoresistor', 'photoresistorIEC', 'fuseIEC', 'fuseUs'];
 
 const digital = 'circuitDiagram D\nA(["A"]):::pinIn\nY(["Y"]):::pinOut\nU1["U1"]:::inverter';
 const electrical = 'circuitDiagram A\nN(["N"]):::pinInOut\nM["M"]:::nmos';
@@ -191,19 +193,24 @@ end`);
     expect(model.nets.map((net) => net.id)).toEqual(['A', 'B']);
   });
 
-  it('normalizes resistor terminal membership independently of endpoint order and duplicate statements', () => {
-    const direct = parseCircuit(`${resistors}\nR1 |B| --- |A| R2`);
-    const reversed = parseCircuit(`${resistors}\nR2 |A| --- |B| R1\nR1 |B| --- |A| R2\nR1 |B| --- |A| R2`);
+  it.each(['resistor', ...resistorFuseVariants])('normalizes %s terminal membership independently of endpoint order and duplicate statements', (type) => {
+    const declarations = resistors.replaceAll(':::resistor', `:::${type}`);
+    const direct = parseCircuit(`${declarations}\nR1 |B| --- |A| R2`);
+    const reversed = parseCircuit(`${declarations}\nR2 |A| --- |B| R1\nR1 |B| --- |A| R2\nR1 |B| --- |A| R2`);
+    for (const terminal of ['W', 'C', 'I', 'bad']) {
+      expect(() => parseCircuit(`${declarations}\nR1 |${terminal}| --- |A| R2`)).toThrow('Unknown terminal');
+      expect(() => parseCircuit(`${declarations}\nR1 |B| --- |${terminal}| R2`)).toThrow('Unknown terminal');
+    }
     expect(topology(direct)).toEqual([['R1.B', 'R2.A']]);
     expect(topology(reversed)).toEqual(topology(direct));
     expect(direct.nets).toHaveLength(1);
-    expect(parseCircuit(`${resistors}\nR1 |B| --- R2 |A|`)).toEqual(direct);
+    expect(parseCircuit(`${declarations}\nR1 |B| --- R2 |A|`)).toEqual(direct);
     expect(reversed.nets).toEqual(direct.nets);
     expect(reversed.connections).toHaveLength(2);
     const net = direct.nets[0]!;
     expect(net).toMatchObject({ type: 'net', label: '', implicit: true });
     expect(net.id).not.toMatch(/^[A-Za-z0-9]+$/u);
-    expect(parseCircuit(`${resistors}\nR1 |B| --- |A| R2`)).toEqual(direct);
+    expect(parseCircuit(`${declarations}\nR1 |B| --- |A| R2`)).toEqual(direct);
   });
 
   it('implies a junction from a shared terminal without a net declaration', () => {
@@ -217,6 +224,20 @@ end`);
       expect(model.nets).toHaveLength(1);
     }
     expect(() => parseCircuit(`${declarations}\nP0 |S| --- |S| P1`)).toThrow('source-to-source');
+  });
+
+  it('preserves the resistor and fuse fixture series links and parallel terminal groups', () => {
+    const model = parseCircuit(drawingFixtures['../examples/fixtures/resistor-fuse-variants.mmd']);
+    expect(model.devices.map((device) => device.type).sort()).toEqual([...resistorFuseVariants].sort());
+    expect(model.devices.every((device) => device.terminals.join(',') === 'A,B')).toBe(true);
+    expect(model.connections).toHaveLength(16);
+    expect(topology(model)).toEqual([
+      ['F1.A'], ['F1.B', 'F2.A'], ['F2.B', 'R1.A', 'R2.A'],
+      ['R1.B', 'R2.B', 'R3.A', 'R4.A'], ['R3.B', 'R4.B', 'R5.A', 'R6.A'], ['R5.B', 'R6.B'],
+    ].map((group) => group.sort()).sort());
+    expect(model.connections.find((item) => item.device === 'F1' && item.terminal === 'A')!.net).toBe('VDD');
+    expect(model.connections.filter((item) => item.net === 'GND').map((item) => `${item.device}.${item.terminal}`).sort())
+      .toEqual(['R5.B', 'R6.B']);
   });
 
   it('connects motor and solenoid terminals through one implied net without adding endpoint inference', () => {
