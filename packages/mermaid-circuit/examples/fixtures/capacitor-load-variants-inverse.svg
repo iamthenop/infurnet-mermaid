@@ -1,0 +1,317 @@
+<svg id="fixture-capacitor-load-variants" width="870" xmlns="http://www.w3.org/2000/svg" viewBox="-210 -297.6 870 2559.7599999999998" height="2559.7599999999998" overflow="visible" font-family="sans-serif" font-size="14" role="graphics-document document" aria-roledescription="circuitDiagram"><style>#fixture-capacitor-load-variants{font-family:"trebuchet ms",verdana,arial,sans-serif;font-size:16px;fill:#ccc;}@keyframes edge-animation-frame{from{stroke-dashoffset:0;}}@keyframes dash{to{stroke-dashoffset:0;}}#fixture-capacitor-load-variants .edge-animation-slow{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 50s linear infinite;stroke-linecap:round;}#fixture-capacitor-load-variants .edge-animation-fast{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 20s linear infinite;stroke-linecap:round;}#fixture-capacitor-load-variants .error-icon{fill:#a44141;}#fixture-capacitor-load-variants .error-text{fill:#ddd;stroke:#ddd;}#fixture-capacitor-load-variants .edge-thickness-normal{stroke-width:1px;}#fixture-capacitor-load-variants .edge-thickness-thick{stroke-width:3.5px;}#fixture-capacitor-load-variants .edge-pattern-solid{stroke-dasharray:0;}#fixture-capacitor-load-variants .edge-thickness-invisible{stroke-width:0;fill:none;}#fixture-capacitor-load-variants .edge-pattern-dashed{stroke-dasharray:3;}#fixture-capacitor-load-variants .edge-pattern-dotted{stroke-dasharray:2;}#fixture-capacitor-load-variants .marker{fill:lightgrey;stroke:lightgrey;}#fixture-capacitor-load-variants .marker.cross{stroke:lightgrey;}#fixture-capacitor-load-variants svg{font-family:"trebuchet ms",verdana,arial,sans-serif;font-size:16px;}#fixture-capacitor-load-variants p{margin:0;}#fixture-capacitor-load-variants,#fixture-capacitor-load-variants svg{font-family:sans-serif;font-size:14px;}#fixture-capacitor-load-variants [data-circuit-background]{fill:#101215;}#fixture-capacitor-load-variants [data-wire] polyline{stroke:#F2F2F2;}#fixture-capacitor-load-variants [data-junction] circle{stroke:#F2F2F2;fill:#F2F2F2;}#fixture-capacitor-load-variants [data-device] [stroke]:not([stroke="none"]),#fixture-capacitor-load-variants [data-net-occurrence] [stroke]:not([stroke="none"]){stroke:#F2F2F2;}#fixture-capacitor-load-variants [data-device] [fill="#000"],#fixture-capacitor-load-variants [data-net-occurrence] [fill="#000"]{fill:#F2F2F2;}#fixture-capacitor-load-variants [data-device] [fill="#fff"],#fixture-capacitor-load-variants [data-device] [fill="white"],#fixture-capacitor-load-variants [data-net-occurrence] [fill="#fff"],#fixture-capacitor-load-variants [data-net-occurrence] [fill="white"]{fill:#101215;}#fixture-capacitor-load-variants [data-stage] polyline,#fixture-capacitor-load-variants [data-block] polyline{stroke:#F2F2F2;}#fixture-capacitor-load-variants [data-device-label] text,#fixture-capacitor-load-variants [data-ic-label] text,#fixture-capacitor-load-variants [data-terminal] text{fill:#F2F2F2;}#fixture-capacitor-load-variants [data-net-label] text,#fixture-capacitor-load-variants [data-frame-label] text{fill:#F2F2F2;}#fixture-capacitor-load-variants .node .neo-node{stroke:#ccc;}#fixture-capacitor-load-variants [data-look="neo"].node rect,#fixture-capacitor-load-variants [data-look="neo"].cluster rect,#fixture-capacitor-load-variants [data-look="neo"].node polygon{stroke:url(#fixture-capacitor-load-variants-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#fixture-capacitor-load-variants [data-look="neo"].swimlane.cluster rect{filter:none;}#fixture-capacitor-load-variants [data-look="neo"].node path{stroke:url(#fixture-capacitor-load-variants-gradient);stroke-width:1px;}#fixture-capacitor-load-variants [data-look="neo"].node .outer-path{filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#fixture-capacitor-load-variants [data-look="neo"].node .neo-line path{stroke:#ccc;filter:none;}#fixture-capacitor-load-variants [data-look="neo"].node circle{stroke:url(#fixture-capacitor-load-variants-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#fixture-capacitor-load-variants [data-look="neo"].node circle .state-start{fill:#000000;}#fixture-capacitor-load-variants [data-look="neo"].icon-shape .icon{fill:url(#fixture-capacitor-load-variants-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#fixture-capacitor-load-variants [data-look="neo"].icon-shape .icon-neo path{stroke:url(#fixture-capacitor-load-variants-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#fixture-capacitor-load-variants :root{--mermaid-font-family:"trebuchet ms",verdana,arial,sans-serif;}</style><rect data-circuit-background="true" x="-210" y="-297.6" width="870" height="2559.7599999999998"></rect>
+<g data-drawing-index="0" data-stage="capacitorLoadVariants" stroke-dasharray="8 6">
+<polyline points="-30,-30 480,-30 480,1950 -30,1950 -30,-30" stroke="#777" stroke-width="1" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="1" data-label="true" data-frame-label="stage">
+<text x="-18" y="-42" xml:space="preserve" fill="#000">capacitorLoadVariants</text>
+</g>
+<g data-drawing-index="2" data-net="@implicit:B1:A" data-wire="|-" data-points="[[60.00000000000001,1200],[60.00000000000001,1260],[210,1260]]">
+<polyline points="60.00000000000001,1200 60.00000000000001,1260 210,1260" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="3" data-net="@implicit:B1:A" data-wire="|-" data-points="[[360,1200],[360,1260],[210,1260]]">
+<polyline points="360,1200 360,1260 210,1260" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="4" data-net="@implicit:B1:A" data-wire="-" data-points="[[210,1260],[210,1440]]">
+<polyline points="210,1260 210,1440" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="5" data-net="@implicit:B1:B" data-wire="-" data-points="[[210,1560],[210,1680]]">
+<polyline points="210,1560 210,1680" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="6" data-net="@implicit:B1:B" data-wire="-" data-points="[[210,1800],[210,1680]]">
+<polyline points="210,1800 210,1680" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="7" data-net="@implicit:C1:B" data-wire="|-" data-points="[[60,360],[60,300],[210,300]]">
+<polyline points="60,360 60,300 210,300" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="8" data-net="@implicit:C1:B" data-wire="|-" data-points="[[360,360],[360,300],[210,300]]">
+<polyline points="360,360 360,300 210,300" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="9" data-net="@implicit:C1:B" data-wire="-" data-points="[[210,120],[210,300]]">
+<polyline points="210,120 210,300" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="10" data-net="@implicit:C2:B" data-wire="|-" data-points="[[60.00000000000001,480],[60.00000000000001,540],[210,540]]">
+<polyline points="60.00000000000001,480 60.00000000000001,540 210,540" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="11" data-net="@implicit:C2:B" data-wire="|-" data-points="[[360,480],[360,540],[210,540]]">
+<polyline points="360,480 360,540 210,540" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="12" data-net="@implicit:C2:B" data-wire="|-" data-points="[[60,720],[60,660],[210,660]]">
+<polyline points="60,720 60,660 210,660" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="13" data-net="@implicit:C2:B" data-wire="|-" data-points="[[360,720],[360,660],[210,660]]">
+<polyline points="360,720 360,660 210,660" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="14" data-net="@implicit:C2:B" data-wire="-" data-points="[[210,540],[210,660]]">
+<polyline points="210,540 210,660" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="15" data-net="@implicit:C4:B" data-wire="|-" data-points="[[60.00000000000001,840],[60.00000000000001,900],[210,900]]">
+<polyline points="60.00000000000001,840 60.00000000000001,900 210,900" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="16" data-net="@implicit:C4:B" data-wire="|-" data-points="[[360,840],[360,900],[210,900]]">
+<polyline points="360,840 360,900 210,900" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="17" data-net="@implicit:C4:B" data-wire="|-" data-points="[[60,1080],[60,1020],[210,1020]]">
+<polyline points="60,1080 60,1020 210,1020" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="18" data-net="@implicit:C4:B" data-wire="|-" data-points="[[360,1080],[360,1020],[210,1020]]">
+<polyline points="360,1080 360,1020 210,1020" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="19" data-net="@implicit:C4:B" data-wire="-" data-points="[[210,900],[210,1020]]">
+<polyline points="210,900 210,1020" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="20" data-net="VDD" data-wire="-" data-points="[[210,-59.99999999999999],[210,3.67394039744206e-15]]">
+<polyline points="210,-59.99999999999999 210,3.67394039744206e-15" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="21" data-net="GND" data-wire="-" data-points="[[210,1980],[210,1920]]">
+<polyline points="210,1980 210,1920" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="22" data-device="C1" data-type="capacitor2" data-stage-index="0">
+<g transform="matrix(6.123233995736766e-17 1 -1 6.123233995736766e-17 270 0)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-capacitor-load-variants-element-22-capacitor2" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 65.226667 72.746666 a 6.48 15 0 0 1 0 -25.493333" id="fixture-capacitor-load-variants-element-22-reference-0" stroke="#000" fill="none" stroke-width="2"></path>
+    <path d="M 0 60 L 55.68 60 M 55.68 48 L 55.68 72 M 64.32 60 L 120 60" id="fixture-capacitor-load-variants-element-22-reference-1" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="23" data-label="true" data-device-label="C1">
+<text x="282" y="104.00000000000001" xml:space="preserve" fill="#000">C1</text>
+</g>
+<g data-drawing-index="24" data-label="true" data-terminal="A" data-terminal-device="C1" data-terminal-side="T" text-anchor="start" dominant-baseline="text-after-edge" data-x="210" data-y="3.67394039744206e-15" data-terminal-net="VDD">
+<text x="214" y="-3.9999999999999964" xml:space="preserve" fill="#000">A</text>
+</g>
+<g data-drawing-index="25" data-label="true" data-terminal="B" data-terminal-device="C1" data-terminal-side="B" text-anchor="start" dominant-baseline="hanging" data-x="210" data-y="120" data-terminal-net="@implicit:C1:B">
+<text x="214" y="124" xml:space="preserve" fill="#000">B</text>
+</g>
+<g data-drawing-index="26" data-device="C2" data-type="capacitorPolar" data-stage-index="0">
+<g transform="matrix(6.123233995736766e-17 1 -1 6.123233995736766e-17 120 360)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-capacitor-load-variants-element-26-capacitorPolar" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path id="fixture-capacitor-load-variants-element-26-reference-0" d="M 0 60 L 55.68 60 M 55.68 48 L 55.68 72 M 64.32 48 L 64.32 72 M 64.32 60 L 120 60" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <text x="45.312" y="32.693333" dominant-baseline="central" fill="#000" font-size="18.666667" font-family="sans" text-anchor="middle" id="fixture-capacitor-load-variants-element-26-polarity-mark" stroke="none"><tspan x="45.312" dy="18.666667">+</tspan></text>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="27" data-label="true" data-device-label="C2">
+<text x="132" y="464" xml:space="preserve" fill="#000">C2</text>
+</g>
+<g data-drawing-index="28" data-label="true" data-terminal="A" data-terminal-device="C2" data-terminal-side="T" text-anchor="start" dominant-baseline="text-after-edge" data-x="60" data-y="360" data-terminal-net="@implicit:C1:B">
+<text x="64" y="356" xml:space="preserve" fill="#000">A</text>
+</g>
+<g data-drawing-index="29" data-label="true" data-terminal="B" data-terminal-device="C2" data-terminal-side="B" text-anchor="start" dominant-baseline="hanging" data-x="60.00000000000001" data-y="480" data-terminal-net="@implicit:C2:B">
+<text x="64" y="484" xml:space="preserve" fill="#000">B</text>
+</g>
+<g data-drawing-index="30" data-device="C3" data-type="capacitor2Polar" data-stage-index="0">
+<g transform="matrix(6.123233995736766e-17 1 -1 6.123233995736766e-17 420 360)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-capacitor-load-variants-element-30-capacitor2Polar" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path id="fixture-capacitor-load-variants-element-30-reference-0" d="M 65.226667 72.746667 a 6.48 15 0 0 1 0 -25.493333" stroke="#000" fill="none" stroke-width="2"></path>
+    <path id="fixture-capacitor-load-variants-element-30-reference-1" d="M 0 60 L 55.68 60 M 55.68 48 L 55.68 72 M 64.32 60 L 120 60" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <text x="45.312" y="32.693333" dominant-baseline="central" fill="#000" font-size="18.666667" font-family="sans" text-anchor="middle" id="fixture-capacitor-load-variants-element-30-polarity-mark" stroke="none"><tspan x="45.312" dy="18.666667">+</tspan></text>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="31" data-label="true" data-device-label="C3">
+<text x="432" y="464" xml:space="preserve" fill="#000">C3</text>
+</g>
+<g data-drawing-index="32" data-label="true" data-terminal="A" data-terminal-device="C3" data-terminal-side="T" text-anchor="start" dominant-baseline="text-after-edge" data-x="360" data-y="360" data-terminal-net="@implicit:C1:B">
+<text x="364" y="356" xml:space="preserve" fill="#000">A</text>
+</g>
+<g data-drawing-index="33" data-label="true" data-terminal="B" data-terminal-device="C3" data-terminal-side="B" text-anchor="start" dominant-baseline="hanging" data-x="360" data-y="480" data-terminal-net="@implicit:C2:B">
+<text x="364" y="484" xml:space="preserve" fill="#000">B</text>
+</g>
+<g data-drawing-index="34" data-device="C4" data-type="capacitorVar" data-stage-index="0">
+<g transform="matrix(6.123233995736766e-17 1 -1 6.123233995736766e-17 120 720)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-capacitor-load-variants-element-34-capacitorVar" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 0 60 L 55.68 60 M 55.68 48 L 55.68 72 M 64.32 48 L 64.32 72 M 64.32 60 L 120 60" id="fixture-capacitor-load-variants-element-34-reference-0" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path d="M 39.68 72 L 71.816 49.505333" id="fixture-capacitor-load-variants-element-34-reference-1" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path d="M 77.496 45.529333 L 74.017333 52.650667 L 69.613333 46.36 Z" id="fixture-capacitor-load-variants-element-34-reference-2" stroke="#000" fill="#000" stroke-linecap="butt" stroke-linejoin="miter"></path>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="35" data-label="true" data-device-label="C4">
+<text x="132" y="824" xml:space="preserve" fill="#000">C4</text>
+</g>
+<g data-drawing-index="36" data-label="true" data-terminal="A" data-terminal-device="C4" data-terminal-side="T" text-anchor="start" dominant-baseline="text-after-edge" data-x="60" data-y="720" data-terminal-net="@implicit:C2:B">
+<text x="64" y="716" xml:space="preserve" fill="#000">A</text>
+</g>
+<g data-drawing-index="37" data-label="true" data-terminal="B" data-terminal-device="C4" data-terminal-side="B" text-anchor="start" dominant-baseline="hanging" data-x="60.00000000000001" data-y="840" data-terminal-net="@implicit:C4:B">
+<text x="64" y="844" xml:space="preserve" fill="#000">B</text>
+</g>
+<g data-drawing-index="38" data-device="C5" data-type="capacitorTrim" data-stage-index="0">
+<g transform="matrix(6.123233995736766e-17 1 -1 6.123233995736766e-17 420 720)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-capacitor-load-variants-element-38-capacitorTrim" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path id="fixture-capacitor-load-variants-element-38-reference-0" d="M 0 60 L 55.68 60 M 55.68 48 L 55.68 72 M 64.32 48 L 64.32 72 M 64.32 60 L 120 60" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path id="fixture-capacitor-load-variants-element-38-reference-1" d="M 41.28 72 L 78.72 48" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path id="fixture-capacitor-load-variants-element-38-reference-2" d="M 75.093444 42.342572 L 82.346667 53.657333" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="39" data-label="true" data-device-label="C5">
+<text x="432" y="824" xml:space="preserve" fill="#000">C5</text>
+</g>
+<g data-drawing-index="40" data-label="true" data-terminal="A" data-terminal-device="C5" data-terminal-side="T" text-anchor="start" dominant-baseline="text-after-edge" data-x="360" data-y="720" data-terminal-net="@implicit:C2:B">
+<text x="364" y="716" xml:space="preserve" fill="#000">A</text>
+</g>
+<g data-drawing-index="41" data-label="true" data-terminal="B" data-terminal-device="C5" data-terminal-side="B" text-anchor="start" dominant-baseline="hanging" data-x="360" data-y="840" data-terminal-net="@implicit:C4:B">
+<text x="364" y="844" xml:space="preserve" fill="#000">B</text>
+</g>
+<g data-drawing-index="42" data-device="L1" data-type="lamp" data-stage-index="0">
+<g transform="matrix(6.123233995736766e-17 1 -1 6.123233995736766e-17 120 1080)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-capacitor-load-variants-element-42-lamp" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path id="fixture-capacitor-load-variants-element-42-reference-0" d="M 36 60 L 36 60 M 84 60 L 84 60" stroke="#000" fill="none"></path>
+    <circle id="fixture-capacitor-load-variants-element-42-reference-1" cx="60" cy="60" r="24" stroke="#000" fill="none"></circle>
+    <path id="fixture-capacitor-load-variants-element-42-reference-2" d="M 36 60 L 36.207729775 59.165644682 L 36.502999541 58.325348967 L 36.885990603 57.487525315 L 37.356006056 56.660561438 L 37.91147777 55.852736328 L 38.549982084 55.072137373 L 39.268264074 54.326579391 L 40.062270135 53.623526394 L 40.927188565 52.970016864 L 41.857497738 52.372593287 L 42.84702138 51.837236656 L 43.888990401 51.369306592 L 44.976110667 50.973487688 L 46.100636019 50.65374261 L 47.254445823 50.413272425 L 48.429126273 50.254484554 L 49.616054617 50.178968672 L 50.806485487 50.187480792 L 51.99163845 50.279935697 L 53.162785911 50.455407791 L 54.31134049 50.71214037 L 55.42894099 51.047563204 L 56.507536105 51.45831827 L 57.539465026 51.940293373 L 58.51753413 52.48866331 L 59.435089004 53.097938181 L 60.286081061 53.762018344 L 61.065128096 54.474255488 L 61.767568166 55.227519186 L 62.389506266 56.014268282 L 62.927853319 56.826626386 L 63.380357106 57.656460729 L 63.745624811 58.495463583 L 64.023136965 59.33523543 L 64.213252647 60.167369054 L 64.317205889 60.983533706 L 64.337093324 61.77555851 L 64.27585319 62.53551426 L 64.137235921 63.255792802 L 63.925766598 63.929183206 L 63.646699644 64.548943951 L 63.305966225 65.10887042 L 62.910114868 65.603357015 L 62.466245904 66.027453278 L 61.981940381 66.376913451 L 61.465184171 66.648238978 L 60.924288022 66.838713535 L 60.36780435 66.946430224 L 59.804441627 66.970310658 L 59.242977191 66.910115763 L 58.692169375 66.766448169 L 58.160669827 66.540746177 L 57.656936893 66.23526936 L 57.18915094 65.85307594 L 56.765132455 65.397992174 L 56.392263761 64.874574048 L 56.0774151 64.288061662 L 55.826875858 63.644326773 L 55.646291603 62.949814012 L 55.540607557 62.21147636 L 55.514019097 61.436705545 L 55.569929747 60.633258038 L 55.710917107 59.8091774 L 55.93870705 58.972713759 L 56.254156437 58.132241212 L 56.657244548 57.296173989 L 57.147073282 56.472882219 L 57.72187615 55.670608132 L 58.379035964 54.89738354 L 59.11511103 54.160949437 L 59.925869613 53.468678492 L 60.806332298 52.827501243 L 61.750821837 52.243836716 L 62.753019994 51.723528157 L 63.806030791 51.271784536 L 64.902449551 50.893128398 L 66.034437023 50.591350588 L 67.193797871 50.369472297 L 68.372062712 50.229714817 L 69.560572912 50.173477303 L 70.750567266 50.201322767 L 71.933269711 50.31297244 L 73.099977185 50.507308561 L 74.242146758 50.782385571 L 75.351481155 51.135449591 L 76.420011825 51.562965985 L 77.440178716 52.060654754 L 78.40490596 52.623533383 L 79.307672713 53.245966719 L 80.142578437 53.921723388 L 80.90440197 54.644038182 L 81.588653802 55.405679782 L 82.191621013 56.199023159 L 82.710404452 57.016125906 L 83.142947756 57.848807753 L 83.48805794 58.688732466 L 83.745417338 59.527491297 L 83.915586784 60.356687171 L 84 61.168018752" stroke="#000" fill="none"></path>
+    <path id="fixture-capacitor-load-variants-element-42-electrical-leads" d="M 0 60 L 36 60 M 84 60 L 120 60" stroke="#000" fill="none"></path>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="43" data-label="true" data-device-label="L1">
+<text x="132" y="1184" xml:space="preserve" fill="#000">L1</text>
+</g>
+<g data-drawing-index="44" data-label="true" data-terminal="A" data-terminal-device="L1" data-terminal-side="T" text-anchor="start" dominant-baseline="text-after-edge" data-x="60" data-y="1080" data-terminal-net="@implicit:C4:B">
+<text x="64" y="1076" xml:space="preserve" fill="#000">A</text>
+</g>
+<g data-drawing-index="45" data-label="true" data-terminal="B" data-terminal-device="L1" data-terminal-side="B" text-anchor="start" dominant-baseline="hanging" data-x="60.00000000000001" data-y="1200" data-terminal-net="@implicit:B1:A">
+<text x="64" y="1204" xml:space="preserve" fill="#000">B</text>
+</g>
+<g data-drawing-index="46" data-device="L2" data-type="lamp2" data-stage-index="0">
+<g transform="matrix(6.123233995736766e-17 1 -1 6.123233995736766e-17 420 1080)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-capacitor-load-variants-element-46-lamp2" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path id="fixture-capacitor-load-variants-element-46-reference-0" d="M 36 60 L 36 60 M 84 60 L 84 60" stroke="#000" fill="none"></path>
+    <circle id="fixture-capacitor-load-variants-element-46-reference-1" cx="60" cy="60" r="24" stroke="#000" fill="none"></circle>
+    <path id="fixture-capacitor-load-variants-element-46-reference-2" d="M 43.029437252 76.970562748 L 76.970562748 43.029437252" stroke="#000" fill="none"></path>
+    <path id="fixture-capacitor-load-variants-element-46-reference-3" d="M 43.029437252 43.029437252 L 76.970562748 76.970562748" stroke="#000" fill="none"></path>
+    <path id="fixture-capacitor-load-variants-element-46-electrical-leads" d="M 0 60 L 36 60 M 84 60 L 120 60" stroke="#000" fill="none"></path>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="47" data-label="true" data-device-label="L2">
+<text x="432" y="1184" xml:space="preserve" fill="#000">L2</text>
+</g>
+<g data-drawing-index="48" data-label="true" data-terminal="A" data-terminal-device="L2" data-terminal-side="T" text-anchor="start" dominant-baseline="text-after-edge" data-x="360" data-y="1080" data-terminal-net="@implicit:C4:B">
+<text x="364" y="1076" xml:space="preserve" fill="#000">A</text>
+</g>
+<g data-drawing-index="49" data-label="true" data-terminal="B" data-terminal-device="L2" data-terminal-side="B" text-anchor="start" dominant-baseline="hanging" data-x="360" data-y="1200" data-terminal-net="@implicit:B1:A">
+<text x="364" y="1204" xml:space="preserve" fill="#000">B</text>
+</g>
+<g data-drawing-index="50" data-device="B1" data-type="breaker" data-stage-index="0">
+<g transform="matrix(6.123233995736766e-17 1 -1 6.123233995736766e-17 270 1440)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-capacitor-load-variants-element-50-breaker" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path id="fixture-capacitor-load-variants-element-50-reference-0" d="M 36 60 M 84 60" stroke="#000" fill="none"></path>
+    <path id="fixture-capacitor-load-variants-element-50-reference-1" d="M 83.635386072 57.291088428 A 24 15.6 0 0 0 36.364613928 57.291088428" stroke="#000" fill="none"></path>
+    <circle id="fixture-capacitor-load-variants-element-50-reference-2" cx="41.76" cy="60" r="5.76" stroke="#000" fill="none"></circle>
+    <circle id="fixture-capacitor-load-variants-element-50-reference-3" cx="78.24" cy="60" r="5.76" stroke="#000" fill="none"></circle>
+    <path id="fixture-capacitor-load-variants-element-50-electrical-leads" d="M 0 60 L 36 60 M 84 60 L 120 60" stroke="#000" fill="none"></path>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="51" data-label="true" data-device-label="B1">
+<text x="282" y="1544" xml:space="preserve" fill="#000">B1</text>
+</g>
+<g data-drawing-index="52" data-label="true" data-terminal="A" data-terminal-device="B1" data-terminal-side="T" text-anchor="start" dominant-baseline="text-after-edge" data-x="210" data-y="1440" data-terminal-net="@implicit:B1:A">
+<text x="214" y="1436" xml:space="preserve" fill="#000">A</text>
+</g>
+<g data-drawing-index="53" data-label="true" data-terminal="B" data-terminal-device="B1" data-terminal-side="B" text-anchor="start" dominant-baseline="hanging" data-x="210" data-y="1560" data-terminal-net="@implicit:B1:B">
+<text x="214" y="1564" xml:space="preserve" fill="#000">B</text>
+</g>
+<g data-drawing-index="54" data-device="D1" data-type="diac" data-stage-index="0">
+<g transform="matrix(6.123233995736766e-17 1 -1 6.123233995736766e-17 270 1800)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-capacitor-load-variants-element-54-diac" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polygon id="fixture-capacitor-load-variants-element-54-reference-0" points="51.6,84 68.4,72 51.6,60" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></polygon>
+    <polygon id="fixture-capacitor-load-variants-element-54-reference-1" points="68.4,36 51.6,48 68.4,60" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></polygon>
+    <path id="fixture-capacitor-load-variants-element-54-reference-2" d="M 0 60 L 51.6 60 M 68.4 38.4 L 68.4 81.6 M 51.6 38.4 L 51.6 81.6 M 68.4 60 L 120 60" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="55" data-label="true" data-device-label="D1">
+<text x="282" y="1904" xml:space="preserve" fill="#000">D1</text>
+</g>
+<g data-drawing-index="56" data-label="true" data-terminal="A" data-terminal-device="D1" data-terminal-side="T" text-anchor="start" dominant-baseline="text-after-edge" data-x="210" data-y="1800" data-terminal-net="@implicit:B1:B">
+<text x="214" y="1796" xml:space="preserve" fill="#000">A</text>
+</g>
+<g data-drawing-index="57" data-label="true" data-terminal="B" data-terminal-device="D1" data-terminal-side="B" text-anchor="start" dominant-baseline="hanging" data-x="210" data-y="1920" data-terminal-net="GND">
+<text x="214" y="1924" xml:space="preserve" fill="#000">B</text>
+</g>
+<g data-drawing-index="58" data-net-occurrence="0" data-net="VDD" data-type="supplyNet" data-branches="1">
+<g transform="matrix(1 0 0 1 150 -180)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-capacitor-load-variants-element-58-supplyNet" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 60 120 L 60 74.4" id="fixture-capacitor-load-variants-element-58-reference-0" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path d="M 60 74.4 L 33 74.4" id="fixture-capacitor-load-variants-element-58-reference-1" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path d="M 60 74.4 L 87 74.4" id="fixture-capacitor-load-variants-element-58-reference-2" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="59" data-label="true" data-net-label="VDD" text-anchor="middle">
+<text x="210" y="-117.6" xml:space="preserve" fill="#000">VDD</text>
+</g>
+<g data-drawing-index="60" data-net-occurrence="1" data-net="GND" data-type="ground" data-branches="1">
+<g transform="matrix(1 0 0 1 150 1980)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-capacitor-load-variants-element-60-ground" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 60 0 L 60 45.6 L 24 45.6 L 96 45.6 M 34.8 62.88 L 85.2 62.88 M 52.8 80.16 L 67.2 80.16" id="fixture-capacitor-load-variants-element-60-reference-0" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="61" data-label="true" data-net-label="GND" text-anchor="middle">
+<text x="210" y="2082.16" xml:space="preserve" fill="#000">GND</text>
+</g>
+<g data-drawing-index="62" data-junction="true" data-net="@implicit:B1:A">
+<circle cx="0" cy="0" r="3" stroke="#000" stroke-width="2" fill="#000" transform="matrix(1 0 0 1 210 1260)"></circle>
+</g>
+<g data-drawing-index="63" data-junction="true" data-net="@implicit:C1:B">
+<circle cx="0" cy="0" r="3" stroke="#000" stroke-width="2" fill="#000" transform="matrix(1 0 0 1 210 300)"></circle>
+</g>
+<g data-drawing-index="64" data-junction="true" data-net="@implicit:C2:B">
+<circle cx="0" cy="0" r="3" stroke="#000" stroke-width="2" fill="#000" transform="matrix(1 0 0 1 210 540)"></circle>
+</g>
+<g data-drawing-index="65" data-junction="true" data-net="@implicit:C2:B">
+<circle cx="0" cy="0" r="3" stroke="#000" stroke-width="2" fill="#000" transform="matrix(1 0 0 1 210 660)"></circle>
+</g>
+<g data-drawing-index="66" data-junction="true" data-net="@implicit:C4:B">
+<circle cx="0" cy="0" r="3" stroke="#000" stroke-width="2" fill="#000" transform="matrix(1 0 0 1 210 900)"></circle>
+</g>
+<g data-drawing-index="67" data-junction="true" data-net="@implicit:C4:B">
+<circle cx="0" cy="0" r="3" stroke="#000" stroke-width="2" fill="#000" transform="matrix(1 0 0 1 210 1020)"></circle>
+</g>
+</svg>

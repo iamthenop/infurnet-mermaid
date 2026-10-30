@@ -199,7 +199,7 @@ async function verifyConsumer() {
       if (module.file) assert(inside(await realpath(module.file)), `Loaded source outside consumer: ${module.file}`);
     }
     for (const result of results) console.log(JSON.stringify(result));
-    assert.equal(results.length, 24);
+    assert.equal(results.length, 27);
     console.log(JSON.stringify({ isolatedRendering: 'pass', networkRequestsDuringRendering: requests.length }));
   } finally {
     await browser?.close();
@@ -233,7 +233,7 @@ try {
     { name: 'colored', suffix: '-colored', config: { theme: 'base', themeVariables: { background: '#FFFFFF', lineColor: '#009600', primaryBorderColor: '#840000', primaryTextColor: '#006464', textColor: '#0F0F0F' } },
       colors: { background: '#FFFFFF', wire: '#009600', device: '#840000', label: '#006464', text: '#0F0F0F', frame: '#777777' } },
   ];
-  const fixtures = await Promise.all(['wireless-solenoid', 'cmos-inverter', 'cmos-nand2', 'cmos-xor12', 'xor-nand4', 'logic-variants', 'schmitt-variants', 'resistor-fuse-variants'].map(async (name) => ({ name,
+  const fixtures = await Promise.all(['wireless-solenoid', 'cmos-inverter', 'cmos-nand2', 'cmos-xor12', 'xor-nand4', 'logic-variants', 'schmitt-variants', 'resistor-fuse-variants', 'capacitor-load-variants'].map(async (name) => ({ name,
     source: await readFile(join(packageRoot, `examples/fixtures/${name}.mmd`), 'utf8'),
     references: Object.fromEntries(await Promise.all(appearances.map(async ({ name: appearance, suffix }) =>
       [appearance, await readFile(join(packageRoot, `examples/fixtures/${name}${suffix}.svg`), 'utf8')]))),

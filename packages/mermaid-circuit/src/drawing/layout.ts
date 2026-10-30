@@ -54,7 +54,8 @@ function conduction(device: Device): [string, string] | undefined {
   if (device.type === 'diode') return ['K', 'A'];
   if (device.type.endsWith('Source')) return ['P', 'N'];
   if (['resistor', 'capacitor', 'fuse', 'motor', 'solenoid', 'resistorIEC', 'resistorVar', 'resistorVarIEC',
-    'thermistor', 'photoresistor', 'photoresistorIEC', 'fuseIEC', 'fuseUs'].includes(device.type)) return ['A', 'B'];
+    'thermistor', 'photoresistor', 'photoresistorIEC', 'fuseIEC', 'fuseUs',
+    'capacitor2', 'capacitorPolar', 'capacitor2Polar', 'capacitorVar', 'capacitorTrim', 'lamp', 'lamp2', 'breaker', 'diac'].includes(device.type)) return ['A', 'B'];
   return undefined;
 }
 

@@ -1,6 +1,6 @@
 # Notation for circuit diagrams
 
-This specification records the approved syntax and electrical semantics of `circuitDiagram`. The parser implements the 40 authorable object types, diagram modes, typed subgraphs, and fixed-terminal connections described here. The NAND2 example is a parser acceptance fixture.
+This specification records the approved syntax and electrical semantics of `circuitDiagram`. The parser implements the 49 authorable object types, diagram modes, typed subgraphs, and fixed-terminal connections described here. The NAND2 example is a parser acceptance fixture.
 
 Basic placement, orthogonal wiring, and symbol rendering are implemented. Mode `A` supports named IC pins on any side, including multiple pins per side.
 
@@ -42,7 +42,7 @@ The parser records the diagram mode and enforces registered-shape eligibility fo
 
 ## Object types
 
-The authorable object vocabulary is closed and contains these 40 types. Generic nets remain internal connectivity groups and cannot be declared with `:::net`.
+The authorable object vocabulary is closed and contains these 49 types. Generic nets remain internal connectivity groups and cannot be declared with `:::net`.
 
 | Type | Kind | Terminals |
 | --- | --- | --- |
@@ -60,6 +60,15 @@ The authorable object vocabulary is closed and contains these 40 types. Generic 
 | `fuseIEC` | Device | A, B |
 | `fuseUs` | Device | A, B |
 | `capacitor` | Device | A, B |
+| `capacitor2` | Device | A, B |
+| `capacitorPolar` | Device | A, B |
+| `capacitor2Polar` | Device | A, B |
+| `capacitorVar` | Device | A, B |
+| `capacitorTrim` | Device | A, B |
+| `lamp` | Device | A, B |
+| `lamp2` | Device | A, B |
+| `breaker` | Device | A, B |
+| `diac` | Device | A, B |
 | `diode` | Device | A, K |
 | `voltageSource` | Device | P, N |
 | `currentSource` | Device | P, N |
@@ -92,6 +101,10 @@ The logic types `nand`, `and`, `or`, `nor`, `xor`, `xnor`, `inverter`, `buffer`,
 The types `resistorIEC`, `resistorVar`, `resistorVarIEC`, `thermistor`, `photoresistor`, `photoresistorIEC`, `fuseIEC`, and `fuseUs` are authorable only in mode `A`. Their arrows and markings add no electrical terminals.
 
 These shapes convey conventional schematic meanings without simulating resistance, adjustment, temperature response, light response, or fuse operation.
+
+The types `capacitor2`, `capacitorPolar`, `capacitor2Polar`, `capacitorVar`, `capacitorTrim`, `lamp`, `lamp2`, `breaker`, and `diac` are authorable only in mode `A`. Their existing polarity, adjustment, and other markings add no terminals or connections. DIAC uses `A` and `B`; `K` is not a valid DIAC terminal.
+
+The renderer does not simulate capacitance, breakdown, switching, lamp operation, or circuit safety.
 
 ### Supply terminology and semantics
 
@@ -132,6 +145,15 @@ These references preserve the existing asset filenames in the [shape library](..
 | `fuseIEC` | `fuse-iec.svg` |
 | `fuseUs` | `fuse-us.svg` |
 | `capacitor` | `capacitor.svg` |
+| `capacitor2` | `capacitor2.svg` |
+| `capacitorPolar` | `capacitor-polar.svg` |
+| `capacitor2Polar` | `capacitor2-polar.svg` |
+| `capacitorVar` | `capacitor-var.svg` |
+| `capacitorTrim` | `capacitor-trim.svg` |
+| `lamp` | `lamp.svg` |
+| `lamp2` | `lamp2.svg` |
+| `breaker` | `breaker.svg` |
+| `diac` | `diac.svg` |
 | `diode` | `diode.svg` |
 | `voltageSource` | `vsource.svg` |
 | `currentSource` | `isource.svg` |

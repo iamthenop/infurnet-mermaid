@@ -1,0 +1,31 @@
+circuitDiagram A
+
+VDD{{"VDD"}}:::supplyNet
+GND{{"GND"}}:::ground
+
+subgraph stage capacitorLoadVariants
+    direction TB
+    C1["C1"]:::capacitor2
+    C2["C2"]:::capacitorPolar
+    C3["C3"]:::capacitor2Polar
+    C4["C4"]:::capacitorVar
+    C5["C5"]:::capacitorTrim
+    L1["L1"]:::lamp
+    L2["L2"]:::lamp2
+    B1["B1"]:::breaker
+    D1["D1"]:::diac
+end
+
+VDD --- |A| C1
+C1 |B| --- |A| C2
+C1 |B| --- |A| C3
+C2 |B| --- |A| C4
+C3 |B| --- |A| C4
+C3 |B| --- |A| C5
+C4 |B| --- |A| L1
+C5 |B| --- |A| L1
+C5 |B| --- |A| L2
+L1 |B| --- |A| B1
+L2 |B| --- |A| B1
+B1 |B| --- |A| D1
+D1 |B| --- GND

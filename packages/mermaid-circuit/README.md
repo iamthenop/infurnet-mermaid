@@ -4,7 +4,7 @@ An external Mermaid circuit renderer with identifier `circuitDiagram`. Version `
 
 ## Implemented behavior
 
-The parser accepts `circuitDiagram D` and `circuitDiagram A`, followed by declarations and connections from the closed 40-type vocabulary in [the notation specification](spec/notation.md).
+The parser accepts `circuitDiagram D` and `circuitDiagram A`, followed by declarations and connections from the closed 49-type vocabulary in [the notation specification](spec/notation.md).
 
 ```text
 circuitDiagram D
@@ -36,7 +36,9 @@ M1 |B| --- |A| S1
 
 The motor is a circle with `M` inside. The solenoid is a circle with a straight arrow through its center. This arrow shows motion; it adds no electrical rule.
 
-The four catalog-only additions are `lamp`, `lamp2`, `breaker`, and `opamp`. They work with the standalone drawing core but cannot be declared in circuit notation. The `antenna` device is authorable in mode `A`.
+The capacitor and load additions are `capacitor2`, `capacitorPolar`, `capacitor2Polar`, `capacitorVar`, `capacitorTrim`, `lamp`, `lamp2`, `breaker`, and `diac`. See [the notation specification](spec/notation.md#object-types) for their terminal contracts and mode restrictions.
+
+The `opamp` symbol remains available only through the standalone drawing core. The `antenna` device is authorable in mode `A`.
 
 Existing diode assets are unchanged. Use `diode` for an ordinary rectifier diode.
 
@@ -283,7 +285,7 @@ npm run dev --workspace mermaid-circuit
 
 Open the local URL printed by Vite. The page registers the compiled package, loads `examples/basic.mmd`, and displays the returned SVG with a completion status. The fixture renders a connected CMOS inverter.
 
-Use the circuit and appearance selectors to inspect all eight fixtures in all three palettes. A preview can also be selected with `?fixture=cmos-nand2&appearance=colored` on that local URL.
+Use the circuit and appearance selectors to inspect all nine fixtures in all three palettes. A preview can also be selected with `?fixture=cmos-nand2&appearance=colored` on that local URL.
 
 ```sh
 npm run typecheck --workspace mermaid-circuit
@@ -293,9 +295,9 @@ npx playwright install chromium
 npm run test:browser --workspace mermaid-circuit
 ```
 
-Unit tests cover the 40 notation types, device connections, hierarchy, parser failures, and database isolation. They also check placement, routing limits, and the NAND and XOR truth tables.
+Unit tests cover the 49 notation types, device connections, hierarchy, parser failures, and database isolation. They also check placement, routing limits, and the NAND and XOR truth tables.
 
-Browser tests register the compiled package with real Mermaid in Chromium. They check all eight drawings, their symbol transforms and wire endpoints, failed input, and recovery after failure. See the [root README](../../README.md) for `.venv/` runtime activation and CI commands.
+Browser tests register the compiled package with real Mermaid in Chromium. They check all nine drawings, their symbol transforms and wire endpoints, failed input, and recovery after failure. See the [root README](../../README.md) for `.venv/` runtime activation and CI commands.
 
 ## Generated circuit examples
 
@@ -313,8 +315,11 @@ Each SVG is produced by the registered Mermaid plugin from its source fixture. T
 | Logic variants | [Mermaid](examples/fixtures/logic-variants.mmd) | [SVG](examples/fixtures/logic-variants.svg) | [SVG](examples/fixtures/logic-variants-inverse.svg) | [SVG](examples/fixtures/logic-variants-colored.svg) |
 | Schmitt variants | [Mermaid](examples/fixtures/schmitt-variants.mmd) | [SVG](examples/fixtures/schmitt-variants.svg) | [SVG](examples/fixtures/schmitt-variants-inverse.svg) | [SVG](examples/fixtures/schmitt-variants-colored.svg) |
 | Resistor and fuse variants | [Mermaid](examples/fixtures/resistor-fuse-variants.mmd) | [SVG](examples/fixtures/resistor-fuse-variants.svg) | [SVG](examples/fixtures/resistor-fuse-variants-inverse.svg) | [SVG](examples/fixtures/resistor-fuse-variants-colored.svg) |
+| Capacitor and load variants | [Mermaid](examples/fixtures/capacitor-load-variants.mmd) | [SVG](examples/fixtures/capacitor-load-variants.svg) | [SVG](examples/fixtures/capacitor-load-variants-inverse.svg) | [SVG](examples/fixtures/capacitor-load-variants-colored.svg) |
 
-Generate the three resistor and fuse SVGs and verify the twenty-one existing references without rewriting them:
+The capacitor and load fixture tests schematic rendering with series and parallel connections. It does not establish that the arrangement is a validated physical circuit.
+
+Generate the three capacitor and load SVGs and verify the twenty-four existing references without rewriting them:
 
 ```sh
 npm run render:fixtures --workspace mermaid-circuit

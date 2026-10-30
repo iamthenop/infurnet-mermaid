@@ -12,6 +12,9 @@ const logicTypes = [...twoInputLogic, ...singleInputLogic];
 const resistorFuseVariants = ['resistorIEC', 'resistorVar', 'resistorVarIEC', 'thermistor',
   'photoresistor', 'photoresistorIEC', 'fuseIEC', 'fuseUs'];
 
+const capacitorLoadVariants = ['capacitor2', 'capacitorPolar', 'capacitor2Polar', 'capacitorVar',
+  'capacitorTrim', 'lamp', 'lamp2', 'breaker', 'diac'];
+
 const digital = 'circuitDiagram D\nA(["A"]):::pinIn\nY(["Y"]):::pinOut\nU1["U1"]:::inverter';
 const electrical = 'circuitDiagram A\nN(["N"]):::pinInOut\nM["M"]:::nmos';
 const resistors = 'circuitDiagram A\nR1["R1"]:::resistor\nR2["R2"]:::resistor\nR3["R3"]:::resistor';
@@ -193,11 +196,11 @@ end`);
     expect(model.nets.map((net) => net.id)).toEqual(['A', 'B']);
   });
 
-  it.each(['resistor', ...resistorFuseVariants])('normalizes %s terminal membership independently of endpoint order and duplicate statements', (type) => {
+  it.each(['resistor', ...resistorFuseVariants, ...capacitorLoadVariants])('normalizes %s terminal membership independently of endpoint order and duplicate statements', (type) => {
     const declarations = resistors.replaceAll(':::resistor', `:::${type}`);
     const direct = parseCircuit(`${declarations}\nR1 |B| --- |A| R2`);
     const reversed = parseCircuit(`${declarations}\nR2 |A| --- |B| R1\nR1 |B| --- |A| R2\nR1 |B| --- |A| R2`);
-    for (const terminal of ['W', 'C', 'I', 'bad']) {
+    for (const terminal of ['W', 'C', 'I', 'K', 'bad']) {
       expect(() => parseCircuit(`${declarations}\nR1 |${terminal}| --- |A| R2`)).toThrow('Unknown terminal');
       expect(() => parseCircuit(`${declarations}\nR1 |B| --- |${terminal}| R2`)).toThrow('Unknown terminal');
     }
@@ -253,7 +256,19 @@ end`);
     expect(() => parseCircuit(`${declarations}\nVDD --- M1 |A|`)).toThrow('Declare endpoint "VDD" explicitly');
   });
 
-  it.each(['lamp', 'lamp2', 'breaker', 'opamp'])('keeps %s catalog-only', (type) => {
+  it('preserves capacitor and load series links, parallel groups, and DIAC terminal identity', () => {
+    const model = parseCircuit(drawingFixtures['../examples/fixtures/capacitor-load-variants.mmd']);
+    expect(model.devices.map((device) => device.type).sort()).toEqual([...capacitorLoadVariants].sort());
+    expect(model.connections).toHaveLength(18);
+    expect(topology(model)).toEqual([
+      ['C1.A'], ['C1.B', 'C2.A', 'C3.A'], ['C2.B', 'C3.B', 'C4.A', 'C5.A'],
+      ['C4.B', 'C5.B', 'L1.A', 'L2.A'], ['L1.B', 'L2.B', 'B1.A'], ['B1.B', 'D1.A'], ['D1.B'],
+    ].map((group) => group.sort()).sort());
+    expect(model.connections.find((item) => item.device === 'C1' && item.terminal === 'A')!.net).toBe('VDD');
+    expect(model.connections.filter((item) => item.net === 'GND')).toEqual([{ device: 'D1', terminal: 'B', net: 'GND' }]);
+  });
+
+  it.each(['opamp'])('keeps %s catalog-only', (type) => {
     for (const mode of ['A', 'D']) {
       expect(() => parseCircuit(`circuitDiagram ${mode}\nU1["U1"]:::${type}`)).toThrow('Unknown authorable');
     }

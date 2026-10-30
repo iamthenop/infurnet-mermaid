@@ -26,7 +26,8 @@ describe('basic floorplanning', () => {
     expect(layout.attachments).toHaveLength(2);
   });
 
-  it.each(['resistorIEC', 'resistorVar', 'resistorVarIEC', 'thermistor', 'photoresistor', 'photoresistorIEC', 'fuseIEC', 'fuseUs'])
+  it.each(['resistorIEC', 'resistorVar', 'resistorVarIEC', 'thermistor', 'photoresistor', 'photoresistorIEC', 'fuseIEC', 'fuseUs',
+    'capacitor2', 'capacitorPolar', 'capacitor2Polar', 'capacitorVar', 'capacitorTrim', 'lamp', 'lamp2', 'breaker', 'diac'])
   ('uses existing series and parallel placement for %s with default and explicit directions', (type) => {
     for (const parallel of [false, true]) for (const direction of ['', 'LR', 'TB']) {
       const links = parallel ? 'R1 |A| --- |A| R2\nR1 |B| --- |B| R2' : 'R1 |B| --- |A| R2';
@@ -40,6 +41,10 @@ describe('basic floorplanning', () => {
       expect(first[1 - axis]).toBe(second[1 - axis]);
       expect(layout.attachments.map(({ device, terminal, net }) => ({ device, terminal, net }))).toEqual(model.connections);
     }
+    const partial = floorplan(parseCircuit(`circuitDiagram A\nR1[R1]:::${type}\nR2[R2]:::${type}\nR1 |A| --- |A| R2`));
+    const [first, second] = partial.devices.map((item) => item.placed.anchors.center);
+    expect(first[0]).toBeLessThan(second[0]);
+    expect(first[1]).toBeLessThan(second[1]);
   });
 
   it.each(['fuse', 'fuseIEC', 'fuseUs'])('applies the positive-source fuse orientation to %s while respecting explicit stage directions', (type) => {
