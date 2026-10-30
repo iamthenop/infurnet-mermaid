@@ -10,7 +10,7 @@ export const deviceTypes = ['pmos', 'nmos', 'pmosBlk', 'nmosBlk', 'resistor', 'c
   'nmosDiode', 'pmosDiode', 'nmosCircle', 'pmosCircle', 'nmos2Diode', 'pmos2Diode', 'nmos2Circle', 'pmos2Circle',
   'analogNFet', 'analogPFet', 'analogNFetBulk', 'analogPFetBulk', 'analogNFetCenteredGate', 'analogPFetCenteredGate',
   'analogPFetNoArrow', 'analogBiasedFet', 'analogBiasedFetBulk', 'analogBiasedFetCenteredGate', 'analogBiasedFetNoArrow',
-  'nfet2', 'pfet2', 'mux', 'demux'] as const;
+  'nfet2', 'pfet2', 'mux', 'demux', 'opamp'] as const;
 export const netTypes = ['net', 'supplyNet', 'ground', 'pinIn', 'pinOut', 'pinInOut'] as const;
 export type DeviceType = typeof deviceTypes[number];
 export const mosfetTypes: readonly DeviceType[] = ['pmos', 'nmos', 'pmosBlk', 'nmosBlk',

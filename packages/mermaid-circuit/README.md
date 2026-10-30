@@ -4,7 +4,7 @@ An external Mermaid circuit renderer with identifier `circuitDiagram`. Version `
 
 ## Implemented behavior
 
-The parser accepts `circuitDiagram D` and `circuitDiagram A`, followed by declarations and connections from the closed 82-type vocabulary in [the notation specification](spec/notation.md).
+The parser accepts `circuitDiagram D` and `circuitDiagram A`, followed by declarations and connections from the closed 83-type vocabulary in [the notation specification](spec/notation.md).
 
 ```text
 circuitDiagram D
@@ -38,7 +38,7 @@ The motor is a circle with `M` inside. The solenoid is a circle with a straight 
 
 The capacitor and load additions are `capacitor2`, `capacitorPolar`, `capacitor2Polar`, `capacitorVar`, `capacitorTrim`, `lamp`, `lamp2`, `breaker`, and `diac`. See [the notation specification](spec/notation.md#object-types) for their terminal contracts and mode restrictions.
 
-The `opamp` symbol remains available only through the standalone drawing core. The `antenna` device is authorable in mode `A`.
+The `opamp` device supports open-loop schematics in mode `A`, using its [registered terminal contract](spec/notation.md#object-types). Declare external endpoints explicitly. Feedback support remains deferred.
 
 Use `diode` for an ordinary rectifier diode. The authorable variants are `diodeFilled`, `schottky`, `diodeTunnel`, `diodeShockley`, `zener`, `diodeTVS`, `varactor`, `led`, `led2`, and `photodiode`. Their terminal contracts and mode restrictions are defined in [the notation specification](spec/notation.md#object-types).
 
@@ -299,9 +299,9 @@ npx playwright install chromium
 npm run test:browser --workspace mermaid-circuit
 ```
 
-Unit tests cover the 82 notation types, device connections, hierarchy, parser failures, and database isolation. They also check placement, routing limits, and the NAND and XOR truth tables.
+Unit tests cover the 83 notation types, device connections, hierarchy, parser failures, and database isolation. They also check placement, routing limits, and the NAND and XOR truth tables.
 
-Browser tests register the compiled package with real Mermaid in Chromium. They check all twelve drawings, their symbol transforms and wire endpoints, failed input, and recovery after failure. See the [root README](../../README.md) for `.venv/` runtime activation and CI commands.
+Browser tests register the compiled package with real Mermaid in Chromium. They check all thirteen drawings, their symbol transforms and wire endpoints, failed input, and recovery after failure. See the [root README](../../README.md) for `.venv/` runtime activation and CI commands.
 
 ## Generated circuit examples
 
@@ -322,13 +322,16 @@ Each SVG is produced by the registered Mermaid plugin from its source fixture. T
 | Capacitor and load variants | [Mermaid](examples/fixtures/capacitor-load-variants.mmd) | [SVG](examples/fixtures/capacitor-load-variants.svg) | [SVG](examples/fixtures/capacitor-load-variants-inverse.svg) | [SVG](examples/fixtures/capacitor-load-variants-colored.svg) |
 | Diode variants | [Mermaid](examples/fixtures/diode-variants.mmd) | [SVG](examples/fixtures/diode-variants.svg) | [SVG](examples/fixtures/diode-variants-inverse.svg) | [SVG](examples/fixtures/diode-variants-colored.svg) |
 | MOSFET variants | [Mermaid](examples/fixtures/mosfet-variants.mmd) | [SVG](examples/fixtures/mosfet-variants.svg) | [SVG](examples/fixtures/mosfet-variants-inverse.svg) | [SVG](examples/fixtures/mosfet-variants-colored.svg) |
+| Open-loop op-amp | [Mermaid](examples/fixtures/opamp-open-loop.mmd) | [SVG](examples/fixtures/opamp-open-loop.svg) | [SVG](examples/fixtures/opamp-open-loop-inverse.svg) | [SVG](examples/fixtures/opamp-open-loop-colored.svg) |
 | MUX and DEMUX | [Mermaid](examples/fixtures/mux-demux.mmd) | [SVG](examples/fixtures/mux-demux.svg) | [SVG](examples/fixtures/mux-demux-inverse.svg) | [SVG](examples/fixtures/mux-demux-colored.svg) |
 
 The MUX/DEMUX fixture connects all four configurations and holds each select at an explicitly named ground reference. Its DEMUX data outputs retain independent nets.
 
 The capacitor and load fixture tests schematic rendering with series and parallel connections. It does not establish that the arrangement is a validated physical circuit.
 
-Generate the three MUX/DEMUX SVGs and verify the thirty-three existing references without rewriting them:
+The open-loop op-amp fixture has independent inputs and an output, with explicit positive-supply and lower-supply reference connections. Its `vs` terminal connects to the declared `VSS` ground reference. The schematic does not assert amplifier stability or physical design validity.
+
+Generate the three op-amp SVGs and verify the thirty-six existing references without rewriting them:
 
 ```sh
 npm run render:fixtures --workspace mermaid-circuit

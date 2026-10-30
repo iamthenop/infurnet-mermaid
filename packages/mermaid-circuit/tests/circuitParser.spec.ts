@@ -136,7 +136,7 @@ end`);
     const model = parseCircuit(`circuitDiagram ${mode}\nU1["display<br/>value=1"]:::${type}`);
     const terminals = type.endsWith('Blk') || type.endsWith('Bulk') ? ['G', 'D', 'S', 'B']
       : mosfetTypes.includes(type) ? ['G', 'D', 'S']
-        : type === 'antenna' ? ['A'] : diodeTypes.includes(type) ? ['A', 'K'] : type.endsWith('Source') ? ['P', 'N']
+        : type === 'opamp' ? ['in1', 'in2', 'out', 'vd', 'vs'] : type === 'antenna' ? ['A'] : diodeTypes.includes(type) ? ['A', 'K'] : type.endsWith('Source') ? ['P', 'N']
           : twoInputLogic.includes(type) ? ['I1', 'I2', 'O'] : singleInputLogic.includes(type) ? ['I', 'O'] : ['A', 'B'];
     expect(model.devices[0]).toMatchObject({ id: 'U1', type, label: 'display<br/>value=1', stage: 0 });
     expect([...model.devices[0]!.terminals].sort()).toEqual(terminals.sort());
@@ -318,9 +318,33 @@ end`);
     expect(model.connections.filter((item) => item.net === 'GND')).toEqual([{ device: 'D1', terminal: 'B', net: 'GND' }]);
   });
 
-  it.each(['opamp'])('keeps %s catalog-only', (type) => {
-    for (const mode of ['A', 'D']) {
-      expect(() => parseCircuit(`circuitDiagram ${mode}\nU1["U1"]:::${type}`)).toThrow('Unknown authorable');
+  it('preserves independent op-amp inputs, output, and supplies without implicit connections', () => {
+    const source = drawingFixtures['../examples/fixtures/opamp-open-loop.mmd'];
+    const model = parseCircuit(source);
+    expect(model.devices).toHaveLength(1);
+    expect(model.devices[0]).toMatchObject({ id: 'U1', type: 'opamp', terminals: ['in1', 'in2', 'out', 'vd', 'vs'] });
+    expect(model.devices[0].pinSides).toBeUndefined();
+    expect(model.devices[0].bulk).toBeUndefined();
+    expect(model.connections).toEqual([
+      { device: 'U1', terminal: 'in1', net: 'Negative' },
+      { device: 'U1', terminal: 'in2', net: 'Positive' },
+      { device: 'U1', terminal: 'out', net: 'Output' },
+      { device: 'U1', terminal: 'vd', net: 'VDD' },
+      { device: 'U1', terminal: 'vs', net: 'VSS' },
+    ]);
+    expect(model.nets).toHaveLength(5);
+    const declaration = 'circuitDiagram A\nU1[U1]:::opamp';
+    expect(parseCircuit(declaration).connections).toEqual([]);
+    expect(parseCircuit(declaration).nets).toEqual([]);
+    for (const terminal of ['in1', 'in2', 'out', 'vd', 'vs']) {
+      expect(() => parseCircuit(`${declaration}\nU1 |${terminal}| --- Missing`)).toThrow('Declare endpoint');
+    }
+    for (const terminal of ['IN1', 'in', 'I', 'O', 'VDD', 'VSS', 'G', 'S', 'D', 'A', 'B']) {
+      expect(() => parseCircuit(`${source}\nU1 |${terminal}| --- Output`)).toThrow('Unknown terminal');
+    }
+    expect(() => parseCircuit(`${declaration}\nX([X]):::pinIn\nX --- |in1| L:U1`)).toThrow('side qualifier');
+    for (const [from, to] of [['out', 'in1'], ['out', 'in2'], ['vd', 'vs']]) {
+      expect(() => parseCircuit(`${declaration}\nU1 |${from}| --- |${to}| U1`)).toThrow('two distinct devices');
     }
   });
 

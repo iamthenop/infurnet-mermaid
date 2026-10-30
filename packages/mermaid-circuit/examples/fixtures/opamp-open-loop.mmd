@@ -1,0 +1,14 @@
+circuitDiagram A
+Negative(["IN-"]):::pinIn
+Positive(["IN+"]):::pinIn
+Output(["OUT"]):::pinOut
+VDD{{"V+"}}:::supplyNet
+VSS{{"VSS"}}:::ground
+subgraph stage amplifier
+    U1["U1"]:::opamp
+end
+Negative --- U1 |in1|
+Positive --- U1 |in2|
+U1 |out| --- Output
+VDD --- U1 |vd|
+U1 |vs| --- VSS

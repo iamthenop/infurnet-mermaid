@@ -9,6 +9,33 @@ const fixtures = import.meta.glob<string>('../examples/fixtures/*.mmd', { eager:
 const fixture = (name: string) => parseCircuit(fixtures[`../examples/fixtures/${name}.mmd`]);
 
 describe('basic floorplanning', () => {
+  it('preserves the op-amp orientation and five registered attachment positions', () => {
+    const model = fixture('opamp-open-loop'), layout = floorplan(model);
+    const placed = layout.devices[0];
+    expect(placed.rotation).toBe(0);
+    expect(placed.flip).toBe(false);
+    const terminals = { in1: [0, 40], in2: [0, 80], out: [120, 60], vd: [60, 0], vs: [60, 120] } as const;
+    const sides = { in1: 'L', in2: 'L', out: 'R', vd: 'T', vs: 'B' };
+    for (const terminal of Object.keys(terminals) as (keyof typeof terminals)[]) {
+      expect(placed.placed.anchors[terminal]).toEqual(placed.placed.transform.apply(terminals[terminal]));
+      expect(layout.attachments.find((item) => item.terminal === terminal)).toMatchObject({
+        device: 'U1', point: placed.placed.anchors[terminal], side: sides[terminal], rotation: 0,
+      });
+    }
+    expect(layout.attachments.map(({ device, terminal, net }) => ({ device, terminal, net }))).toEqual(model.connections);
+  });
+
+  it('does not classify op-amp signal or supply connections as conduction pairs', () => {
+    const declaration = 'circuitDiagram A\nU1[U1]:::opamp\nU2[U2]:::opamp';
+    const baseline = floorplan(parseCircuit(declaration)).devices.map((item) => item.placed.anchors);
+    for (const links of ['U1 |out| --- |in1| U2', 'U1 |vd| --- |vd| U2\nU1 |vs| --- |vs| U2',
+      'U1 |in1| --- |in1| U2\nU1 |out| --- |out| U2']) {
+      const layout = floorplan(parseCircuit(`${declaration}\n${links}`));
+      expect(layout.devices.map((item) => item.placed.anchors)).toEqual(baseline);
+      expect(layout.devices.every((item) => item.rotation === 0)).toBe(true);
+    }
+  });
+
   it('derives parallel and series placement from conduction terminals', () => {
     const source = fixtures['../examples/fixtures/cmos-nand2.mmd'];
     const layout = floorplan(parseCircuit(source.replace('N0["N0"]:::nmos\n    N1["N1"]:::nmos', 'N1["N1"]:::nmos\n    N0["N0"]:::nmos')));

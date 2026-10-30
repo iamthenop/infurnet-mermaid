@@ -148,6 +148,11 @@ it.each([...Object.entries(fixtures), ...mosfetCases, ...selectorCases, ...contr
         if (group.getAttribute('data-type') !== device.type) errors.push(`wrong symbol type ${device.id}`);
         const artwork = group.querySelector<SVGGraphicsElement>('[transform]')!;
         const matrix = root.getScreenCTM()!.inverse().multiply(artwork.getScreenCTM()!);
+        if (device.type === 'opamp') {
+          const triangle = artwork.querySelector('path');
+          if (triangle?.getAttribute('d') !== 'M 36.905989232 60 L 36.905989232 20 L 106.188021535 60 L 36.905989232 100 L 36.905989232 60 M 106.188021535 60') errors.push('changed op-amp triangle');
+          if (artwork.querySelectorAll('path').length !== 6) errors.push('changed op-amp artwork');
+        }
         for (const [terminal, local] of Object.entries(device.terminals)) {
           const actual = new DOMPoint(local[0], local[1]).matrixTransform(matrix);
           if (!close([actual.x, actual.y], device.anchors[terminal])) errors.push(`artwork ${device.id}.${terminal}`);

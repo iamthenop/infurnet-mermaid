@@ -1,6 +1,6 @@
 # Notation for circuit diagrams
 
-This specification records the approved syntax and electrical semantics of `circuitDiagram`. The parser implements the 82 authorable object types, diagram modes, typed subgraphs, and fixed-terminal connections described here. The NAND2 example is a parser acceptance fixture.
+This specification records the approved syntax and electrical semantics of `circuitDiagram`. The parser implements the 83 authorable object types, diagram modes, typed subgraphs, and fixed-terminal connections described here. The NAND2 example is a parser acceptance fixture.
 
 Basic placement, orthogonal wiring, and symbol rendering are implemented. Mode `A` supports named IC pins on any side, including multiple pins per side.
 
@@ -42,7 +42,7 @@ The parser records the diagram mode and enforces registered-shape eligibility fo
 
 ## Object types
 
-The authorable object vocabulary is closed and contains these 82 types. Generic nets remain internal connectivity groups and cannot be declared with `:::net`.
+The authorable object vocabulary is closed and contains these 83 types. Generic nets remain internal connectivity groups and cannot be declared with `:::net`.
 
 | Type | Kind | Terminals |
 | --- | --- | --- |
@@ -107,6 +107,7 @@ The authorable object vocabulary is closed and contains these 82 types. Generic 
 | `solenoid` | Device | A, B |
 | `fuse` | Device | A, B |
 | `antenna` | Device | A |
+| `opamp` | Device | in1, in2, out, vd, vs |
 | `nand` | Device | I1, I2, O |
 | `and` | Device | I1, I2, O |
 | `or` | Device | I1, I2, O |
@@ -144,6 +145,10 @@ The types `diodeFilled`, `schottky`, `diodeTunnel`, `diodeShockley`, `zener`, `d
 Existing arrows, polarity marks, and capacitance markings add no electrical terminals. The renderer does not simulate breakdown voltage, emission, illumination, capacitance, or current-voltage characteristics.
 
 The MOSFET variants in the vocabulary table are authorable only in mode `A`. Their exact terminal coordinates and dimensions remain defined by [the shape catalog](../shapes/shapes.json), including the alternate-orientation variants. Symbol names such as `nmosDiode` and `pmosDiode` do not create gate-to-drain connections.
+
+`opamp` is authorable only in mode `A`. Its registered terminals are `in1` (inverting input), `in2` (non-inverting input), `out` (output), `vd` (positive supply), and `vs` (negative supply).
+
+Connections are established only by authored terminal relationships. No feedback, supply connection, or internal amplifier behaviour is implied.
 
 ### Supply terminology and semantics
 
@@ -231,6 +236,7 @@ These references preserve the existing asset filenames in the [shape library](..
 | `solenoid` | `solenoid.svg` |
 | `fuse` | `fuse.svg` |
 | `antenna` | `antenna.svg` |
+| `opamp` | `opamp.svg` |
 | `nand` | `nand.svg` |
 | `and` | `and.svg` |
 | `or` | `or.svg` |
