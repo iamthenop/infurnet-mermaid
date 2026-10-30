@@ -380,6 +380,16 @@ end`);
     expect(model.connections.find((item) => item.device === 'RG' && item.terminal === 'B')!.net).toBe('GND');
   });
 
+  it.each(['opamp-voltage-follower', 'opamp-noninverting-amplifier'])('omits power connections in %s-no-supply without inventing nets', (name) => {
+    const model = parseCircuit(drawingFixtures[`../examples/fixtures/${name}-no-supply.mmd`]);
+    const powered = parseCircuit(drawingFixtures[`../examples/fixtures/${name}.mmd`]);
+    expect(model.devices).toEqual(powered.devices);
+    expect(model.connections).toEqual(powered.connections.filter((item) => !['VPLUS', 'VMINUS'].includes(item.net)));
+    expect(model.nets).toEqual(powered.nets.filter((net) => !['VPLUS', 'VMINUS'].includes(net.id)));
+    expect(model.nets.some((net) => net.type === 'supplyNet')).toBe(false);
+    expect(model.connections.some((item) => ['vd', 'vs'].includes(item.terminal))).toBe(false);
+  });
+
   it.each(diodeTypes)('preserves %s anode and cathode connections and rejects non-diode terminal names', (type) => {
     const declarations = `circuitDiagram A\nD1[D1]:::${type}\nD2[D2]:::${type}\nHigh([High]):::pinInOut\nLow([Low]):::pinInOut`;
     const model = parseCircuit(`${declarations}\nHigh --- |K| D1\nD1 |A| --- |K| D2\nD2 |A| --- Low`);

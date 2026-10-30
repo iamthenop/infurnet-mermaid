@@ -67,7 +67,8 @@ it.each([...Object.entries(fixtures), ['capacitor-feedback', capacitorFeedback] 
       [name, ({ 'v+': [90, 0], 'v-': [90, 240], ctl: [0, 90], A: [0, 150], no: [180, 120] } as Record<string, readonly number[]>)[name]])) : item.device.type === 'mux' || item.device.type === 'demux' ? selectorTerminals[`${item.device.type}${item.device.size}`] : catalog[item.device.type].terminals,
     sides: Object.fromEntries(item.device.terminals.map((terminal) => {
       const attached = layout.attachments.find((attachment) => attachment.device === item.device.id && attachment.terminal === terminal);
-      const side = item.device.pinSides?.[terminal];
+      const side = item.device.pinSides?.[terminal] ?? (item.device.type === 'opamp'
+        ? ({ in1: 'L', in2: 'L', out: 'R', vd: 'T', vs: 'B' } as Record<string, string>)[terminal] : undefined);
       const expectedSide = attached?.side ?? (item.rotation === 90 && side ? { L: 'T', R: 'B', B: 'L', T: 'R' }[side] : side);
       if (!expectedSide) throw new Error(`Missing expected side for ${item.device.id}.${terminal}`);
       return [terminal, expectedSide];

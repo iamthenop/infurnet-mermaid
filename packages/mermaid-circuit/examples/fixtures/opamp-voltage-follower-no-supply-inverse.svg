@@ -1,0 +1,96 @@
+<svg id="fixture-opamp-voltage-follower-no-supply" width="962" xmlns="http://www.w3.org/2000/svg" viewBox="-406 -360 962 690" height="690" overflow="visible" font-family="sans-serif" font-size="14" role="graphics-document document" aria-roledescription="circuitDiagram"><style>#fixture-opamp-voltage-follower-no-supply{font-family:"trebuchet ms",verdana,arial,sans-serif;font-size:16px;fill:#ccc;}@keyframes edge-animation-frame{from{stroke-dashoffset:0;}}@keyframes dash{to{stroke-dashoffset:0;}}#fixture-opamp-voltage-follower-no-supply .edge-animation-slow{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 50s linear infinite;stroke-linecap:round;}#fixture-opamp-voltage-follower-no-supply .edge-animation-fast{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 20s linear infinite;stroke-linecap:round;}#fixture-opamp-voltage-follower-no-supply .error-icon{fill:#a44141;}#fixture-opamp-voltage-follower-no-supply .error-text{fill:#ddd;stroke:#ddd;}#fixture-opamp-voltage-follower-no-supply .edge-thickness-normal{stroke-width:1px;}#fixture-opamp-voltage-follower-no-supply .edge-thickness-thick{stroke-width:3.5px;}#fixture-opamp-voltage-follower-no-supply .edge-pattern-solid{stroke-dasharray:0;}#fixture-opamp-voltage-follower-no-supply .edge-thickness-invisible{stroke-width:0;fill:none;}#fixture-opamp-voltage-follower-no-supply .edge-pattern-dashed{stroke-dasharray:3;}#fixture-opamp-voltage-follower-no-supply .edge-pattern-dotted{stroke-dasharray:2;}#fixture-opamp-voltage-follower-no-supply .marker{fill:lightgrey;stroke:lightgrey;}#fixture-opamp-voltage-follower-no-supply .marker.cross{stroke:lightgrey;}#fixture-opamp-voltage-follower-no-supply svg{font-family:"trebuchet ms",verdana,arial,sans-serif;font-size:16px;}#fixture-opamp-voltage-follower-no-supply p{margin:0;}#fixture-opamp-voltage-follower-no-supply,#fixture-opamp-voltage-follower-no-supply svg{font-family:sans-serif;font-size:14px;}#fixture-opamp-voltage-follower-no-supply [data-circuit-background]{fill:#101215;}#fixture-opamp-voltage-follower-no-supply [data-wire] polyline{stroke:#F2F2F2;}#fixture-opamp-voltage-follower-no-supply [data-junction] circle{stroke:#F2F2F2;fill:#F2F2F2;}#fixture-opamp-voltage-follower-no-supply [data-device] [stroke]:not([stroke="none"]),#fixture-opamp-voltage-follower-no-supply [data-net-occurrence] [stroke]:not([stroke="none"]){stroke:#F2F2F2;}#fixture-opamp-voltage-follower-no-supply [data-device] [fill="#000"],#fixture-opamp-voltage-follower-no-supply [data-net-occurrence] [fill="#000"]{fill:#F2F2F2;}#fixture-opamp-voltage-follower-no-supply [data-device] [fill="#fff"],#fixture-opamp-voltage-follower-no-supply [data-device] [fill="white"],#fixture-opamp-voltage-follower-no-supply [data-net-occurrence] [fill="#fff"],#fixture-opamp-voltage-follower-no-supply [data-net-occurrence] [fill="white"]{fill:#101215;}#fixture-opamp-voltage-follower-no-supply [data-stage] polyline,#fixture-opamp-voltage-follower-no-supply [data-block] polyline{stroke:#F2F2F2;}#fixture-opamp-voltage-follower-no-supply [data-device-label] text,#fixture-opamp-voltage-follower-no-supply [data-ic-label] text,#fixture-opamp-voltage-follower-no-supply [data-terminal] text{fill:#F2F2F2;}#fixture-opamp-voltage-follower-no-supply [data-net-label] text,#fixture-opamp-voltage-follower-no-supply [data-frame-label] text{fill:#F2F2F2;}#fixture-opamp-voltage-follower-no-supply .node .neo-node{stroke:#ccc;}#fixture-opamp-voltage-follower-no-supply [data-look="neo"].node rect,#fixture-opamp-voltage-follower-no-supply [data-look="neo"].cluster rect,#fixture-opamp-voltage-follower-no-supply [data-look="neo"].node polygon{stroke:url(#fixture-opamp-voltage-follower-no-supply-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#fixture-opamp-voltage-follower-no-supply [data-look="neo"].swimlane.cluster rect{filter:none;}#fixture-opamp-voltage-follower-no-supply [data-look="neo"].node path{stroke:url(#fixture-opamp-voltage-follower-no-supply-gradient);stroke-width:1px;}#fixture-opamp-voltage-follower-no-supply [data-look="neo"].node .outer-path{filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#fixture-opamp-voltage-follower-no-supply [data-look="neo"].node .neo-line path{stroke:#ccc;filter:none;}#fixture-opamp-voltage-follower-no-supply [data-look="neo"].node circle{stroke:url(#fixture-opamp-voltage-follower-no-supply-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#fixture-opamp-voltage-follower-no-supply [data-look="neo"].node circle .state-start{fill:#000000;}#fixture-opamp-voltage-follower-no-supply [data-look="neo"].icon-shape .icon{fill:url(#fixture-opamp-voltage-follower-no-supply-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#fixture-opamp-voltage-follower-no-supply [data-look="neo"].icon-shape .icon-neo path{stroke:url(#fixture-opamp-voltage-follower-no-supply-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#fixture-opamp-voltage-follower-no-supply :root{--mermaid-font-family:"trebuchet ms",verdana,arial,sans-serif;}</style><rect data-circuit-background="true" x="-406" y="-360" width="962" height="690"></rect>
+<g data-drawing-index="0" data-stage="amplifier" stroke-dasharray="8 6">
+<polyline points="-30,-30 210,-30 210,150 -30,150 -30,-30" stroke="#777" stroke-width="1" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="1" data-label="true" data-frame-label="stage">
+<text x="-18" y="-42" xml:space="preserve" fill="#000">amplifier</text>
+</g>
+<g data-drawing-index="2" data-net="VOUT" data-wire="-" data-points="[[120,60],[180,60]]">
+<polyline points="120,60 180,60" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="3" data-net="VOUT" data-wire="-" data-points="[[180,60],[180,-180]]">
+<polyline points="180,60 180,-180" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="4" data-net="VOUT" data-wire="-" data-points="[[180,-180],[-120,-180]]">
+<polyline points="180,-180 -120,-180" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="5" data-net="VOUT" data-wire="-" data-points="[[-120,-180],[-120,40]]">
+<polyline points="-120,-180 -120,40" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="6" data-net="VOUT" data-wire="-" data-points="[[-120,40],[0,40]]">
+<polyline points="-120,40 0,40" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="7" data-net="VIN" data-wire="-" data-points="[[-150,80],[0,80]]">
+<polyline points="-150,80 0,80" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="8" data-net="VOUT" data-wire="-" data-points="[[300,60],[180,60]]">
+<polyline points="300,60 180,60" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="9" data-device="U1" data-type="opamp" data-stage-index="0">
+<g transform="matrix(1 0 0 1 0 0)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-opamp-voltage-follower-no-supply-element-9-opamp" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path id="fixture-opamp-voltage-follower-no-supply-element-9-reference-0" d="M 36.905989232 60 L 36.905989232 20 L 106.188021535 60 L 36.905989232 100 L 36.905989232 60 M 106.188021535 60" stroke="#000" fill="none"></path>
+    <path id="fixture-opamp-voltage-follower-no-supply-element-9-reference-1" d="M 42.36624327 40 L 48.76624327 40" stroke="#000" fill="none"></path>
+    <path id="fixture-opamp-voltage-follower-no-supply-element-9-reference-2" d="M 42.36624327 80 L 48.76624327 80" stroke="#000" fill="none"></path>
+    <path id="fixture-opamp-voltage-follower-no-supply-element-9-reference-3" d="M 45.56624327 83.2 L 45.56624327 76.8" stroke="#000" fill="none"></path>
+    <path id="fixture-opamp-voltage-follower-no-supply-element-9-signal-leads" d="M 0 40 L 36.905989232 40 M 0 80 L 36.905989232 80 M 106.188021535 60 L 120 60" stroke="#000" fill="none"></path>
+    <path id="fixture-opamp-voltage-follower-no-supply-element-9-supply-leads" d="M 60 0 L 60 33.333333333 M 60 86.666666667 L 60 120" stroke="#000" fill="none"></path>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="10" data-label="true" data-device-label="U1">
+<text x="132" y="104" xml:space="preserve" fill="#000">U1</text>
+</g>
+<g data-drawing-index="11" data-label="true" data-terminal="in1" data-terminal-device="U1" data-terminal-side="L" text-anchor="end" dominant-baseline="text-after-edge" data-x="0" data-y="40" data-terminal-net="VOUT">
+<text x="-4" y="36" xml:space="preserve" fill="#000">in1</text>
+</g>
+<g data-drawing-index="12" data-label="true" data-terminal="in2" data-terminal-device="U1" data-terminal-side="L" text-anchor="end" dominant-baseline="text-after-edge" data-x="0" data-y="80" data-terminal-net="VIN">
+<text x="-4" y="76" xml:space="preserve" fill="#000">in2</text>
+</g>
+<g data-drawing-index="13" data-label="true" data-terminal="out" data-terminal-device="U1" data-terminal-side="R" text-anchor="start" dominant-baseline="text-after-edge" data-x="120" data-y="60" data-terminal-net="VOUT">
+<text x="124" y="56" xml:space="preserve" fill="#000">out</text>
+</g>
+<g data-drawing-index="14" data-label="true" data-terminal="vd" data-terminal-device="U1" data-terminal-side="T" text-anchor="start" dominant-baseline="text-after-edge" data-x="60" data-y="0">
+<text x="64" y="-4" xml:space="preserve" fill="#000">vd</text>
+</g>
+<g data-drawing-index="15" data-label="true" data-terminal="vs" data-terminal-device="U1" data-terminal-side="B" text-anchor="start" dominant-baseline="hanging" data-x="60" data-y="120">
+<text x="64" y="124" xml:space="preserve" fill="#000">vs</text>
+</g>
+<g data-drawing-index="16" data-net-occurrence="0" data-net="VIN" data-type="pinIn" data-branches="1">
+<g transform="matrix(1 0 0 1 -270 20)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-opamp-voltage-follower-no-supply-element-16-pin-in" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polygon id="fixture-opamp-voltage-follower-no-supply-element-16-body" points="44,42 104,42 116,60 104,78 44,78"></polygon>
+    <line id="fixture-opamp-voltage-follower-no-supply-element-16-stem" x1="116" y1="60" x2="120" y2="60"></line>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="17" data-label="true" data-net-label="VIN" text-anchor="middle">
+<text x="-188" y="85" xml:space="preserve" fill="#000">Vin</text>
+</g>
+<g data-drawing-index="18" data-net-occurrence="1" data-net="VOUT" data-type="pinOut" data-branches="1">
+<g transform="matrix(1 0 0 1 300 0)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-opamp-voltage-follower-no-supply-element-18-pin-out" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <line id="fixture-opamp-voltage-follower-no-supply-element-18-stem" x1="0" y1="60" x2="4" y2="60"></line>
+    <polygon id="fixture-opamp-voltage-follower-no-supply-element-18-body" points="4,42 64,42 76,60 64,78 4,78"></polygon>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="19" data-label="true" data-net-label="VOUT" text-anchor="middle">
+<text x="338" y="65" xml:space="preserve" fill="#000">Vout</text>
+</g>
+<g data-drawing-index="20" data-junction="true" data-net="VOUT">
+<circle cx="0" cy="0" r="3" stroke="#000" stroke-width="2" fill="#000" transform="matrix(1 0 0 1 180 60)"></circle>
+</g>
+</svg>
