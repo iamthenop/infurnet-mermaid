@@ -48,7 +48,7 @@ const selectorTerminals: Record<string, Record<string, readonly [number, number]
 };
 const selectorCases = ['mux', 'demux'].flatMap((type) => [2, 4].flatMap((size) => ['LR', 'TB'].map((direction) =>
   [`unconnected-${type}-${size}-${direction}`, `circuitDiagram D\nsubgraph stage selection\ndirection ${direction}\nU["U<br/>size=${size}"]:::${type}\nend`] as const)));
-const controlledSelectorCases = selectorCases.filter(([name]) => name.endsWith('TB')).map(([name, source]) => {
+const controlledSelectorCases = selectorCases.map(([name, source]) => {
   const selects = parseCircuit(source).devices[0].terminals.filter((terminal) => terminal.startsWith('S'));
   return [name.replace('unconnected', 'controlled'), `${source}\n${selects.map((terminal) =>
     `${terminal}([${terminal}]):::pinIn\n${terminal} --- U |${terminal}|`).join('\n')}`] as const;

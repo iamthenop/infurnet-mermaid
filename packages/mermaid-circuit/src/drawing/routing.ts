@@ -430,7 +430,12 @@ export function routeLayout(layout: Layout): Routing {
       const stage = amplifier ? pad(amplifier.pane, 30) : layout.stageBounds[first.stage];
       const commonConductor = conductorAxis(group) === 0;
       const left = net.type === 'pinIn' || net.type === 'pinInOut' && first.side === 'L';
-      const pinY = input && group.length === 1 && first.side === 'T'
+      const selector = net.type === 'pinIn' && group.length === 1 && first.side === 'B'
+        ? layout.devices.find((item) => item.device.id === first.device && ['mux', 'demux'].includes(item.device.type)
+          && item.device.pinSides?.[first.terminal] === 'B') : undefined;
+      const selectIndex = selector?.device.terminals.filter((terminal) => selector.device.pinSides?.[terminal] === 'B').indexOf(first.terminal) ?? 0;
+      const pinY = selector ? joint[1] + MIN_TERMINAL_APPROACH + selectIndex * 120
+        : input && group.length === 1 && first.side === 'T'
         ? Math.min(joint[1] - 60, ...occurrences.filter((item) => item.net.id === net.id).map((item) => item.placed.bounds.minY - 60))
         : joint[1] + (commonConductor ? group.every((item) => item.side === 'B') ? 60 : -60 : 0);
       const base: Point = net.type === 'supplyNet'
@@ -455,6 +460,8 @@ export function routeLayout(layout: Layout): Routing {
           const approach: Point = lowerSupply ? [joint[0], joint[1] + MIN_TERMINAL_APPROACH] : joint;
           if (lowerSupply) added.push(chooseRoute(net.id, joint, approach, [...routes, ...added], obstacles()));
           const trunk = chooseRoute(net.id, at, approach, [...routes, ...added], [...obstacles(), placed.bounds], Boolean(lowerSupply));
+          if (selector && (Math.abs(trunk.points.at(-2)![0] - joint[0]) > EPS
+            || trunk.points.at(-2)![1] - joint[1] < MIN_TERMINAL_APPROACH - EPS)) continue;
           if (commonConductor && Math.abs(trunk.points.at(-2)![0] - joint[0]) > EPS) continue;
           if (routes.some((route) => route.net !== net.id && hitsBox(route.points, placed.bounds))) continue;
           junctions([...routes, ...added, trunk], layout.attachments);

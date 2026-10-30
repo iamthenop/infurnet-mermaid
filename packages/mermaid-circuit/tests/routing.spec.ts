@@ -139,6 +139,37 @@ describe('orthogonal routing', () => {
       .toThrow('Routing failure');
   });
 
+  it.each(['mux', 'demux'].flatMap((type) => [2, 4].map((size) => ({ type, size }))))
+  ('routes external inputs to bottom select terminals on $type size=$size', ({ type, size }) => {
+    const declaration = `circuitDiagram D\nU["U<br/>size=${size}"]:::${type}`;
+    const device = parseCircuit(declaration).devices[0];
+    const selects = device.terminals.filter((terminal) => terminal.startsWith('S'));
+    const orders = [selects, [...selects].reverse(), ...selects.map((terminal) => [terminal]), [...device.terminals]];
+    for (const terminals of orders) {
+      const source = `${declaration}\n${terminals.map((terminal) =>
+        `N${terminal}([${terminal}]):::${terminal.startsWith('O') ? 'pinOut' : 'pinIn'}\nN${terminal} --- U |${terminal}|`).join('\n')}`;
+      const model = parseCircuit(source), snapshot = JSON.stringify(model), layout = floorplan(model), routed = routeLayout(layout);
+      expect(JSON.stringify(model)).toBe(snapshot);
+      expect(routed.junctions).toEqual([]);
+      expect(routed.crossings).toBe(0);
+      expect(routed.occurrences).toHaveLength(terminals.length);
+      expect(routed.occurrences.some((item) => item.isProxy)).toBe(false);
+      expect(() => validateConnectivity(layout, routed)).not.toThrow();
+      for (const attachment of layout.attachments.filter((item) => item.terminal.startsWith('S'))) {
+        expect(attachment.side).toBe('B');
+        const route = routed.routes.find((item) => item.net === attachment.net)!;
+        const arrival = route.points.at(-2)!;
+        expect(route.points.at(-1)).toEqual(attachment.point);
+        expect(arrival[0]).toBe(attachment.point[0]);
+        expect(arrival[1] - attachment.point[1]).toBeGreaterThanOrEqual(60);
+      }
+      for (const route of routed.routes) {
+        expect(validPath(route.points)).toBe(true);
+        expect(acceptsRoute(route, routed.routes, layout.devices.map((item) => item.placed.bounds))).toBe(true);
+      }
+    }
+  });
+
   it('uses original graph counts and permits input proxies only at the four-to-one threshold', () => {
     const base = 'circuitDiagram D\nA([A]):::pinIn\nB([B]):::pinIn\nY([Y]):::pinOut\nV{{V}}:::supplyNet\nG{{G}}:::ground\n';
     const source = (count: number) => base + Array.from({ length: count }, (_, index) => `U${index}[U${index}]:::buffer`).join('\n');
