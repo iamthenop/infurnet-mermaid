@@ -15,6 +15,9 @@ const resistorFuseVariants = ['resistorIEC', 'resistorVar', 'resistorVarIEC', 't
 const capacitorLoadVariants = ['capacitor2', 'capacitorPolar', 'capacitor2Polar', 'capacitorVar',
   'capacitorTrim', 'lamp', 'lamp2', 'breaker', 'diac'];
 
+const diodeTypes = ['diode', 'diodeFilled', 'schottky', 'diodeTunnel', 'diodeShockley',
+  'zener', 'diodeTVS', 'varactor', 'led', 'led2', 'photodiode'];
+
 const digital = 'circuitDiagram D\nA(["A"]):::pinIn\nY(["Y"]):::pinOut\nU1["U1"]:::inverter';
 const electrical = 'circuitDiagram A\nN(["N"]):::pinInOut\nM["M"]:::nmos';
 const resistors = 'circuitDiagram A\nR1["R1"]:::resistor\nR2["R2"]:::resistor\nR3["R3"]:::resistor';
@@ -133,7 +136,7 @@ end`);
     const model = parseCircuit(`circuitDiagram ${mode}\nU1["display<br/>value=1"]:::${type}`);
     const terminals = type.endsWith('Blk') ? ['G', 'D', 'S', 'B']
       : ['pmos', 'nmos'].includes(type) ? ['G', 'D', 'S']
-        : type === 'antenna' ? ['A'] : type === 'diode' ? ['A', 'K'] : type.endsWith('Source') ? ['P', 'N']
+        : type === 'antenna' ? ['A'] : diodeTypes.includes(type) ? ['A', 'K'] : type.endsWith('Source') ? ['P', 'N']
           : twoInputLogic.includes(type) ? ['I1', 'I2', 'O'] : singleInputLogic.includes(type) ? ['I', 'O'] : ['A', 'B'];
     expect(model.devices[0]).toMatchObject({ id: 'U1', type, label: 'display<br/>value=1', stage: 0 });
     expect([...model.devices[0]!.terminals].sort()).toEqual(terminals.sort());
@@ -272,6 +275,33 @@ end`);
     for (const mode of ['A', 'D']) {
       expect(() => parseCircuit(`circuitDiagram ${mode}\nU1["U1"]:::${type}`)).toThrow('Unknown authorable');
     }
+  });
+
+  it.each(diodeTypes)('preserves %s anode and cathode connections and rejects non-diode terminal names', (type) => {
+    const declarations = `circuitDiagram A\nD1[D1]:::${type}\nD2[D2]:::${type}\nHigh([High]):::pinInOut\nLow([Low]):::pinInOut`;
+    const model = parseCircuit(`${declarations}\nHigh --- |K| D1\nD1 |A| --- |K| D2\nD2 |A| --- Low`);
+    expect(topology(model)).toEqual([['D1.A', 'D2.K'], ['D1.K'], ['D2.A']]);
+    expect(model.connections).toHaveLength(4);
+    expect(model.connections).toEqual(expect.arrayContaining([
+      { device: 'D1', terminal: 'K', net: 'High' }, { device: 'D2', terminal: 'A', net: 'Low' },
+    ]));
+    for (const terminal of ['B', 'I', 'W', 'bad']) {
+      expect(() => parseCircuit(`${declarations}\nD1 |${terminal}| --- |K| D2`)).toThrow('Unknown terminal');
+      expect(() => parseCircuit(`${declarations}\nD1 |A| --- |${terminal}| D2`)).toThrow('Unknown terminal');
+    }
+  });
+
+  it('preserves diode fixture polarity across series links and parallel groups', () => {
+    const model = parseCircuit(drawingFixtures['../examples/fixtures/diode-variants.mmd']);
+    expect(model.devices.map((device) => device.type).sort()).toEqual(diodeTypes.slice(1).sort());
+    expect(model.connections).toHaveLength(20);
+    expect(topology(model)).toEqual([
+      ['D1.K'], ['D1.A', 'D2.K', 'D3.K'], ['D2.A', 'D3.A', 'D4.K', 'D5.K'],
+      ['D4.A', 'D5.A', 'D6.K', 'D7.K'], ['D6.A', 'D7.A', 'D8.K', 'D9.K'],
+      ['D8.A', 'D9.A', 'D10.K'], ['D10.A'],
+    ].map((group) => group.sort()).sort());
+    expect(model.connections.find((item) => item.device === 'D1' && item.terminal === 'K')!.net).toBe('VDD');
+    expect(model.connections.filter((item) => item.net === 'GND')).toEqual([{ device: 'D10', terminal: 'A', net: 'GND' }]);
   });
 
   it.each(['pmos', 'nmos', 'pmosBlk', 'nmosBlk'])('requires drain-to-source written order for direct %s connections', (type) => {

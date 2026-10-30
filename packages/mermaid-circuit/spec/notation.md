@@ -1,6 +1,6 @@
 # Notation for circuit diagrams
 
-This specification records the approved syntax and electrical semantics of `circuitDiagram`. The parser implements the 49 authorable object types, diagram modes, typed subgraphs, and fixed-terminal connections described here. The NAND2 example is a parser acceptance fixture.
+This specification records the approved syntax and electrical semantics of `circuitDiagram`. The parser implements the 59 authorable object types, diagram modes, typed subgraphs, and fixed-terminal connections described here. The NAND2 example is a parser acceptance fixture.
 
 Basic placement, orthogonal wiring, and symbol rendering are implemented. Mode `A` supports named IC pins on any side, including multiple pins per side.
 
@@ -42,7 +42,7 @@ The parser records the diagram mode and enforces registered-shape eligibility fo
 
 ## Object types
 
-The authorable object vocabulary is closed and contains these 49 types. Generic nets remain internal connectivity groups and cannot be declared with `:::net`.
+The authorable object vocabulary is closed and contains these 59 types. Generic nets remain internal connectivity groups and cannot be declared with `:::net`.
 
 | Type | Kind | Terminals |
 | --- | --- | --- |
@@ -70,6 +70,16 @@ The authorable object vocabulary is closed and contains these 49 types. Generic 
 | `breaker` | Device | A, B |
 | `diac` | Device | A, B |
 | `diode` | Device | A, K |
+| `diodeFilled` | Device | A, K |
+| `schottky` | Device | A, K |
+| `diodeTunnel` | Device | A, K |
+| `diodeShockley` | Device | A, K |
+| `zener` | Device | A, K |
+| `diodeTVS` | Device | A, K |
+| `varactor` | Device | A, K |
+| `led` | Device | A, K |
+| `led2` | Device | A, K |
+| `photodiode` | Device | A, K |
 | `voltageSource` | Device | P, N |
 | `currentSource` | Device | P, N |
 | `motor` | Device | A, B |
@@ -105,6 +115,10 @@ These shapes convey conventional schematic meanings without simulating resistanc
 The types `capacitor2`, `capacitorPolar`, `capacitor2Polar`, `capacitorVar`, `capacitorTrim`, `lamp`, `lamp2`, `breaker`, and `diac` are authorable only in mode `A`. Their existing polarity, adjustment, and other markings add no terminals or connections. DIAC uses `A` and `B`; `K` is not a valid DIAC terminal.
 
 The renderer does not simulate capacitance, breakdown, switching, lamp operation, or circuit safety.
+
+The types `diodeFilled`, `schottky`, `diodeTunnel`, `diodeShockley`, `zener`, `diodeTVS`, `varactor`, `led`, `led2`, and `photodiode` are authorable only in mode `A`. For these types and `diode`, `A` names the anode and `K` names the cathode. Rotation preserves these identities.
+
+Existing arrows, polarity marks, and capacitance markings add no electrical terminals. The renderer does not simulate breakdown voltage, emission, illumination, capacitance, or current-voltage characteristics.
 
 ### Supply terminology and semantics
 
@@ -155,6 +169,16 @@ These references preserve the existing asset filenames in the [shape library](..
 | `breaker` | `breaker.svg` |
 | `diac` | `diac.svg` |
 | `diode` | `diode.svg` |
+| `diodeFilled` | `diode-filled.svg` |
+| `schottky` | `schottky.svg` |
+| `diodeTunnel` | `diode-tunnel.svg` |
+| `diodeShockley` | `diode-shockley.svg` |
+| `zener` | `zener.svg` |
+| `diodeTVS` | `diode-tvs.svg` |
+| `varactor` | `varactor.svg` |
+| `led` | `led.svg` |
+| `led2` | `led2.svg` |
+| `photodiode` | `photodiode.svg` |
 | `voltageSource` | `vsource.svg` |
 | `currentSource` | `isource.svg` |
 | `motor` | `motor.svg` |

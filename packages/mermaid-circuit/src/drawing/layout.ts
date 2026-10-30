@@ -51,7 +51,8 @@ export function validateOrientation(type: string, rotation: number, reverse = fa
 function conduction(device: Device): [string, string] | undefined {
   if (device.type.startsWith('pmos')) return ['S', 'D'];
   if (device.type.startsWith('nmos')) return ['D', 'S'];
-  if (device.type === 'diode') return ['K', 'A'];
+  if (['diode', 'diodeFilled', 'schottky', 'diodeTunnel', 'diodeShockley', 'zener', 'diodeTVS',
+    'varactor', 'led', 'led2', 'photodiode'].includes(device.type)) return ['K', 'A'];
   if (device.type.endsWith('Source')) return ['P', 'N'];
   if (['resistor', 'capacitor', 'fuse', 'motor', 'solenoid', 'resistorIEC', 'resistorVar', 'resistorVarIEC',
     'thermistor', 'photoresistor', 'photoresistorIEC', 'fuseIEC', 'fuseUs',
@@ -60,7 +61,7 @@ function conduction(device: Device): [string, string] | undefined {
 }
 
 function defaultRotation(device: Device): number {
-  if (device.type === 'diode') return 270;
+  if (conduction(device)?.[0] === 'K') return 270;
   return conduction(device)?.[0] === 'A' ? 90 : 0;
 }
 

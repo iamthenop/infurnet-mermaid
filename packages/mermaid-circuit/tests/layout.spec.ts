@@ -61,6 +61,29 @@ describe('basic floorplanning', () => {
     expect(negative.devices.find((item) => item.device.id === 'Fuse')!.rotation).toBe(90);
   });
 
+  it.each(['diode', 'diodeFilled', 'schottky', 'diodeTunnel', 'diodeShockley', 'zener', 'diodeTVS', 'varactor', 'led', 'led2', 'photodiode'])
+  ('preserves %s polarity in series and parallel layouts with default and explicit directions', (type) => {
+    for (const parallel of [false, true]) for (const direction of ['', 'LR', 'TB']) {
+      const links = parallel ? 'D1 |K| --- |K| D2\nD1 |A| --- |A| D2' : 'D1 |A| --- |K| D2';
+      const source = `circuitDiagram A\nsubgraph stage pair\n${direction ? `direction ${direction}\n` : ''}D1[D1]:::diode\nD2[D2]:::diode\nend\n${links}`;
+      const baseline = floorplan(parseCircuit(source));
+      const model = parseCircuit(source.replaceAll(':::diode', `:::${type}`)), layout = floorplan(model);
+      expect(layout.devices.map((item) => item.placed.anchors)).toEqual(baseline.devices.map((item) => item.placed.anchors));
+      const horizontal = parallel ? direction === 'TB' : direction === 'LR';
+      for (const item of layout.devices) {
+        expect(item.rotation).toBe(horizontal ? 180 : 270);
+        expect(item.placed.anchors.K[horizontal ? 0 : 1]).toBeLessThan(item.placed.anchors.A[horizontal ? 0 : 1]);
+        expect(item.placed.anchors.A).toEqual(item.placed.transform.apply([0, 60]));
+        expect(item.placed.anchors.K).toEqual(item.placed.transform.apply([120, 60]));
+      }
+      const axis = parallel ? horizontal ? 1 : 0 : horizontal ? 0 : 1;
+      const [first, second] = layout.devices.map((item) => item.placed.anchors.center);
+      expect(first[axis]).toBeLessThan(second[axis]);
+      expect(first[1 - axis]).toBeCloseTo(second[1 - axis], 10);
+      expect(layout.attachments.map(({ device, terminal, net }) => ({ device, terminal, net }))).toEqual(model.connections);
+    }
+  });
+
   it('preserves explicit TB parallel and LR series stage directions', () => {
     const source = fixtures['../examples/fixtures/cmos-nand2.mmd'].replace('direction LR', 'direction TB').replace('stage pullDown\n    direction TB', 'stage pullDown\n    direction LR');
     const layout = floorplan(parseCircuit(source));

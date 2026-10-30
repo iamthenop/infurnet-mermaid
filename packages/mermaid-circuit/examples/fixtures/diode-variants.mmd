@@ -1,0 +1,34 @@
+circuitDiagram A
+
+VDD{{"VDD"}}:::supplyNet
+GND{{"GND"}}:::ground
+
+subgraph stage diodeVariants
+    direction TB
+    D1["D1"]:::diodeFilled
+    D2["D2"]:::schottky
+    D3["D3"]:::diodeTunnel
+    D4["D4"]:::diodeShockley
+    D5["D5"]:::zener
+    D6["D6"]:::diodeTVS
+    D7["D7"]:::varactor
+    D8["D8"]:::led
+    D9["D9"]:::led2
+    D10["D10"]:::photodiode
+end
+
+VDD --- |K| D1
+D1 |A| --- |K| D2
+D1 |A| --- |K| D3
+D2 |A| --- |K| D4
+D3 |A| --- |K| D4
+D3 |A| --- |K| D5
+D4 |A| --- |K| D6
+D5 |A| --- |K| D6
+D5 |A| --- |K| D7
+D6 |A| --- |K| D8
+D7 |A| --- |K| D8
+D7 |A| --- |K| D9
+D8 |A| --- |K| D10
+D9 |A| --- |K| D10
+D10 |A| --- GND
