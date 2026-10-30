@@ -8,6 +8,7 @@ import { routeLayout } from '../src/drawing/routing.js';
 import catalog from '../shapes/shapes.json' with { type: 'json' };
 import type { MermaidConfig } from 'mermaid';
 import { Drawing, Element as DrawingElement } from '../src/drawing/core.js';
+import { mosfetTypes, mosfetChannel } from '../src/circuitTypes.js';
 import type { SymbolId } from '../src/drawing/symbols.js';
 
 const fixtures = import.meta.glob<string>('../examples/fixtures/*.mmd', { eager: true, query: '?raw', import: 'default' });
@@ -31,7 +32,15 @@ beforeAll(async () => {
   browser = await chromium.launch();
 }, 60_000);
 
-it.each(Object.entries(fixtures).flatMap(([path, source]) => appearances.map((appearance) => ({ path, source, ...appearance }))))
+const mosfetCases = mosfetTypes.filter((type) => !['pmos', 'nmos', 'pmosBlk', 'nmosBlk'].includes(type)).map((type) => {
+  const terminals = ['G', ...(mosfetChannel(type) === 'P' ? ['S', 'D'] : ['D', 'S']),
+    ...('B' in catalog[type as keyof typeof catalog].terminals ? ['B'] : [])];
+  const source = `circuitDiagram A\nM[M]:::${type}\n${terminals.map((terminal) =>
+    `N${terminal}([${terminal}]):::pinInOut\nM |${terminal}| --- N${terminal}`).join('\n')}`;
+  return [type, source] as const;
+});
+
+it.each([...Object.entries(fixtures), ...mosfetCases].flatMap(([path, source]) => appearances.map((appearance) => ({ path, source, ...appearance }))))
 ('renders exact geometry and standalone colours for $path in $name', async ({ path, source, config, colors }) => {
   const page = await browser!.newPage();
   const model = parseCircuit(source), layout = floorplan(model);

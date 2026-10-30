@@ -1,5 +1,5 @@
 import catalog from '../../shapes/shapes.json' with { type: 'json' };
-import { deviceTypes, netTypes, type CircuitMode, type CircuitModel,
+import { deviceTypes, netTypes, mosfetTypes, mosfetChannel, type CircuitMode, type CircuitModel,
   type Connection, type Device, type DeviceType, type Direction, type Net, type NetType, type PinSide } from '../circuitTypes.js';
 
 type PendingStage = { name: string | null; implicit: boolean; order: number; direction: Direction;
@@ -129,8 +129,9 @@ export function parseCircuit(text: string): CircuitModel {
       const device: Device = { id, type: deviceType, label: displayLabel,
         terminals: entry ? Object.keys(entry.terminals) : [], stage: stageIndex,
         ...(type === 'ic' ? { pinSides: {} } : {}),
-        ...(type === 'pmos' || type === 'nmos' ? { bulk: { kind: 'implicit' as const, sourceTerminal: 'S' as const } }
-          : type === 'pmosBlk' || type === 'nmosBlk' ? { bulk: { kind: 'explicit' as const, terminal: 'B' as const } } : {}) };
+        ...(mosfetTypes.includes(deviceType) ? { bulk: entry && 'B' in entry.terminals
+          ? { kind: 'explicit' as const, terminal: 'B' as const }
+          : { kind: 'implicit' as const, sourceTerminal: 'S' as const } } : {}) };
       if (scope) stages[stageIndex]!.devices.push(id);
       else outside.push(devices.length);
       devices.push(device); nodes.set(id, device); deviceIds.add(id);
@@ -175,13 +176,12 @@ export function parseCircuit(text: string): CircuitModel {
     if (nodes.has(net) || !deviceIds.has(device)) continue;
     const connected = nodes.get(device) as Device;
     const terminal = leftTerminal ?? rightTerminal;
-    const pmos = connected.type === 'pmos' || connected.type === 'pmosBlk';
-    const nmos = connected.type === 'nmos' || connected.type === 'nmosBlk';
+    const channel = mosfetChannel(connected.type);
     let type: NetType | undefined;
-    if (pmos || nmos) {
+    if (mosfetTypes.includes(connected.type)) {
       if (terminal === 'G') type = 'pinIn';
       else if (terminal === 'D') type = 'pinOut';
-      else if (terminal === 'S') type = pmos ? 'supplyNet' : 'ground';
+      else if (terminal === 'S' && channel) type = channel === 'P' ? 'supplyNet' : 'ground';
     }
     if (type === undefined) continue;
     const inferred: Net = { id: net, type, label: net, implicit: true };

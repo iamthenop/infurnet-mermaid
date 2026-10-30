@@ -1,0 +1,186 @@
+<svg id="fixture-mosfet-variants" width="1032" xmlns="http://www.w3.org/2000/svg" viewBox="-466 -297.6 1032 1119.76" height="1119.76" overflow="visible" font-family="sans-serif" font-size="14" role="graphics-document document" aria-roledescription="circuitDiagram"><style>#fixture-mosfet-variants{font-family:"trebuchet ms",verdana,arial,sans-serif;font-size:16px;fill:#0F0F0F;}@keyframes edge-animation-frame{from{stroke-dashoffset:0;}}@keyframes dash{to{stroke-dashoffset:0;}}#fixture-mosfet-variants .edge-animation-slow{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 50s linear infinite;stroke-linecap:round;}#fixture-mosfet-variants .edge-animation-fast{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 20s linear infinite;stroke-linecap:round;}#fixture-mosfet-variants .error-icon{fill:hsl(220.5882352941, 100%, 98.3333333333%);}#fixture-mosfet-variants .error-text{fill:rgb(8.5000000002, 5.7500000001, 0);stroke:rgb(8.5000000002, 5.7500000001, 0);}#fixture-mosfet-variants .edge-thickness-normal{stroke-width:1px;}#fixture-mosfet-variants .edge-thickness-thick{stroke-width:3.5px;}#fixture-mosfet-variants .edge-pattern-solid{stroke-dasharray:0;}#fixture-mosfet-variants .edge-thickness-invisible{stroke-width:0;fill:none;}#fixture-mosfet-variants .edge-pattern-dashed{stroke-dasharray:3;}#fixture-mosfet-variants .edge-pattern-dotted{stroke-dasharray:2;}#fixture-mosfet-variants .marker{fill:#009600;stroke:#009600;}#fixture-mosfet-variants .marker.cross{stroke:#009600;}#fixture-mosfet-variants svg{font-family:"trebuchet ms",verdana,arial,sans-serif;font-size:16px;}#fixture-mosfet-variants p{margin:0;}#fixture-mosfet-variants,#fixture-mosfet-variants svg{font-family:sans-serif;font-size:14px;}#fixture-mosfet-variants [data-circuit-background]{fill:#FFFFFF;}#fixture-mosfet-variants [data-wire] polyline{stroke:#009600;}#fixture-mosfet-variants [data-junction] circle{stroke:#009600;fill:#009600;}#fixture-mosfet-variants [data-device] [stroke]:not([stroke="none"]),#fixture-mosfet-variants [data-net-occurrence] [stroke]:not([stroke="none"]){stroke:#840000;}#fixture-mosfet-variants [data-device] [fill="#000"],#fixture-mosfet-variants [data-net-occurrence] [fill="#000"]{fill:#840000;}#fixture-mosfet-variants [data-device] [fill="#fff"],#fixture-mosfet-variants [data-device] [fill="white"],#fixture-mosfet-variants [data-net-occurrence] [fill="#fff"],#fixture-mosfet-variants [data-net-occurrence] [fill="white"]{fill:#FFFFFF;}#fixture-mosfet-variants [data-stage] polyline,#fixture-mosfet-variants [data-block] polyline{stroke:#777777;}#fixture-mosfet-variants [data-device-label] text,#fixture-mosfet-variants [data-ic-label] text,#fixture-mosfet-variants [data-terminal] text{fill:#006464;}#fixture-mosfet-variants [data-net-label] text,#fixture-mosfet-variants [data-frame-label] text{fill:#0F0F0F;}#fixture-mosfet-variants .node .neo-node{stroke:#840000;}#fixture-mosfet-variants [data-look="neo"].node rect,#fixture-mosfet-variants [data-look="neo"].cluster rect,#fixture-mosfet-variants [data-look="neo"].node polygon{stroke:url(#fixture-mosfet-variants-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#fixture-mosfet-variants [data-look="neo"].swimlane.cluster rect{filter:none;}#fixture-mosfet-variants [data-look="neo"].node path{stroke:url(#fixture-mosfet-variants-gradient);stroke-width:1px;}#fixture-mosfet-variants [data-look="neo"].node .outer-path{filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#fixture-mosfet-variants [data-look="neo"].node .neo-line path{stroke:#840000;filter:none;}#fixture-mosfet-variants [data-look="neo"].node circle{stroke:url(#fixture-mosfet-variants-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#fixture-mosfet-variants [data-look="neo"].node circle .state-start{fill:#000000;}#fixture-mosfet-variants [data-look="neo"].icon-shape .icon{fill:url(#fixture-mosfet-variants-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#fixture-mosfet-variants [data-look="neo"].icon-shape .icon-neo path{stroke:url(#fixture-mosfet-variants-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#fixture-mosfet-variants :root{--mermaid-font-family:"trebuchet ms",verdana,arial,sans-serif;}</style><rect data-circuit-background="true" x="-466" y="-297.6" width="1032" height="1119.76"></rect>
+<g data-drawing-index="0" data-stage="inverter" stroke-dasharray="8 6">
+<polyline points="-120,-30 190,-30 190,510 -120,510 -120,-30" stroke="#777" stroke-width="1" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="1" data-label="true" data-frame-label="stage">
+<text x="-108" y="-42" xml:space="preserve" fill="#000">inverter</text>
+</g>
+<g data-drawing-index="2" data-net="Bias" data-wire="-" data-points="[[310,60],[120,60]]">
+<polyline points="310,60 120,60" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="3" data-net="VDD" data-wire="-" data-points="[[90,-60],[90,0]]">
+<polyline points="90,-60 90,0" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="4" data-net="A" data-wire="-" data-points="[[-90,40],[-90,440]]">
+<polyline points="-90,40 -90,440" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="5" data-net="A" data-wire="-" data-points="[[0,40],[-90,40]]">
+<polyline points="0,40 -90,40" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="6" data-net="A" data-wire="-" data-points="[[10,440],[-90,440]]">
+<polyline points="10,440 -90,440" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="7" data-net="A" data-wire="-" data-points="[[-210,240],[-90,240]]">
+<polyline points="-210,240 -90,240" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="8" data-net="OUT" data-wire="-" data-points="[[90,120],[90,240]]">
+<polyline points="90,120 90,240" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="9" data-net="OUT" data-wire="-" data-points="[[90,360],[90,240]]">
+<polyline points="90,360 90,240" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="10" data-net="OUT" data-wire="-" data-points="[[310,240],[90,240]]">
+<polyline points="310,240 90,240" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="11" data-net="VSS" data-wire="-" data-points="[[90,540],[90,480]]">
+<polyline points="90,540 90,480" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="12" data-device="P0" data-type="analogPFetBulk" data-stage-index="0">
+<g transform="matrix(1 0 0 1 0 0)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-mosfet-variants-element-12-analogPFetBulk" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path id="fixture-mosfet-variants-element-12-reference-0" d="M 90 11.2 L 90 35.2 L 66 35.2 L 66 83.2 L 90 83.2 L 90 107.2" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path id="fixture-mosfet-variants-element-12-reference-1" d="M 61.2 40 L 61.2 78.4" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path id="fixture-mosfet-variants-element-12-reference-2" d="M 61.2 40 L 37.2 40" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path id="fixture-mosfet-variants-element-12-reference-3" d="M 66 59.2 L 75.6 59.2" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path id="fixture-mosfet-variants-element-12-reference-4" d="M 86.8 59.2 L 75.6 52 L 75.6 66.4 Z" stroke="#000" fill="#000" stroke-linecap="butt" stroke-linejoin="miter"></path>
+    <path id="fixture-mosfet-variants-element-12-gate-extension" d="M 0 40 L 37.2 40"></path>
+    <path id="fixture-mosfet-variants-element-12-upper-extension" d="M 90 0 L 90 11.2"></path>
+    <path id="fixture-mosfet-variants-element-12-lower-extension" d="M 90 107.2 L 90 120"></path>
+    <path id="fixture-mosfet-variants-element-12-bulk-extension" d="M 90 59.2 L 105 59.2 L 105 60 L 120 60"></path>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="13" data-label="true" data-device-label="P0">
+<text x="132" y="104" xml:space="preserve" fill="#000">P0</text>
+</g>
+<g data-drawing-index="14" data-label="true" data-terminal="G" data-terminal-device="P0" data-terminal-side="L" text-anchor="end" dominant-baseline="text-after-edge" data-x="0" data-y="40" data-terminal-net="A">
+<text x="-4" y="36" xml:space="preserve" fill="#000">G</text>
+</g>
+<g data-drawing-index="15" data-label="true" data-terminal="S" data-terminal-device="P0" data-terminal-side="T" text-anchor="start" dominant-baseline="text-after-edge" data-x="90" data-y="0" data-terminal-net="VDD">
+<text x="94" y="-4" xml:space="preserve" fill="#000">S</text>
+</g>
+<g data-drawing-index="16" data-label="true" data-terminal="D" data-terminal-device="P0" data-terminal-side="B" text-anchor="start" dominant-baseline="hanging" data-x="90" data-y="120" data-terminal-net="OUT">
+<text x="94" y="124" xml:space="preserve" fill="#000">D</text>
+</g>
+<g data-drawing-index="17" data-label="true" data-terminal="B" data-terminal-device="P0" data-terminal-side="R" text-anchor="start" dominant-baseline="text-after-edge" data-x="120" data-y="60" data-terminal-net="Bias">
+<text x="124" y="56" xml:space="preserve" fill="#000">B</text>
+</g>
+<g data-drawing-index="18" data-device="N0" data-type="nmos2Circle" data-stage-index="0">
+<g transform="matrix(6.123233995736766e-17 1 -1 6.123233995736766e-17 130 360)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-mosfet-variants-element-18-nmos2Circle" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle id="fixture-mosfet-variants-element-18-reference-0" cx="60.8" cy="44.8" r="33.6" stroke="#000" fill="none" stroke-width="2"></circle>
+    <path id="fixture-mosfet-variants-element-18-reference-1" d="M 0 40 L 12.8 40 L 46.4 40 L 46.4 54.4 M 75.2 54.4 L 75.2 40 L 108.8 40 L 120 40" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path id="fixture-mosfet-variants-element-18-reference-2" d="M 44 54.4 L 48.8 54.4" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path id="fixture-mosfet-variants-element-18-reference-3" d="M 58.4 54.4 L 63.2 54.4" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path id="fixture-mosfet-variants-element-18-reference-4" d="M 72.8 54.4 L 77.6 54.4" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path id="fixture-mosfet-variants-element-18-reference-5" d="M 80 88 L 80 64" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path id="fixture-mosfet-variants-element-18-reference-6" d="M 80 64 L 41.6 64" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path id="fixture-mosfet-variants-element-18-reference-7" d="M 60.8 44.8 L 60.8 40" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path id="fixture-mosfet-variants-element-18-reference-8" d="M 60.8 51.2 L 56 44.8 L 65.6 44.8 Z" stroke="#000" fill="#000" stroke-linecap="butt" stroke-linejoin="miter"></path>
+    <path id="fixture-mosfet-variants-element-18-reference-9" d="M 60.8 40 L 75.2 40" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path id="fixture-mosfet-variants-element-18-gate-extension" d="M 80 88 L 80 120"></path>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="19" data-label="true" data-device-label="N0">
+<text x="142" y="464" xml:space="preserve" fill="#000">N0</text>
+</g>
+<g data-drawing-index="20" data-label="true" data-terminal="G" data-terminal-device="N0" data-terminal-side="L" text-anchor="end" dominant-baseline="text-after-edge" data-x="10" data-y="440" data-terminal-net="A">
+<text x="6" y="436" xml:space="preserve" fill="#000">G</text>
+</g>
+<g data-drawing-index="21" data-label="true" data-terminal="D" data-terminal-device="N0" data-terminal-side="T" text-anchor="start" dominant-baseline="text-after-edge" data-x="90" data-y="360" data-terminal-net="OUT">
+<text x="94" y="356" xml:space="preserve" fill="#000">D</text>
+</g>
+<g data-drawing-index="22" data-label="true" data-terminal="S" data-terminal-device="N0" data-terminal-side="B" text-anchor="start" dominant-baseline="hanging" data-x="90" data-y="480" data-terminal-net="VSS">
+<text x="94" y="484" xml:space="preserve" fill="#000">S</text>
+</g>
+<g data-drawing-index="23" data-net-occurrence="0" data-net="Bias" data-type="pinInOut" data-branches="1">
+<g transform="matrix(1 0 0 1 310 0)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-mosfet-variants-element-23-pin-io" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <line id="fixture-mosfet-variants-element-23-stem" x1="0" y1="60" x2="4" y2="60"></line>
+    <polygon id="fixture-mosfet-variants-element-23-body" points="4,60 16,42 64,42 76,60 64,78 16,78"></polygon>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="24" data-label="true" data-net-label="Bias" text-anchor="middle">
+<text x="348" y="65" xml:space="preserve" fill="#000">Bulk bias</text>
+</g>
+<g data-drawing-index="25" data-net-occurrence="1" data-net="VDD" data-type="supplyNet" data-branches="1">
+<g transform="matrix(1 0 0 1 30 -180)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-mosfet-variants-element-25-supplyNet" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 60 120 L 60 74.4" id="fixture-mosfet-variants-element-25-reference-0" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path d="M 60 74.4 L 33 74.4" id="fixture-mosfet-variants-element-25-reference-1" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path d="M 60 74.4 L 87 74.4" id="fixture-mosfet-variants-element-25-reference-2" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="26" data-label="true" data-net-label="VDD" text-anchor="middle">
+<text x="90" y="-117.6" xml:space="preserve" fill="#000">VDD</text>
+</g>
+<g data-drawing-index="27" data-net-occurrence="2" data-net="A" data-type="pinIn" data-branches="2">
+<g transform="matrix(1 0 0 1 -330 180)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-mosfet-variants-element-27-pin-in" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polygon id="fixture-mosfet-variants-element-27-body" points="44,42 104,42 116,60 104,78 44,78"></polygon>
+    <line id="fixture-mosfet-variants-element-27-stem" x1="116" y1="60" x2="120" y2="60"></line>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="28" data-label="true" data-net-label="A" text-anchor="middle">
+<text x="-248" y="245" xml:space="preserve" fill="#000">A</text>
+</g>
+<g data-drawing-index="29" data-net-occurrence="3" data-net="OUT" data-type="pinOut" data-branches="2">
+<g transform="matrix(1 0 0 1 310 180)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-mosfet-variants-element-29-pin-out" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <line id="fixture-mosfet-variants-element-29-stem" x1="0" y1="60" x2="4" y2="60"></line>
+    <polygon id="fixture-mosfet-variants-element-29-body" points="4,42 64,42 76,60 64,78 4,78"></polygon>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="30" data-label="true" data-net-label="OUT" text-anchor="middle">
+<text x="348" y="245" xml:space="preserve" fill="#000">OUT</text>
+</g>
+<g data-drawing-index="31" data-net-occurrence="4" data-net="VSS" data-type="ground" data-branches="1">
+<g transform="matrix(1 0 0 1 30 540)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-mosfet-variants-element-31-ground" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 60 0 L 60 45.6 L 24 45.6 L 96 45.6 M 34.8 62.88 L 85.2 62.88 M 52.8 80.16 L 67.2 80.16" id="fixture-mosfet-variants-element-31-reference-0" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="32" data-label="true" data-net-label="VSS" text-anchor="middle">
+<text x="90" y="642.16" xml:space="preserve" fill="#000">VSS</text>
+</g>
+<g data-drawing-index="33" data-junction="true" data-net="A">
+<circle cx="0" cy="0" r="3" stroke="#000" stroke-width="2" fill="#000" transform="matrix(1 0 0 1 -90 240)"></circle>
+</g>
+<g data-drawing-index="34" data-junction="true" data-net="OUT">
+<circle cx="0" cy="0" r="3" stroke="#000" stroke-width="2" fill="#000" transform="matrix(1 0 0 1 90 240)"></circle>
+</g>
+</svg>

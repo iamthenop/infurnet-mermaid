@@ -4,7 +4,7 @@ An external Mermaid circuit renderer with identifier `circuitDiagram`. Version `
 
 ## Implemented behavior
 
-The parser accepts `circuitDiagram D` and `circuitDiagram A`, followed by declarations and connections from the closed 59-type vocabulary in [the notation specification](spec/notation.md).
+The parser accepts `circuitDiagram D` and `circuitDiagram A`, followed by declarations and connections from the closed 80-type vocabulary in [the notation specification](spec/notation.md).
 
 ```text
 circuitDiagram D
@@ -60,6 +60,8 @@ The former colon-separated terminal syntax is rejected.
 Shared terminals imply one net and a junction, while distinct terminal groups remain separate. Repeated statements do not duplicate connectivity. Direct source-to-source and source-to-drain statements are rejected; write drain-to-source connections in that order.
 
 External endpoints may be declared using their existing types. Missing declarations are inferred from the approved MOS terminal mapping in [connection syntax](spec/notation.md#connection-syntax), never from names such as `VDD`. Endpoints without a mapped MOS connection require explicit declarations.
+
+MOSFET variants now include diode and circle artwork, analog N/P-channel symbols, biased FETs, and alternate orientations. Their terminal contracts, bulk relationships, and endpoint inference follow [the notation specification](spec/notation.md#bulk-semantics).
 
 The normalized model remains a connectivity model, not an electrical simulator.
 
@@ -295,9 +297,9 @@ npx playwright install chromium
 npm run test:browser --workspace mermaid-circuit
 ```
 
-Unit tests cover the 59 notation types, device connections, hierarchy, parser failures, and database isolation. They also check placement, routing limits, and the NAND and XOR truth tables.
+Unit tests cover the 80 notation types, device connections, hierarchy, parser failures, and database isolation. They also check placement, routing limits, and the NAND and XOR truth tables.
 
-Browser tests register the compiled package with real Mermaid in Chromium. They check all ten drawings, their symbol transforms and wire endpoints, failed input, and recovery after failure. See the [root README](../../README.md) for `.venv/` runtime activation and CI commands.
+Browser tests register the compiled package with real Mermaid in Chromium. They check all eleven drawings, their symbol transforms and wire endpoints, failed input, and recovery after failure. See the [root README](../../README.md) for `.venv/` runtime activation and CI commands.
 
 ## Generated circuit examples
 
@@ -317,10 +319,11 @@ Each SVG is produced by the registered Mermaid plugin from its source fixture. T
 | Resistor and fuse variants | [Mermaid](examples/fixtures/resistor-fuse-variants.mmd) | [SVG](examples/fixtures/resistor-fuse-variants.svg) | [SVG](examples/fixtures/resistor-fuse-variants-inverse.svg) | [SVG](examples/fixtures/resistor-fuse-variants-colored.svg) |
 | Capacitor and load variants | [Mermaid](examples/fixtures/capacitor-load-variants.mmd) | [SVG](examples/fixtures/capacitor-load-variants.svg) | [SVG](examples/fixtures/capacitor-load-variants-inverse.svg) | [SVG](examples/fixtures/capacitor-load-variants-colored.svg) |
 | Diode variants | [Mermaid](examples/fixtures/diode-variants.mmd) | [SVG](examples/fixtures/diode-variants.svg) | [SVG](examples/fixtures/diode-variants-inverse.svg) | [SVG](examples/fixtures/diode-variants-colored.svg) |
+| MOSFET variants | [Mermaid](examples/fixtures/mosfet-variants.mmd) | [SVG](examples/fixtures/mosfet-variants.svg) | [SVG](examples/fixtures/mosfet-variants-inverse.svg) | [SVG](examples/fixtures/mosfet-variants-colored.svg) |
 
 The capacitor and load fixture tests schematic rendering with series and parallel connections. It does not establish that the arrangement is a validated physical circuit.
 
-Generate the three diode SVGs and verify the twenty-seven existing references without rewriting them:
+Generate the three MOSFET SVGs and verify the thirty existing references without rewriting them:
 
 ```sh
 npm run render:fixtures --workspace mermaid-circuit

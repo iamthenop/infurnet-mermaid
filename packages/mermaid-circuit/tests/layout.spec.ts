@@ -2,6 +2,8 @@
 import { describe, expect, it } from 'vitest';
 import { parseCircuit } from '../src/parser/circuitParser.js';
 import { floorplan, validateOrientation } from '../src/drawing/layout.js';
+import { mosfetTypes } from '../src/circuitTypes.js';
+import catalog from '../shapes/shapes.json' with { type: 'json' };
 
 const fixtures = import.meta.glob<string>('../examples/fixtures/*.mmd', { eager: true, query: '?raw', import: 'default' });
 const fixture = (name: string) => parseCircuit(fixtures[`../examples/fixtures/${name}.mmd`]);
@@ -81,6 +83,37 @@ describe('basic floorplanning', () => {
       expect(first[axis]).toBeLessThan(second[axis]);
       expect(first[1 - axis]).toBeCloseTo(second[1 - axis], 10);
       expect(layout.attachments.map(({ device, terminal, net }) => ({ device, terminal, net }))).toEqual(model.connections);
+    }
+  });
+
+  it.each(mosfetTypes)('places %s from both conduction nets and preserves registered attachments', (type) => {
+    const pChannel = ['pmos', 'pmosBlk', 'pmosDiode', 'pmosCircle', 'pmos2Diode', 'pmos2Circle',
+      'analogPFet', 'analogPFetBulk', 'analogPFetCenteredGate', 'analogPFetNoArrow', 'pfet2'].includes(type);
+    const [incoming, outgoing] = pChannel ? ['S', 'D'] : ['D', 'S'];
+    const declarations = `M1[M1]:::${type}\nM2[M2]:::${type}`;
+    for (const parallel of [false, true]) for (const direction of ['', 'LR', 'TB']) {
+      const links = parallel ? 'M1 |D| --- |D| M2\nV{{V}}:::supplyNet\nV --- M1 |S|\nV --- M2 |S|'
+        : pChannel ? 'M1 |D| --- |S| M2' : 'M2 |D| --- |S| M1';
+      const model = parseCircuit(`circuitDiagram A\nsubgraph stage pair\n${direction ? `direction ${direction}\n` : ''}${declarations}\nend\n${links}`);
+      const layout = floorplan(model);
+      const horizontal = parallel ? direction === 'TB' : direction === 'LR';
+      const axis = horizontal ? 0 : 1;
+      const [first, second] = layout.devices.map((item) => item.placed.anchors[incoming]);
+      expect(first[parallel ? 1 - axis : axis]).toBeLessThan(second[parallel ? 1 - axis : axis]);
+      expect(second[parallel ? axis : 1 - axis] - first[parallel ? axis : 1 - axis]).toBeCloseTo(parallel ? 90 : 0, 8);
+      for (const item of layout.devices) {
+        expect(item.placed.anchors[incoming][axis]).toBeLessThan(item.placed.anchors[outgoing][axis]);
+        for (const [terminal, point] of Object.entries(catalog[type as keyof typeof catalog].terminals)) {
+          expect(item.placed.anchors[terminal]).toEqual(item.placed.transform.apply(point as [number, number]));
+        }
+      }
+      expect(layout.attachments.map(({ device, terminal, net }) => ({ device, terminal, net }))).toEqual(model.connections);
+    }
+    for (const shared of ['G', 'D', 'S']) {
+      const partial = floorplan(parseCircuit(`circuitDiagram A\n${declarations}\nX([X]):::pinInOut\nX --- M1 |${shared}|\nX --- M2 |${shared}|`));
+      const [first, second] = partial.devices.map((item) => item.placed.anchors[incoming]);
+      expect(second[0] - first[0]).toBeCloseTo(300, 8);
+      expect(second[1] - first[1]).toBeCloseTo(90, 8);
     }
   });
 

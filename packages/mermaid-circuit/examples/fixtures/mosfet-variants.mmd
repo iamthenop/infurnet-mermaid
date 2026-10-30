@@ -1,0 +1,13 @@
+circuitDiagram A
+Bias(["Bulk bias"]):::pinInOut
+subgraph stage inverter
+    P0["P0"]:::analogPFetBulk
+    N0["N0"]:::nmos2Circle
+end
+VDD --- P0 |S|
+A --- P0 |G|
+P0 |D| --- OUT
+OUT --- N0 |D|
+A --- N0 |G|
+N0 |S| --- VSS
+Bias --- P0 |B|

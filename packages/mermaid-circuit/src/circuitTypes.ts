@@ -6,9 +6,27 @@ export const deviceTypes = ['pmos', 'nmos', 'pmosBlk', 'nmosBlk', 'resistor', 'c
   'and', 'or', 'nor', 'xor', 'xnor', 'notNot', 'schmitt', 'schmittNot', 'schmittAnd', 'schmittNand',
   'resistorIEC', 'resistorVar', 'resistorVarIEC', 'thermistor', 'photoresistor', 'photoresistorIEC', 'fuseIEC', 'fuseUs',
   'capacitor2', 'capacitorPolar', 'capacitor2Polar', 'capacitorVar', 'capacitorTrim', 'lamp', 'lamp2', 'breaker', 'diac',
-  'diodeFilled', 'schottky', 'diodeTunnel', 'diodeShockley', 'zener', 'diodeTVS', 'varactor', 'led', 'led2', 'photodiode'] as const;
+  'diodeFilled', 'schottky', 'diodeTunnel', 'diodeShockley', 'zener', 'diodeTVS', 'varactor', 'led', 'led2', 'photodiode',
+  'nmosDiode', 'pmosDiode', 'nmosCircle', 'pmosCircle', 'nmos2Diode', 'pmos2Diode', 'nmos2Circle', 'pmos2Circle',
+  'analogNFet', 'analogPFet', 'analogNFetBulk', 'analogPFetBulk', 'analogNFetCenteredGate', 'analogPFetCenteredGate',
+  'analogPFetNoArrow', 'analogBiasedFet', 'analogBiasedFetBulk', 'analogBiasedFetCenteredGate', 'analogBiasedFetNoArrow',
+  'nfet2', 'pfet2'] as const;
 export const netTypes = ['net', 'supplyNet', 'ground', 'pinIn', 'pinOut', 'pinInOut'] as const;
 export type DeviceType = typeof deviceTypes[number];
+export const mosfetTypes: readonly DeviceType[] = ['pmos', 'nmos', 'pmosBlk', 'nmosBlk',
+  'nmosDiode', 'pmosDiode', 'nmosCircle', 'pmosCircle', 'nmos2Diode', 'pmos2Diode', 'nmos2Circle', 'pmos2Circle',
+  'analogNFet', 'analogPFet', 'analogNFetBulk', 'analogPFetBulk', 'analogNFetCenteredGate', 'analogPFetCenteredGate',
+  'analogPFetNoArrow', 'analogBiasedFet', 'analogBiasedFetBulk', 'analogBiasedFetCenteredGate', 'analogBiasedFetNoArrow',
+  'nfet2', 'pfet2'];
+
+export function mosfetChannel(type: DeviceType): 'P' | 'N' | undefined {
+  if (['pmos', 'pmosBlk', 'pmosDiode', 'pmosCircle', 'pmos2Diode', 'pmos2Circle',
+    'analogPFet', 'analogPFetBulk', 'analogPFetCenteredGate', 'analogPFetNoArrow', 'pfet2'].includes(type)) return 'P';
+  if (['nmos', 'nmosBlk', 'nmosDiode', 'nmosCircle', 'nmos2Diode', 'nmos2Circle',
+    'analogNFet', 'analogNFetBulk', 'analogNFetCenteredGate', 'nfet2'].includes(type)) return 'N';
+  return undefined;
+}
+
 export type NetType = typeof netTypes[number];
 export type PinSide = 'T' | 'B' | 'L' | 'R';
 

@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
 import { describe, expect, it } from 'vitest';
 import { parseCircuit } from '../src/parser/circuitParser.js';
-import { deviceTypes, netTypes, type CircuitModel } from '../src/circuitTypes.js';
+import { deviceTypes, netTypes, mosfetTypes, type CircuitModel } from '../src/circuitTypes.js';
 import { ScaffoldDb } from '../src/db.js';
 import { createParser } from '../src/parser.js';
 import notation from '../spec/notation.md?raw';
@@ -134,8 +134,8 @@ end`);
   it.each(deviceTypes.filter((type) => type !== 'ic'))('retains the approved %s device and its terminal contract', (type) => {
     const mode = logicTypes.includes(type) ? 'D' : 'A';
     const model = parseCircuit(`circuitDiagram ${mode}\nU1["display<br/>value=1"]:::${type}`);
-    const terminals = type.endsWith('Blk') ? ['G', 'D', 'S', 'B']
-      : ['pmos', 'nmos'].includes(type) ? ['G', 'D', 'S']
+    const terminals = type.endsWith('Blk') || type.endsWith('Bulk') ? ['G', 'D', 'S', 'B']
+      : mosfetTypes.includes(type) ? ['G', 'D', 'S']
         : type === 'antenna' ? ['A'] : diodeTypes.includes(type) ? ['A', 'K'] : type.endsWith('Source') ? ['P', 'N']
           : twoInputLogic.includes(type) ? ['I1', 'I2', 'O'] : singleInputLogic.includes(type) ? ['I', 'O'] : ['A', 'B'];
     expect(model.devices[0]).toMatchObject({ id: 'U1', type, label: 'display<br/>value=1', stage: 0 });
@@ -304,7 +304,7 @@ end`);
     expect(model.connections.filter((item) => item.net === 'GND')).toEqual([{ device: 'D10', terminal: 'A', net: 'GND' }]);
   });
 
-  it.each(['pmos', 'nmos', 'pmosBlk', 'nmosBlk'])('requires drain-to-source written order for direct %s connections', (type) => {
+  it.each(mosfetTypes)('requires drain-to-source written order for direct %s connections', (type) => {
     const source = `circuitDiagram A\nP0["P0"]:::${type}\nP1["P1"]:::${type}`;
     for (const link of ['P0 |D| --- |S| P1', 'P0 |D| --- P1 |S|']) {
       expect(topology(parseCircuit(`${source}\n${link}`))).toEqual([['P0.D', 'P1.S']]);
@@ -316,13 +316,43 @@ end`);
     }
   });
 
+  it.each(mosfetTypes)('preserves independent %s terminal nets and bulk semantics', (type) => {
+    const explicit = ['pmosBlk', 'nmosBlk', 'analogNFetBulk', 'analogPFetBulk', 'analogBiasedFetBulk'].includes(type);
+    const terminals = explicit ? ['G', 'D', 'S', 'B'] : ['G', 'D', 'S'];
+    const declaration = `circuitDiagram A\nM[M]:::${type}`;
+    const empty = parseCircuit(declaration);
+    expect(empty.connections).toEqual([]);
+    expect(empty.nets).toEqual([]);
+    expect(empty.devices[0].bulk).toEqual(explicit ? { kind: 'explicit', terminal: 'B' } : { kind: 'implicit', sourceTerminal: 'S' });
+    const source = `${declaration}\n${terminals.map((terminal) => `N${terminal}([${terminal}]):::pinInOut\nM |${terminal}| --- N${terminal}`).join('\n')}`;
+    expect(parseCircuit(source).connections).toEqual(terminals.map((terminal) => ({ device: 'M', terminal, net: `N${terminal}` })));
+    expect(topology(parseCircuit(`${source}\nM |G| --- NG`))).toEqual(terminals.map((terminal) => [`M.${terminal}`]).sort());
+    for (const terminal of ['A', 'K', 'bad', ...(explicit ? [] : ['B'])]) {
+      expect(() => parseCircuit(`${source}\nM |${terminal}| --- NG`)).toThrow('Unknown terminal');
+    }
+    expect(() => parseCircuit(`${declaration}\nM2[M2]:::${type}\nM |S| --- |S| M2`)).toThrow('source-to-source');
+    expect(() => parseCircuit(`${declaration}\nM |D| --- Missing |S|`)).toThrow('undeclared device');
+    for (const [first, second, inferred] of [['G', 'D', 'pinIn'], ['D', 'G', 'pinOut']]) {
+      const shared = `${declaration}\nM |${first}| --- X\nM |${second}| --- X`;
+      expect(parseCircuit(shared).nets).toEqual([{ id: 'X', type: inferred, label: 'X', implicit: true }]);
+      expect(parseCircuit(`${shared}\nX([explicit]):::pinInOut`).nets).toEqual([{ id: 'X', type: 'pinInOut', label: 'explicit' }]);
+    }
+  });
+
+  it('preserves the MOSFET fixture gate, source, drain and independent bulk nets', () => {
+    const model = parseCircuit(drawingFixtures['../examples/fixtures/mosfet-variants.mmd']);
+    expect(topology(model)).toEqual([['N0.G', 'P0.G'], ['N0.D', 'P0.D'], ['P0.S'], ['N0.S'], ['P0.B']].sort());
+    expect(model.connections.find((connection) => connection.terminal === 'B')!.net).toBe('Bias');
+  });
+
   it('rejects retired direct syntax and authored generic nets', () => {
     expect(() => parseCircuit(`${resistors}\nR1 ---|B:A| R2`)).toThrow('Unsupported');
     expect(() => parseCircuit(`${resistors}\nn1(("n1")):::net`)).toThrow('Unknown authorable');
   });
 
-  it.each(['pmos', 'nmos', 'pmosBlk', 'nmosBlk'] as const)('infers endpoints from %s terminals, not identifier names or written side', (type) => {
-    const sourceType = type.startsWith('pmos') ? 'supplyNet' : 'ground';
+  it.each(mosfetTypes.filter((type) => !type.startsWith('analogBiased')))('infers endpoints from %s terminals, not identifier names or written side', (type) => {
+    const sourceType = ['pmos', 'pmosBlk', 'pmosDiode', 'pmosCircle', 'pmos2Diode', 'pmos2Circle',
+      'analogPFet', 'analogPFetBulk', 'analogPFetCenteredGate', 'analogPFetNoArrow', 'pfet2'].includes(type) ? 'supplyNet' : 'ground';
     for (const links of ['GND --- M |S|\nVDD --- |G| M\nM |D| --- A', 'M |S| --- GND\nM |G| --- VDD\nA --- M |D|']) {
       const model = parseCircuit(`circuitDiagram A\nM["M"]:::${type}\n${links}`);
       expect(model.nets).toEqual([
@@ -400,7 +430,8 @@ VDD --- P0 |S|`);
   });
 
   it.each([
-    ['pmosBlk', 'B'], ['nmosBlk', 'B'], ['resistor', 'A'], ['capacitor', 'B'],
+    ['pmosBlk', 'B'], ['nmosBlk', 'B'], ['analogNFetBulk', 'B'], ['analogPFetBulk', 'B'], ['analogBiasedFetBulk', 'B'],
+    ['analogBiasedFet', 'S'], ['analogBiasedFetBulk', 'S'], ['analogBiasedFetCenteredGate', 'S'], ['analogBiasedFetNoArrow', 'S'], ['resistor', 'A'], ['capacitor', 'B'],
     ['diode', 'K'], ['voltageSource', 'P'], ['currentSource', 'N'], ['inverter', 'I'], ['buffer', 'O'],
   ])('requires an explicit endpoint type outside the approved inference mapping: %s.%s', (type, terminal) => {
     const mode = type === 'buffer' || type === 'inverter' ? 'D' : 'A';
@@ -557,7 +588,7 @@ end`);
     for (const device of model.devices) expect(device.bulk).toEqual({ kind: 'implicit', sourceTerminal: 'S' });
   });
 
-  it.each(['pmosBlk', 'nmosBlk'])('retains explicit bulk on %s without inventing nets', (type) => {
+  it.each(['pmosBlk', 'nmosBlk', 'analogNFetBulk', 'analogPFetBulk', 'analogBiasedFetBulk'])('retains explicit bulk on %s without inventing nets', (type) => {
     const model = parseCircuit(`circuitDiagram A\nM["M"]:::${type}\nN(["N"]):::pinInOut\nM |B| --- N`);
     expect(model.devices[0]!.bulk).toEqual({ kind: 'explicit', terminal: 'B' });
     expect(model.connections).toEqual([{ device: 'M', terminal: 'B', net: 'N' }]);

@@ -1,6 +1,6 @@
 # Notation for circuit diagrams
 
-This specification records the approved syntax and electrical semantics of `circuitDiagram`. The parser implements the 59 authorable object types, diagram modes, typed subgraphs, and fixed-terminal connections described here. The NAND2 example is a parser acceptance fixture.
+This specification records the approved syntax and electrical semantics of `circuitDiagram`. The parser implements the 80 authorable object types, diagram modes, typed subgraphs, and fixed-terminal connections described here. The NAND2 example is a parser acceptance fixture.
 
 Basic placement, orthogonal wiring, and symbol rendering are implemented. Mode `A` supports named IC pins on any side, including multiple pins per side.
 
@@ -42,7 +42,7 @@ The parser records the diagram mode and enforces registered-shape eligibility fo
 
 ## Object types
 
-The authorable object vocabulary is closed and contains these 59 types. Generic nets remain internal connectivity groups and cannot be declared with `:::net`.
+The authorable object vocabulary is closed and contains these 80 types. Generic nets remain internal connectivity groups and cannot be declared with `:::net`.
 
 | Type | Kind | Terminals |
 | --- | --- | --- |
@@ -50,6 +50,27 @@ The authorable object vocabulary is closed and contains these 59 types. Generic 
 | `nmos` | Device | G, D, S |
 | `pmosBlk` | Device | G, S, D, B |
 | `nmosBlk` | Device | G, D, S, B |
+| `nmosDiode` | Device | G, D, S |
+| `pmosDiode` | Device | G, S, D |
+| `nmosCircle` | Device | G, D, S |
+| `pmosCircle` | Device | G, S, D |
+| `nmos2Diode` | Device | G, D, S |
+| `pmos2Diode` | Device | G, S, D |
+| `nmos2Circle` | Device | G, D, S |
+| `pmos2Circle` | Device | G, S, D |
+| `analogNFet` | Device | G, D, S |
+| `analogPFet` | Device | G, S, D |
+| `analogNFetBulk` | Device | G, D, S, B |
+| `analogPFetBulk` | Device | G, S, D, B |
+| `analogNFetCenteredGate` | Device | G, D, S |
+| `analogPFetCenteredGate` | Device | G, S, D |
+| `analogPFetNoArrow` | Device | G, S, D |
+| `analogBiasedFet` | Device | G, D, S |
+| `analogBiasedFetBulk` | Device | G, D, S, B |
+| `analogBiasedFetCenteredGate` | Device | G, D, S |
+| `analogBiasedFetNoArrow` | Device | G, D, S |
+| `nfet2` | Device | G, D, S |
+| `pfet2` | Device | G, D, S |
 | `resistor` | Device | A, B |
 | `resistorIEC` | Device | A, B |
 | `resistorVar` | Device | A, B |
@@ -120,6 +141,8 @@ The types `diodeFilled`, `schottky`, `diodeTunnel`, `diodeShockley`, `zener`, `d
 
 Existing arrows, polarity marks, and capacitance markings add no electrical terminals. The renderer does not simulate breakdown voltage, emission, illumination, capacitance, or current-voltage characteristics.
 
+The MOSFET variants in the vocabulary table are authorable only in mode `A`. Their exact terminal coordinates and dimensions remain defined by [the shape catalog](../shapes/shapes.json), including the alternate-orientation variants. Symbol names such as `nmosDiode` and `pmosDiode` do not create gate-to-drain connections.
+
 ### Supply terminology and semantics
 
 The term *supply net* follows IEEE 1801 terminology and covers electrical supply connections used for power or ground functions. `supplyNet` is this project's camelCase identifier, not an assertion that IEEE defines that programmatic spelling.
@@ -149,6 +172,27 @@ These references preserve the existing asset filenames in the [shape library](..
 | `nmos` | `nmos.svg` |
 | `pmosBlk` | `pmos4.svg` |
 | `nmosBlk` | `nmos4.svg` |
+| `nmosDiode` | `nmos-diode.svg` |
+| `pmosDiode` | `pmos-diode.svg` |
+| `nmosCircle` | `nmos-circle.svg` |
+| `pmosCircle` | `pmos-circle.svg` |
+| `nmos2Diode` | `nmos2-diode.svg` |
+| `pmos2Diode` | `pmos2-diode.svg` |
+| `nmos2Circle` | `nmos2-circle.svg` |
+| `pmos2Circle` | `pmos2-circle.svg` |
+| `analogNFet` | `analog-nfet.svg` |
+| `analogPFet` | `analog-pfet.svg` |
+| `analogNFetBulk` | `analog-nfet-bulk.svg` |
+| `analogPFetBulk` | `analog-pfet-bulk.svg` |
+| `analogNFetCenteredGate` | `analog-nfet-centered-gate.svg` |
+| `analogPFetCenteredGate` | `analog-pfet-centered-gate.svg` |
+| `analogPFetNoArrow` | `analog-pfet-no-arrow.svg` |
+| `analogBiasedFet` | `analog-biased-fet.svg` |
+| `analogBiasedFetBulk` | `analog-biased-fet-bulk.svg` |
+| `analogBiasedFetCenteredGate` | `analog-biased-fet-centered-gate.svg` |
+| `analogBiasedFetNoArrow` | `analog-biased-fet-no-arrow.svg` |
+| `nfet2` | `nfet2.svg` |
+| `pfet2` | `pfet2.svg` |
 | `resistor` | `resistor.svg` |
 | `resistorIEC` | `resistor-iec.svg` |
 | `resistorVar` | `resistor-var.svg` |
@@ -346,10 +390,12 @@ Missing endpoint declarations may be inferred from the connected MOS device and 
 
 | Connected device | Terminal | Inferred endpoint type |
 | --- | --- | --- |
-| `pmos`, `pmosBlk` | S | `supplyNet` |
-| `nmos`, `nmosBlk` | S | `ground` |
-| Any of these MOS devices | G | `pinIn` |
-| Any of these MOS devices | D | `pinOut` |
+| `pmos`, `pmosBlk`, `pmosDiode`, `pmosCircle`, `pmos2Diode`, `pmos2Circle`, `analogPFet`, `analogPFetBulk`, `analogPFetCenteredGate`, `analogPFetNoArrow`, `pfet2` | S | `supplyNet` |
+| `nmos`, `nmosBlk`, `nmosDiode`, `nmosCircle`, `nmos2Diode`, `nmos2Circle`, `analogNFet`, `analogNFetBulk`, `analogNFetCenteredGate`, `nfet2` | S | `ground` |
+| Any authorable MOSFET | G | `pinIn` |
+| Any authorable MOSFET | D | `pinOut` |
+
+The `analogBiasedFet`, `analogBiasedFetBulk`, `analogBiasedFetCenteredGate`, and `analogBiasedFetNoArrow` types have no source-polarity inference. Their source endpoints require explicit declarations unless another mapped connection establishes the endpoint. No MOSFET infers an endpoint from `B`.
 
 An undeclared endpoint is created once, using its first mapped connection's type and its identifier as its label. Later references reuse that endpoint without changing its type, even when another connected terminal has a different inference mapping. Names such as `VDD` and `GND` do not determine type, and neither does the endpoint's written side.
 
@@ -535,7 +581,9 @@ Pins on each side retain their first connection-statement order. Their spacing a
 
 ## Bulk semantics
 
-Three-terminal `pmos` and `nmos` devices have their bulk implicitly tied to their source. Use `pmosBlk` or `nmosBlk` when the bulk connects to a separate net. Bulk connections must not be inferred from visual geometry.
+All authorable three-terminal MOSFETs record an implicit bulk-to-source relationship. That relationship adds no rendered terminal or independently authorable bulk connection.
+
+The explicit-bulk types are `pmosBlk`, `nmosBlk`, `analogNFetBulk`, `analogPFetBulk`, and `analogBiasedFetBulk`. Their `B` terminal connects independently through authored connections. Bulk connections must not be inferred from visual geometry.
 
 ## Junctions
 

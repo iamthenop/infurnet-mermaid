@@ -1,4 +1,4 @@
-import type { CircuitModel, Device, Net, PinSide } from '../circuitTypes.js';
+import { mosfetTypes, mosfetChannel, type CircuitModel, type Device, type Net, type PinSide } from '../circuitTypes.js';
 import { Element, Graphic, type ElementOptions, type PlacedElement } from './core.js';
 import { bounds, unionBounds, type Bounds, type Point } from './geometry.js';
 import type { SymbolId } from './symbols.js';
@@ -49,8 +49,7 @@ export function validateOrientation(type: string, rotation: number, reverse = fa
 }
 
 function conduction(device: Device): [string, string] | undefined {
-  if (device.type.startsWith('pmos')) return ['S', 'D'];
-  if (device.type.startsWith('nmos')) return ['D', 'S'];
+  if (mosfetTypes.includes(device.type)) return mosfetChannel(device.type) === 'P' ? ['S', 'D'] : ['D', 'S'];
   if (['diode', 'diodeFilled', 'schottky', 'diodeTunnel', 'diodeShockley', 'zener', 'diodeTVS',
     'varactor', 'led', 'led2', 'photodiode'].includes(device.type)) return ['K', 'A'];
   if (device.type.endsWith('Source')) return ['P', 'N'];
@@ -61,6 +60,8 @@ function conduction(device: Device): [string, string] | undefined {
 }
 
 function defaultRotation(device: Device): number {
+  if (['nmos2Diode', 'pmos2Diode', 'nmos2Circle', 'pmos2Circle', 'nfet2'].includes(device.type)) return 90;
+  if (device.type === 'pfet2') return 270;
   if (conduction(device)?.[0] === 'K') return 270;
   return conduction(device)?.[0] === 'A' ? 90 : 0;
 }

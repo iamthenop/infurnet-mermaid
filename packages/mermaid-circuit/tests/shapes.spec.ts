@@ -199,7 +199,7 @@ describe('shape catalog', () => {
       Object.keys(assets).map((path) => path.split('/').at(-1)!).sort(),
     );
     const definitions = [...notation.matchAll(/^\| `([^`]+)` \| (Device|Net) \| ([^|]+) \|$/gmu)];
-    expect(definitions).toHaveLength(59);
+    expect(definitions).toHaveLength(80);
     expect(definitions.map((match) => match[1])).not.toContain('net');
     const existing = definitions.map((match) => match[1]!).filter((key) => key !== 'net' && key !== 'ic');
     expect(Object.keys(shapes)).toEqual(expect.arrayContaining(existing));
