@@ -10,7 +10,7 @@ export const deviceTypes = ['pmos', 'nmos', 'pmosBlk', 'nmosBlk', 'resistor', 'c
   'nmosDiode', 'pmosDiode', 'nmosCircle', 'pmosCircle', 'nmos2Diode', 'pmos2Diode', 'nmos2Circle', 'pmos2Circle',
   'analogNFet', 'analogPFet', 'analogNFetBulk', 'analogPFetBulk', 'analogNFetCenteredGate', 'analogPFetCenteredGate',
   'analogPFetNoArrow', 'analogBiasedFet', 'analogBiasedFetBulk', 'analogBiasedFetCenteredGate', 'analogBiasedFetNoArrow',
-  'nfet2', 'pfet2'] as const;
+  'nfet2', 'pfet2', 'mux', 'demux'] as const;
 export const netTypes = ['net', 'supplyNet', 'ground', 'pinIn', 'pinOut', 'pinInOut'] as const;
 export type DeviceType = typeof deviceTypes[number];
 export const mosfetTypes: readonly DeviceType[] = ['pmos', 'nmos', 'pmosBlk', 'nmosBlk',
@@ -36,6 +36,7 @@ export interface Device {
   readonly label: string;
   readonly terminals: readonly string[];
   readonly stage: number;
+  readonly size?: 2 | 4;
   readonly pinSides?: Readonly<Record<string, PinSide>>;
   readonly bulk?: { readonly kind: 'implicit'; readonly sourceTerminal: 'S' }
     | { readonly kind: 'explicit'; readonly terminal: 'B' };

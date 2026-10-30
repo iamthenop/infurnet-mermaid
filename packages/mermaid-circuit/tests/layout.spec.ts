@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
 import { describe, expect, it } from 'vitest';
 import { parseCircuit } from '../src/parser/circuitParser.js';
-import { floorplan, validateOrientation } from '../src/drawing/layout.js';
+import { floorplan, validateOrientation, icGeometry } from '../src/drawing/layout.js';
 import { mosfetTypes } from '../src/circuitTypes.js';
 import catalog from '../shapes/shapes.json' with { type: 'json' };
 
@@ -115,6 +115,55 @@ describe('basic floorplanning', () => {
       expect(second[0] - first[0]).toBeCloseTo(300, 8);
       expect(second[1] - first[1]).toBeCloseTo(90, 8);
     }
+  });
+
+  it.each(['mux', 'demux'].flatMap((type) => [2, 4].map((size) => ({ type, size }))))
+  ('draws the $type size=$size trapezoid with fixed, ordered attachments', ({ type, size }) => {
+    for (const direction of ['LR', 'TB']) {
+      const model = parseCircuit(`circuitDiagram D\nsubgraph stage selection\ndirection ${direction}\nU["U<br/>size=${size}"]:::${type}\nend`);
+      const item = floorplan(model).devices[0], geometry = icGeometry(item.device);
+      const width = size === 2 ? 180 : 240, height = size === 2 ? 240 : 360;
+      expect([geometry.width, geometry.height]).toEqual([width, height]);
+      const leftInset = type === 'demux' ? 60 : 0, rightInset = type === 'mux' ? 60 : 0;
+      expect(item.placed.primitives[0]).toMatchObject({ kind: 'polyline', points: [
+        [30, 30 + leftInset], [width - 30, 30 + rightInset], [width - 30, height - 30 - rightInset],
+        [30, height - 30 - leftInset], [30, 30 + leftInset],
+      ] });
+      expect(item.placed.primitives.every((primitive) => ['line', 'polyline'].includes(primitive.kind))).toBe(true);
+      expect(item.placed.primitives).toHaveLength(item.device.terminals.length + 1);
+      expect(item.rotation).toBe(direction === 'TB' ? 90 : 0);
+      const data = Array.from({ length: size }, (_, index) => `${type === 'mux' ? 'I' : 'O'}${index}`);
+      data.forEach((name, index) => expect(geometry.anchors[name]).toEqual([type === 'mux' ? 0 : width, 90 + 60 * index]));
+      expect(geometry.anchors[type === 'mux' ? 'O' : 'I']).toEqual([type === 'mux' ? width : 0, height / 2]);
+      expect(geometry.anchors.S0).toEqual([90, height]);
+      if (size === 4) expect(geometry.anchors.S1).toEqual([150, height]);
+      for (const [index, terminal] of item.device.terminals.entries()) {
+        const anchor = geometry.anchors[terminal];
+        expect(item.placed.anchors[terminal]).toEqual(item.placed.transform.apply(anchor));
+        const lead = item.placed.primitives[index + 1];
+        expect(lead).toMatchObject({ kind: 'line', start: anchor });
+        if (lead.kind === 'line' && terminal.startsWith('S')) {
+          expect(lead.end).toEqual([anchor[0], height - 30 - leftInset + (leftInset - rightInset) * (anchor[0] - 30) / (width - 60)]);
+          expect(anchor[1] - lead.end[1]).toBeGreaterThanOrEqual(30);
+        }
+      }
+      expect(floorplan(model).attachments).toEqual([]);
+    }
+  });
+
+  it.each([2, 4])('uses every size=%s DEMUX output for dependency levels and avoids overlapping larger bodies', (size) => {
+    for (const direction of ['LR', 'TB']) {
+      const source = `circuitDiagram D\nsubgraph stage data\ndirection ${direction}\n${Array.from({ length: size }, (_, i) => `B${i}[B${i}]:::buffer`).join('\n')}\nD["D<br/>size=${size}"]:::demux\nend\n${Array.from({ length: size }, (_, i) => `D |O${i}| --- |I| B${i}`).join('\n')}`;
+      const layout = floorplan(parseCircuit(source)), demux = layout.devices.find((item) => item.device.id === 'D')!;
+      const axis = direction === 'TB' ? 1 : 0;
+      for (const buffer of layout.devices.filter((item) => item !== demux)) {
+        expect(buffer.placed.anchors.center[axis]).toBeGreaterThan(demux.placed.anchors.center[axis]);
+      }
+      const peers = floorplan(parseCircuit(`circuitDiagram D\nsubgraph stage data\ndirection ${direction}\nD1["D1<br/>size=${size}"]:::demux\nD2["D2<br/>size=${size}"]:::demux\nend`)).devices;
+      expect(direction === 'TB' ? peers[0].pane.maxX < peers[1].pane.minX : peers[0].pane.maxY < peers[1].pane.minY).toBe(true);
+    }
+    const outputsOnly = floorplan(parseCircuit(`circuitDiagram D\nD["D<br/>size=${size}"]:::demux\nM["M<br/>size=2"]:::mux\nD |O0| --- |O| M`));
+    expect(outputsOnly.devices[0].placed.anchors.center[0]).toBe(outputsOnly.devices[1].placed.anchors.center[0]);
   });
 
   it('preserves explicit TB parallel and LR series stage directions', () => {

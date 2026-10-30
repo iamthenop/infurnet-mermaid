@@ -112,8 +112,9 @@ export function parseCircuit(text: string): CircuitModel {
       fail(line, `Incorrect declaration brackets for "${type}".`);
     }
     const displayLabel = label(body.slice(delimiters[0]!.length, -delimiters[1]!.length).trim(), line);
-    const entry = type === 'ic' ? undefined : catalog[type as Exclude<NetType, 'net'> | Exclude<DeviceType, 'ic'>];
-    if (type === 'ic' ? mode !== 'A' : !entry!.allowedModes.includes(mode)) fail(line, `Type "${type}" is not eligible in mode ${mode}.`);
+    const selector = type === 'mux' || type === 'demux';
+    const entry = type === 'ic' || selector ? undefined : catalog[type as Exclude<NetType, 'net'> | Exclude<DeviceType, 'ic' | 'mux' | 'demux'>];
+    if (type === 'ic' ? mode !== 'A' : selector ? mode !== 'D' : !entry!.allowedModes.includes(mode)) fail(line, `Type "${type}" is not eligible in mode ${mode}.`);
     if (isDevice) {
       let stageIndex = scope?.index ?? -1;
       if (scope?.kind === 'block') {
@@ -125,9 +126,28 @@ export function parseCircuit(text: string): CircuitModel {
         }
         stageIndex = blockDefaults.get(scope.index)!;
       }
+      let size: 2 | 4 | undefined;
+      let pinSides: Record<string, PinSide> | undefined;
+      if (selector) {
+        const parameters = displayLabel.split(/<br\s*\/?\s*>/iu).slice(1).map((part) => part.trim())
+          .filter((part) => /^size\b/u.test(part));
+        const values = parameters.map((part) => part.match(/^size\s*=\s*([24])$/u)?.[1]);
+        if (!values.length || values.some((value) => value === undefined) || new Set(values).size !== 1) {
+          fail(line, 'MUX/DEMUX requires a non-conflicting size=2 or size=4 label parameter.');
+        }
+        size = values[0] === '2' ? 2 : 4;
+        const data = Array.from({ length: size }, (_, index) => `${type === 'mux' ? 'I' : 'O'}${index}`);
+        const select = size === 2 ? ['S0'] : ['S0', 'S1'];
+        pinSides = Object.fromEntries([
+          ...(type === 'mux' ? data.map((name) => [name, 'L']) : [['I', 'L']]),
+          ...(type === 'mux' ? [['O', 'R']] : data.map((name) => [name, 'R'])),
+          ...select.map((name) => [name, 'B']),
+        ]) as Record<string, PinSide>;
+      }
       const deviceType = type as DeviceType;
       const device: Device = { id, type: deviceType, label: displayLabel,
-        terminals: entry ? Object.keys(entry.terminals) : [], stage: stageIndex,
+        terminals: entry ? Object.keys(entry.terminals) : pinSides ? Object.keys(pinSides) : [], stage: stageIndex,
+        ...(size ? { size, pinSides } : {}),
         ...(type === 'ic' ? { pinSides: {} } : {}),
         ...(mosfetTypes.includes(deviceType) ? { bulk: entry && 'B' in entry.terminals
           ? { kind: 'explicit' as const, terminal: 'B' as const }

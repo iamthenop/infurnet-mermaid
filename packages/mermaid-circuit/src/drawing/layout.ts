@@ -82,13 +82,17 @@ export function icGeometry(device: Device): { width: number; height: number; anc
 }
 
 export function deviceElement(device: Device, options: ElementOptions): Element {
-  if (device.type !== 'ic') return new Element(device.type as SymbolId, options);
+  if (!['ic', 'mux', 'demux'].includes(device.type)) return new Element(device.type as SymbolId, options);
   const { width, height, anchors } = icGeometry(device);
+  const mux = device.type === 'mux', demux = device.type === 'demux';
+  const leftInset = demux ? 60 : 0, rightInset = mux ? 60 : 0;
   return new Graphic([
-    { kind: 'polyline', points: [[30, 30], [width - 30, 30], [width - 30, height - 30], [30, height - 30], [30, 30]] },
+    { kind: 'polyline', points: [[30, 30 + leftInset], [width - 30, 30 + rightInset],
+      [width - 30, height - 30 - rightInset], [30, height - 30 - leftInset], [30, 30 + leftInset]] },
     ...device.terminals.map((name) => {
       const start = anchors[name], side = device.pinSides![name];
-      const end: Point = side === 'T' ? [start[0], 30] : side === 'B' ? [start[0], height - 30]
+      const bottom = height - 30 - leftInset + (leftInset - rightInset) * (start[0] - 30) / (width - 60);
+      const end: Point = side === 'T' ? [start[0], 30] : side === 'B' ? [start[0], bottom]
         : side === 'L' ? [30, start[1]] : [width - 30, start[1]];
       return { kind: 'line' as const, start, end };
     }),
@@ -98,7 +102,7 @@ export function deviceElement(device: Device, options: ElementOptions): Element 
 function placement(device: Device, at: Point, rotation: number, anchor: string, flip = false): DevicePlacement {
   const element = deviceElement(device, { at, rotation, anchor, flip });
   const placed = element.place();
-  const { width, height } = device.type === 'ic' ? icGeometry(device) : { width: 120, height: 120 };
+  const { width, height } = ['ic', 'mux', 'demux'].includes(device.type) ? icGeometry(device) : { width: 120, height: 120 };
   const pane = bounds(placed.transform.applyAll([[0, 0], [width, 0], [width, height], [0, height]]));
   return { device, element, placed, pane, rotation, flip };
 }
@@ -179,14 +183,21 @@ export function floorplan(model: CircuitModel): Layout {
   const stageLayouts = model.stages.map((stage) => {
     const devices = stage.devices.map((id) => deviceById.get(id)!);
     if (model.mode === 'D') {
+      const outputs = (device: Device) => device.type === 'demux'
+        ? device.terminals.filter((terminal) => /^O[0-3]$/u.test(terminal)) : ['O'];
       const edges = devices.map((target) => devices.flatMap((source, index) => source !== target
-        && netAt(source, 'O') !== undefined && target.terminals.some((terminal) => terminal !== 'O'
-          && netAt(target, terminal) === netAt(source, 'O')) ? [index] : []));
+        && outputs(source).some((output) => netAt(source, output) !== undefined
+          && target.terminals.some((terminal) => !outputs(target).includes(terminal)
+            && netAt(target, terminal) === netAt(source, output))) ? [index] : []));
+      const sizes = devices.map((device) => device.type === 'mux' || device.type === 'demux'
+        ? icGeometry(device) : { width: 120, height: 120 });
+      const columnStep = Math.max(120, ...sizes.map((size) => size.width)) + 240;
+      const rowStep = Math.max(120, ...sizes.map((size) => size.height)) + 120;
       const depth = levels(edges), maxRows = Math.max(1, ...depth.map((level) => depth.filter((value) => value === level).length));
       return devices.map((device, index) => {
         const row = depth.slice(0, index).filter((value) => value === depth[index]).length;
         const count = depth.filter((value) => value === depth[index]).length;
-        const x = depth[index] * 360, y = (row - (count - 1) / 2) * 240 + (maxRows - 1) * 120;
+        const x = depth[index] * columnStep, y = (row - (count - 1) / 2) * rowStep + (maxRows - 1) * rowStep / 2;
         const peers = devices.filter((_, other) => depth[other] === depth[index]);
         const sharedInput = netAt(device, 'I2');
         const flip = device.type === 'nand' && count === 2 && row === 1 && sharedInput !== undefined

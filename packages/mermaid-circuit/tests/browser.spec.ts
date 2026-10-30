@@ -40,15 +40,35 @@ const mosfetCases = mosfetTypes.filter((type) => !['pmos', 'nmos', 'pmosBlk', 'n
   return [type, source] as const;
 });
 
-it.each([...Object.entries(fixtures), ...mosfetCases].flatMap(([path, source]) => appearances.map((appearance) => ({ path, source, ...appearance }))))
+const selectorTerminals: Record<string, Record<string, readonly [number, number]>> = {
+  mux2: { I0: [0, 90], I1: [0, 150], O: [180, 120], S0: [90, 240] },
+  mux4: { I0: [0, 90], I1: [0, 150], I2: [0, 210], I3: [0, 270], O: [240, 180], S0: [90, 360], S1: [150, 360] },
+  demux2: { I: [0, 120], O0: [180, 90], O1: [180, 150], S0: [90, 240] },
+  demux4: { I: [0, 180], O0: [240, 90], O1: [240, 150], O2: [240, 210], O3: [240, 270], S0: [90, 360], S1: [150, 360] },
+};
+const selectorCases = ['mux', 'demux'].flatMap((type) => [2, 4].flatMap((size) => ['LR', 'TB'].map((direction) =>
+  [`unconnected-${type}-${size}-${direction}`, `circuitDiagram D\nsubgraph stage selection\ndirection ${direction}\nU["U<br/>size=${size}"]:::${type}\nend`] as const)));
+const controlledSelectorCases = selectorCases.filter(([name]) => name.endsWith('TB')).map(([name, source]) => {
+  const selects = parseCircuit(source).devices[0].terminals.filter((terminal) => terminal.startsWith('S'));
+  return [name.replace('unconnected', 'controlled'), `${source}\n${selects.map((terminal) =>
+    `${terminal}([${terminal}]):::pinIn\n${terminal} --- U |${terminal}|`).join('\n')}`] as const;
+});
+
+it.each([...Object.entries(fixtures), ...mosfetCases, ...selectorCases, ...controlledSelectorCases].flatMap(([path, source]) => appearances.map((appearance) => ({ path, source, ...appearance }))))
 ('renders exact geometry and standalone colours for $path in $name', async ({ path, source, config, colors }) => {
   const page = await browser!.newPage();
   const model = parseCircuit(source), layout = floorplan(model);
   const planned = routeLayout(layout);
   const expected = layout.devices.map((item) => ({ id: item.device.id, type: item.device.type,
     terminals: item.device.type === 'ic' ? Object.fromEntries(Object.entries(item.device.pinSides!).map(([name]) =>
-      [name, ({ 'v+': [90, 0], 'v-': [90, 240], ctl: [0, 90], A: [0, 150], no: [180, 120] } as Record<string, readonly number[]>)[name]])) : catalog[item.device.type].terminals,
-    sides: Object.fromEntries(layout.attachments.filter((attachment) => attachment.device === item.device.id).map((attachment) => [attachment.terminal, attachment.side])),
+      [name, ({ 'v+': [90, 0], 'v-': [90, 240], ctl: [0, 90], A: [0, 150], no: [180, 120] } as Record<string, readonly number[]>)[name]])) : item.device.type === 'mux' || item.device.type === 'demux' ? selectorTerminals[`${item.device.type}${item.device.size}`] : catalog[item.device.type].terminals,
+    sides: Object.fromEntries(item.device.terminals.map((terminal) => {
+      const attached = layout.attachments.find((attachment) => attachment.device === item.device.id && attachment.terminal === terminal);
+      const side = item.device.pinSides?.[terminal];
+      const expectedSide = attached?.side ?? (item.rotation === 90 && side ? { L: 'T', R: 'B', B: 'L', T: 'R' }[side] : side);
+      if (!expectedSide) throw new Error(`Missing expected side for ${item.device.id}.${terminal}`);
+      return [terminal, expectedSide];
+    })),
     anchors: item.placed.anchors, nets: Object.fromEntries(model.connections.filter((connection) => connection.device === item.device.id)
       .map((connection) => [connection.terminal, connection.net])) }));
   try {
@@ -135,7 +155,7 @@ it.each([...Object.entries(fixtures), ...mosfetCases].flatMap(([path, source]) =
             element.getAttribute('data-terminal-device') === device.id && element.getAttribute('data-terminal') === terminal)!;
           const label = marker.querySelector('text')!;
           const side = device.sides[terminal];
-          const vertical = device.type === 'ic' && ['T', 'B'].includes(side);
+          const vertical = ['ic', 'mux', 'demux'].includes(device.type) && ['T', 'B'].includes(side);
           const offset = vertical ? [4, 0] : ({ L: [-4, -4], R: [4, -4], T: [4, -4], B: [4, 4] } as Record<string, number[]>)[side];
           const anchor = side === 'L' || vertical && side === 'B' ? 'end' : 'start';
           const baseline = vertical || side === 'B' ? 'hanging' : 'text-after-edge';
@@ -168,6 +188,7 @@ it.each([...Object.entries(fixtures), ...mosfetCases].flatMap(([path, source]) =
       }
       return { errors, deterministic: first.svg === second.svg, uniqueIds: new Set(ids).size === ids.length,
         devices: root.querySelectorAll('[data-device]').length,
+        terminals: root.querySelectorAll('[data-terminal]').length,
         assignments: root.querySelectorAll('[data-terminal-net]').length,
         stages: root.querySelectorAll('[data-stage]').length, blocks: root.querySelectorAll('[data-block]').length,
         report: second.report, viewBox: root.getAttribute('viewBox')!.split(/\s+/u).map(Number) };
@@ -184,6 +205,7 @@ it.each([...Object.entries(fixtures), ...mosfetCases].flatMap(([path, source]) =
     expect(result.deterministic).toBe(true);
     expect(result.uniqueIds).toBe(true);
     expect(result.devices).toBe(model.devices.length);
+    expect(result.terminals).toBe(model.devices.reduce((count, device) => count + device.terminals.length, 0));
     expect(result.assignments).toBe(model.connections.length);
     expect(result.stages).toBe(model.stages.filter((stage) => !stage.implicit).length);
     expect(result.blocks).toBe(model.blocks.length);

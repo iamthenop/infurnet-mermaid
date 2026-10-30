@@ -1,6 +1,6 @@
 # Notation for circuit diagrams
 
-This specification records the approved syntax and electrical semantics of `circuitDiagram`. The parser implements the 80 authorable object types, diagram modes, typed subgraphs, and fixed-terminal connections described here. The NAND2 example is a parser acceptance fixture.
+This specification records the approved syntax and electrical semantics of `circuitDiagram`. The parser implements the 82 authorable object types, diagram modes, typed subgraphs, and fixed-terminal connections described here. The NAND2 example is a parser acceptance fixture.
 
 Basic placement, orthogonal wiring, and symbol rendering are implemented. Mode `A` supports named IC pins on any side, including multiple pins per side.
 
@@ -42,7 +42,7 @@ The parser records the diagram mode and enforces registered-shape eligibility fo
 
 ## Object types
 
-The authorable object vocabulary is closed and contains these 80 types. Generic nets remain internal connectivity groups and cannot be declared with `:::net`.
+The authorable object vocabulary is closed and contains these 82 types. Generic nets remain internal connectivity groups and cannot be declared with `:::net`.
 
 | Type | Kind | Terminals |
 | --- | --- | --- |
@@ -118,6 +118,8 @@ The authorable object vocabulary is closed and contains these 80 types. Generic 
 | `notNot` | Device | I, O |
 | `schmitt` | Device | I, O |
 | `schmittNot` | Device | I, O |
+| `mux` | Device | Fixed by size; see [MUX and DEMUX](#mux-and-demux) |
+| `demux` | Device | Fixed by size; see [MUX and DEMUX](#mux-and-demux) |
 | `ic` | Device | Dynamic |
 | `inverter` | Device | I, O |
 | `buffer` | Device | I, O |
@@ -249,6 +251,34 @@ These references preserve the existing asset filenames in the [shape library](..
 | `pinInOut` | `pin-io.svg` |
 
 `shapes/shapes.json` owns SVG filenames, pane dimensions, terminal coordinates, and label anchors. This specification does not define a coordinate registry.
+
+## MUX and DEMUX
+
+`mux` and `demux` are digital devices, eligible only in mode `D`. They use a mandatory `size=2` or `size=4` parameter below the instance name:
+
+```text
+M2["M2<br/>size=2"]:::mux
+M4["M4<br/>size=4"]:::mux
+D2["D2<br/>size=2"]:::demux
+D4["D4<br/>size=4"]:::demux
+```
+
+The size is the number of MUX data inputs or DEMUX data outputs. Missing, invalid, and conflicting sizes are rejected. Other label parameters retain their display-only behavior.
+
+| Device | Size | Left data inputs | Right data outputs | Bottom selects |
+| --- | --- | --- | --- | --- |
+| `mux` | 2 | I0, I1 | O | S0 |
+| `mux` | 4 | I0, I1, I2, I3 | O | S0, S1 |
+| `demux` | 2 | I | O0, O1 | S0 |
+| `demux` | 4 | I | O0, O1, O2, O3 | S0, S1 |
+
+Data indices increase from top to bottom; select indices increase from left to right. `S0` is the least significant select bit, followed by `S1`. The binary select value identifies the numbered input or output; the renderer does not simulate selection.
+
+All listed terminals exist and remain visible even when unconnected. Unconnected terminals acquire no inferred nets. Unsupported names, size-incompatible indices, and side qualifiers are rejected.
+
+Use the existing named-terminal connection syntax without IC side qualifiers. Distinct data and select terminals remain separate unless authored connections join them. No enable, reset, clock, or inverted-select terminal is defined.
+
+These devices use dynamic [trapezoid geometry](style.md#mux-and-demux-presentation). The read-only IC templates remain visual references, outside the 110-entry shape catalog.
 
 ## Circuit structure
 
@@ -566,7 +596,7 @@ Pins on each side retain their first connection-statement order. Their spacing a
 7. Supply and ground nets use `{{...}}` syntax.
 8. Input, output, and bidirectional pins use `([...])` syntax.
 9. Labels preserve the author's device or net name.
-10. Optional device parameters appear below the instance name, separated by `<br/>` in the label. The notation does not interpret parameter values.
+10. Optional device parameters appear below the instance name, separated by `<br/>` in the label. Only MUX/DEMUX `size` parameters are interpreted, as defined in [MUX and DEMUX](#mux-and-demux).
 11. Connections follow the [connection syntax](#connection-syntax); written left-to-right order states current-flow direction.
 12. A device terminal connects to one net.
 13. Nets connect to device terminals, not directly to other nets.

@@ -3,8 +3,8 @@ import { readFile, writeFile } from 'node:fs/promises';
 import { chromium } from 'playwright';
 import { createServer } from 'vite';
 
-const existingNames = ['wireless-solenoid', 'cmos-inverter', 'cmos-nand2', 'cmos-xor12', 'xor-nand4', 'logic-variants', 'schmitt-variants', 'resistor-fuse-variants', 'capacitor-load-variants', 'diode-variants'];
-const names = [...existingNames, 'mosfet-variants'];
+const existingNames = ['wireless-solenoid', 'cmos-inverter', 'cmos-nand2', 'cmos-xor12', 'xor-nand4', 'logic-variants', 'schmitt-variants', 'resistor-fuse-variants', 'capacitor-load-variants', 'diode-variants', 'mosfet-variants'];
+const names = [...existingNames, 'mux-demux'];
 const appearances = [
   { name: 'default', suffix: '', config: { theme: 'default' } },
   { name: 'default-inverse', suffix: '-inverse', config: { theme: 'dark' } },

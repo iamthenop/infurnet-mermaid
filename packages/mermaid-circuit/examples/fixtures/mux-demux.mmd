@@ -1,0 +1,33 @@
+circuitDiagram D
+A(["A"]):::pinIn
+B(["B"]):::pinIn
+Y0(["Y0"]):::pinOut
+Y1(["Y1"]):::pinOut
+M2Select{{"M2 S0"}}:::ground
+D4Select0{{"D4 S0"}}:::ground
+D4Select1{{"D4 S1"}}:::ground
+M4Select0{{"M4 S0"}}:::ground
+M4Select1{{"M4 S1"}}:::ground
+D2Select{{"D2 S0"}}:::ground
+subgraph stage selection
+    M2["M2<br/>size=2"]:::mux
+    D4["D4<br/>size=4"]:::demux
+    M4["M4<br/>size=4"]:::mux
+    D2["D2<br/>size=2"]:::demux
+end
+A --- M2 |I0|
+B --- M2 |I1|
+M2 |O| --- |I| D4
+D4 |O0| --- |I0| M4
+D4 |O1| --- |I1| M4
+D4 |O2| --- |I2| M4
+D4 |O3| --- |I3| M4
+M4 |O| --- |I| D2
+D2 |O0| --- Y0
+D2 |O1| --- Y1
+M2 |S0| --- M2Select
+D4 |S0| --- D4Select0
+D4 |S1| --- D4Select1
+M4 |S0| --- M4Select0
+M4 |S1| --- M4Select1
+D2 |S0| --- D2Select

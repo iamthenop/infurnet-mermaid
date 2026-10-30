@@ -131,7 +131,7 @@ end`);
       .toEqual({ mode, devices: [], nets: [], stages: [], blocks: [], connections: [] });
   });
 
-  it.each(deviceTypes.filter((type) => type !== 'ic'))('retains the approved %s device and its terminal contract', (type) => {
+  it.each(deviceTypes.filter((type) => !['ic', 'mux', 'demux'].includes(type)))('retains the approved %s device and its terminal contract', (type) => {
     const mode = logicTypes.includes(type) ? 'D' : 'A';
     const model = parseCircuit(`circuitDiagram ${mode}\nU1["display<br/>value=1"]:::${type}`);
     const terminals = type.endsWith('Blk') || type.endsWith('Bulk') ? ['G', 'D', 'S', 'B']
@@ -141,6 +141,53 @@ end`);
     expect(model.devices[0]).toMatchObject({ id: 'U1', type, label: 'display<br/>value=1', stage: 0 });
     expect([...model.devices[0]!.terminals].sort()).toEqual(terminals.sort());
     expect(model.nets).toEqual([]);
+  });
+
+  it.each([
+    ['mux', 2, ['I0', 'I1', 'O', 'S0']],
+    ['mux', 4, ['I0', 'I1', 'I2', 'I3', 'O', 'S0', 'S1']],
+    ['demux', 2, ['I', 'O0', 'O1', 'S0']],
+    ['demux', 4, ['I', 'O0', 'O1', 'O2', 'O3', 'S0', 'S1']],
+  ] as const)('preserves the fixed %s size=%s terminals even when unconnected', (type, size, terminals) => {
+    const declaration = `circuitDiagram D\nU["U<br/>size=${size}"]:::${type}`;
+    const model = parseCircuit(declaration);
+    expect(model.devices[0]).toMatchObject({ type, size, terminals, label: `U<br/>size=${size}` });
+    expect(model.devices[0].pinSides).toEqual(Object.fromEntries(terminals.map((terminal) =>
+      [terminal, terminal.startsWith('I') ? 'L' : terminal.startsWith('O') ? 'R' : 'B'])));
+    expect(model.connections).toEqual([]);
+    expect(model.nets).toEqual([]);
+    const links = terminals.map((terminal) => `N${terminal}([${terminal}]):::pinInOut\nU |${terminal}| --- N${terminal}`);
+    const connected = parseCircuit(`${declaration}\n${links.join('\n')}\nU |${terminals[0]}| --- N${terminals[0]}`);
+    expect(connected.connections).toEqual(terminals.map((terminal) => ({ device: 'U', terminal, net: `N${terminal}` })));
+    expect(new Set(connected.connections.map(({ net }) => net)).size).toBe(terminals.length);
+    for (const invalid of ['EN', 'CLK', 'RESET', 'S', 'S2', 'I4', 'O4', ...(size === 2 ? ['S1', 'I2', 'O2'] : []),
+      ...(type === 'mux' ? ['I', 'O0'] : ['I0', 'O'])]) {
+      expect(() => parseCircuit(`${declaration}\nX([X]):::pinInOut\nU |${invalid}| --- X`)).toThrow('Unknown terminal');
+    }
+    expect(() => parseCircuit(`${declaration}\nU:L |${terminals[0]}| --- X`)).toThrow('side qualifier');
+    expect(() => parseCircuit(`${declaration}\nU |S0| --- Missing`)).toThrow('Declare endpoint');
+    expect(() => parseCircuit(declaration.replace('circuitDiagram D', 'circuitDiagram A'))).toThrow('not eligible');
+    expect(parseCircuit(declaration.replace('size=', 'size = ')).devices[0].size).toBe(size);
+  });
+
+  it.each(['mux', 'demux'])('rejects missing, malformed, conflicting and unsupported %s sizes', (type) => {
+    for (const label of ['U', 'size=2', 'U<br/>size=', 'U<br/>size=1', 'U<br/>size=3', 'U<br/>size=8',
+      'U<br/>size=02', 'U<br/>size=2.0', 'U<br/>size=2x', 'U<br/>size=2<br/>size=4', 'U<br/>size=2<br/>size=bad']) {
+      expect(() => parseCircuit(`circuitDiagram D\nU["${label}"]:::${type}`)).toThrow('size=2 or size=4');
+    }
+    expect(parseCircuit(`circuitDiagram D\nU["U<br/>size=2<br/>size=2"]:::${type}`).devices[0].size).toBe(2);
+    expect(parseCircuit(`circuitDiagram D\nU["U<br/>gain=10<br/>size=4"]:::${type}`).devices[0].label).toBe('U<br/>gain=10<br/>size=4');
+    expect(parseCircuit('circuitDiagram D\nU["U<br/>size=bad"]:::buffer').devices[0].size).toBeUndefined();
+  });
+
+  it('retains separate data and select nets across the four MUX/DEMUX configurations', () => {
+    const model = parseCircuit(drawingFixtures['../examples/fixtures/mux-demux.mmd']);
+    expect(model.devices.map(({ type, size }) => [type, size])).toEqual([['mux', 2], ['demux', 4], ['mux', 4], ['demux', 2]]);
+    expect(topology(model)).toEqual([
+      ['M2.I0'], ['M2.I1'], ['M2.O', 'D4.I'], ...[0, 1, 2, 3].map((i) => [`D4.O${i}`, `M4.I${i}`]),
+      ['M4.O', 'D2.I'], ['D2.O0'], ['D2.O1'], ['M2.S0'], ['D4.S0'], ['D4.S1'], ['M4.S0'], ['M4.S1'], ['D2.S0'],
+    ].map((group) => group.sort()).sort());
+    expect(model.connections).toHaveLength(22);
   });
 
   it.each(netTypes.filter((type) => type !== 'net').flatMap((type) => ['D', 'A'].map((mode) => ({ type, mode }))))('accepts shared $type in $mode', ({ type, mode }) => {
@@ -182,7 +229,7 @@ end`);
   });
 
   it.each(deviceTypes)('rejects %s in its ineligible mode', (type) => {
-    const mode = logicTypes.includes(type) ? 'A' : 'D';
+    const mode = [...logicTypes, 'mux', 'demux'].includes(type) ? 'A' : 'D';
     expect(() => parseCircuit(`circuitDiagram ${mode}\nU1["U1"]:::${type}`)).toThrow('Line 2: Type');
   });
 
