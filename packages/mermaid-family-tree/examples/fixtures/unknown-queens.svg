@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" id="unknown-queens" viewBox="0 0 756 374" width="756" height="374" role="img" aria-labelledby="ft-75-6e-6b-6e-6f-77-6e-2d-71-75-65-65-6e-73-title-74-69-74-6c-65" font-family="sans-serif" font-size="14">
+<title id="ft-75-6e-6b-6e-6f-77-6e-2d-71-75-65-65-6e-73-title-74-69-74-6c-65">Cat family pedigree</title>
+<rect width="100%" height="100%" fill="#ffffff"/>
+<g stroke="#344054" stroke-width="1.6" stroke-linejoin="round">
+<g id="ft-75-6e-6b-6e-6f-77-6e-2d-71-75-65-65-6e-73-relationship-5b-22-63-61-6e-64-69-64-61-74-65-22-2c-22-55-6e-6b-6e-6f-77-6e-22-2c-22-4c-31-22-5d" data-kind="candidate" data-source="Unknown" data-target="L1" stroke-dasharray="6 5">
+<path d="M330,114 L330,208 L240,208 L240,226" fill="none" />
+</g>
+<g id="ft-75-6e-6b-6e-6f-77-6e-2d-71-75-65-65-6e-73-relationship-5b-22-63-61-6e-64-69-64-61-74-65-22-2c-22-55-6e-6b-6e-6f-77-6e-22-2c-22-4c-32-22-5d" data-kind="candidate" data-source="Unknown" data-target="L2" stroke-dasharray="6 5">
+<path d="M370,114 L370,200 L460,200 L460,226" fill="none" />
+</g>
+<g id="ft-75-6e-6b-6e-6f-77-6e-2d-71-75-65-65-6e-73-relationship-5b-22-6d-61-74-65-72-6e-69-74-79-22-2c-22-40-75-6e-6b-6e-6f-77-6e-2d-71-75-65-65-6e-3a-4c-31-22-2c-22-4c-31-22-5d" data-kind="maternity" data-source="@unknown-queen:L1" data-target="L1">
+<path d="M128,114 L128,192 L240,192 L240,226" fill="none" />
+</g>
+<g id="ft-75-6e-6b-6e-6f-77-6e-2d-71-75-65-65-6e-73-relationship-5b-22-6d-61-74-65-72-6e-69-74-79-22-2c-22-40-75-6e-6b-6e-6f-77-6e-2d-71-75-65-65-6e-3a-4c-32-22-2c-22-4c-32-22-5d" data-kind="maternity" data-source="@unknown-queen:L2" data-target="L2">
+<path d="M572,114 L572,184 L460,184 L460,226" fill="none" />
+</g>
+<g id="ft-75-6e-6b-6e-6f-77-6e-2d-71-75-65-65-6e-73-litter-4c-31" data-litter="L1"><title>First litter</title>
+<path d="M240,226 L240,258" fill="none" data-stem="true"/>
+<path d="M240,258 L240,258" fill="none" data-rail="true"/>
+<circle data-junction="true" cx="240" cy="226" r="3" fill="#344054"/>
+<path d="M240,258 L240,290" fill="none" data-offspring="A"/>
+</g>
+<g id="ft-75-6e-6b-6e-6f-77-6e-2d-71-75-65-65-6e-73-litter-4c-32" data-litter="L2"><title>Second litter</title>
+<path d="M460,226 L460,258" fill="none" data-stem="true"/>
+<path d="M460,258 L460,258" fill="none" data-rail="true"/>
+<circle data-junction="true" cx="460" cy="226" r="3" fill="#344054"/>
+<path d="M460,258 L460,290" fill="none" data-offspring="B"/>
+</g>
+</g>
+<g id="ft-75-6e-6b-6e-6f-77-6e-2d-71-75-65-65-6e-73-individual-40-75-6e-6b-6e-6f-77-6e-2d-71-75-65-65-6e-3a-4c-31" data-individual="@unknown-queen:L1" data-generation="0" data-classes="queen">
+<title>Unknown queen (unknown queen for L1)</title>
+<rect data-nameplate="true" x="60" y="78" width="136" height="36" rx="9" fill="#f8fafc" stroke="#344054" stroke-width="1.6"/>
+<text x="128" y="96" dominant-baseline="central" text-anchor="middle" fill="#182230">Unknown queen</text>
+<text data-sex="queen" x="208" y="96" dominant-baseline="central" text-anchor="middle" font-size="18" fill="#344054">♀</text>
+</g>
+<g id="ft-75-6e-6b-6e-6f-77-6e-2d-71-75-65-65-6e-73-individual-40-75-6e-6b-6e-6f-77-6e-2d-71-75-65-65-6e-3a-4c-32" data-individual="@unknown-queen:L2" data-generation="0" data-classes="queen">
+<title>Unknown queen (unknown queen for L2)</title>
+<rect data-nameplate="true" x="504" y="78" width="136" height="36" rx="9" fill="#f8fafc" stroke="#344054" stroke-width="1.6"/>
+<text x="572" y="96" dominant-baseline="central" text-anchor="middle" fill="#182230">Unknown queen</text>
+<text data-sex="queen" x="652" y="96" dominant-baseline="central" text-anchor="middle" font-size="18" fill="#344054">♀</text>
+</g>
+<g id="ft-75-6e-6b-6e-6f-77-6e-2d-71-75-65-65-6e-73-individual-41" data-individual="A" data-generation="1" data-classes="">
+<title>Ada</title>
+<rect data-nameplate="true" x="174" y="290" width="132" height="36" rx="9" fill="#f8fafc" stroke="#344054" stroke-width="1.6"/>
+<text x="240" y="308" dominant-baseline="central" text-anchor="middle" fill="#182230">Ada</text>
+</g>
+<g id="ft-75-6e-6b-6e-6f-77-6e-2d-71-75-65-65-6e-73-individual-42" data-individual="B" data-generation="1" data-classes="">
+<title>Bea</title>
+<rect data-nameplate="true" x="394" y="290" width="132" height="36" rx="9" fill="#f8fafc" stroke="#344054" stroke-width="1.6"/>
+<text x="460" y="308" dominant-baseline="central" text-anchor="middle" fill="#182230">Bea</text>
+</g>
+<g id="ft-75-6e-6b-6e-6f-77-6e-2d-71-75-65-65-6e-73-individual-55-6e-6b-6e-6f-77-6e" data-individual="Unknown" data-generation="0" data-classes="tom">
+<title>Unknown</title>
+<rect data-nameplate="true" x="284" y="78" width="132" height="36" rx="9" fill="#f8fafc" stroke="#344054" stroke-width="1.6"/>
+<text x="350" y="96" dominant-baseline="central" text-anchor="middle" fill="#182230">Unknown</text>
+<text data-sex="tom" x="428" y="96" dominant-baseline="central" text-anchor="middle" font-size="18" fill="#344054">♂</text>
+</g>
+</svg>

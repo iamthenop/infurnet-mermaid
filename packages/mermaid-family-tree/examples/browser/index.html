@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="en">
+  <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Cat family pedigrees</title>
+    <style>body { font-family: sans-serif; margin: 24px; color: #182230; } #output svg { max-width: 100%; height: auto; }</style>
+  </head>
+  <body>
+    <h1>Cat family pedigrees</h1>
+    <p>Solid lines show maternity or confirmed parentage. Dashed lines to a litter show possible sires. Adoption has its own label.</p>
+    <label>Example <select id="fixture"></select></label>
+    <p id="status" role="status">Loading pedigree…</p>
+    <div id="output"></div>
+    <script type="module" src="/main.ts"></script>
+  </body>
+</html>

@@ -33,6 +33,7 @@ infer it.
 | :--- | :--- |
 | Repository root (`.`) | Workspace configuration, package coordination, and repository-level documentation. No diagram implementation. |
 | `packages/mermaid-circuit/` | `mermaid-circuit` owns the `circuitDiagram` plugin, including notation, electrical model, parsing, placement, rendering, SVG symbols, examples, and tests. |
+| `packages/mermaid-family-tree/` | `mermaid-family-tree` owns the `familyTree` plugin and its `catmode` notation, genealogy model, validation, layout, SVG rendering, examples, and tests. |
 
 
 ## Import boundaries

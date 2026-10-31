@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" id="generation-spans" viewBox="0 0 1016 798" width="1016" height="798" role="img" aria-labelledby="ft-67-65-6e-65-72-61-74-69-6f-6e-2d-73-70-61-6e-73-title-74-69-74-6c-65" font-family="sans-serif" font-size="14">
+<title id="ft-67-65-6e-65-72-61-74-69-6f-6e-2d-73-70-61-6e-73-title-74-69-74-6c-65">Cat family pedigree</title>
+<rect width="100%" height="100%" fill="#ffffff"/>
+<defs><marker id="ft-67-65-6e-65-72-61-74-69-6f-6e-2d-73-70-61-6e-73-arrow-63-6f-6e-66-69-72-6d-65-64" viewBox="0 0 8 8" refX="8" refY="4" markerWidth="8" markerHeight="8" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#344054"/></marker></defs>
+<g stroke="#344054" stroke-width="1.6" stroke-linejoin="round">
+<g id="ft-67-65-6e-65-72-61-74-69-6f-6e-2d-73-70-61-6e-73-relationship-5b-22-61-6e-63-65-73-74-72-79-22-2c-22-41-6e-63-65-73-74-6f-72-22-2c-22-44-65-73-63-65-6e-64-61-6e-74-22-2c-22-2d-2d-2d-2d-3e-22-5d" data-kind="ancestry" data-source="Ancestor" data-target="Descendant" data-generation-span="3">
+<path d="M566,114 L566,146 L888,146 L888,696 L472,696 L472,732 L496,732" fill="none" marker-end="url(#ft-67-65-6e-65-72-61-74-69-6f-6e-2d-73-70-61-6e-73-arrow-63-6f-6e-66-69-72-6d-65-64)"/>
+</g>
+<g id="ft-67-65-6e-65-72-61-74-69-6f-6e-2d-73-70-61-6e-73-relationship-5b-22-61-6e-63-65-73-74-72-79-22-2c-22-47-72-61-6e-64-66-61-74-68-65-72-22-2c-22-47-72-61-6e-64-64-61-75-67-68-74-65-72-22-2c-22-2d-2d-2d-3e-22-5d" data-kind="ancestry" data-source="Grandfather" data-target="Granddaughter" data-generation-span="2">
+<path d="M786,114 L786,146 L912,146 L912,476 L682,476 L682,520 L706,520" fill="none" marker-end="url(#ft-67-65-6e-65-72-61-74-69-6f-6e-2d-73-70-61-6e-73-arrow-63-6f-6e-66-69-72-6d-65-64)"/>
+</g>
+<g id="ft-67-65-6e-65-72-61-74-69-6f-6e-2d-73-70-61-6e-73-relationship-5b-22-63-6f-6e-66-69-72-6d-65-64-22-2c-22-41-22-2c-22-42-22-5d" data-kind="confirmed" data-source="A" data-target="B">
+<path d="M126,114 L126,256 L44,256 L44,308 L68,308" fill="none" marker-end="url(#ft-67-65-6e-65-72-61-74-69-6f-6e-2d-73-70-61-6e-73-arrow-63-6f-6e-66-69-72-6d-65-64)"/>
+</g>
+<g id="ft-67-65-6e-65-72-61-74-69-6f-6e-2d-73-70-61-6e-73-relationship-5b-22-63-6f-6e-66-69-72-6d-65-64-22-2c-22-42-22-2c-22-43-22-5d" data-kind="confirmed" data-source="B" data-target="C">
+<path d="M134,326 L134,460 L48,460 L48,520 L72,520" fill="none" marker-end="url(#ft-67-65-6e-65-72-61-74-69-6f-6e-2d-73-70-61-6e-73-arrow-63-6f-6e-66-69-72-6d-65-64)"/>
+</g>
+<g id="ft-67-65-6e-65-72-61-74-69-6f-6e-2d-73-70-61-6e-73-relationship-5b-22-63-6f-6e-66-69-72-6d-65-64-22-2c-22-4d-6f-74-68-65-72-22-2c-22-44-61-75-67-68-74-65-72-22-5d" data-kind="confirmed" data-source="Mother" data-target="Daughter">
+<path d="M346,114 L346,272 L264,272 L264,308 L288,308" fill="none" marker-end="url(#ft-67-65-6e-65-72-61-74-69-6f-6e-2d-73-70-61-6e-73-arrow-63-6f-6e-66-69-72-6d-65-64)"/>
+</g>
+</g>
+<g id="ft-67-65-6e-65-72-61-74-69-6f-6e-2d-73-70-61-6e-73-individual-41" data-individual="A" data-generation="0" data-classes="">
+<title>A</title>
+<rect data-nameplate="true" x="60" y="78" width="132" height="36" rx="9" fill="#f8fafc" stroke="#344054" stroke-width="1.6"/>
+<text x="126" y="96" dominant-baseline="central" text-anchor="middle" fill="#182230">A</text>
+</g>
+<g id="ft-67-65-6e-65-72-61-74-69-6f-6e-2d-73-70-61-6e-73-individual-41-6e-63-65-73-74-6f-72" data-individual="Ancestor" data-generation="0" data-classes="">
+<title>Ancestor</title>
+<rect data-nameplate="true" x="500" y="78" width="132" height="36" rx="9" fill="#f8fafc" stroke="#344054" stroke-width="1.6"/>
+<text x="566" y="96" dominant-baseline="central" text-anchor="middle" fill="#182230">Ancestor</text>
+</g>
+<g id="ft-67-65-6e-65-72-61-74-69-6f-6e-2d-73-70-61-6e-73-individual-42" data-individual="B" data-generation="1" data-classes="">
+<title>B</title>
+<rect data-nameplate="true" x="68" y="290" width="132" height="36" rx="9" fill="#f8fafc" stroke="#344054" stroke-width="1.6"/>
+<text x="134" y="308" dominant-baseline="central" text-anchor="middle" fill="#182230">B</text>
+</g>
+<g id="ft-67-65-6e-65-72-61-74-69-6f-6e-2d-73-70-61-6e-73-individual-43" data-individual="C" data-generation="2" data-classes="">
+<title>C</title>
+<rect data-nameplate="true" x="72" y="502" width="132" height="36" rx="9" fill="#f8fafc" stroke="#344054" stroke-width="1.6"/>
+<text x="138" y="520" dominant-baseline="central" text-anchor="middle" fill="#182230">C</text>
+</g>
+<g id="ft-67-65-6e-65-72-61-74-69-6f-6e-2d-73-70-61-6e-73-individual-44-61-75-67-68-74-65-72" data-individual="Daughter" data-generation="1" data-classes="">
+<title>Daughter</title>
+<rect data-nameplate="true" x="288" y="290" width="132" height="36" rx="9" fill="#f8fafc" stroke="#344054" stroke-width="1.6"/>
+<text x="354" y="308" dominant-baseline="central" text-anchor="middle" fill="#182230">Daughter</text>
+</g>
+<g id="ft-67-65-6e-65-72-61-74-69-6f-6e-2d-73-70-61-6e-73-individual-44-65-73-63-65-6e-64-61-6e-74" data-individual="Descendant" data-generation="3" data-classes="">
+<title>Descendant</title>
+<rect data-nameplate="true" x="496" y="714" width="132" height="36" rx="9" fill="#f8fafc" stroke="#344054" stroke-width="1.6"/>
+<text x="562" y="732" dominant-baseline="central" text-anchor="middle" fill="#182230">Descendant</text>
+</g>
+<g id="ft-67-65-6e-65-72-61-74-69-6f-6e-2d-73-70-61-6e-73-individual-47-72-61-6e-64-64-61-75-67-68-74-65-72" data-individual="Granddaughter" data-generation="2" data-classes="">
+<title>Granddaughter</title>
+<rect data-nameplate="true" x="706" y="502" width="136" height="36" rx="9" fill="#f8fafc" stroke="#344054" stroke-width="1.6"/>
+<text x="774" y="520" dominant-baseline="central" text-anchor="middle" fill="#182230">Granddaughter</text>
+</g>
+<g id="ft-67-65-6e-65-72-61-74-69-6f-6e-2d-73-70-61-6e-73-individual-47-72-61-6e-64-66-61-74-68-65-72" data-individual="Grandfather" data-generation="0" data-classes="">
+<title>Grandfather</title>
+<rect data-nameplate="true" x="720" y="78" width="132" height="36" rx="9" fill="#f8fafc" stroke="#344054" stroke-width="1.6"/>
+<text x="786" y="96" dominant-baseline="central" text-anchor="middle" fill="#182230">Grandfather</text>
+</g>
+<g id="ft-67-65-6e-65-72-61-74-69-6f-6e-2d-73-70-61-6e-73-individual-4d-6f-74-68-65-72" data-individual="Mother" data-generation="0" data-classes="">
+<title>Mother</title>
+<rect data-nameplate="true" x="280" y="78" width="132" height="36" rx="9" fill="#f8fafc" stroke="#344054" stroke-width="1.6"/>
+<text x="346" y="96" dominant-baseline="central" text-anchor="middle" fill="#182230">Mother</text>
+</g>
+</svg>
