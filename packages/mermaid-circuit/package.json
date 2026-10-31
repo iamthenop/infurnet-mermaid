@@ -1,6 +1,6 @@
 {
   "name": "mermaid-circuit",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "license": "MIT",
   "description": "Circuit notation, connectivity, and basic schematic drawing for Mermaid",
   "repository": {
@@ -15,7 +15,7 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": { ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" } },
-  "files": ["dist", "shapes/shapes.json", "LICENSE", "ACKNOWLEDGEMENTS.md"],
+  "files": ["dist", "shapes/shapes.json", "LICENSE", "ACKNOWLEDGEMENTS.md", "CHANGELOG.md"],
   "scripts": {
     "build": "node scripts/build-shape-assets.mjs && tsc -p tsconfig.json",
     "typecheck": "npm run build && tsc --ignoreConfig --noEmit --strict --skipLibCheck --target ES2022 --module NodeNext --moduleResolution NodeNext tests/detector.spec.ts tests/diagram.spec.ts tests/circuitParser.spec.ts tests/browser.spec.ts tests/shapes.spec.ts tests/drawing.spec.ts tests/layout.spec.ts tests/routing.spec.ts examples/browser/main.ts",

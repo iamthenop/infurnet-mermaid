@@ -1,10 +1,9 @@
 import assert from 'node:assert/strict';
-import { readFile, writeFile } from 'node:fs/promises';
+import { readFile } from 'node:fs/promises';
 import { chromium } from 'playwright';
 import { createServer } from 'vite';
 
-const existingNames = ['wireless-solenoid', 'cmos-inverter', 'cmos-nand2', 'cmos-xor12', 'xor-nand4', 'logic-variants', 'schmitt-variants', 'resistor-fuse-variants', 'capacitor-load-variants', 'diode-variants', 'mosfet-variants', 'mux-demux', 'opamp-open-loop', 'opamp-voltage-follower', 'opamp-noninverting-amplifier'];
-const names = [...existingNames, 'opamp-voltage-follower-no-supply', 'opamp-noninverting-amplifier-no-supply'];
+const names = ['wireless-solenoid', 'cmos-inverter', 'cmos-nand2', 'cmos-xor12', 'xor-nand4', 'logic-variants', 'schmitt-variants', 'resistor-fuse-variants', 'capacitor-load-variants', 'diode-variants', 'mosfet-variants', 'mux-demux', 'opamp-open-loop', 'opamp-voltage-follower', 'opamp-noninverting-amplifier', 'opamp-voltage-follower-no-supply', 'opamp-noninverting-amplifier-no-supply'];
 const appearances = [
   { name: 'default', suffix: '', config: { theme: 'default' } },
   { name: 'default-inverse', suffix: '-inverse', config: { theme: 'dark' } },
@@ -34,11 +33,7 @@ try {
       return { svg, report };
     }, { name, config: appearance.config });
     const reference = new URL(`../examples/fixtures/${name}${appearance.suffix}.svg`, import.meta.url);
-    if (existingNames.includes(name)) {
-      assert.equal(result.svg + '\n', await readFile(reference, 'utf8'), `${name}/${appearance.name}: reference changed.`);
-    } else {
-      await writeFile(reference, result.svg + '\n');
-    }
+    assert.equal(result.svg + '\n', await readFile(reference, 'utf8'), `${name}/${appearance.name}: reference changed.`);
     console.log(JSON.stringify({ fixture: name, appearance: appearance.name, ...result.report }));
   }
 } finally {

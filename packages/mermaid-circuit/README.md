@@ -1,6 +1,8 @@
 # mermaid-circuit
 
-An external Mermaid circuit renderer with identifier `circuitDiagram`. Version `0.1.0` is a release candidate; it has not been published to npm. The package is prepared for tarball installation, while the repository-root workspace remains private.
+An external Mermaid circuit renderer with identifier `circuitDiagram`. Version `0.1.0` is published on npm. Version `0.1.1` is the current source release candidate; it has not been published.
+
+The candidate is prepared for tarball installation, while the repository-root workspace remains private. See the [changelog](CHANGELOG.md) for the candidate’s implemented changes and known routing limits.
 
 ## Implemented behavior
 
@@ -167,10 +169,10 @@ npm ci
 npm run build --workspace mermaid-circuit
 npm pack --dry-run --json --workspace mermaid-circuit
 npm pack --workspace mermaid-circuit
-tar -tzf mermaid-circuit-0.1.0.tgz
+tar -tzf mermaid-circuit-0.1.1.tgz
 ```
 
-The tarball contains compiled ESM, TypeScript declarations, the shape catalog, bundled symbol artwork, this README, the MIT license, and acknowledgements. The 110 registered symbols are bundled in JavaScript; runtime rendering does not read source SVG files. The nine unregistered IC templates are excluded.
+The tarball contains compiled ESM, TypeScript declarations, the shape catalog, bundled symbol artwork, this README, the changelog, the MIT license, and acknowledgements. The 110 registered symbols are bundled in JavaScript; runtime rendering does not read source SVG files. The nine unregistered IC templates are excluded.
 
 Run the isolated consumer check from the checkout:
 
@@ -179,14 +181,14 @@ npx playwright install chromium
 npm run verify:distribution --workspace mermaid-circuit
 ```
 
-The check builds and packs the package, audits the actual archive, and installs it into a temporary app outside the repository. It compiles a TypeScript consumer, checks all 110 symbols, and renders all five reference circuits in all three appearances. It checks geometry, connectivity, and colours against the saved SVGs, with network requests blocked during rendering.
+The check builds and packs the package, audits the actual archive, and installs it into a temporary app outside the repository. It compiles a TypeScript consumer, checks all 110 symbols, and renders all seventeen reference circuits in all three appearances. It checks geometry, connectivity, and colours against the saved SVGs, with network requests blocked during rendering.
 
 Imports must resolve inside the isolated app. The check uses Node.js and existing JavaScript tooling; no Python runtime is needed. It removes its temporary app and tarball on success or failure.
 
 To retain the exact tarball that passed verification, supply an output path outside the repository:
 
 ```sh
-npm run verify:distribution --workspace mermaid-circuit -- --tarball-output /absolute/output/mermaid-circuit-0.1.0.tgz
+npm run verify:distribution --workspace mermaid-circuit -- --tarball-output /absolute/output/mermaid-circuit-0.1.1.tgz
 ```
 
 The output directory must already exist. The verifier prints the tarball's filename, byte size, SHA-256 digest, content inventory, and each circuit/theme result. Delete locally generated tarballs after use; do not commit them.
@@ -194,7 +196,7 @@ The output directory must already exist. The verifier prints the tarball's filen
 In an independent ESM app, install that verified tarball alongside Mermaid:
 
 ```sh
-npm install /absolute/output/mermaid-circuit-0.1.0.tgz mermaid@12.2.0
+npm install /absolute/output/mermaid-circuit-0.1.1.tgz mermaid@12.2.0
 ```
 
 Use the [host registration example](#local-consumption) below. The public ESM entry point, declaration files, and export map are unchanged.
@@ -341,7 +343,7 @@ The resistor values illustrate the ideal nominal relationship `Av ≈ 1 + Rf/Rg 
 
 The two signal-only examples omit `supplyNet` declarations and leave `vd` and `vs` visibly unconnected. Their signal and feedback connections match the powered examples; the amplifier retains its explicit divider ground. These abbreviated schematics do not imply that an op-amp operates without power.
 
-Generate the six signal-only SVGs and verify the forty-five existing references without rewriting them:
+Verify all seventeen source fixtures against their fifty-one saved SVG references without rewriting them. A mismatched reference fails validation:
 
 ```sh
 npm run render:fixtures --workspace mermaid-circuit
