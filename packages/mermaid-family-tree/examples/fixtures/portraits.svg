@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" id="portraits" viewBox="0 0 776 620" width="776" height="620" role="img" aria-labelledby="ft-70-6f-72-74-72-61-69-74-73-title-74-69-74-6c-65" font-family="sans-serif" font-size="14">
+<title id="ft-70-6f-72-74-72-61-69-74-73-title-74-69-74-6c-65">Cat family pedigree</title>
+<rect width="100%" height="100%" fill="#ffffff"/>
+<defs><marker id="ft-70-6f-72-74-72-61-69-74-73-arrow-61-64-6f-70-74-69-6f-6e" viewBox="0 0 8 8" refX="8" refY="4" markerWidth="8" markerHeight="8" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#7c3f99"/></marker></defs>
+<g stroke="#344054" stroke-width="1.6" stroke-linejoin="round">
+<g id="ft-70-6f-72-74-72-61-69-74-73-relationship-5b-22-61-64-6f-70-74-69-6f-6e-22-2c-22-48-61-6e-22-2c-22-42-72-61-75-73-22-5d" data-kind="adoption" data-source="Han" data-target="Braus" stroke-dasharray="6 5" stroke="#7c3f99">
+<path d="M566,222 L566,252 L668,252 L668,572 L145,572 L145,542" fill="none" marker-end="url(#ft-70-6f-72-74-72-61-69-74-73-arrow-61-64-6f-70-74-69-6f-6e)"/>
+</g>
+<text x="674" y="406" stroke="none" fill="#7c3f99" font-size="12">adopt</text>
+<g id="ft-70-6f-72-74-72-61-69-74-73-relationship-5b-22-63-61-6e-64-69-64-61-74-65-22-2c-22-53-74-61-6e-6c-65-79-22-2c-22-4c-31-22-5d" data-kind="candidate" data-source="Stanley" data-target="L1" stroke-dasharray="6 5">
+<path d="M346,222 L346,290 L240,290 L240,316" fill="none" />
+</g>
+<g id="ft-70-6f-72-74-72-61-69-74-73-relationship-5b-22-6d-61-74-65-72-6e-69-74-79-22-2c-22-52-6f-73-65-22-2c-22-4c-31-22-5d" data-kind="maternity" data-source="Rose" data-target="L1">
+<path d="M126,222 L126,282 L240,282 L240,316" fill="none" />
+</g>
+<g id="ft-70-6f-72-74-72-61-69-74-73-litter-4c-31" data-litter="L1"><title>L1</title>
+<path d="M240,316 L240,348" fill="none" data-stem="true"/>
+<path d="M145,348 L335,348" fill="none" data-rail="true"/>
+<circle data-junction="true" cx="240" cy="316" r="3" fill="#344054"/>
+<path d="M145,348 L145,380" fill="none" data-offspring="Braus"/>
+<path d="M335,348 L335,506" fill="none" data-offspring="Jimmy"/>
+</g>
+</g>
+<g id="ft-70-6f-72-74-72-61-69-74-73-individual-42-72-61-75-73" data-individual="Braus" data-generation="1" data-classes="queen">
+<title>Fräulein Bräuß</title>
+<defs><clipPath id="ft-70-6f-72-74-72-61-69-74-73-portrait-42-72-61-75-73"><circle cx="145" cy="452" r="72"/></clipPath></defs>
+<image data-portrait="true" href="cat.svg" x="73" y="380" width="144" height="144" preserveAspectRatio="xMidYMid slice" clip-path="url(#ft-70-6f-72-74-72-61-69-74-73-portrait-42-72-61-75-73)"/>
+<rect data-nameplate="true" x="73" y="506" width="144" height="36" rx="9" fill="#f8fafc" stroke="#344054" stroke-width="1.6"/>
+<text x="145" y="524" dominant-baseline="central" text-anchor="middle" fill="#182230">Fräulein Bräuß</text>
+<text data-sex="queen" x="229" y="524" dominant-baseline="central" text-anchor="middle" font-size="18" fill="#344054">♀</text>
+</g>
+<g id="ft-70-6f-72-74-72-61-69-74-73-individual-48-61-6e" data-individual="Han" data-generation="0" data-classes="human">
+<title>Han</title>
+<rect data-nameplate="true" x="500" y="186" width="132" height="36" rx="9" fill="#f8fafc" stroke="#344054" stroke-width="1.6"/>
+<text x="566" y="204" dominant-baseline="central" text-anchor="middle" fill="#182230">Han</text>
+</g>
+<g id="ft-70-6f-72-74-72-61-69-74-73-individual-4a-69-6d-6d-79" data-individual="Jimmy" data-generation="1" data-classes="">
+<title>Jimmy</title>
+<rect data-nameplate="true" x="269" y="506" width="132" height="36" rx="9" fill="#f8fafc" stroke="#344054" stroke-width="1.6"/>
+<text x="335" y="524" dominant-baseline="central" text-anchor="middle" fill="#182230">Jimmy</text>
+</g>
+<g id="ft-70-6f-72-74-72-61-69-74-73-individual-52-6f-73-65" data-individual="Rose" data-generation="0" data-classes="queen">
+<title>Rose</title>
+<defs><clipPath id="ft-70-6f-72-74-72-61-69-74-73-portrait-52-6f-73-65"><circle cx="126" cy="138" r="66"/></clipPath></defs>
+<image data-portrait="true" href="cat.svg" x="60" y="72" width="132" height="132" preserveAspectRatio="xMidYMid slice" clip-path="url(#ft-70-6f-72-74-72-61-69-74-73-portrait-52-6f-73-65)"/>
+<rect data-nameplate="true" x="60" y="186" width="132" height="36" rx="9" fill="#f8fafc" stroke="#344054" stroke-width="1.6"/>
+<text x="126" y="204" dominant-baseline="central" text-anchor="middle" fill="#182230">Rose</text>
+<text data-sex="queen" x="204" y="204" dominant-baseline="central" text-anchor="middle" font-size="18" fill="#344054">♀</text>
+</g>
+<g id="ft-70-6f-72-74-72-61-69-74-73-individual-53-74-61-6e-6c-65-79" data-individual="Stanley" data-generation="0" data-classes="tom">
+<title>Stanley</title>
+<rect data-nameplate="true" x="280" y="186" width="132" height="36" rx="9" fill="#f8fafc" stroke="#344054" stroke-width="1.6"/>
+<text x="346" y="204" dominant-baseline="central" text-anchor="middle" fill="#182230">Stanley</text>
+<text data-sex="tom" x="424" y="204" dominant-baseline="central" text-anchor="middle" font-size="18" fill="#344054">♂</text>
+</g>
+</svg>

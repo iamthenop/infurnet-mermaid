@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" id="generation-gap" viewBox="0 0 552 798" width="552" height="798" role="img" aria-labelledby="ft-67-65-6e-65-72-61-74-69-6f-6e-2d-67-61-70-title-74-69-74-6c-65" font-family="sans-serif" font-size="14">
+<title id="ft-67-65-6e-65-72-61-74-69-6f-6e-2d-67-61-70-title-74-69-74-6c-65">Cat family pedigree</title>
+<rect width="100%" height="100%" fill="#ffffff"/>
+<defs><marker id="ft-67-65-6e-65-72-61-74-69-6f-6e-2d-67-61-70-arrow-63-6f-6e-66-69-72-6d-65-64" viewBox="0 0 8 8" refX="8" refY="4" markerWidth="8" markerHeight="8" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#344054"/></marker></defs>
+<g stroke="#344054" stroke-width="1.6" stroke-linejoin="round">
+<g id="ft-67-65-6e-65-72-61-74-69-6f-6e-2d-67-61-70-relationship-5b-22-63-61-6e-64-69-64-61-74-65-22-2c-22-46-6f-75-6e-64-65-72-22-2c-22-4c-31-22-5d" data-kind="candidate" data-source="Founder" data-target="L1" stroke-dasharray="6 5">
+<path d="M106,114 L106,208 L236,208 L236,226" fill="none" />
+</g>
+<g id="ft-67-65-6e-65-72-61-74-69-6f-6e-2d-67-61-70-relationship-5b-22-63-6f-6e-66-69-72-6d-65-64-22-2c-22-46-6f-75-6e-64-65-72-22-2c-22-4b-69-74-74-65-6e-22-5d" data-kind="confirmed" data-source="Founder" data-target="Kitten">
+<path d="M146,114 L146,146 L448,146 L448,688 L146,688 L146,732 L170,732" fill="none" marker-end="url(#ft-67-65-6e-65-72-61-74-69-6f-6e-2d-67-61-70-arrow-63-6f-6e-66-69-72-6d-65-64)"/>
+</g>
+<g id="ft-67-65-6e-65-72-61-74-69-6f-6e-2d-67-61-70-relationship-5b-22-6d-61-74-65-72-6e-69-74-79-22-2c-22-44-61-75-67-68-74-65-72-22-2c-22-4c-32-22-5d" data-kind="maternity" data-source="Daughter" data-target="L2">
+<path d="M236,326 L236,404 L236,404 L236,438" fill="none" />
+</g>
+<g id="ft-67-65-6e-65-72-61-74-69-6f-6e-2d-67-61-70-relationship-5b-22-6d-61-74-65-72-6e-69-74-79-22-2c-22-47-72-61-6e-64-64-61-75-67-68-74-65-72-22-2c-22-4c-33-22-5d" data-kind="maternity" data-source="Granddaughter" data-target="L3">
+<path d="M236,538 L236,608 L236,608 L236,650" fill="none" />
+</g>
+<g id="ft-67-65-6e-65-72-61-74-69-6f-6e-2d-67-61-70-relationship-5b-22-6d-61-74-65-72-6e-69-74-79-22-2c-22-51-75-65-65-6e-22-2c-22-4c-31-22-5d" data-kind="maternity" data-source="Queen" data-target="L1">
+<path d="M346,114 L346,208 L236,208 L236,226" fill="none" />
+</g>
+<g id="ft-67-65-6e-65-72-61-74-69-6f-6e-2d-67-61-70-litter-4c-31" data-litter="L1"><title>L1</title>
+<path d="M236,226 L236,258" fill="none" data-stem="true"/>
+<path d="M236,258 L236,258" fill="none" data-rail="true"/>
+<circle data-junction="true" cx="236" cy="226" r="3" fill="#344054"/>
+<path d="M236,258 L236,290" fill="none" data-offspring="Daughter"/>
+</g>
+<g id="ft-67-65-6e-65-72-61-74-69-6f-6e-2d-67-61-70-litter-4c-32" data-litter="L2"><title>L2</title>
+<path d="M236,438 L236,470" fill="none" data-stem="true"/>
+<path d="M236,470 L236,470" fill="none" data-rail="true"/>
+<circle data-junction="true" cx="236" cy="438" r="3" fill="#344054"/>
+<path d="M236,470 L236,502" fill="none" data-offspring="Granddaughter"/>
+</g>
+<g id="ft-67-65-6e-65-72-61-74-69-6f-6e-2d-67-61-70-litter-4c-33" data-litter="L3"><title>L3</title>
+<path d="M236,650 L236,682" fill="none" data-stem="true"/>
+<path d="M236,682 L236,682" fill="none" data-rail="true"/>
+<circle data-junction="true" cx="236" cy="650" r="3" fill="#344054"/>
+<path d="M236,682 L236,714" fill="none" data-offspring="Kitten"/>
+</g>
+</g>
+<g id="ft-67-65-6e-65-72-61-74-69-6f-6e-2d-67-61-70-individual-44-61-75-67-68-74-65-72" data-individual="Daughter" data-generation="1" data-classes="queen">
+<title>Daughter</title>
+<rect data-nameplate="true" x="170" y="290" width="132" height="36" rx="9" fill="#f8fafc" stroke="#344054" stroke-width="1.6"/>
+<text x="236" y="308" dominant-baseline="central" text-anchor="middle" fill="#182230">Daughter</text>
+<text data-sex="queen" x="314" y="308" dominant-baseline="central" text-anchor="middle" font-size="18" fill="#344054">♀</text>
+</g>
+<g id="ft-67-65-6e-65-72-61-74-69-6f-6e-2d-67-61-70-individual-46-6f-75-6e-64-65-72" data-individual="Founder" data-generation="0" data-classes="tom">
+<title>Founder</title>
+<rect data-nameplate="true" x="60" y="78" width="132" height="36" rx="9" fill="#f8fafc" stroke="#344054" stroke-width="1.6"/>
+<text x="126" y="96" dominant-baseline="central" text-anchor="middle" fill="#182230">Founder</text>
+<text data-sex="tom" x="204" y="96" dominant-baseline="central" text-anchor="middle" font-size="18" fill="#344054">♂</text>
+</g>
+<g id="ft-67-65-6e-65-72-61-74-69-6f-6e-2d-67-61-70-individual-47-72-61-6e-64-64-61-75-67-68-74-65-72" data-individual="Granddaughter" data-generation="2" data-classes="queen">
+<title>Granddaughter</title>
+<rect data-nameplate="true" x="168" y="502" width="136" height="36" rx="9" fill="#f8fafc" stroke="#344054" stroke-width="1.6"/>
+<text x="236" y="520" dominant-baseline="central" text-anchor="middle" fill="#182230">Granddaughter</text>
+<text data-sex="queen" x="316" y="520" dominant-baseline="central" text-anchor="middle" font-size="18" fill="#344054">♀</text>
+</g>
+<g id="ft-67-65-6e-65-72-61-74-69-6f-6e-2d-67-61-70-individual-4b-69-74-74-65-6e" data-individual="Kitten" data-generation="3" data-classes="">
+<title>Kitten</title>
+<rect data-nameplate="true" x="170" y="714" width="132" height="36" rx="9" fill="#f8fafc" stroke="#344054" stroke-width="1.6"/>
+<text x="236" y="732" dominant-baseline="central" text-anchor="middle" fill="#182230">Kitten</text>
+</g>
+<g id="ft-67-65-6e-65-72-61-74-69-6f-6e-2d-67-61-70-individual-51-75-65-65-6e" data-individual="Queen" data-generation="0" data-classes="queen">
+<title>Queen</title>
+<rect data-nameplate="true" x="280" y="78" width="132" height="36" rx="9" fill="#f8fafc" stroke="#344054" stroke-width="1.6"/>
+<text x="346" y="96" dominant-baseline="central" text-anchor="middle" fill="#182230">Queen</text>
+<text data-sex="queen" x="424" y="96" dominant-baseline="central" text-anchor="middle" font-size="18" fill="#344054">♀</text>
+</g>
+</svg>

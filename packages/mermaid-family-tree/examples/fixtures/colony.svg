@@ -1,0 +1,198 @@
+<svg xmlns="http://www.w3.org/2000/svg" id="colony" viewBox="0 0 2074 798" width="2074" height="798" role="img" aria-labelledby="ft-63-6f-6c-6f-6e-79-title-74-69-74-6c-65" font-family="sans-serif" font-size="14">
+<title id="ft-63-6f-6c-6f-6e-79-title-74-69-74-6c-65">Cat family pedigree</title>
+<rect width="100%" height="100%" fill="#ffffff"/>
+<g stroke="#344054" stroke-width="1.6" stroke-linejoin="round">
+<g id="ft-63-6f-6c-6f-6e-79-relationship-5b-22-63-61-6e-64-69-64-61-74-65-22-2c-22-52-75-62-65-6e-22-2c-22-4c-32-22-5d" data-kind="candidate" data-source="Ruben" data-target="L2" stroke-dasharray="6 5">
+<path d="M1100,326 L1100,420 L891.333,420 L891.333,438" fill="none" />
+</g>
+<g id="ft-63-6f-6c-6f-6e-79-relationship-5b-22-63-61-6e-64-69-64-61-74-65-22-2c-22-52-75-62-65-6e-22-2c-22-4c-33-22-5d" data-kind="candidate" data-source="Ruben" data-target="L3" stroke-dasharray="6 5">
+<path d="M1140,326 L1140,412 L1482.333,412 L1482.333,438" fill="none" />
+</g>
+<g id="ft-63-6f-6c-6f-6e-79-relationship-5b-22-63-61-6e-64-69-64-61-74-65-22-2c-22-53-61-6e-63-68-6f-22-2c-22-4c-34-22-5d" data-kind="candidate" data-source="Sancho" data-target="L4" stroke-dasharray="6 5">
+<path d="M550.333,538 L550.333,616 L1052,616 L1052,650" fill="none" />
+</g>
+<g id="ft-63-6f-6c-6f-6e-79-relationship-5b-22-63-61-6e-64-69-64-61-74-65-22-2c-22-53-61-6e-63-68-6f-22-2c-22-4c-35-22-5d" data-kind="candidate" data-source="Sancho" data-target="L5" stroke-dasharray="6 5">
+<path d="M590.333,538 L590.333,608 L310,608 L310,650" fill="none" />
+</g>
+<g id="ft-63-6f-6c-6f-6e-79-relationship-5b-22-63-61-6e-64-69-64-61-74-65-22-2c-22-53-74-61-6e-6c-65-79-22-2c-22-4c-31-22-5d" data-kind="candidate" data-source="Stanley" data-target="L1" stroke-dasharray="6 5">
+<path d="M1726,114 L1726,208 L1616,208 L1616,226" fill="none" />
+</g>
+<g id="ft-63-6f-6c-6f-6e-79-relationship-5b-22-63-61-6e-64-69-64-61-74-65-22-2c-22-55-6e-6b-6e-6f-77-6e-53-69-72-65-22-2c-22-4c-32-22-5d" data-kind="candidate" data-source="UnknownSire" data-target="L2" stroke-dasharray="6 5">
+<path d="M726,326 L726,412 L891.333,412 L891.333,438" fill="none" />
+</g>
+<g id="ft-63-6f-6c-6f-6e-79-relationship-5b-22-6d-61-74-65-72-6e-69-74-79-22-2c-22-43-68-6c-6f-65-22-2c-22-4c-32-22-5d" data-kind="maternity" data-source="Chloe" data-target="L2">
+<path d="M1504,326 L1504,404 L891.333,404 L891.333,438" fill="none" />
+</g>
+<g id="ft-63-6f-6c-6f-6e-79-relationship-5b-22-6d-61-74-65-72-6e-69-74-79-22-2c-22-43-68-6c-6f-65-22-2c-22-4c-33-22-5d" data-kind="maternity" data-source="Chloe" data-target="L3">
+<path d="M1544,326 L1544,396 L1482.333,396 L1482.333,438" fill="none" />
+</g>
+<g id="ft-63-6f-6c-6f-6e-79-relationship-5b-22-6d-61-74-65-72-6e-69-74-79-22-2c-22-4d-61-79-62-65-6c-6c-65-22-2c-22-4c-34-22-5d" data-kind="maternity" data-source="Maybelle" data-target="L4">
+<path d="M966.333,538 L966.333,632 L1052,632 L1052,650" fill="none" />
+</g>
+<g id="ft-63-6f-6c-6f-6e-79-relationship-5b-22-6d-61-74-65-72-6e-69-74-79-22-2c-22-4d-61-79-62-65-6c-6c-65-22-2c-22-4c-35-22-5d" data-kind="maternity" data-source="Maybelle" data-target="L5">
+<path d="M1006.333,538 L1006.333,624 L310,624 L310,650" fill="none" />
+</g>
+<g id="ft-63-6f-6c-6f-6e-79-relationship-5b-22-6d-61-74-65-72-6e-69-74-79-22-2c-22-52-6f-73-65-22-2c-22-4c-31-22-5d" data-kind="maternity" data-source="Rose" data-target="L1">
+<path d="M1506,114 L1506,192 L1616,192 L1616,226" fill="none" />
+</g>
+<g id="ft-63-6f-6c-6f-6e-79-litter-4c-31" data-litter="L1"><title>Litter 1</title>
+<path d="M1616,226 L1616,258" fill="none" data-stem="true"/>
+<path d="M1340,258 L1892,258" fill="none" data-rail="true"/>
+<circle data-junction="true" cx="1616" cy="226" r="3" fill="#344054"/>
+<path d="M1340,258 L1340,290" fill="none" data-offspring="Calie"/>
+<path d="M1524,258 L1524,290" fill="none" data-offspring="Chloe"/>
+<path d="M1708,258 L1708,290" fill="none" data-offspring="Chysie"/>
+<path d="M1892,258 L1892,290" fill="none" data-offspring="Jimmy"/>
+</g>
+<g id="ft-63-6f-6c-6f-6e-79-litter-4c-32" data-litter="L2"><title>Litter 2</title>
+<path d="M891.333,438 L891.333,470" fill="none" data-stem="true"/>
+<path d="M796.333,470 L986.333,470" fill="none" data-rail="true"/>
+<circle data-junction="true" cx="891.333" cy="438" r="3" fill="#344054"/>
+<path d="M796.333,470 L796.333,502" fill="none" data-offspring="Braus"/>
+<path d="M986.333,470 L986.333,502" fill="none" data-offspring="Maybelle"/>
+</g>
+<g id="ft-63-6f-6c-6f-6e-79-litter-4c-33" data-litter="L3"><title>Litter 3</title>
+<path d="M1482.333,438 L1482.333,470" fill="none" data-stem="true"/>
+<path d="M1206.333,470 L1758.333,470" fill="none" data-rail="true"/>
+<circle data-junction="true" cx="1482.333" cy="438" r="3" fill="#344054"/>
+<path d="M1206.333,470 L1206.333,502" fill="none" data-offspring="Bug"/>
+<path d="M1390.333,470 L1390.333,502" fill="none" data-offspring="Fluffy"/>
+<path d="M1574.333,470 L1574.333,502" fill="none" data-offspring="Mario"/>
+<path d="M1758.333,470 L1758.333,502" fill="none" data-offspring="Rocky"/>
+</g>
+<g id="ft-63-6f-6c-6f-6e-79-litter-4c-34" data-litter="L4"><title>Litter 4</title>
+<path d="M1052,650 L1052,682" fill="none" data-stem="true"/>
+<path d="M776,682 L1328,682" fill="none" data-rail="true"/>
+<circle data-junction="true" cx="1052" cy="650" r="3" fill="#344054"/>
+<path d="M776,682 L776,714" fill="none" data-offspring="Bandit"/>
+<path d="M960,682 L960,714" fill="none" data-offspring="Gus"/>
+<path d="M1144,682 L1144,714" fill="none" data-offspring="JJ"/>
+<path d="M1328,682 L1328,714" fill="none" data-offspring="Scout"/>
+</g>
+<g id="ft-63-6f-6c-6f-6e-79-litter-4c-35" data-litter="L5"><title>Litter 5</title>
+<path d="M310,650 L310,682" fill="none" data-stem="true"/>
+<path d="M126,682 L494,682" fill="none" data-rail="true"/>
+<circle data-junction="true" cx="310" cy="650" r="3" fill="#344054"/>
+<path d="M126,682 L126,714" fill="none" data-offspring="Fozzy"/>
+<path d="M310,682 L310,714" fill="none" data-offspring="Tigger"/>
+<path d="M494,682 L494,714" fill="none" data-offspring="Tony"/>
+</g>
+</g>
+<g id="ft-63-6f-6c-6f-6e-79-individual-42-61-6e-64-69-74" data-individual="Bandit" data-generation="3" data-classes="">
+<title>Bandit</title>
+<rect data-nameplate="true" x="710" y="714" width="132" height="36" rx="9" fill="#f8fafc" stroke="#344054" stroke-width="1.6"/>
+<text x="776" y="732" dominant-baseline="central" text-anchor="middle" fill="#182230">Bandit</text>
+</g>
+<g id="ft-63-6f-6c-6f-6e-79-individual-42-72-61-75-73" data-individual="Braus" data-generation="2" data-classes="">
+<title>Fräulein Bräuß</title>
+<rect data-nameplate="true" x="724.333" y="502" width="144" height="36" rx="9" fill="#f8fafc" stroke="#344054" stroke-width="1.6"/>
+<text x="796.333" y="520" dominant-baseline="central" text-anchor="middle" fill="#182230">Fräulein Bräuß</text>
+</g>
+<g id="ft-63-6f-6c-6f-6e-79-individual-42-75-67" data-individual="Bug" data-generation="2" data-classes="">
+<title>Bug</title>
+<rect data-nameplate="true" x="1140.333" y="502" width="132" height="36" rx="9" fill="#f8fafc" stroke="#344054" stroke-width="1.6"/>
+<text x="1206.333" y="520" dominant-baseline="central" text-anchor="middle" fill="#182230">Bug</text>
+</g>
+<g id="ft-63-6f-6c-6f-6e-79-individual-43-61-6c-69-65" data-individual="Calie" data-generation="1" data-classes="">
+<title>Calie</title>
+<rect data-nameplate="true" x="1274" y="290" width="132" height="36" rx="9" fill="#f8fafc" stroke="#344054" stroke-width="1.6"/>
+<text x="1340" y="308" dominant-baseline="central" text-anchor="middle" fill="#182230">Calie</text>
+</g>
+<g id="ft-63-6f-6c-6f-6e-79-individual-43-68-6c-6f-65" data-individual="Chloe" data-generation="1" data-classes="queen">
+<title>Chloe</title>
+<rect data-nameplate="true" x="1458" y="290" width="132" height="36" rx="9" fill="#f8fafc" stroke="#344054" stroke-width="1.6"/>
+<text x="1524" y="308" dominant-baseline="central" text-anchor="middle" fill="#182230">Chloe</text>
+<text data-sex="queen" x="1602" y="308" dominant-baseline="central" text-anchor="middle" font-size="18" fill="#344054">♀</text>
+</g>
+<g id="ft-63-6f-6c-6f-6e-79-individual-43-68-79-73-69-65" data-individual="Chysie" data-generation="1" data-classes="">
+<title>Chysie</title>
+<rect data-nameplate="true" x="1642" y="290" width="132" height="36" rx="9" fill="#f8fafc" stroke="#344054" stroke-width="1.6"/>
+<text x="1708" y="308" dominant-baseline="central" text-anchor="middle" fill="#182230">Chysie</text>
+</g>
+<g id="ft-63-6f-6c-6f-6e-79-individual-46-6c-75-66-66-79" data-individual="Fluffy" data-generation="2" data-classes="">
+<title>Fluffy</title>
+<rect data-nameplate="true" x="1324.333" y="502" width="132" height="36" rx="9" fill="#f8fafc" stroke="#344054" stroke-width="1.6"/>
+<text x="1390.333" y="520" dominant-baseline="central" text-anchor="middle" fill="#182230">Fluffy</text>
+</g>
+<g id="ft-63-6f-6c-6f-6e-79-individual-46-6f-7a-7a-79" data-individual="Fozzy" data-generation="3" data-classes="">
+<title>Fozzy</title>
+<rect data-nameplate="true" x="60" y="714" width="132" height="36" rx="9" fill="#f8fafc" stroke="#344054" stroke-width="1.6"/>
+<text x="126" y="732" dominant-baseline="central" text-anchor="middle" fill="#182230">Fozzy</text>
+</g>
+<g id="ft-63-6f-6c-6f-6e-79-individual-47-75-73" data-individual="Gus" data-generation="3" data-classes="">
+<title>Gus</title>
+<rect data-nameplate="true" x="894" y="714" width="132" height="36" rx="9" fill="#f8fafc" stroke="#344054" stroke-width="1.6"/>
+<text x="960" y="732" dominant-baseline="central" text-anchor="middle" fill="#182230">Gus</text>
+</g>
+<g id="ft-63-6f-6c-6f-6e-79-individual-4a-4a" data-individual="JJ" data-generation="3" data-classes="">
+<title>JJ</title>
+<rect data-nameplate="true" x="1078" y="714" width="132" height="36" rx="9" fill="#f8fafc" stroke="#344054" stroke-width="1.6"/>
+<text x="1144" y="732" dominant-baseline="central" text-anchor="middle" fill="#182230">JJ</text>
+</g>
+<g id="ft-63-6f-6c-6f-6e-79-individual-4a-69-6d-6d-79" data-individual="Jimmy" data-generation="1" data-classes="">
+<title>Jimmy</title>
+<rect data-nameplate="true" x="1826" y="290" width="132" height="36" rx="9" fill="#f8fafc" stroke="#344054" stroke-width="1.6"/>
+<text x="1892" y="308" dominant-baseline="central" text-anchor="middle" fill="#182230">Jimmy</text>
+</g>
+<g id="ft-63-6f-6c-6f-6e-79-individual-4d-61-72-69-6f" data-individual="Mario" data-generation="2" data-classes="">
+<title>Mario</title>
+<rect data-nameplate="true" x="1508.333" y="502" width="132" height="36" rx="9" fill="#f8fafc" stroke="#344054" stroke-width="1.6"/>
+<text x="1574.333" y="520" dominant-baseline="central" text-anchor="middle" fill="#182230">Mario</text>
+</g>
+<g id="ft-63-6f-6c-6f-6e-79-individual-4d-61-79-62-65-6c-6c-65" data-individual="Maybelle" data-generation="2" data-classes="queen">
+<title>Maybelle</title>
+<rect data-nameplate="true" x="920.333" y="502" width="132" height="36" rx="9" fill="#f8fafc" stroke="#344054" stroke-width="1.6"/>
+<text x="986.333" y="520" dominant-baseline="central" text-anchor="middle" fill="#182230">Maybelle</text>
+<text data-sex="queen" x="1064.333" y="520" dominant-baseline="central" text-anchor="middle" font-size="18" fill="#344054">♀</text>
+</g>
+<g id="ft-63-6f-6c-6f-6e-79-individual-52-6f-63-6b-79" data-individual="Rocky" data-generation="2" data-classes="">
+<title>Rocky</title>
+<rect data-nameplate="true" x="1692.333" y="502" width="132" height="36" rx="9" fill="#f8fafc" stroke="#344054" stroke-width="1.6"/>
+<text x="1758.333" y="520" dominant-baseline="central" text-anchor="middle" fill="#182230">Rocky</text>
+</g>
+<g id="ft-63-6f-6c-6f-6e-79-individual-52-6f-73-65" data-individual="Rose" data-generation="0" data-classes="queen">
+<title>Rose</title>
+<rect data-nameplate="true" x="1440" y="78" width="132" height="36" rx="9" fill="#f8fafc" stroke="#344054" stroke-width="1.6"/>
+<text x="1506" y="96" dominant-baseline="central" text-anchor="middle" fill="#182230">Rose</text>
+<text data-sex="queen" x="1584" y="96" dominant-baseline="central" text-anchor="middle" font-size="18" fill="#344054">♀</text>
+</g>
+<g id="ft-63-6f-6c-6f-6e-79-individual-52-75-62-65-6e" data-individual="Ruben" data-generation="1" data-classes="tom">
+<title>Ruben</title>
+<rect data-nameplate="true" x="1054" y="290" width="132" height="36" rx="9" fill="#f8fafc" stroke="#344054" stroke-width="1.6"/>
+<text x="1120" y="308" dominant-baseline="central" text-anchor="middle" fill="#182230">Ruben</text>
+<text data-sex="tom" x="1198" y="308" dominant-baseline="central" text-anchor="middle" font-size="18" fill="#344054">♂</text>
+</g>
+<g id="ft-63-6f-6c-6f-6e-79-individual-53-61-6e-63-68-6f" data-individual="Sancho" data-generation="2" data-classes="tom">
+<title>Sancho</title>
+<rect data-nameplate="true" x="504.33299999999997" y="502" width="132" height="36" rx="9" fill="#f8fafc" stroke="#344054" stroke-width="1.6"/>
+<text x="570.333" y="520" dominant-baseline="central" text-anchor="middle" fill="#182230">Sancho</text>
+<text data-sex="tom" x="648.333" y="520" dominant-baseline="central" text-anchor="middle" font-size="18" fill="#344054">♂</text>
+</g>
+<g id="ft-63-6f-6c-6f-6e-79-individual-53-63-6f-75-74" data-individual="Scout" data-generation="3" data-classes="">
+<title>Scout</title>
+<rect data-nameplate="true" x="1262" y="714" width="132" height="36" rx="9" fill="#f8fafc" stroke="#344054" stroke-width="1.6"/>
+<text x="1328" y="732" dominant-baseline="central" text-anchor="middle" fill="#182230">Scout</text>
+</g>
+<g id="ft-63-6f-6c-6f-6e-79-individual-53-74-61-6e-6c-65-79" data-individual="Stanley" data-generation="0" data-classes="tom">
+<title>Stanley</title>
+<rect data-nameplate="true" x="1660" y="78" width="132" height="36" rx="9" fill="#f8fafc" stroke="#344054" stroke-width="1.6"/>
+<text x="1726" y="96" dominant-baseline="central" text-anchor="middle" fill="#182230">Stanley</text>
+<text data-sex="tom" x="1804" y="96" dominant-baseline="central" text-anchor="middle" font-size="18" fill="#344054">♂</text>
+</g>
+<g id="ft-63-6f-6c-6f-6e-79-individual-54-69-67-67-65-72" data-individual="Tigger" data-generation="3" data-classes="">
+<title>Tigger</title>
+<rect data-nameplate="true" x="244" y="714" width="132" height="36" rx="9" fill="#f8fafc" stroke="#344054" stroke-width="1.6"/>
+<text x="310" y="732" dominant-baseline="central" text-anchor="middle" fill="#182230">Tigger</text>
+</g>
+<g id="ft-63-6f-6c-6f-6e-79-individual-54-6f-6e-79" data-individual="Tony" data-generation="3" data-classes="">
+<title>Tony</title>
+<rect data-nameplate="true" x="428" y="714" width="132" height="36" rx="9" fill="#f8fafc" stroke="#344054" stroke-width="1.6"/>
+<text x="494" y="732" dominant-baseline="central" text-anchor="middle" fill="#182230">Tony</text>
+</g>
+<g id="ft-63-6f-6c-6f-6e-79-individual-55-6e-6b-6e-6f-77-6e-53-69-72-65" data-individual="UnknownSire" data-generation="1" data-classes="tom">
+<title>Unknown</title>
+<rect data-nameplate="true" x="660" y="290" width="132" height="36" rx="9" fill="#f8fafc" stroke="#344054" stroke-width="1.6"/>
+<text x="726" y="308" dominant-baseline="central" text-anchor="middle" fill="#182230">Unknown</text>
+<text data-sex="tom" x="804" y="308" dominant-baseline="central" text-anchor="middle" font-size="18" fill="#344054">♂</text>
+</g>
+</svg>

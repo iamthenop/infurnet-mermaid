@@ -1,0 +1,14 @@
+familyTree TB
+catmode
+Rose["Rose"]:::queen
+Rose@{ img: "cat.svg" }
+Stanley["Stanley"]:::tom
+Han["Han"]:::human
+subgraph L1
+    Braus["Fräulein Bräuß"]:::queen
+    Braus@{ img: "cat.svg", birth: "2025-06" }
+    Jimmy@{ birth: "2025-07" }
+end
+Rose --> L1
+Stanley --> L1
+Han -.->|adopt| Braus
