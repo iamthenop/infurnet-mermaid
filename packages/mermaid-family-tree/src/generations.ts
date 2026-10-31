@@ -1,6 +1,7 @@
 import { type Family, type GenerationSpan } from './model.js';
 
 interface Constraint {
+  readonly id?: string;
   readonly source: string;
   readonly target: string;
   readonly span: GenerationSpan;
@@ -18,7 +19,7 @@ function conflict(reasons: readonly string[]): never {
   throw new Error(`Conflicting generation constraints: ${[...new Set(reasons)].join('; ')}.`);
 }
 
-function constraintsFor(family: Family, layout: boolean): Constraint[] {
+function biologicalConstraints(family: Family): Constraint[] {
   const result: Constraint[] = [];
   const byId = new Map(family.individuals.map((node) => [node.id, node]));
   const confirmed = family.relationships.filter((edge) => edge.kind === 'confirmed');
@@ -30,11 +31,37 @@ function constraintsFor(family: Family, layout: boolean): Constraint[] {
       const mother = confirmed.find((edge) => edge.target === child && byId.get(edge.source)!.classification === 'queen');
       if (!mother) result.push({ source: litter.queen, target: child, span: { kind: 'exact', generations: 1 },
         description: `${litter.queen} --> ${litter.id} (maternity of ${child})` });
-      if (layout && child !== litter.offspring[0]) result.push({ source: litter.offspring[0], target: child,
-        span: { kind: 'exact', generations: 0 }, description: `litter ${litter.id} aligns ${litter.offspring[0]} and ${child}` });
     }
   }
+  return result;
+}
+
+/** Gaps yield to paths through intermediate individuals, excluding possible sires and adoption. */
+export function redundantGapIds(family: Family): Set<string> {
+  const children = new Map(family.individuals.map((node) => [node.id, new Set<string>()]));
+  for (const edge of biologicalConstraints(family)) children.get(edge.source)!.add(edge.target);
+  const redundant = new Set<string>();
+  for (const edge of family.relationships) {
+    if (edge.kind !== 'ancestry') continue;
+    const pending = [...children.get(edge.source)!].filter((child) => child !== edge.target);
+    const seen = new Set<string>();
+    while (pending.length) {
+      const id = pending.pop()!;
+      if (id === edge.target) { redundant.add(edge.id); break; }
+      if (seen.has(id)) continue;
+      seen.add(id); pending.push(...children.get(id)!);
+    }
+  }
+  return redundant;
+}
+
+function constraintsFor(family: Family, layout: boolean): Constraint[] {
+  const redundant = redundantGapIds(family);
+  const result = biologicalConstraints(family).filter((edge) => !edge.id || !redundant.has(edge.id));
   if (layout) for (const litter of family.litters) {
+    for (const child of litter.offspring.slice(1)) result.push({ source: litter.offspring[0], target: child,
+      span: { kind: 'exact', generations: 0 }, description: `litter ${litter.id} aligns ${litter.offspring[0]} and ${child}` });
+
     if (!litter.offspring.length) continue;
     for (const source of [litter.queen, ...litter.candidateSires]) result.push({ source, target: litter.offspring[0], span: { kind: 'unknown' },
       description: `${source} --> ${litter.id} (layout above litter)` });

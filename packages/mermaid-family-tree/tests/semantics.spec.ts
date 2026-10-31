@@ -155,6 +155,7 @@ describe('generation-span notation', () => {
     ['A--->B\nA---->B', ['A ---> B', 'A ----> B']],
     ['A-->B\nB-*->C\nA-->C', ['A --> B', 'B -*-> C', 'A --> C']],
     ['A--->B\nC--->D\nB-*->C\nD-*->A', []],
+    ['A-->B\nB-->D\nA--->C\nC-->D', ['A --> B', 'B --> D', 'A ---> C', 'C --> D']],
   ] as const)('rejects conflicting ancestry constraints: %s', (source, edges) => {
     expect(() => parse(source)).toThrow(/generation constraints|Biological ancestry cycle/u);
     for (const edge of edges) expect(() => parse(source)).toThrow(edge);

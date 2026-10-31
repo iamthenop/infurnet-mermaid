@@ -9,7 +9,9 @@ Generations run from top to bottom. Littermates share a row. The layout places
 known parents and candidate sires above the relevant litter, preserving the
 relationship's confirmed or uncertain status.
 
-Generation ranks enforce the [declared biological distances](notation.md#generation-spans).
+Generation ranks follow [generation-gap resolution](notation.md#generation-gap-resolution).
+Redundant shortcuts contribute neither rank constraints nor connectors.
+
 Empty ranks leave vertical space without adding ancestor nodes. Unknown spans
 use the smallest feasible distance in stable graph order when several solutions
 are possible.

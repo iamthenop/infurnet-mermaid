@@ -69,7 +69,7 @@ it.each(Object.entries(fixtures))('renders valid, deterministic SVG with correct
 
 it.each([
   ['generation-spans', [['Grandfather', 'Granddaughter', 2], ['Ancestor', 'Descendant', 3], ['Mother', 'Daughter', 1], ['A', 'B', 1], ['B', 'C', 1], ['A', 'C', 2]], 9],
-  ['unknown-generation-spans', [['Ancestor', 'Descendant', 1], ['Grandparent', 'Child', 2], ['Founder', 'Middle', 1], ['Middle', 'Last', 2], ['Founder', 'Last', 3]], 8],
+  ['unknown-generation-spans', [['Ancestor', 'Descendant', 1], ['Grandparent', 'Child', 2], ['Founder', 'Middle', 1], ['Middle', 'Last', 1], ['Founder', 'Last', 2], ['A', 'D', 2]], 12],
 ] as const)('draws the declared rank separations and endpoint geometry in %s', async (name, expected, count) => {
   const page = await browser!.newPage();
   try {
@@ -92,9 +92,10 @@ it.each([
         const a = nodes.get(from)!, b = nodes.get(to)!;
         if (b.rank - a.rank !== span || Math.abs((b.y - a.y) / span - 212) > 0.001) errors.push(`rank separation: ${from} -> ${to}`);
       }
-      const declarations: string[] = [];
+      const declarations: string[] = [], connections: string[] = [];
       for (const edge of root.querySelectorAll('[data-kind="ancestry"], [data-kind="confirmed"]')) {
         const from = edge.getAttribute('data-source')!, to = edge.getAttribute('data-target')!;
+        connections.push(`${from}:${to}`);
         const a = nodes.get(from)!, b = nodes.get(to)!, path = edge.querySelector<SVGPathElement>('path')!;
         const first = path.getPointAtLength(0), last = path.getPointAtLength(path.getTotalLength());
         if (Math.abs(first.y - a.y - a.height) > 0.001 || first.x < a.x || first.x > a.x + a.width) errors.push(`source port: ${from}`);
@@ -113,13 +114,18 @@ it.each([
         }
         if (edge.hasAttribute('data-generation-span')) declarations.push(`${from}:${to}:${edge.getAttribute('data-generation-span')}`);
       }
-      return { errors, count: nodes.size, declarations };
+      return { errors, count: nodes.size, declarations, connections };
     }, { source: fixtures[`../examples/fixtures/${name}.mmd`], expected });
     expect(result.errors).toEqual([]); expect(result.count).toBe(count);
     if (name === 'unknown-generation-spans') {
-      expect(result.declarations).toContain('Grandparent:Child:unknown');
+      expect(result.connections).not.toContain('Grandparent:Child');
+      expect(result.connections).not.toContain('Founder:Last');
+      expect(result.declarations).toContain('A:D:unknown');
       expect(result.declarations).toContain('Ancestor:Descendant:unknown');
-    } else expect(result.declarations).toContain('Grandfather:Granddaughter:2');
+    } else {
+      expect(result.declarations).toContain('Grandfather:Granddaughter:2');
+      expect(result.connections).not.toContain('A:C');
+    }
   } finally { await page.close(); }
 }, 60_000);
 

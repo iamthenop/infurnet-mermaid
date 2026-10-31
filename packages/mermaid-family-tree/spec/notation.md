@@ -127,24 +127,43 @@ Between individuals, `-->` spans exactly one generation. Each additional dash
 adds one generation: `--->` spans two and `---->` spans three.
 The parser stores the positive integer distance without adding intermediate individuals.
 
-`-*->` asserts ancestry with an unknown positive span. Other biological paths
-can constrain its distance; otherwise layout uses the smallest valid separation.
+`-*->` asserts ancestry with an unknown positive span. When the gap is needed,
+independent biological paths can constrain its distance; otherwise layout uses
+the smallest valid separation.
+
 The declared span remains unknown in the semantic graph even when layout fixes
 its distance.
 
-All biological paths must agree. This graph is valid:
+### Generation-gap resolution
+
+A gap edge (`--->`, `---->`, longer dash sequences, or `-*->`) provides an
+ancestry shortcut where intermediate generations are absent. If another biological
+path connects its endpoints through intermediate individuals, that path takes
+precedence.
+
+The shortcut remains in the semantic graph, but is omitted from rendering and
+imposes no separate generation constraint. For example:
 
 ```text
 familyTree TB
     catmode
-    A --> B
-    B --> C
-    A ---> C
+    Grandfather --> Mother
+    Mother --> Granddaughter
+    Grandfather ---> Granddaughter
 ```
 
-Replacing the last edge with `A --> C` creates a conflict. Diagnostics identify
-the conflicting edges. An unknown span must also fit the other constraints while
-remaining positive.
+Only the two parentage connectors are drawn. A longer or unknown shortcut would
+also be suppressed, regardless of its declared distance. Definite maternity
+through litters counts toward the biological path; candidate sire links and
+adoption do not.
+
+Without such a path, explicit gap lengths set the required separation and
+unknown gaps use the smallest valid separation. Contradictory constraints on
+independent, nonredundant ancestry paths remain errors.
+
+Ordinary `-->` still declares immediate parentage and is never suppressed as a
+gap. `A --> B; B --> C; A --> C` therefore remains invalid.
+Diagnostics identify the conflicting edges.
 
 Longer and unknown ancestry edges do not declare immediate parentage. They do
 not replace a litter's candidate sires or count as another confirmed parent.

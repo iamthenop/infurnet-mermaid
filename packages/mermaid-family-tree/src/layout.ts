@@ -1,6 +1,6 @@
 import { graphStratify, layeringSimplex, sugiyama, type GraphNode } from 'd3-dag';
 import { compareIds, type Family, type Individual, type Litter, type Relationship } from './model.js';
-import { resolveGenerations } from './generations.js';
+import { redundantGapIds, resolveGenerations } from './generations.js';
 
 export interface Point { readonly x: number; readonly y: number }
 export interface PlacedIndividual {
@@ -50,6 +50,8 @@ function chronologicalOrder(nodes: readonly Individual[]): Individual[] {
 export function layoutFamily(family: Family): FamilyLayout {
   if (!family.individuals.length) return { individuals: [], litters: [], relationships: [], width: 160, height: 80 };
   const generation = resolveGenerations(family, true);
+  const redundant = redundantGapIds(family);
+  const visibleRelationships = family.relationships.filter((edge) => !redundant.has(edge.id));
   const birthLitter = new Map<string, Litter>();
   for (const litter of family.litters) for (const child of litter.offspring) birthLitter.set(child, litter);
   const litterGeneration = new Map(family.litters.map((litter) => [litter.id, Math.max(
@@ -58,7 +60,7 @@ export function layoutFamily(family: Family): FamilyLayout {
   const data: LayoutDatum[] = family.individuals.map((node) => ({ id: node.id, width: widthOf(node), layer: generation.get(node.id)! * 2,
     parentIds: [...new Set([
       ...(birthLitter.has(node.id) ? [`@litter:${birthLitter.get(node.id)!.id}`] : []),
-      ...family.relationships.filter((edge) => (edge.kind === 'confirmed' || edge.kind === 'ancestry') && edge.target === node.id).map((edge) => edge.source),
+      ...visibleRelationships.filter((edge) => (edge.kind === 'confirmed' || edge.kind === 'ancestry') && edge.target === node.id).map((edge) => edge.source),
     ])] }));
   for (const litter of family.litters) data.push({ id: `@litter:${litter.id}`, width: 12,
     layer: litterGeneration.get(litter.id)! * 2 - 1, parentIds: [litter.queen, ...litter.candidateSires] });
@@ -111,7 +113,7 @@ export function layoutFamily(family: Family): FamilyLayout {
   const byLitter = new Map(litters.map((item) => [item.litter.id, item]));
   const contentRight = Math.max(...individuals.map((node) => node.x + node.width / 2));
   let outerLane = contentRight + 36;
-  const relationships: RoutedRelationship[] = family.relationships.map((relationship, index) => {
+  const relationships: RoutedRelationship[] = visibleRelationships.map((relationship, index) => {
     const from = placed.get(relationship.source)!;
     if (relationship.kind === 'adoption') {
       const to = placed.get(relationship.target)!;
@@ -125,7 +127,7 @@ export function layoutFamily(family: Family): FamilyLayout {
     }
     const litter = byLitter.get(relationship.target), target = placed.get(relationship.target);
     const to = litter?.junction ?? { x: target!.x, y: target!.top };
-    const outgoing = family.relationships.filter((edge) => edge.source === relationship.source && edge.kind !== 'adoption');
+    const outgoing = visibleRelationships.filter((edge) => edge.source === relationship.source && edge.kind !== 'adoption');
     const offset = outgoing.length > 1 ? -20 + 40 * outgoing.findIndex((edge) => edge.id === relationship.id) / (outgoing.length - 1) : 0;
     const start = { x: from.x + offset, y: from.bottom };
     const gap = (litterGeneration.get(relationship.target) ?? target?.generation ?? 0) - from.generation;

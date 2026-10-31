@@ -71,6 +71,10 @@ For skipped or uncertain generations, see the
 [conflicting-path example](examples/invalid/generation-conflict.mmd) demonstrates
 a rejected graph; it has no rendered SVG.
 
+The span examples include redundant shortcuts. Their intermediate lineage takes
+precedence under [generation-gap resolution](spec/notation.md#generation-gap-resolution),
+so those shortcuts draw no extra connector.
+
 ## Semantic graph and standalone rendering
 
 ```ts

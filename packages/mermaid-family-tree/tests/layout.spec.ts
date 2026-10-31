@@ -103,7 +103,7 @@ it.each([
   ['A-->B\nB-->C\nA--->C', [['A', 'B', 1], ['B', 'C', 1], ['A', 'C', 2]]],
   ['A-->B\nB-->C\nA-*->C', [['A', 'C', 2]]],
   ['A--->C\nA-*->B\nB-*->C', [['A', 'B', 1], ['B', 'C', 1]]],
-  ['A---->C\nA-*->B\nB-*->C', [['A', 'B', 1], ['B', 'C', 2]]],
+  ['A---->C\nA-*->B\nB-*->C', [['A', 'B', 1], ['B', 'C', 1]]],
   ['A---->B\nC-*->B', [['A', 'B', 3], ['C', 'B', 1]]],
   ['A--->B\nA-*->C', [['A', 'B', 2], ['A', 'C', 1]]],
   ['A--->B\nB-.->|adopt|A', [['A', 'B', 2]]],
@@ -119,9 +119,9 @@ it.each([
 });
 
 it('detects contradictions across exact components connected by unknown inequalities', () => {
-  const body = 'A--->B\nC-->D\nA-*->C\nD-*->B';
+  const body = 'A--->B\nC-->B\nC-->D\nD-*->A';
   expect(() => parseFamily(`familyTree TB\ncatmode\n${body}`)).toThrow(/Conflicting generation constraints/u);
-  for (const text of ['A ---> B', 'C --> D', 'A -*-> C', 'D -*-> B']) {
+  for (const text of ['A ---> B', 'C --> B', 'C --> D', 'D -*-> A']) {
     expect(() => parseFamily(`familyTree TB\ncatmode\n${body}`)).toThrow(text);
   }
 });
@@ -133,4 +133,45 @@ it('keeps constraint solving independent of source order and birth dates', () =>
   expect(resolveGenerations(first)).toEqual(resolveGenerations(second));
   expect(renderFamily(first)).toBe(renderFamily(second));
   expect(resolveGenerations(parse([...declarations, 'A@{birth:"2026"}', 'D@{birth:"2020"}']))).toEqual(resolveGenerations(first));
+});
+
+
+it.each(['--->', '---->', '-*->'])('omits redundant %s shortcuts and uses the known lineage unchanged', (arrow) => {
+  const lineage = 'Grandfather-->Mother\nMother-->Granddaughter';
+  const base = parseFamily(`familyTree TB\ncatmode\n${lineage}`);
+  const family = parseFamily(`familyTree TB\ncatmode\nGrandfather${arrow}Granddaughter\n${lineage}`);
+  const before = JSON.stringify(family), layout = layoutFamily(family);
+  expect(layout.relationships).toHaveLength(2);
+  expect(layout.relationships.every((route) => route.relationship.kind === 'confirmed')).toBe(true);
+  expect(renderFamily(family)).toBe(renderFamily(base));
+  expect(JSON.stringify(family)).toBe(before);
+  expect(family.relationships).toHaveLength(3);
+});
+
+it('resolves nested shortcuts through known intermediates independent of declaration order', () => {
+  const base = 'A-->B\nB-->C\nC-->D';
+  const lines = [...base.split('\n'), 'A----->D', 'A---->C', 'B-*->D'];
+  const parse = (body: string) => parseFamily(`familyTree TB\ncatmode\n${body}`);
+  expect(renderFamily(parse(lines.join('\n')))).toBe(renderFamily(parse(base)));
+  expect(renderFamily(parse(lines.reverse().join('\n')))).toBe(renderFamily(parse(base)));
+});
+
+it('recognizes definite litter ancestry when suppressing shortcuts', () => {
+  const base = 'G:::queen\nM:::queen\nsubgraph L1\nM\nend\nsubgraph L2\nK\nend\nG-->L1\nM-->L2';
+  const parse = (body: string) => parseFamily(`familyTree TB\ncatmode\n${body}`);
+  expect(renderFamily(parse(`${base}\nG---->K`))).toBe(renderFamily(parse(base)));
+});
+
+it('does not suppress ancestry through adoption or candidate sire paths', () => {
+  const adopt = parseFamily('familyTree TB\ncatmode\nA-.->|adopt|B\nB-->C\nA--->C');
+  expect(layoutFamily(adopt).relationships.filter((route) => route.relationship.kind === 'ancestry')).toHaveLength(1);
+  const candidate = parseFamily(fixtures['../examples/fixtures/generation-gap.mmd']);
+  expect(layoutFamily(candidate).relationships.filter((route) => route.relationship.kind === 'ancestry')).toHaveLength(1);
+});
+
+it('keeps nonredundant unknown distances constrained by independent paths', () => {
+  const family = parseFamily('familyTree TB\ncatmode\nA--->B\nC-->B\nC-->D\nA-*->D');
+  const layout = layoutFamily(family), ranks = new Map(layout.individuals.map((node) => [node.individual.id, node.generation]));
+  expect(ranks.get('D')! - ranks.get('A')!).toBe(2);
+  expect(layout.relationships.find((route) => route.relationship.source === 'A' && route.relationship.target === 'D')!.relationship).toMatchObject({ span: { kind: 'unknown' } });
 });
