@@ -199,15 +199,15 @@ describe('shape catalog', () => {
       Object.keys(assets).map((path) => path.split('/').at(-1)!).sort(),
     );
     const definitions = [...notation.matchAll(/^\| `([^`]+)` \| (Device|Net) \| ([^|]+) \|$/gmu)];
-    expect(definitions).toHaveLength(22);
+    expect(definitions).toHaveLength(83);
     expect(definitions.map((match) => match[1])).not.toContain('net');
-    const existing = definitions.map((match) => match[1]!).filter((key) => key !== 'net' && key !== 'ic');
+    const existing = definitions.map((match) => match[1]!).filter((key) => !['net', 'ic', 'mux', 'demux'].includes(key));
     expect(Object.keys(shapes)).toEqual(expect.arrayContaining(existing));
     const approved = new Set([...existing, ...Object.values(variants).flat(), ...digitalAdditions, ...electricalAdditions]);
     for (const key of Object.keys(shapes)) expect(approved.has(key), key).toBe(true);
     expect(existing).not.toContain('source');
     for (const [, key, , terminals] of definitions) {
-      if (key === 'net' || key === 'ic') continue;
+      if (['net', 'ic', 'mux', 'demux'].includes(key!)) continue;
       const shape: ShapeEntry = shapes[key as ShapeType];
       expect(Object.keys(shape.terminals).sort()).toEqual(terminals === 'None' ? [] : terminals!.split(', ').sort());
     }
@@ -278,8 +278,8 @@ describe('shape catalog', () => {
     expect(svg).not.toMatch(/<(?:text|tspan|use)\b|(?:href|font-family)=/u);
     const authorableTypes = [...notation.matchAll(/^\| `([^`]+)` \| (Device|Net) \| ([^|]+) \|$/gmu)]
       .map((match) => match[1]);
-    if (key === 'nand') expect(authorableTypes).toContain(key);
-    else expect(authorableTypes).not.toContain(key);
+    if (key === 'tgate' || key === 'tristate') expect(authorableTypes).not.toContain(key);
+    else expect(authorableTypes).toContain(key);
   });
 
   it.each(Object.entries(shapes))('%s has grid-aligned attachments and geometry inside its pane', (_key, entry) => {
@@ -425,9 +425,12 @@ describe('shape catalog', () => {
     expect(elements(readSvg(shapes.source.file), 'circle')).toHaveLength(1);
   });
 
-  it('keeps expanded resistor and source attachments horizontal', () => {
+  it('keeps two-terminal catalog attachments horizontal', () => {
     const keys = ['resistorIEC', 'resistorVar', 'resistorVarIEC', 'fuse', 'fuseUs', 'fuseIEC',
-      'thermistor', 'source', 'sourceSin', 'sourceSquare', 'sourceTriangle', 'sourceRamp',
+      'thermistor', 'photoresistor', 'photoresistorIEC',
+      'capacitor2', 'capacitorPolar', 'capacitor2Polar', 'capacitorVar', 'capacitorTrim', 'lamp', 'lamp2', 'breaker', 'diac',
+      'diodeFilled', 'schottky', 'diodeTunnel', 'diodeShockley', 'zener', 'diodeTVS', 'varactor', 'led', 'led2', 'photodiode',
+      'source', 'sourceSin', 'sourceSquare', 'sourceTriangle', 'sourceRamp',
       'sourceControlled', 'sourceControlledI', 'sourceControlledV', 'batteryCell', 'battery'] as const;
     for (const key of keys) {
       const terminals = Object.values(shapes[key].terminals).sort((a, b) => a[0] - b[0]);

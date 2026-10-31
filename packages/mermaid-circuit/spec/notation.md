@@ -1,6 +1,6 @@
 # Notation for circuit diagrams
 
-This specification records the approved syntax and electrical semantics of `circuitDiagram`. The parser implements the 22 authorable object types, diagram modes, typed subgraphs, and fixed-terminal connections described here. The NAND2 example is a parser acceptance fixture.
+This specification records the approved syntax and electrical semantics of `circuitDiagram`. The parser implements the 83 authorable object types, diagram modes, typed subgraphs, and fixed-terminal connections described here. The NAND2 example is a parser acceptance fixture.
 
 Basic placement, orthogonal wiring, and symbol rendering are implemented. Mode `A` supports named IC pins on any side, including multiple pins per side.
 
@@ -42,7 +42,7 @@ The parser records the diagram mode and enforces registered-shape eligibility fo
 
 ## Object types
 
-The authorable object vocabulary is closed and contains these 22 types. Generic nets remain internal connectivity groups and cannot be declared with `:::net`.
+The authorable object vocabulary is closed and contains these 83 types. Generic nets remain internal connectivity groups and cannot be declared with `:::net`.
 
 | Type | Kind | Terminals |
 | --- | --- | --- |
@@ -50,16 +50,77 @@ The authorable object vocabulary is closed and contains these 22 types. Generic 
 | `nmos` | Device | G, D, S |
 | `pmosBlk` | Device | G, S, D, B |
 | `nmosBlk` | Device | G, D, S, B |
+| `nmosDiode` | Device | G, D, S |
+| `pmosDiode` | Device | G, S, D |
+| `nmosCircle` | Device | G, D, S |
+| `pmosCircle` | Device | G, S, D |
+| `nmos2Diode` | Device | G, D, S |
+| `pmos2Diode` | Device | G, S, D |
+| `nmos2Circle` | Device | G, D, S |
+| `pmos2Circle` | Device | G, S, D |
+| `analogNFet` | Device | G, D, S |
+| `analogPFet` | Device | G, S, D |
+| `analogNFetBulk` | Device | G, D, S, B |
+| `analogPFetBulk` | Device | G, S, D, B |
+| `analogNFetCenteredGate` | Device | G, D, S |
+| `analogPFetCenteredGate` | Device | G, S, D |
+| `analogPFetNoArrow` | Device | G, S, D |
+| `analogBiasedFet` | Device | G, D, S |
+| `analogBiasedFetBulk` | Device | G, D, S, B |
+| `analogBiasedFetCenteredGate` | Device | G, D, S |
+| `analogBiasedFetNoArrow` | Device | G, D, S |
+| `nfet2` | Device | G, D, S |
+| `pfet2` | Device | G, D, S |
 | `resistor` | Device | A, B |
+| `resistorIEC` | Device | A, B |
+| `resistorVar` | Device | A, B |
+| `resistorVarIEC` | Device | A, B |
+| `thermistor` | Device | A, B |
+| `photoresistor` | Device | A, B |
+| `photoresistorIEC` | Device | A, B |
+| `fuseIEC` | Device | A, B |
+| `fuseUs` | Device | A, B |
 | `capacitor` | Device | A, B |
+| `capacitor2` | Device | A, B |
+| `capacitorPolar` | Device | A, B |
+| `capacitor2Polar` | Device | A, B |
+| `capacitorVar` | Device | A, B |
+| `capacitorTrim` | Device | A, B |
+| `lamp` | Device | A, B |
+| `lamp2` | Device | A, B |
+| `breaker` | Device | A, B |
+| `diac` | Device | A, B |
 | `diode` | Device | A, K |
+| `diodeFilled` | Device | A, K |
+| `schottky` | Device | A, K |
+| `diodeTunnel` | Device | A, K |
+| `diodeShockley` | Device | A, K |
+| `zener` | Device | A, K |
+| `diodeTVS` | Device | A, K |
+| `varactor` | Device | A, K |
+| `led` | Device | A, K |
+| `led2` | Device | A, K |
+| `photodiode` | Device | A, K |
 | `voltageSource` | Device | P, N |
 | `currentSource` | Device | P, N |
 | `motor` | Device | A, B |
 | `solenoid` | Device | A, B |
 | `fuse` | Device | A, B |
 | `antenna` | Device | A |
+| `opamp` | Device | in1, in2, out, vd, vs |
 | `nand` | Device | I1, I2, O |
+| `and` | Device | I1, I2, O |
+| `or` | Device | I1, I2, O |
+| `nor` | Device | I1, I2, O |
+| `xor` | Device | I1, I2, O |
+| `xnor` | Device | I1, I2, O |
+| `schmittAnd` | Device | I1, I2, O |
+| `schmittNand` | Device | I1, I2, O |
+| `notNot` | Device | I, O |
+| `schmitt` | Device | I, O |
+| `schmittNot` | Device | I, O |
+| `mux` | Device | Fixed by size; see [MUX and DEMUX](#mux-and-demux) |
+| `demux` | Device | Fixed by size; see [MUX and DEMUX](#mux-and-demux) |
 | `ic` | Device | Dynamic |
 | `inverter` | Device | I, O |
 | `buffer` | Device | I, O |
@@ -68,6 +129,26 @@ The authorable object vocabulary is closed and contains these 22 types. Generic 
 | `pinIn` | Net | None |
 | `pinOut` | Net | None |
 | `pinInOut` | Net | None |
+
+The logic types `nand`, `and`, `or`, `nor`, `xor`, `xnor`, `inverter`, `buffer`, `notNot`, `schmitt`, `schmittNot`, `schmittAnd`, and `schmittNand` are authorable only in mode `D`. They select conventional logic symbols; Schmitt symbols also denote hysteresis. The renderer draws their connections without logic simulation, threshold calculations, or hysteresis simulation.
+
+The types `resistorIEC`, `resistorVar`, `resistorVarIEC`, `thermistor`, `photoresistor`, `photoresistorIEC`, `fuseIEC`, and `fuseUs` are authorable only in mode `A`. Their arrows and markings add no electrical terminals.
+
+These shapes convey conventional schematic meanings without simulating resistance, adjustment, temperature response, light response, or fuse operation.
+
+The types `capacitor2`, `capacitorPolar`, `capacitor2Polar`, `capacitorVar`, `capacitorTrim`, `lamp`, `lamp2`, `breaker`, and `diac` are authorable only in mode `A`. Their existing polarity, adjustment, and other markings add no terminals or connections. DIAC uses `A` and `B`; `K` is not a valid DIAC terminal.
+
+The renderer does not simulate capacitance, breakdown, switching, lamp operation, or circuit safety.
+
+The types `diodeFilled`, `schottky`, `diodeTunnel`, `diodeShockley`, `zener`, `diodeTVS`, `varactor`, `led`, `led2`, and `photodiode` are authorable only in mode `A`. For these types and `diode`, `A` names the anode and `K` names the cathode. Rotation preserves these identities.
+
+Existing arrows, polarity marks, and capacitance markings add no electrical terminals. The renderer does not simulate breakdown voltage, emission, illumination, capacitance, or current-voltage characteristics.
+
+The MOSFET variants in the vocabulary table are authorable only in mode `A`. Their exact terminal coordinates and dimensions remain defined by [the shape catalog](../shapes/shapes.json), including the alternate-orientation variants. Symbol names such as `nmosDiode` and `pmosDiode` do not create gate-to-drain connections.
+
+`opamp` is authorable only in mode `A`. Its registered terminals are `in1` (inverting input), `in2` (non-inverting input), `out` (output), `vd` (positive supply), and `vs` (negative supply).
+
+Connections are established only by authored terminal relationships. No feedback, supply connection, or internal amplifier behaviour is implied.
 
 ### Supply terminology and semantics
 
@@ -98,16 +179,75 @@ These references preserve the existing asset filenames in the [shape library](..
 | `nmos` | `nmos.svg` |
 | `pmosBlk` | `pmos4.svg` |
 | `nmosBlk` | `nmos4.svg` |
+| `nmosDiode` | `nmos-diode.svg` |
+| `pmosDiode` | `pmos-diode.svg` |
+| `nmosCircle` | `nmos-circle.svg` |
+| `pmosCircle` | `pmos-circle.svg` |
+| `nmos2Diode` | `nmos2-diode.svg` |
+| `pmos2Diode` | `pmos2-diode.svg` |
+| `nmos2Circle` | `nmos2-circle.svg` |
+| `pmos2Circle` | `pmos2-circle.svg` |
+| `analogNFet` | `analog-nfet.svg` |
+| `analogPFet` | `analog-pfet.svg` |
+| `analogNFetBulk` | `analog-nfet-bulk.svg` |
+| `analogPFetBulk` | `analog-pfet-bulk.svg` |
+| `analogNFetCenteredGate` | `analog-nfet-centered-gate.svg` |
+| `analogPFetCenteredGate` | `analog-pfet-centered-gate.svg` |
+| `analogPFetNoArrow` | `analog-pfet-no-arrow.svg` |
+| `analogBiasedFet` | `analog-biased-fet.svg` |
+| `analogBiasedFetBulk` | `analog-biased-fet-bulk.svg` |
+| `analogBiasedFetCenteredGate` | `analog-biased-fet-centered-gate.svg` |
+| `analogBiasedFetNoArrow` | `analog-biased-fet-no-arrow.svg` |
+| `nfet2` | `nfet2.svg` |
+| `pfet2` | `pfet2.svg` |
 | `resistor` | `resistor.svg` |
+| `resistorIEC` | `resistor-iec.svg` |
+| `resistorVar` | `resistor-var.svg` |
+| `resistorVarIEC` | `resistor-var-iec.svg` |
+| `thermistor` | `thermistor.svg` |
+| `photoresistor` | `photoresistor.svg` |
+| `photoresistorIEC` | `photoresistor-iec.svg` |
+| `fuseIEC` | `fuse-iec.svg` |
+| `fuseUs` | `fuse-us.svg` |
 | `capacitor` | `capacitor.svg` |
+| `capacitor2` | `capacitor2.svg` |
+| `capacitorPolar` | `capacitor-polar.svg` |
+| `capacitor2Polar` | `capacitor2-polar.svg` |
+| `capacitorVar` | `capacitor-var.svg` |
+| `capacitorTrim` | `capacitor-trim.svg` |
+| `lamp` | `lamp.svg` |
+| `lamp2` | `lamp2.svg` |
+| `breaker` | `breaker.svg` |
+| `diac` | `diac.svg` |
 | `diode` | `diode.svg` |
+| `diodeFilled` | `diode-filled.svg` |
+| `schottky` | `schottky.svg` |
+| `diodeTunnel` | `diode-tunnel.svg` |
+| `diodeShockley` | `diode-shockley.svg` |
+| `zener` | `zener.svg` |
+| `diodeTVS` | `diode-tvs.svg` |
+| `varactor` | `varactor.svg` |
+| `led` | `led.svg` |
+| `led2` | `led2.svg` |
+| `photodiode` | `photodiode.svg` |
 | `voltageSource` | `vsource.svg` |
 | `currentSource` | `isource.svg` |
 | `motor` | `motor.svg` |
 | `solenoid` | `solenoid.svg` |
 | `fuse` | `fuse.svg` |
 | `antenna` | `antenna.svg` |
+| `opamp` | `opamp.svg` |
 | `nand` | `nand.svg` |
+| `and` | `and.svg` |
+| `or` | `or.svg` |
+| `nor` | `nor.svg` |
+| `xor` | `xor.svg` |
+| `xnor` | `xnor.svg` |
+| `notNot` | `not-not.svg` |
+| `schmitt` | `schmitt.svg` |
+| `schmittNot` | `schmitt-not.svg` |
+| `schmittAnd` | `schmitt-and.svg` |
+| `schmittNand` | `schmitt-nand.svg` |
 | `inverter` | `inverter.svg` |
 | `buffer` | `buffer.svg` |
 | `supplyNet` | `vdd.svg` |
@@ -117,6 +257,34 @@ These references preserve the existing asset filenames in the [shape library](..
 | `pinInOut` | `pin-io.svg` |
 
 `shapes/shapes.json` owns SVG filenames, pane dimensions, terminal coordinates, and label anchors. This specification does not define a coordinate registry.
+
+## MUX and DEMUX
+
+`mux` and `demux` are digital devices, eligible only in mode `D`. They use a mandatory `size=2` or `size=4` parameter below the instance name:
+
+```text
+M2["M2<br/>size=2"]:::mux
+M4["M4<br/>size=4"]:::mux
+D2["D2<br/>size=2"]:::demux
+D4["D4<br/>size=4"]:::demux
+```
+
+The size is the number of MUX data inputs or DEMUX data outputs. Missing, invalid, and conflicting sizes are rejected. Other label parameters retain their display-only behavior.
+
+| Device | Size | Left data inputs | Right data outputs | Bottom selects |
+| --- | --- | --- | --- | --- |
+| `mux` | 2 | I0, I1 | O | S0 |
+| `mux` | 4 | I0, I1, I2, I3 | O | S0, S1 |
+| `demux` | 2 | I | O0, O1 | S0 |
+| `demux` | 4 | I | O0, O1, O2, O3 | S0, S1 |
+
+Data indices increase from top to bottom; select indices increase from left to right. `S0` is the least significant select bit, followed by `S1`. The binary select value identifies the numbered input or output; the renderer does not simulate selection.
+
+All listed terminals exist and remain visible even when unconnected. Unconnected terminals acquire no inferred nets. Unsupported names, size-incompatible indices, and side qualifiers are rejected.
+
+Use the existing named-terminal connection syntax without IC side qualifiers. Distinct data and select terminals remain separate unless authored connections join them. No enable, reset, clock, or inverted-select terminal is defined.
+
+These devices use dynamic [trapezoid geometry](style.md#mux-and-demux-presentation). The read-only IC templates remain visual references, outside the 110-entry shape catalog.
 
 ## Circuit structure
 
@@ -158,7 +326,7 @@ end
 
 `stage` and `block` are structural keywords. There is no initial `module` subgraph type.
 
-The following is an intended structural example, not an implemented parser fixture:
+The following accepted notation illustrates structural membership:
 
 ```text
 circuitDiagram D
@@ -177,7 +345,7 @@ subgraph block datapath
 end
 ```
 
-This example illustrates structural membership only. It does not authorize the new logic gates in the currently closed object-type table. The existing 22-type vocabulary remains unchanged.
+This example groups devices without defining electrical connections.
 
 ### Membership and hierarchy
 
@@ -239,6 +407,29 @@ P0 |D| --- P1 |S|
 
 Both forms connect `P0.D` to `P1.S` with the same stated direction. The reversed source-to-drain form, `P1 |S| --- |D| P0`, is invalid. Reordering whole statements in the document does not change electrical membership.
 
+### Local op-amp negative feedback
+
+The sole permitted direct same-device connection is an op-amp output to its own inverting input, written in this direction:
+
+```text
+U1 |out| --- |in1| U1
+```
+
+Both terminals belong to one implied net. Repeated declarations do not duplicate membership. All other direct same-device terminal pairs remain invalid, including the reversed form and connections to `in2` or either supply terminal.
+
+A local return may instead pass through one explicitly connected `resistor` or `capacitor`:
+
+```text
+U1 |out| --- |A| RF
+RF |B| --- |in1| U1
+```
+
+The passive component retains its ordinary device identity and two distinct terminal nets. Its position does not establish feedback. The return must connect the output and inverting input of the same op-amp.
+
+A resistor from the inverting-input net to an explicitly declared ground forms the divider's ground leg. Neither that leg nor an external output is inferred. The [feedback presentation rules](style.md#local-op-amp-feedback) change drawing geometry without creating electrical connections.
+
+This contract does not introduce positive feedback, arbitrary passive networks, general cycle routing, or electrical simulation.
+
 ### External endpoints
 
 External endpoints use their identifiers without terminal labels:
@@ -258,10 +449,12 @@ Missing endpoint declarations may be inferred from the connected MOS device and 
 
 | Connected device | Terminal | Inferred endpoint type |
 | --- | --- | --- |
-| `pmos`, `pmosBlk` | S | `supplyNet` |
-| `nmos`, `nmosBlk` | S | `ground` |
-| Any of these MOS devices | G | `pinIn` |
-| Any of these MOS devices | D | `pinOut` |
+| `pmos`, `pmosBlk`, `pmosDiode`, `pmosCircle`, `pmos2Diode`, `pmos2Circle`, `analogPFet`, `analogPFetBulk`, `analogPFetCenteredGate`, `analogPFetNoArrow`, `pfet2` | S | `supplyNet` |
+| `nmos`, `nmosBlk`, `nmosDiode`, `nmosCircle`, `nmos2Diode`, `nmos2Circle`, `analogNFet`, `analogNFetBulk`, `analogNFetCenteredGate`, `nfet2` | S | `ground` |
+| Any authorable MOSFET | G | `pinIn` |
+| Any authorable MOSFET | D | `pinOut` |
+
+The `analogBiasedFet`, `analogBiasedFetBulk`, `analogBiasedFetCenteredGate`, and `analogBiasedFetNoArrow` types have no source-polarity inference. Their source endpoints require explicit declarations unless another mapped connection establishes the endpoint. No MOSFET infers an endpoint from `B`.
 
 An undeclared endpoint is created once, using its first mapped connection's type and its identifier as its label. Later references reuse that endpoint without changing its type, even when another connected terminal has a different inference mapping. Names such as `VDD` and `GND` do not determine type, and neither does the endpoint's written side.
 
@@ -432,7 +625,7 @@ Pins on each side retain their first connection-statement order. Their spacing a
 7. Supply and ground nets use `{{...}}` syntax.
 8. Input, output, and bidirectional pins use `([...])` syntax.
 9. Labels preserve the author's device or net name.
-10. Optional device parameters appear below the instance name, separated by `<br/>` in the label. The notation does not interpret parameter values.
+10. Optional device parameters appear below the instance name, separated by `<br/>` in the label. Only MUX/DEMUX `size` parameters are interpreted, as defined in [MUX and DEMUX](#mux-and-demux).
 11. Connections follow the [connection syntax](#connection-syntax); written left-to-right order states current-flow direction.
 12. A device terminal connects to one net.
 13. Nets connect to device terminals, not directly to other nets.
@@ -447,7 +640,9 @@ Pins on each side retain their first connection-statement order. Their spacing a
 
 ## Bulk semantics
 
-Three-terminal `pmos` and `nmos` devices have their bulk implicitly tied to their source. Use `pmosBlk` or `nmosBlk` when the bulk connects to a separate net. Bulk connections must not be inferred from visual geometry.
+All authorable three-terminal MOSFETs record an implicit bulk-to-source relationship. That relationship adds no rendered terminal or independently authorable bulk connection.
+
+The explicit-bulk types are `pmosBlk`, `nmosBlk`, `analogNFetBulk`, `analogPFetBulk`, and `analogBiasedFetBulk`. Their `B` terminal connects independently through authored connections. Bulk connections must not be inferred from visual geometry.
 
 ## Junctions
 

@@ -76,7 +76,7 @@ function compose(model: CircuitModel) {
       const side = attached?.side ?? ([['L', Math.abs(point[0] - item.pane.minX)], ['R', Math.abs(point[0] - item.pane.maxX)],
         ['T', Math.abs(point[1] - item.pane.minY)], ['B', Math.abs(point[1] - item.pane.maxY)]] as ['L' | 'R' | 'T' | 'B', number][])
         .sort((a, b) => a[1] - b[1])[0][0];
-      const vertical = item.device.type === 'ic' && (side === 'T' || side === 'B');
+      const vertical = ['ic', 'mux', 'demux'].includes(item.device.type) && (side === 'T' || side === 'B');
       const at: Point = vertical ? [point[0] + 4, point[1]]
         : [point[0] + (side === 'L' ? -4 : 4), point[1] + (side === 'B' ? 4 : -4)];
       text(terminal, at, { 'data-terminal': terminal, 'data-terminal-device': item.device.id,

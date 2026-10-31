@@ -1,4 +1,4 @@
-import type { CircuitModel, Device, Net, PinSide } from '../circuitTypes.js';
+import { mosfetTypes, mosfetChannel, type CircuitModel, type Connection, type Device, type Net, type PinSide } from '../circuitTypes.js';
 import { Element, Graphic, type ElementOptions, type PlacedElement } from './core.js';
 import { bounds, unionBounds, type Bounds, type Point } from './geometry.js';
 import type { SymbolId } from './symbols.js';
@@ -48,17 +48,36 @@ export function validateOrientation(type: string, rotation: number, reverse = fa
   }
 }
 
+export function localFeedback(devices: readonly Device[], connections: readonly Connection[], nets: readonly Net[]) {
+  const netAt = (device: Device, terminal: string) => connections.find((item) => item.device === device.id && item.terminal === terminal)?.net;
+  return devices.filter((device) => device.type === 'opamp').flatMap((opamp) => {
+    const output = netAt(opamp, 'out'), input = netAt(opamp, 'in1');
+    if (output === undefined || input === undefined) return [];
+    const candidates = devices.filter((device) => ['resistor', 'capacitor'].includes(device.type)
+      && netAt(device, 'A') === output && netAt(device, 'B') === input);
+    if (output !== input && candidates.length !== 1) return [];
+    const passive = output === input ? undefined : candidates[0];
+    const legs = passive ? devices.filter((device) => device !== passive && device.type === 'resistor'
+      && netAt(device, 'A') === input && nets.some((net) => net.type === 'ground' && net.id === netAt(device, 'B'))) : [];
+    return [{ opamp, output, input, passive, groundLeg: legs.length === 1 ? legs[0] : undefined }];
+  });
+}
+
 function conduction(device: Device): [string, string] | undefined {
-  if (device.type.startsWith('pmos')) return ['S', 'D'];
-  if (device.type.startsWith('nmos')) return ['D', 'S'];
-  if (device.type === 'diode') return ['K', 'A'];
+  if (mosfetTypes.includes(device.type)) return mosfetChannel(device.type) === 'P' ? ['S', 'D'] : ['D', 'S'];
+  if (['diode', 'diodeFilled', 'schottky', 'diodeTunnel', 'diodeShockley', 'zener', 'diodeTVS',
+    'varactor', 'led', 'led2', 'photodiode'].includes(device.type)) return ['K', 'A'];
   if (device.type.endsWith('Source')) return ['P', 'N'];
-  if (['resistor', 'capacitor', 'fuse', 'motor', 'solenoid'].includes(device.type)) return ['A', 'B'];
+  if (['resistor', 'capacitor', 'fuse', 'motor', 'solenoid', 'resistorIEC', 'resistorVar', 'resistorVarIEC',
+    'thermistor', 'photoresistor', 'photoresistorIEC', 'fuseIEC', 'fuseUs',
+    'capacitor2', 'capacitorPolar', 'capacitor2Polar', 'capacitorVar', 'capacitorTrim', 'lamp', 'lamp2', 'breaker', 'diac'].includes(device.type)) return ['A', 'B'];
   return undefined;
 }
 
 function defaultRotation(device: Device): number {
-  if (device.type === 'diode') return 270;
+  if (['nmos2Diode', 'pmos2Diode', 'nmos2Circle', 'pmos2Circle', 'nfet2'].includes(device.type)) return 90;
+  if (device.type === 'pfet2') return 270;
+  if (conduction(device)?.[0] === 'K') return 270;
   return conduction(device)?.[0] === 'A' ? 90 : 0;
 }
 
@@ -78,13 +97,17 @@ export function icGeometry(device: Device): { width: number; height: number; anc
 }
 
 export function deviceElement(device: Device, options: ElementOptions): Element {
-  if (device.type !== 'ic') return new Element(device.type as SymbolId, options);
+  if (!['ic', 'mux', 'demux'].includes(device.type)) return new Element(device.type as SymbolId, options);
   const { width, height, anchors } = icGeometry(device);
+  const mux = device.type === 'mux', demux = device.type === 'demux';
+  const leftInset = demux ? 60 : 0, rightInset = mux ? 60 : 0;
   return new Graphic([
-    { kind: 'polyline', points: [[30, 30], [width - 30, 30], [width - 30, height - 30], [30, height - 30], [30, 30]] },
+    { kind: 'polyline', points: [[30, 30 + leftInset], [width - 30, 30 + rightInset],
+      [width - 30, height - 30 - rightInset], [30, height - 30 - leftInset], [30, 30 + leftInset]] },
     ...device.terminals.map((name) => {
       const start = anchors[name], side = device.pinSides![name];
-      const end: Point = side === 'T' ? [start[0], 30] : side === 'B' ? [start[0], height - 30]
+      const bottom = height - 30 - leftInset + (leftInset - rightInset) * (start[0] - 30) / (width - 60);
+      const end: Point = side === 'T' ? [start[0], 30] : side === 'B' ? [start[0], bottom]
         : side === 'L' ? [30, start[1]] : [width - 30, start[1]];
       return { kind: 'line' as const, start, end };
     }),
@@ -94,7 +117,7 @@ export function deviceElement(device: Device, options: ElementOptions): Element 
 function placement(device: Device, at: Point, rotation: number, anchor: string, flip = false): DevicePlacement {
   const element = deviceElement(device, { at, rotation, anchor, flip });
   const placed = element.place();
-  const { width, height } = device.type === 'ic' ? icGeometry(device) : { width: 120, height: 120 };
+  const { width, height } = ['ic', 'mux', 'demux'].includes(device.type) ? icGeometry(device) : { width: 120, height: 120 };
   const pane = bounds(placed.transform.applyAll([[0, 0], [width, 0], [width, height], [0, height]]));
   return { device, element, placed, pane, rotation, flip };
 }
@@ -117,7 +140,7 @@ function refineAnalogPlacement(model: CircuitModel, devices: DevicePlacement[], 
     const center = item.placed.anchors.center;
     devices[devices.indexOf(item)] = placement(item.device, [center[0] + dx, center[1] + dy], item.rotation, 'center', item.flip);
   };
-  for (const fuse of devices.filter((item) => item.device.type === 'fuse')) {
+  for (const fuse of devices.filter((item) => ['fuse', 'fuseIEC', 'fuseUs'].includes(item.device.type))) {
     const source = devices.find((item) => item.device.type === 'voltageSource'
       && netAt(item.device, 'P') !== undefined && netAt(item.device, 'P') === netAt(fuse.device, 'A'));
     if (!source || model.stages[fuse.device.stage].explicitDirection) continue;
@@ -172,17 +195,27 @@ export function floorplan(model: CircuitModel): Layout {
   const deviceById = new Map(model.devices.map((device) => [device.id, device]));
   const membership = new Map(model.connections.map((connection) => [`${connection.device}:${connection.terminal}`, connection.net]));
   const netAt = (device: Device, terminal: string) => membership.get(`${device.id}:${terminal}`);
+  const feedback = localFeedback(model.devices, model.connections, model.nets);
+  const feedbackDevices = new Set(feedback.flatMap(({ passive, groundLeg }) => [passive?.id, groundLeg?.id]));
+  const ordinaryConduction = (device: Device) => feedbackDevices.has(device.id) ? undefined : conduction(device);
   const stageLayouts = model.stages.map((stage) => {
     const devices = stage.devices.map((id) => deviceById.get(id)!);
     if (model.mode === 'D') {
+      const outputs = (device: Device) => device.type === 'demux'
+        ? device.terminals.filter((terminal) => /^O[0-3]$/u.test(terminal)) : ['O'];
       const edges = devices.map((target) => devices.flatMap((source, index) => source !== target
-        && netAt(source, 'O') !== undefined && target.terminals.some((terminal) => terminal !== 'O'
-          && netAt(target, terminal) === netAt(source, 'O')) ? [index] : []));
+        && outputs(source).some((output) => netAt(source, output) !== undefined
+          && target.terminals.some((terminal) => !outputs(target).includes(terminal)
+            && netAt(target, terminal) === netAt(source, output))) ? [index] : []));
+      const sizes = devices.map((device) => device.type === 'mux' || device.type === 'demux'
+        ? icGeometry(device) : { width: 120, height: 120 });
+      const columnStep = Math.max(120, ...sizes.map((size) => size.width)) + 240;
+      const rowStep = Math.max(120, ...sizes.map((size) => size.height)) + 120;
       const depth = levels(edges), maxRows = Math.max(1, ...depth.map((level) => depth.filter((value) => value === level).length));
       return devices.map((device, index) => {
         const row = depth.slice(0, index).filter((value) => value === depth[index]).length;
         const count = depth.filter((value) => value === depth[index]).length;
-        const x = depth[index] * 360, y = (row - (count - 1) / 2) * 240 + (maxRows - 1) * 120;
+        const x = depth[index] * columnStep, y = (row - (count - 1) / 2) * rowStep + (maxRows - 1) * rowStep / 2;
         const peers = devices.filter((_, other) => depth[other] === depth[index]);
         const sharedInput = netAt(device, 'I2');
         const flip = device.type === 'nand' && count === 2 && row === 1 && sharedInput !== undefined
@@ -193,14 +226,14 @@ export function floorplan(model: CircuitModel): Layout {
     const groups: Device[][] = [];
     const keys = new Map<string, number>();
     for (const device of devices) {
-      const pair = conduction(device), first = pair && netAt(device, pair[0]), second = pair && netAt(device, pair[1]);
+      const pair = ordinaryConduction(device), first = pair && netAt(device, pair[0]), second = pair && netAt(device, pair[1]);
       const key = first && second ? JSON.stringify([first, second]) : device.id;
       let group = keys.get(key);
       if (group === undefined) { group = groups.length; keys.set(key, group); groups.push([]); }
       groups[group].push(device);
     }
     const edges = groups.map(([target], i) => groups.flatMap(([source], j) => {
-      const from = conduction(source), to = conduction(target);
+      const from = ordinaryConduction(source), to = ordinaryConduction(target);
       return i !== j && from && to && netAt(source, from[1]) !== undefined
         && netAt(source, from[1]) === netAt(target, to[0]) ? [j] : [];
     }));
@@ -208,8 +241,8 @@ export function floorplan(model: CircuitModel): Layout {
     if (!linked && groups.every((group) => group.length === 1)) {
       return devices.map((device, index) => placement(device,
         stage.direction === 'TB' ? [0, index * 300] : [index * 300, index * 90],
-        devices.length === 1 && stage.explicitDirection && stage.direction === 'LR' && conduction(device)?.[0] === 'A'
-          ? 0 : defaultRotation(device), conduction(device)?.[0] ?? 'center'));
+        devices.length === 1 && stage.explicitDirection && stage.direction === 'LR' && ordinaryConduction(device)?.[0] === 'A'
+          ? 0 : defaultRotation(device), ordinaryConduction(device)?.[0] ?? 'center'));
     }
     const transpose = stage.explicitDirection && (linked ? stage.direction === 'LR' : stage.direction === 'TB');
     const occupied = new Map<number, number>();
@@ -222,7 +255,7 @@ export function floorplan(model: CircuitModel): Layout {
       const cross = (rows[index] + member - ((occupied.get(depth[index]) ?? 1) - 1) / 2) * 300;
       const along = depth[index] * 360 + (group.length > 1 && group.some((item) => item.terminals.length > 2) ? member * 90 : 0);
       return placement(device, transpose ? [along, cross] : [cross, along],
-        (defaultRotation(device) + (transpose ? 270 : 0)) % 360, conduction(device)?.[0] ?? 'center');
+        (defaultRotation(device) + (transpose ? 270 : 0)) % 360, ordinaryConduction(device)?.[0] ?? 'center');
     }));
   });
   if (model.mode === 'A') for (const local of stageLayouts) {
@@ -300,6 +333,25 @@ export function floorplan(model: CircuitModel): Layout {
   });
   if (model.mode === 'A') {
     refineAnalogPlacement(model, devices, netAt);
+    for (const { opamp, passive, groundLeg } of feedback) {
+      const amplifier = devices.find((item) => item.device.id === opamp.id)!;
+      const [x, y] = amplifier.placed.anchors.in1;
+      if (passive) {
+        const index = devices.findIndex((item) => item.device.id === passive.id);
+        devices[index] = placement(passive, [x + 120, amplifier.pane.minY - 180], 180, 'A');
+      }
+      if (groundLeg) {
+        const index = devices.findIndex((item) => item.device.id === groundLeg.id);
+        devices[index] = placement(groundLeg, [x - 360, y + 120], 90, 'A');
+      }
+    }
+    for (const moved of devices.filter((item) => feedbackDevices.has(item.device.id))) {
+      const box = moved.placed.bounds;
+      if (devices.some((other) => other !== moved && box.minX < other.placed.bounds.maxX && box.maxX > other.placed.bounds.minX
+        && box.minY < other.placed.bounds.maxY && box.maxY > other.placed.bounds.minY)) {
+        throw new Error(`Unsupported local feedback placement: ${moved.device.id} overlaps another device.`);
+      }
+    }
     model.stages.forEach((stage, index) => {
       const members = devices.filter((item) => stage.devices.includes(item.device.id));
       if (!members.length) return;

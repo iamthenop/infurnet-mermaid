@@ -1,5 +1,5 @@
 import catalog from '../../shapes/shapes.json' with { type: 'json' };
-import { deviceTypes, netTypes, type CircuitMode, type CircuitModel,
+import { deviceTypes, netTypes, mosfetTypes, mosfetChannel, type CircuitMode, type CircuitModel,
   type Connection, type Device, type DeviceType, type Direction, type Net, type NetType, type PinSide } from '../circuitTypes.js';
 
 type PendingStage = { name: string | null; implicit: boolean; order: number; direction: Direction;
@@ -112,8 +112,9 @@ export function parseCircuit(text: string): CircuitModel {
       fail(line, `Incorrect declaration brackets for "${type}".`);
     }
     const displayLabel = label(body.slice(delimiters[0]!.length, -delimiters[1]!.length).trim(), line);
-    const entry = type === 'ic' ? undefined : catalog[type as Exclude<NetType, 'net'> | Exclude<DeviceType, 'ic'>];
-    if (type === 'ic' ? mode !== 'A' : !entry!.allowedModes.includes(mode)) fail(line, `Type "${type}" is not eligible in mode ${mode}.`);
+    const selector = type === 'mux' || type === 'demux';
+    const entry = type === 'ic' || selector ? undefined : catalog[type as Exclude<NetType, 'net'> | Exclude<DeviceType, 'ic' | 'mux' | 'demux'>];
+    if (type === 'ic' ? mode !== 'A' : selector ? mode !== 'D' : !entry!.allowedModes.includes(mode)) fail(line, `Type "${type}" is not eligible in mode ${mode}.`);
     if (isDevice) {
       let stageIndex = scope?.index ?? -1;
       if (scope?.kind === 'block') {
@@ -125,12 +126,32 @@ export function parseCircuit(text: string): CircuitModel {
         }
         stageIndex = blockDefaults.get(scope.index)!;
       }
+      let size: 2 | 4 | undefined;
+      let pinSides: Record<string, PinSide> | undefined;
+      if (selector) {
+        const parameters = displayLabel.split(/<br\s*\/?\s*>/iu).slice(1).map((part) => part.trim())
+          .filter((part) => /^size\b/u.test(part));
+        const values = parameters.map((part) => part.match(/^size\s*=\s*([24])$/u)?.[1]);
+        if (!values.length || values.some((value) => value === undefined) || new Set(values).size !== 1) {
+          fail(line, 'MUX/DEMUX requires a non-conflicting size=2 or size=4 label parameter.');
+        }
+        size = values[0] === '2' ? 2 : 4;
+        const data = Array.from({ length: size }, (_, index) => `${type === 'mux' ? 'I' : 'O'}${index}`);
+        const select = size === 2 ? ['S0'] : ['S0', 'S1'];
+        pinSides = Object.fromEntries([
+          ...(type === 'mux' ? data.map((name) => [name, 'L']) : [['I', 'L']]),
+          ...(type === 'mux' ? [['O', 'R']] : data.map((name) => [name, 'R'])),
+          ...select.map((name) => [name, 'B']),
+        ]) as Record<string, PinSide>;
+      }
       const deviceType = type as DeviceType;
       const device: Device = { id, type: deviceType, label: displayLabel,
-        terminals: entry ? Object.keys(entry.terminals) : [], stage: stageIndex,
+        terminals: entry ? Object.keys(entry.terminals) : pinSides ? Object.keys(pinSides) : [], stage: stageIndex,
+        ...(size ? { size, pinSides } : {}),
         ...(type === 'ic' ? { pinSides: {} } : {}),
-        ...(type === 'pmos' || type === 'nmos' ? { bulk: { kind: 'implicit' as const, sourceTerminal: 'S' as const } }
-          : type === 'pmosBlk' || type === 'nmosBlk' ? { bulk: { kind: 'explicit' as const, terminal: 'B' as const } } : {}) };
+        ...(mosfetTypes.includes(deviceType) ? { bulk: entry && 'B' in entry.terminals
+          ? { kind: 'explicit' as const, terminal: 'B' as const }
+          : { kind: 'implicit' as const, sourceTerminal: 'S' as const } } : {}) };
       if (scope) stages[stageIndex]!.devices.push(id);
       else outside.push(devices.length);
       devices.push(device); nodes.set(id, device); deviceIds.add(id);
@@ -175,13 +196,12 @@ export function parseCircuit(text: string): CircuitModel {
     if (nodes.has(net) || !deviceIds.has(device)) continue;
     const connected = nodes.get(device) as Device;
     const terminal = leftTerminal ?? rightTerminal;
-    const pmos = connected.type === 'pmos' || connected.type === 'pmosBlk';
-    const nmos = connected.type === 'nmos' || connected.type === 'nmosBlk';
+    const channel = mosfetChannel(connected.type);
     let type: NetType | undefined;
-    if (pmos || nmos) {
+    if (mosfetTypes.includes(connected.type)) {
       if (terminal === 'G') type = 'pinIn';
       else if (terminal === 'D') type = 'pinOut';
-      else if (terminal === 'S') type = pmos ? 'supplyNet' : 'ground';
+      else if (terminal === 'S' && channel) type = channel === 'P' ? 'supplyNet' : 'ground';
     }
     if (type === undefined) continue;
     const inferred: Net = { id: net, type, label: net, implicit: true };
@@ -213,7 +233,9 @@ export function parseCircuit(text: string): CircuitModel {
   for (const { left, right, leftTerminal, rightTerminal, line } of pending) {
     if (leftTerminal !== undefined && rightTerminal !== undefined) {
       if (!nodes.has(left) || !nodes.has(right)) fail(line, `Connection references an undeclared device: ${left}, ${right}.`);
-      if (!deviceIds.has(left) || !deviceIds.has(right) || left === right) {
+      const negativeFeedback = left === right && (nodes.get(left) as Device).type === 'opamp'
+        && leftTerminal === 'out' && rightTerminal === 'in1';
+      if (!deviceIds.has(left) || !deviceIds.has(right) || left === right && !negativeFeedback) {
         fail(line, 'A direct connection requires two distinct devices.');
       }
       const first = endpoint(left, leftTerminal, line), second = endpoint(right, rightTerminal, line);

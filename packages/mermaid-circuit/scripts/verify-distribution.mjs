@@ -11,7 +11,7 @@ const packageRoot = fileURLToPath(new URL('../', import.meta.url));
 const repository = await realpath(join(packageRoot, '../..'));
 const manifest = JSON.parse(await readFile(join(packageRoot, 'package.json'), 'utf8'));
 assert.equal(manifest.name, 'mermaid-circuit');
-assert.equal(manifest.version, '0.1.0');
+assert.equal(manifest.version, '0.1.1');
 assert.equal(manifest.private, undefined);
 assert.equal(manifest.type, 'module');
 assert.equal(manifest.license, 'MIT');
@@ -46,7 +46,7 @@ function unpack(bytes) {
     assert(type === '' || type === '0', `Unexpected tar entry type ${type}: ${name}`);
     assert(name.startsWith('package/') && !name.split('/').includes('..') && !files.has(name), `Unsafe tar path: ${name}`);
     const path = name.slice('package/'.length);
-    assert(/^(?:dist\/(?:[\w-]+\/)*[\w-]+\.(?:js|d\.ts)|shapes\/shapes\.json|package\.json|README\.md|LICENSE|ACKNOWLEDGEMENTS\.md)$/u.test(path),
+    assert(/^(?:dist\/(?:[\w-]+\/)*[\w-]+\.(?:js|d\.ts)|shapes\/shapes\.json|package\.json|README\.md|CHANGELOG\.md|LICENSE|ACKNOWLEDGEMENTS\.md)$/u.test(path),
       `Unintended package content: ${name}`);
     files.set(path, tar.subarray(offset + 512, offset + 512 + size));
     offset += 512 + Math.ceil(size / 512) * 512;
@@ -199,7 +199,7 @@ async function verifyConsumer() {
       if (module.file) assert(inside(await realpath(module.file)), `Loaded source outside consumer: ${module.file}`);
     }
     for (const result of results) console.log(JSON.stringify(result));
-    assert.equal(results.length, 15);
+    assert.equal(results.length, 51);
     console.log(JSON.stringify({ isolatedRendering: 'pass', networkRequestsDuringRendering: requests.length }));
   } finally {
     await browser?.close();
@@ -215,14 +215,14 @@ try {
   const packed = JSON.parse(run(process.execPath, [npm, 'pack', '--json', '--workspace', 'mermaid-circuit', '--pack-destination', workspace], repository, true))[0];
   const tarball = join(workspace, packed.filename), bytes = await readFile(tarball), files = unpack(bytes);
   assert.deepEqual([...files.keys()].sort(), dryRun.files.map((file) => file.path).sort(), 'Tarball differs from dry run.');
-  const expectedFiles = ['package.json', 'README.md', 'LICENSE', 'ACKNOWLEDGEMENTS.md', 'shapes/shapes.json'];
+  const expectedFiles = ['package.json', 'README.md', 'CHANGELOG.md', 'LICENSE', 'ACKNOWLEDGEMENTS.md', 'shapes/shapes.json'];
   for (const source of await readdir(join(packageRoot, 'src'), { recursive: true })) {
     if (source.endsWith('.ts')) expectedFiles.push(...['.js', '.d.ts'].map((extension) => `dist/${source.slice(0, -3).split(sep).join('/')}${extension}`));
   }
   assert.deepEqual([...files.keys()].sort(), expectedFiles.sort(), 'Unexpected or missing compiled files in tarball.');
   for (const path of ['dist/index.js', 'dist/index.d.ts', 'dist/generated/symbol-assets.js', 'shapes/shapes.json',
-    'package.json', 'README.md', 'LICENSE', 'ACKNOWLEDGEMENTS.md']) assert(files.has(path), `Missing distribution file: ${path}`);
-  assert.equal(JSON.parse(files.get('package.json')).version, '0.1.0');
+    'package.json', 'README.md', 'CHANGELOG.md', 'LICENSE', 'ACKNOWLEDGEMENTS.md']) assert(files.has(path), `Missing distribution file: ${path}`);
+  assert.equal(JSON.parse(files.get('package.json')).version, '0.1.1');
   for (const path of ['LICENSE', 'ACKNOWLEDGEMENTS.md']) assert(files.get(path).equals(await readFile(join(packageRoot, path))), `Changed notice: ${path}`);
   const catalog = JSON.parse(files.get('shapes/shapes.json'));
   const symbols = Object.fromEntries(await Promise.all(Object.entries(catalog).map(async ([id, entry]) =>
@@ -233,7 +233,7 @@ try {
     { name: 'colored', suffix: '-colored', config: { theme: 'base', themeVariables: { background: '#FFFFFF', lineColor: '#009600', primaryBorderColor: '#840000', primaryTextColor: '#006464', textColor: '#0F0F0F' } },
       colors: { background: '#FFFFFF', wire: '#009600', device: '#840000', label: '#006464', text: '#0F0F0F', frame: '#777777' } },
   ];
-  const fixtures = await Promise.all(['wireless-solenoid', 'cmos-inverter', 'cmos-nand2', 'cmos-xor12', 'xor-nand4'].map(async (name) => ({ name,
+  const fixtures = await Promise.all(['wireless-solenoid', 'cmos-inverter', 'cmos-nand2', 'cmos-xor12', 'xor-nand4', 'logic-variants', 'schmitt-variants', 'resistor-fuse-variants', 'capacitor-load-variants', 'diode-variants', 'mosfet-variants', 'mux-demux', 'opamp-open-loop', 'opamp-voltage-follower', 'opamp-noninverting-amplifier', 'opamp-voltage-follower-no-supply', 'opamp-noninverting-amplifier-no-supply'].map(async (name) => ({ name,
     source: await readFile(join(packageRoot, `examples/fixtures/${name}.mmd`), 'utf8'),
     references: Object.fromEntries(await Promise.all(appearances.map(async ({ name: appearance, suffix }) =>
       [appearance, await readFile(join(packageRoot, `examples/fixtures/${name}${suffix}.svg`), 'utf8')]))),

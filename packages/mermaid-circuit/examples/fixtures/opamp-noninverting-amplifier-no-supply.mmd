@@ -1,0 +1,18 @@
+circuitDiagram A
+
+VIN(["Vin"]):::pinIn
+VOUT(["Vout"]):::pinOut
+GND{{"GND"}}:::ground
+
+subgraph stage amplifier
+    U1["U1"]:::opamp
+    RF["Rf<br/>90k"]:::resistor
+    RG["Rg<br/>10k"]:::resistor
+end
+
+VIN --- U1 |in2|
+U1 |out| --- |A| RF
+RF |B| --- |in1| U1
+U1 |in1| --- |A| RG
+RG |B| --- GND
+U1 |out| --- VOUT

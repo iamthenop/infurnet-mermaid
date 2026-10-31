@@ -1,0 +1,21 @@
+circuitDiagram D
+
+A(["A"]):::pinIn
+B(["B"]):::pinIn
+Y(["Y"]):::pinOut
+
+subgraph stage schmittVariants
+    direction LR
+    U1["U1"]:::schmitt
+    U2["U2"]:::schmittNot
+    U3["U3"]:::schmittAnd
+    U4["U4"]:::schmittNand
+end
+
+A --- |I| U1
+B --- |I| U2
+U1 |O| --- |I1| U3
+U2 |O| --- |I2| U3
+U3 |O| --- |I1| U4
+U3 |O| --- |I2| U4
+U4 |O| --- Y

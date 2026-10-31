@@ -8,6 +8,7 @@ import { routeLayout } from '../src/drawing/routing.js';
 import catalog from '../shapes/shapes.json' with { type: 'json' };
 import type { MermaidConfig } from 'mermaid';
 import { Drawing, Element as DrawingElement } from '../src/drawing/core.js';
+import { mosfetTypes, mosfetChannel } from '../src/circuitTypes.js';
 import type { SymbolId } from '../src/drawing/symbols.js';
 
 const fixtures = import.meta.glob<string>('../examples/fixtures/*.mmd', { eager: true, query: '?raw', import: 'default' });
@@ -31,15 +32,47 @@ beforeAll(async () => {
   browser = await chromium.launch();
 }, 60_000);
 
-it.each(Object.entries(fixtures).flatMap(([path, source]) => appearances.map((appearance) => ({ path, source, ...appearance }))))
+const mosfetCases = mosfetTypes.filter((type) => !['pmos', 'nmos', 'pmosBlk', 'nmosBlk'].includes(type)).map((type) => {
+  const terminals = ['G', ...(mosfetChannel(type) === 'P' ? ['S', 'D'] : ['D', 'S']),
+    ...('B' in catalog[type as keyof typeof catalog].terminals ? ['B'] : [])];
+  const source = `circuitDiagram A\nM[M]:::${type}\n${terminals.map((terminal) =>
+    `N${terminal}([${terminal}]):::pinInOut\nM |${terminal}| --- N${terminal}`).join('\n')}`;
+  return [type, source] as const;
+});
+
+const selectorTerminals: Record<string, Record<string, readonly [number, number]>> = {
+  mux2: { I0: [0, 90], I1: [0, 150], O: [180, 120], S0: [90, 240] },
+  mux4: { I0: [0, 90], I1: [0, 150], I2: [0, 210], I3: [0, 270], O: [240, 180], S0: [90, 360], S1: [150, 360] },
+  demux2: { I: [0, 120], O0: [180, 90], O1: [180, 150], S0: [90, 240] },
+  demux4: { I: [0, 180], O0: [240, 90], O1: [240, 150], O2: [240, 210], O3: [240, 270], S0: [90, 360], S1: [150, 360] },
+};
+const selectorCases = ['mux', 'demux'].flatMap((type) => [2, 4].flatMap((size) => ['LR', 'TB'].map((direction) =>
+  [`unconnected-${type}-${size}-${direction}`, `circuitDiagram D\nsubgraph stage selection\ndirection ${direction}\nU["U<br/>size=${size}"]:::${type}\nend`] as const)));
+const controlledSelectorCases = selectorCases.map(([name, source]) => {
+  const selects = parseCircuit(source).devices[0].terminals.filter((terminal) => terminal.startsWith('S'));
+  return [name.replace('unconnected', 'controlled'), `${source}\n${selects.map((terminal) =>
+    `${terminal}([${terminal}]):::pinIn\n${terminal} --- U |${terminal}|`).join('\n')}`] as const;
+});
+
+const capacitorFeedback = fixtures['../examples/fixtures/opamp-noninverting-amplifier.mmd']
+  .replace('RF["Rf<br/>90k"]:::resistor', 'RF["Cf<br/>10n"]:::capacitor');
+
+it.each([...Object.entries(fixtures), ['capacitor-feedback', capacitorFeedback] as const, ...mosfetCases, ...selectorCases, ...controlledSelectorCases].flatMap(([path, source]) => appearances.map((appearance) => ({ path, source, ...appearance }))))
 ('renders exact geometry and standalone colours for $path in $name', async ({ path, source, config, colors }) => {
   const page = await browser!.newPage();
   const model = parseCircuit(source), layout = floorplan(model);
   const planned = routeLayout(layout);
   const expected = layout.devices.map((item) => ({ id: item.device.id, type: item.device.type,
     terminals: item.device.type === 'ic' ? Object.fromEntries(Object.entries(item.device.pinSides!).map(([name]) =>
-      [name, ({ 'v+': [90, 0], 'v-': [90, 240], ctl: [0, 90], A: [0, 150], no: [180, 120] } as Record<string, readonly number[]>)[name]])) : catalog[item.device.type].terminals,
-    sides: Object.fromEntries(layout.attachments.filter((attachment) => attachment.device === item.device.id).map((attachment) => [attachment.terminal, attachment.side])),
+      [name, ({ 'v+': [90, 0], 'v-': [90, 240], ctl: [0, 90], A: [0, 150], no: [180, 120] } as Record<string, readonly number[]>)[name]])) : item.device.type === 'mux' || item.device.type === 'demux' ? selectorTerminals[`${item.device.type}${item.device.size}`] : catalog[item.device.type].terminals,
+    sides: Object.fromEntries(item.device.terminals.map((terminal) => {
+      const attached = layout.attachments.find((attachment) => attachment.device === item.device.id && attachment.terminal === terminal);
+      const side = item.device.pinSides?.[terminal] ?? (item.device.type === 'opamp'
+        ? ({ in1: 'L', in2: 'L', out: 'R', vd: 'T', vs: 'B' } as Record<string, string>)[terminal] : undefined);
+      const expectedSide = attached?.side ?? (item.rotation === 90 && side ? { L: 'T', R: 'B', B: 'L', T: 'R' }[side] : side);
+      if (!expectedSide) throw new Error(`Missing expected side for ${item.device.id}.${terminal}`);
+      return [terminal, expectedSide];
+    })),
     anchors: item.placed.anchors, nets: Object.fromEntries(model.connections.filter((connection) => connection.device === item.device.id)
       .map((connection) => [connection.terminal, connection.net])) }));
   try {
@@ -116,8 +149,14 @@ it.each(Object.entries(fixtures).flatMap(([path, source]) => appearances.map((ap
       for (const device of expected) {
         const group = [...root.querySelectorAll<SVGGElement>('[data-device]')].find((group) => group.getAttribute('data-device') === device.id)!;
         if (!group) { errors.push(`missing ${device.id}`); continue; }
+        if (group.getAttribute('data-type') !== device.type) errors.push(`wrong symbol type ${device.id}`);
         const artwork = group.querySelector<SVGGraphicsElement>('[transform]')!;
         const matrix = root.getScreenCTM()!.inverse().multiply(artwork.getScreenCTM()!);
+        if (device.type === 'opamp') {
+          const triangle = artwork.querySelector('path');
+          if (triangle?.getAttribute('d') !== 'M 36.905989232 60 L 36.905989232 20 L 106.188021535 60 L 36.905989232 100 L 36.905989232 60 M 106.188021535 60') errors.push('changed op-amp triangle');
+          if (artwork.querySelectorAll('path').length !== 6) errors.push('changed op-amp artwork');
+        }
         for (const [terminal, local] of Object.entries(device.terminals)) {
           const actual = new DOMPoint(local[0], local[1]).matrixTransform(matrix);
           if (!close([actual.x, actual.y], device.anchors[terminal])) errors.push(`artwork ${device.id}.${terminal}`);
@@ -125,7 +164,7 @@ it.each(Object.entries(fixtures).flatMap(([path, source]) => appearances.map((ap
             element.getAttribute('data-terminal-device') === device.id && element.getAttribute('data-terminal') === terminal)!;
           const label = marker.querySelector('text')!;
           const side = device.sides[terminal];
-          const vertical = device.type === 'ic' && ['T', 'B'].includes(side);
+          const vertical = ['ic', 'mux', 'demux'].includes(device.type) && ['T', 'B'].includes(side);
           const offset = vertical ? [4, 0] : ({ L: [-4, -4], R: [4, -4], T: [4, -4], B: [4, 4] } as Record<string, number[]>)[side];
           const anchor = side === 'L' || vertical && side === 'B' ? 'end' : 'start';
           const baseline = vertical || side === 'B' ? 'hanging' : 'text-after-edge';
@@ -158,6 +197,7 @@ it.each(Object.entries(fixtures).flatMap(([path, source]) => appearances.map((ap
       }
       return { errors, deterministic: first.svg === second.svg, uniqueIds: new Set(ids).size === ids.length,
         devices: root.querySelectorAll('[data-device]').length,
+        terminals: root.querySelectorAll('[data-terminal]').length,
         assignments: root.querySelectorAll('[data-terminal-net]').length,
         stages: root.querySelectorAll('[data-stage]').length, blocks: root.querySelectorAll('[data-block]').length,
         report: second.report, viewBox: root.getAttribute('viewBox')!.split(/\s+/u).map(Number) };
@@ -174,6 +214,7 @@ it.each(Object.entries(fixtures).flatMap(([path, source]) => appearances.map((ap
     expect(result.deterministic).toBe(true);
     expect(result.uniqueIds).toBe(true);
     expect(result.devices).toBe(model.devices.length);
+    expect(result.terminals).toBe(model.devices.reduce((count, device) => count + device.terminals.length, 0));
     expect(result.assignments).toBe(model.connections.length);
     expect(result.stages).toBe(model.stages.filter((stage) => !stage.implicit).length);
     expect(result.blocks).toBe(model.blocks.length);

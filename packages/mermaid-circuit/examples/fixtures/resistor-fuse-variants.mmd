@@ -1,0 +1,29 @@
+circuitDiagram A
+
+VDD{{"VDD"}}:::supplyNet
+GND{{"GND"}}:::ground
+
+subgraph stage resistorFuseVariants
+    direction TB
+    F1["F1"]:::fuseIEC
+    F2["F2"]:::fuseUs
+    R1["R1"]:::resistorIEC
+    R2["R2"]:::resistorVar
+    R3["R3"]:::resistorVarIEC
+    R4["R4"]:::thermistor
+    R5["R5"]:::photoresistor
+    R6["R6"]:::photoresistorIEC
+end
+
+VDD --- |A| F1
+F1 |B| --- |A| F2
+F2 |B| --- |A| R1
+F2 |B| --- |A| R2
+R1 |B| --- |A| R3
+R2 |B| --- |A| R3
+R2 |B| --- |A| R4
+R3 |B| --- |A| R5
+R4 |B| --- |A| R5
+R4 |B| --- |A| R6
+R5 |B| --- GND
+R6 |B| --- GND

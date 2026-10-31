@@ -94,11 +94,35 @@ IC bodies have a minimum width and height of 120 units. Pins on each side are ce
 
 For each dimension, the body span is `max(120, (n + 1) × 60)`, where `n` is the larger pin count on the two corresponding sides. Leads extend 30 units beyond the body. One pin per side retains the approved 120 × 120 body and 180 × 180 extent.
 
+### MUX and DEMUX presentation
+
+MUX and DEMUX use dynamic trapezoids with the fixed terminals and ordering defined in [the notation contract](notation.md#mux-and-demux). The MUX has a taller input edge and shorter output edge; the DEMUX reverses those edges. Neither shape has a select inversion bubble.
+
+Reuse the IC pin spacing and outer extent calculation above. The taller body edge spans the calculated height minus the two 30-unit lead margins. Inset each end of the shorter edge by another 60 units.
+
+Horizontal data leads join each vertical body edge to its outer attachment. Selects descend from the sloped outline to the bottom of the pane, centered 60 units apart.
+
+In LR stages, data flows left to right and selects attach below. TB stages rotate the complete shape and its terminals through the existing 90-degree transform. Terminal labels use the dynamic IC alignment rules.
+
+Digital dependency levels account for every data output. For stages containing these larger bodies, column spacing uses the largest pane width plus the existing 240-unit gap; row spacing uses the largest pane height plus 120 units.
+
 ## Routing and junction presentation
 
 Wires use orthogonal routing. Junction markers follow the [junction contract](notation.md#junctions). A junction belongs to the nearest shared scope of the branches it joins: their stage, then their block, then the diagram.
 
 Stage frames enclose their junctions with at least 30 units of clearance; block frames enclose shared block junctions within their inner padding. Routes and crossings must not redefine electrical connectivity.
+
+## Local op-amp feedback
+
+The [notation contract](notation.md#local-op-amp-negative-feedback) defines recognized direct and passive returns. Only the local route from one op-amp's output back to its own inverting input may double back around the body. Ordinary input, output, supply, and unrelated routes retain their existing constraints.
+
+A recognized return uses orthogonal segments with the existing 60-unit outward approach at both op-amp terminals. It avoids device bodies and terminal labels. Where multiple ordinary segments form the return, their shared net identity and assembled connectivity must be validated.
+
+Place the return resistor or capacitor above the op-amp on the returning path. Place the divider's ground resistor on its separate ground leg. Adjust only recognized feedback components; unrelated devices retain their placement, and an obstructed local arrangement must fail rather than move them.
+
+Keep the op-amp's normal orientation and the external output proceeding rightward. Branch the return near the output, after its terminal approach. Prefer a clear return with fewer bends; this exception does not permit unrestricted multi-bend routing.
+
+Draw a junction dot at a genuine three-way output or divider branch. Two-way return bends and unrelated wire crossings receive no dot. Supply wires receive no feedback U-turn exemption.
 
 ## Labels
 

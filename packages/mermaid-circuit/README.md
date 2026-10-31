@@ -1,10 +1,12 @@
 # mermaid-circuit
 
-An external Mermaid circuit renderer with identifier `circuitDiagram`. Version `0.1.0` is a release candidate; it has not been published to npm. The package is prepared for tarball installation, while the repository-root workspace remains private.
+An external Mermaid circuit renderer with identifier `circuitDiagram`. Version `0.1.0` is published on npm. Version `0.1.1` is the current source release candidate; it has not been published.
+
+The candidate is prepared for tarball installation, while the repository-root workspace remains private. See the [changelog](CHANGELOG.md) for the candidate’s implemented changes and known routing limits.
 
 ## Implemented behavior
 
-The parser accepts `circuitDiagram D` and `circuitDiagram A`, followed by declarations and connections from the closed 22-type vocabulary in [the notation specification](spec/notation.md).
+The parser accepts `circuitDiagram D` and `circuitDiagram A`, followed by declarations and connections from the closed 83-type vocabulary in [the notation specification](spec/notation.md).
 
 ```text
 circuitDiagram D
@@ -19,7 +21,9 @@ U1 |O| --- Y
 
 Blank lines and Mermaid `%%` comments are accepted. The parser validates mode eligibility, declaration brackets, object identity, device terminals, terminal-qualified connections, and typed stage/block membership. Optional device parameters remain uninterpreted label content.
 
-The full 110-shape catalog is not an authorable device vocabulary. The parser now admits `fuse` in mode `A` and `nand` in mode `D`.
+The full 110-shape catalog is not an authorable device vocabulary. The digital vocabulary includes `and`, `or`, `nor`, `xor`, `xnor`, `notNot`, `schmitt`, `schmittNot`, `schmittAnd`, and `schmittNand`, alongside `nand`, `inverter`, and `buffer`. Their terminals and mode restrictions are defined in [the notation specification](spec/notation.md#object-types).
+
+The resistor and fuse variants include `resistorIEC`, `resistorVar`, `resistorVarIEC`, `thermistor`, `photoresistor`, `photoresistorIEC`, `fuseIEC`, and `fuseUs`. See [the notation specification](spec/notation.md#object-types) for their terminal contracts and mode restrictions.
 
 Mode `A` also accepts `antenna` and dynamic `ic` devices using the [IC pin notation](spec/notation.md#integrated-circuit-pins). Multiple pins may share a side.
 
@@ -34,9 +38,11 @@ M1 |B| --- |A| S1
 
 The motor is a circle with `M` inside. The solenoid is a circle with a straight arrow through its center. This arrow shows motion; it adds no electrical rule.
 
-The four catalog-only additions are `lamp`, `lamp2`, `breaker`, and `opamp`. They work with the standalone drawing core but cannot be declared in circuit notation. The `antenna` device is authorable in mode `A`.
+The capacitor and load additions are `capacitor2`, `capacitorPolar`, `capacitor2Polar`, `capacitorVar`, `capacitorTrim`, `lamp`, `lamp2`, `breaker`, and `diac`. See [the notation specification](spec/notation.md#object-types) for their terminal contracts and mode restrictions.
 
-Existing diode assets are unchanged. Use `diode` for an ordinary rectifier diode.
+The `opamp` device supports open-loop schematics and [local negative feedback](spec/notation.md#local-op-amp-negative-feedback) in mode `A`. Declare external endpoints explicitly. The return may connect `out` directly to its own `in1`, or pass through one ordinary resistor or capacitor.
+
+Use `diode` for an ordinary rectifier diode. The authorable variants are `diodeFilled`, `schottky`, `diodeTunnel`, `diodeShockley`, `zener`, `diodeTVS`, `varactor`, `led`, `led2`, and `photodiode`. Their terminal contracts and mode restrictions are defined in [the notation specification](spec/notation.md#object-types).
 
 Direct device connections name both terminals in endpoint order:
 
@@ -56,6 +62,10 @@ The former colon-separated terminal syntax is rejected.
 Shared terminals imply one net and a junction, while distinct terminal groups remain separate. Repeated statements do not duplicate connectivity. Direct source-to-source and source-to-drain statements are rejected; write drain-to-source connections in that order.
 
 External endpoints may be declared using their existing types. Missing declarations are inferred from the approved MOS terminal mapping in [connection syntax](spec/notation.md#connection-syntax), never from names such as `VDD`. Endpoints without a mapped MOS connection require explicit declarations.
+
+MOSFET variants now include diode and circle artwork, analog N/P-channel symbols, biased FETs, and alternate orientations. Their terminal contracts, bulk relationships, and endpoint inference follow [the notation specification](spec/notation.md#bulk-semantics).
+
+Digital MUX and DEMUX devices support two-way and four-way configurations, selected with labels such as `M["M<br/>size=4"]:::mux`. Fixed data and select pins use named-terminal connections; see [the terminal contracts](spec/notation.md#mux-and-demux).
 
 The normalized model remains a connectivity model, not an electrical simulator.
 
@@ -159,10 +169,10 @@ npm ci
 npm run build --workspace mermaid-circuit
 npm pack --dry-run --json --workspace mermaid-circuit
 npm pack --workspace mermaid-circuit
-tar -tzf mermaid-circuit-0.1.0.tgz
+tar -tzf mermaid-circuit-0.1.1.tgz
 ```
 
-The tarball contains compiled ESM, TypeScript declarations, the shape catalog, bundled symbol artwork, this README, the MIT license, and acknowledgements. The 110 registered symbols are bundled in JavaScript; runtime rendering does not read source SVG files. The nine unregistered IC templates are excluded.
+The tarball contains compiled ESM, TypeScript declarations, the shape catalog, bundled symbol artwork, this README, the changelog, the MIT license, and acknowledgements. The 110 registered symbols are bundled in JavaScript; runtime rendering does not read source SVG files. The nine unregistered IC templates are excluded.
 
 Run the isolated consumer check from the checkout:
 
@@ -171,14 +181,14 @@ npx playwright install chromium
 npm run verify:distribution --workspace mermaid-circuit
 ```
 
-The check builds and packs the package, audits the actual archive, and installs it into a temporary app outside the repository. It compiles a TypeScript consumer, checks all 110 symbols, and renders all five reference circuits in all three appearances. It checks geometry, connectivity, and colours against the saved SVGs, with network requests blocked during rendering.
+The check builds and packs the package, audits the actual archive, and installs it into a temporary app outside the repository. It compiles a TypeScript consumer, checks all 110 symbols, and renders all seventeen reference circuits in all three appearances. It checks geometry, connectivity, and colours against the saved SVGs, with network requests blocked during rendering.
 
 Imports must resolve inside the isolated app. The check uses Node.js and existing JavaScript tooling; no Python runtime is needed. It removes its temporary app and tarball on success or failure.
 
 To retain the exact tarball that passed verification, supply an output path outside the repository:
 
 ```sh
-npm run verify:distribution --workspace mermaid-circuit -- --tarball-output /absolute/output/mermaid-circuit-0.1.0.tgz
+npm run verify:distribution --workspace mermaid-circuit -- --tarball-output /absolute/output/mermaid-circuit-0.1.1.tgz
 ```
 
 The output directory must already exist. The verifier prints the tarball's filename, byte size, SHA-256 digest, content inventory, and each circuit/theme result. Delete locally generated tarballs after use; do not commit them.
@@ -186,7 +196,7 @@ The output directory must already exist. The verifier prints the tarball's filen
 In an independent ESM app, install that verified tarball alongside Mermaid:
 
 ```sh
-npm install /absolute/output/mermaid-circuit-0.1.0.tgz mermaid@12.2.0
+npm install /absolute/output/mermaid-circuit-0.1.1.tgz mermaid@12.2.0
 ```
 
 Use the [host registration example](#local-consumption) below. The public ESM entry point, declaration files, and export map are unchanged.
@@ -281,7 +291,7 @@ npm run dev --workspace mermaid-circuit
 
 Open the local URL printed by Vite. The page registers the compiled package, loads `examples/basic.mmd`, and displays the returned SVG with a completion status. The fixture renders a connected CMOS inverter.
 
-Use the circuit and appearance selectors to inspect all five fixtures in all three palettes. A preview can also be selected with `?fixture=cmos-nand2&appearance=colored` on that local URL.
+Use the circuit and appearance selectors to inspect all ten fixtures in all three palettes. A preview can also be selected with `?fixture=cmos-nand2&appearance=colored` on that local URL.
 
 ```sh
 npm run typecheck --workspace mermaid-circuit
@@ -291,9 +301,9 @@ npx playwright install chromium
 npm run test:browser --workspace mermaid-circuit
 ```
 
-Unit tests cover the 22 notation types, device connections, hierarchy, parser failures, and database isolation. They also check placement, routing limits, and the NAND and XOR truth tables.
+Unit tests cover the 83 notation types, device connections, hierarchy, parser failures, and database isolation. They also check placement, routing limits, and the NAND and XOR truth tables.
 
-Browser tests register the compiled package with real Mermaid in Chromium. They check all five drawings, their symbol transforms and wire endpoints, failed input, and recovery after failure. See the [root README](../../README.md) for `.venv/` runtime activation and CI commands.
+Browser tests register the compiled package with real Mermaid in Chromium. They check all seventeen drawings, their symbol transforms and wire endpoints, failed input, and recovery after failure. See the [root README](../../README.md) for `.venv/` runtime activation and CI commands.
 
 ## Generated circuit examples
 
@@ -308,8 +318,32 @@ Each SVG is produced by the registered Mermaid plugin from its source fixture. T
 | CMOS NAND2 | [Mermaid](examples/fixtures/cmos-nand2.mmd) | [SVG](examples/fixtures/cmos-nand2.svg) | [SVG](examples/fixtures/cmos-nand2-inverse.svg) | [SVG](examples/fixtures/cmos-nand2-colored.svg) |
 | CMOS XOR, twelve transistors | [Mermaid](examples/fixtures/cmos-xor12.mmd) | [SVG](examples/fixtures/cmos-xor12.svg) | [SVG](examples/fixtures/cmos-xor12-inverse.svg) | [SVG](examples/fixtures/cmos-xor12-colored.svg) |
 | XOR, four NAND gates | [Mermaid](examples/fixtures/xor-nand4.mmd) | [SVG](examples/fixtures/xor-nand4.svg) | [SVG](examples/fixtures/xor-nand4-inverse.svg) | [SVG](examples/fixtures/xor-nand4-colored.svg) |
+| Logic variants | [Mermaid](examples/fixtures/logic-variants.mmd) | [SVG](examples/fixtures/logic-variants.svg) | [SVG](examples/fixtures/logic-variants-inverse.svg) | [SVG](examples/fixtures/logic-variants-colored.svg) |
+| Schmitt variants | [Mermaid](examples/fixtures/schmitt-variants.mmd) | [SVG](examples/fixtures/schmitt-variants.svg) | [SVG](examples/fixtures/schmitt-variants-inverse.svg) | [SVG](examples/fixtures/schmitt-variants-colored.svg) |
+| Resistor and fuse variants | [Mermaid](examples/fixtures/resistor-fuse-variants.mmd) | [SVG](examples/fixtures/resistor-fuse-variants.svg) | [SVG](examples/fixtures/resistor-fuse-variants-inverse.svg) | [SVG](examples/fixtures/resistor-fuse-variants-colored.svg) |
+| Capacitor and load variants | [Mermaid](examples/fixtures/capacitor-load-variants.mmd) | [SVG](examples/fixtures/capacitor-load-variants.svg) | [SVG](examples/fixtures/capacitor-load-variants-inverse.svg) | [SVG](examples/fixtures/capacitor-load-variants-colored.svg) |
+| Diode variants | [Mermaid](examples/fixtures/diode-variants.mmd) | [SVG](examples/fixtures/diode-variants.svg) | [SVG](examples/fixtures/diode-variants-inverse.svg) | [SVG](examples/fixtures/diode-variants-colored.svg) |
+| MOSFET variants | [Mermaid](examples/fixtures/mosfet-variants.mmd) | [SVG](examples/fixtures/mosfet-variants.svg) | [SVG](examples/fixtures/mosfet-variants-inverse.svg) | [SVG](examples/fixtures/mosfet-variants-colored.svg) |
+| Open-loop op-amp | [Mermaid](examples/fixtures/opamp-open-loop.mmd) | [SVG](examples/fixtures/opamp-open-loop.svg) | [SVG](examples/fixtures/opamp-open-loop-inverse.svg) | [SVG](examples/fixtures/opamp-open-loop-colored.svg) |
+| Unity-gain voltage follower | [Mermaid](examples/fixtures/opamp-voltage-follower.mmd) | [SVG](examples/fixtures/opamp-voltage-follower.svg) | [SVG](examples/fixtures/opamp-voltage-follower-inverse.svg) | [SVG](examples/fixtures/opamp-voltage-follower-colored.svg) |
+| Non-inverting amplifier | [Mermaid](examples/fixtures/opamp-noninverting-amplifier.mmd) | [SVG](examples/fixtures/opamp-noninverting-amplifier.svg) | [SVG](examples/fixtures/opamp-noninverting-amplifier-inverse.svg) | [SVG](examples/fixtures/opamp-noninverting-amplifier-colored.svg) |
+| Voltage follower, supply connections omitted | [Mermaid](examples/fixtures/opamp-voltage-follower-no-supply.mmd) | [SVG](examples/fixtures/opamp-voltage-follower-no-supply.svg) | [SVG](examples/fixtures/opamp-voltage-follower-no-supply-inverse.svg) | [SVG](examples/fixtures/opamp-voltage-follower-no-supply-colored.svg) |
+| Non-inverting amplifier, supply connections omitted | [Mermaid](examples/fixtures/opamp-noninverting-amplifier-no-supply.mmd) | [SVG](examples/fixtures/opamp-noninverting-amplifier-no-supply.svg) | [SVG](examples/fixtures/opamp-noninverting-amplifier-no-supply-inverse.svg) | [SVG](examples/fixtures/opamp-noninverting-amplifier-no-supply-colored.svg) |
+| MUX and DEMUX | [Mermaid](examples/fixtures/mux-demux.mmd) | [SVG](examples/fixtures/mux-demux.svg) | [SVG](examples/fixtures/mux-demux-inverse.svg) | [SVG](examples/fixtures/mux-demux-colored.svg) |
 
-Regenerate all fifteen SVGs with the existing Node and Chromium environment:
+The MUX/DEMUX fixture connects all four configurations and holds each select at an explicitly named ground reference. Its DEMUX data outputs retain independent nets.
+
+The capacitor and load fixture tests schematic rendering with series and parallel connections. It does not establish that the arrangement is a validated physical circuit.
+
+The open-loop op-amp fixture has independent inputs and an output, with explicit positive-supply and lower-supply reference connections. Its `vs` terminal connects to the declared `VSS` ground reference. The schematic does not assert amplifier stability or physical design validity.
+
+The voltage follower connects the output directly to the inverting input while `Vin` enters the non-inverting input. The non-inverting amplifier uses a 90 kΩ return resistor and a 10 kΩ ground-leg resistor. Both fixtures retain separate +15 V and −15 V supply nets.
+
+The resistor values illustrate the ideal nominal relationship `Av ≈ 1 + Rf/Rg = 1 + 90k/10k = 10`. The plugin draws the authored topology; it does not calculate gain, output voltage, or stability. The capacitor test exercises the same local return geometry without adding another permanent fixture.
+
+The two signal-only examples omit `supplyNet` declarations and leave `vd` and `vs` visibly unconnected. Their signal and feedback connections match the powered examples; the amplifier retains its explicit divider ground. These abbreviated schematics do not imply that an op-amp operates without power.
+
+Verify all seventeen source fixtures against their fifty-one saved SVG references without rewriting them. A mismatched reference fails validation:
 
 ```sh
 npm run render:fixtures --workspace mermaid-circuit

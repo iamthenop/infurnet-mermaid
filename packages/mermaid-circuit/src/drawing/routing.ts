@@ -1,7 +1,7 @@
 import type { Net } from '../circuitTypes.js';
 import { Element, type PlacedElement, type WireShape } from './core.js';
 import type { Bounds, Point } from './geometry.js';
-import { pad, validateOrientation, type Attachment, type Layout } from './layout.js';
+import { localFeedback, pad, validateOrientation, type Attachment, type Layout } from './layout.js';
 
 export interface Route { readonly net: string; readonly points: readonly Point[]; readonly shape: WireShape }
 export interface NetOccurrence { readonly net: Net; readonly element: Element; readonly placed: PlacedElement; readonly branches: number; readonly isProxy: boolean; readonly stages: readonly number[] }
@@ -293,9 +293,54 @@ export function routeLayout(layout: Layout): Routing {
     }
     return added;
   }
+  const feedback = localFeedback(layout.devices.map((item) => item.device), layout.attachments, layout.nets);
+  const handled = new Set<string>();
+  const feedbackJoints = new Map<string, Attachment[]>();
+  const splitCorners: { net: string; point: Point }[] = [];
+  const terminalLabels = layout.attachments.map((item): Bounds => {
+    const [x, y] = item.point, width = item.terminal.length * 8;
+    return { minX: item.side === 'L' ? x - 4 - width : x + 4,
+      maxX: item.side === 'L' ? x - 4 : x + 4 + width,
+      minY: item.side === 'B' ? y + 4 : y - 18,
+      maxY: item.side === 'B' ? y + 18 : y - 4 };
+  });
+  function feedbackPath(net: string, points: readonly Point[]): void {
+    for (const point of points) splitCorners.push({ net, point });
+    for (const [start, end] of segments(points)) {
+      routes.push(chooseRoute(net, start, end, routes, [...obstacles(), ...terminalLabels]));
+    }
+  }
+  for (const loop of feedback) {
+    const amplifier = layout.devices.find((item) => item.device.id === loop.opamp.id)!;
+    const attachment = (device: string, terminal: string) => layout.attachments.find((item) => item.device === device && item.terminal === terminal)!;
+    const output = attachment(loop.opamp.id, 'out'), input = attachment(loop.opamp.id, 'in1');
+    if (output.side !== 'R' || input.side !== 'L') throw new Error('Routing failure: local feedback requires the normal op-amp orientation.');
+    const branch: Point = [output.point[0] + MIN_TERMINAL_APPROACH, output.point[1]];
+    const left = input.point[0] - (loop.groundLeg ? 360 : 120), top = amplifier.pane.minY - 180;
+    feedbackPath(loop.output, [output.point, branch, [branch[0], top]]);
+    handled.add(`${loop.opamp.id}:out`);
+    handled.add(`${loop.opamp.id}:in1`);
+    feedbackJoints.set(loop.output, [...feedbackJoints.get(loop.output) ?? [], { ...output, point: branch }]);
+    if (loop.passive) {
+      const a = attachment(loop.passive.id, 'A'), b = attachment(loop.passive.id, 'B');
+      feedbackPath(loop.output, [[branch[0], top], a.point]);
+      feedbackPath(loop.input, [b.point, [left, top], [left, input.point[1]], input.point]);
+      handled.add(`${loop.passive.id}:A`);
+      handled.add(`${loop.passive.id}:B`);
+      feedbackJoints.set(loop.input, [...feedbackJoints.get(loop.input) ?? [], { ...input, point: [left, input.point[1]] }]);
+    } else {
+      feedbackPath(loop.output, [[branch[0], top], [left, top], [left, input.point[1]], input.point]);
+    }
+    if (loop.groundLeg) {
+      const a = attachment(loop.groundLeg.id, 'A');
+      feedbackPath(loop.input, [[left, input.point[1]], a.point]);
+      handled.add(`${loop.groundLeg.id}:A`);
+    }
+  }
   const ordered = [...layout.nets].sort((a, b) => Number(a.type !== 'net') - Number(b.type !== 'net'));
   for (const net of ordered) {
-    const attachments = layout.attachments.filter((item) => item.net === net.id);
+    const attachments = [...layout.attachments.filter((item) => item.net === net.id && !handled.has(`${item.device}:${item.terminal}`)),
+      ...feedbackJoints.get(net.id) ?? []];
     if (!attachments.length) continue;
     const input = net.type === 'pinIn' || net.type === 'pinInOut';
     const singleOccurrence = net.type !== 'net' && !mayProxy(net, layout.proxyPolicy);
@@ -379,10 +424,18 @@ export function routeLayout(layout: Layout): Routing {
       const axis = peer ? reflectionAxis(group, peer.group, layout)! : undefined;
       const reflected = (point: Point): Point => [point[0], 2 * axis! - point[1]];
       const joint = connectedAt ?? (peer ? reflected(peer.joint) : groupJoint(group, layout, input));
-      const first = group[0], stage = layout.stageBounds[first.stage];
+      const first = group[0];
+      const amplifier = feedback.some((loop) => loop.opamp.id === first.device)
+        ? layout.devices.find((item) => item.device.id === first.device) : undefined;
+      const stage = amplifier ? pad(amplifier.pane, 30) : layout.stageBounds[first.stage];
       const commonConductor = conductorAxis(group) === 0;
       const left = net.type === 'pinIn' || net.type === 'pinInOut' && first.side === 'L';
-      const pinY = input && group.length === 1 && first.side === 'T'
+      const selector = net.type === 'pinIn' && group.length === 1 && first.side === 'B'
+        ? layout.devices.find((item) => item.device.id === first.device && ['mux', 'demux'].includes(item.device.type)
+          && item.device.pinSides?.[first.terminal] === 'B') : undefined;
+      const selectIndex = selector?.device.terminals.filter((terminal) => selector.device.pinSides?.[terminal] === 'B').indexOf(first.terminal) ?? 0;
+      const pinY = selector ? joint[1] + MIN_TERMINAL_APPROACH + selectIndex * 120
+        : input && group.length === 1 && first.side === 'T'
         ? Math.min(joint[1] - 60, ...occurrences.filter((item) => item.net.id === net.id).map((item) => item.placed.bounds.minY - 60))
         : joint[1] + (commonConductor ? group.every((item) => item.side === 'B') ? 60 : -60 : 0);
       const base: Point = net.type === 'supplyNet'
@@ -403,11 +456,17 @@ export function routeLayout(layout: Layout): Routing {
         if (obstacles().some((other) => box.minX < other.maxX && box.maxX > other.minX && box.minY < other.maxY && box.maxY > other.minY)) continue;
         try {
           const added = connectedAt ? [] : branches(net.id, group, joint, routes);
-          const trunk = chooseRoute(net.id, at, joint, [...routes, ...added], [...obstacles(), placed.bounds]);
+          const lowerSupply = amplifier && group.length === 1 && first.terminal === 'vs' && first.side === 'B' && net.type === 'supplyNet';
+          const approach: Point = lowerSupply ? [joint[0], joint[1] + MIN_TERMINAL_APPROACH] : joint;
+          if (lowerSupply) added.push(chooseRoute(net.id, joint, approach, [...routes, ...added], obstacles()));
+          const trunk = chooseRoute(net.id, at, approach, [...routes, ...added], [...obstacles(), placed.bounds], Boolean(lowerSupply));
+          if (selector && (Math.abs(trunk.points.at(-2)![0] - joint[0]) > EPS
+            || trunk.points.at(-2)![1] - joint[1] < MIN_TERMINAL_APPROACH - EPS)) continue;
           if (commonConductor && Math.abs(trunk.points.at(-2)![0] - joint[0]) > EPS) continue;
           if (routes.some((route) => route.net !== net.id && hitsBox(route.points, placed.bounds))) continue;
           junctions([...routes, ...added, trunk], layout.attachments);
           routes.push(...added, trunk);
+          if (lowerSupply) splitCorners.push({ net: net.id, point: approach });
           occurrences.push({ net, element, placed, stages, branches: group.length, isProxy: occurrences.some((item) => item.net.id === net.id) });
           if (['pinIn', 'pinOut', 'pinInOut'].includes(net.type)) pinPlacements.push({ net, group, at, joint });
           return true;
@@ -485,8 +544,17 @@ export function routeLayout(layout: Layout): Routing {
     }
   }
   const crossings = new Set(routes.flatMap((route) => (crossingPoints(route, routes) ?? []).map(key)));
+  const extraBends = new Set(splitCorners.filter(({ net, point }) => {
+    const directions = new Set<string>();
+    for (const route of routes.filter((item) => item.net === net)) for (const [a, b] of segments(route.points)) {
+      if (!intersection(a, b, point, point)) continue;
+      for (const end of [a, b]) if (!equal(point, end)) directions.add(Math.abs(end[0] - point[0]) > EPS
+        ? end[0] < point[0] ? 'L' : 'R' : end[1] < point[1] ? 'T' : 'B');
+    }
+    return directions.size === 2 && !(['L', 'R'].every((side) => directions.has(side)) || ['T', 'B'].every((side) => directions.has(side)));
+  }).map(({ net, point }) => `${net}:${key(point)}`)).size;
   const result: Routing = { routes, occurrences, junctions: junctions(routes, layout.attachments), attachments: layout.attachments,
-    bends: routes.filter((route) => route.shape !== '-').length, crossings: crossings.size, junctionScopes: [] };
+    bends: routes.filter((route) => route.shape !== '-').length + extraBends, crossings: crossings.size, junctionScopes: [] };
   const junctionScopes = result.junctions.map((joint) => {
     const candidates = scopes.filter((scope) => scope.net === joint.net && equal(scope.point, joint.point)).sort((a, b) => a.stages.length - b.stages.length);
     return candidates[0] ?? { ...joint, stages: [...new Set(layout.attachments.filter((item) => item.net === joint.net).map((item) => item.stage))] };

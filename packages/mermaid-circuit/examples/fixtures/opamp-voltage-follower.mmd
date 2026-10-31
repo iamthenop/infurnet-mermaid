@@ -1,0 +1,16 @@
+circuitDiagram A
+
+VIN(["Vin"]):::pinIn
+VOUT(["Vout"]):::pinOut
+VPLUS{{"+15 V"}}:::supplyNet
+VMINUS{{"-15 V"}}:::supplyNet
+
+subgraph stage amplifier
+    U1["U1"]:::opamp
+end
+
+VIN --- U1 |in2|
+U1 |out| --- |in1| U1
+U1 |out| --- VOUT
+VPLUS --- U1 |vd|
+VMINUS --- U1 |vs|

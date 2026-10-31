@@ -1,0 +1,132 @@
+<svg id="fixture-opamp-open-loop" width="962" xmlns="http://www.w3.org/2000/svg" viewBox="-406 -297.6 962 759.76" height="759.76" overflow="visible" font-family="sans-serif" font-size="14" role="graphics-document document" aria-roledescription="circuitDiagram"><style>#fixture-opamp-open-loop{font-family:"trebuchet ms",verdana,arial,sans-serif;font-size:16px;fill:#ccc;}@keyframes edge-animation-frame{from{stroke-dashoffset:0;}}@keyframes dash{to{stroke-dashoffset:0;}}#fixture-opamp-open-loop .edge-animation-slow{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 50s linear infinite;stroke-linecap:round;}#fixture-opamp-open-loop .edge-animation-fast{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 20s linear infinite;stroke-linecap:round;}#fixture-opamp-open-loop .error-icon{fill:#a44141;}#fixture-opamp-open-loop .error-text{fill:#ddd;stroke:#ddd;}#fixture-opamp-open-loop .edge-thickness-normal{stroke-width:1px;}#fixture-opamp-open-loop .edge-thickness-thick{stroke-width:3.5px;}#fixture-opamp-open-loop .edge-pattern-solid{stroke-dasharray:0;}#fixture-opamp-open-loop .edge-thickness-invisible{stroke-width:0;fill:none;}#fixture-opamp-open-loop .edge-pattern-dashed{stroke-dasharray:3;}#fixture-opamp-open-loop .edge-pattern-dotted{stroke-dasharray:2;}#fixture-opamp-open-loop .marker{fill:lightgrey;stroke:lightgrey;}#fixture-opamp-open-loop .marker.cross{stroke:lightgrey;}#fixture-opamp-open-loop svg{font-family:"trebuchet ms",verdana,arial,sans-serif;font-size:16px;}#fixture-opamp-open-loop p{margin:0;}#fixture-opamp-open-loop,#fixture-opamp-open-loop svg{font-family:sans-serif;font-size:14px;}#fixture-opamp-open-loop [data-circuit-background]{fill:#101215;}#fixture-opamp-open-loop [data-wire] polyline{stroke:#F2F2F2;}#fixture-opamp-open-loop [data-junction] circle{stroke:#F2F2F2;fill:#F2F2F2;}#fixture-opamp-open-loop [data-device] [stroke]:not([stroke="none"]),#fixture-opamp-open-loop [data-net-occurrence] [stroke]:not([stroke="none"]){stroke:#F2F2F2;}#fixture-opamp-open-loop [data-device] [fill="#000"],#fixture-opamp-open-loop [data-net-occurrence] [fill="#000"]{fill:#F2F2F2;}#fixture-opamp-open-loop [data-device] [fill="#fff"],#fixture-opamp-open-loop [data-device] [fill="white"],#fixture-opamp-open-loop [data-net-occurrence] [fill="#fff"],#fixture-opamp-open-loop [data-net-occurrence] [fill="white"]{fill:#101215;}#fixture-opamp-open-loop [data-stage] polyline,#fixture-opamp-open-loop [data-block] polyline{stroke:#F2F2F2;}#fixture-opamp-open-loop [data-device-label] text,#fixture-opamp-open-loop [data-ic-label] text,#fixture-opamp-open-loop [data-terminal] text{fill:#F2F2F2;}#fixture-opamp-open-loop [data-net-label] text,#fixture-opamp-open-loop [data-frame-label] text{fill:#F2F2F2;}#fixture-opamp-open-loop .node .neo-node{stroke:#ccc;}#fixture-opamp-open-loop [data-look="neo"].node rect,#fixture-opamp-open-loop [data-look="neo"].cluster rect,#fixture-opamp-open-loop [data-look="neo"].node polygon{stroke:url(#fixture-opamp-open-loop-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#fixture-opamp-open-loop [data-look="neo"].swimlane.cluster rect{filter:none;}#fixture-opamp-open-loop [data-look="neo"].node path{stroke:url(#fixture-opamp-open-loop-gradient);stroke-width:1px;}#fixture-opamp-open-loop [data-look="neo"].node .outer-path{filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#fixture-opamp-open-loop [data-look="neo"].node .neo-line path{stroke:#ccc;filter:none;}#fixture-opamp-open-loop [data-look="neo"].node circle{stroke:url(#fixture-opamp-open-loop-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#fixture-opamp-open-loop [data-look="neo"].node circle .state-start{fill:#000000;}#fixture-opamp-open-loop [data-look="neo"].icon-shape .icon{fill:url(#fixture-opamp-open-loop-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#fixture-opamp-open-loop [data-look="neo"].icon-shape .icon-neo path{stroke:url(#fixture-opamp-open-loop-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#fixture-opamp-open-loop :root{--mermaid-font-family:"trebuchet ms",verdana,arial,sans-serif;}</style><rect data-circuit-background="true" x="-406" y="-297.6" width="962" height="759.76"></rect>
+<g data-drawing-index="0" data-stage="amplifier" stroke-dasharray="8 6">
+<polyline points="-30,-30 180,-30 180,150 -30,150 -30,-30" stroke="#777" stroke-width="1" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="1" data-label="true" data-frame-label="stage">
+<text x="-18" y="-42" xml:space="preserve" fill="#000">amplifier</text>
+</g>
+<g data-drawing-index="2" data-net="Negative" data-wire="-" data-points="[[-150,40],[0,40]]">
+<polyline points="-150,40 0,40" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="3" data-net="Positive" data-wire="-" data-points="[[-150,80],[0,80]]">
+<polyline points="-150,80 0,80" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="4" data-net="Output" data-wire="-" data-points="[[300,60],[120,60]]">
+<polyline points="300,60 120,60" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="5" data-net="VDD" data-wire="-" data-points="[[60,-60],[60,0]]">
+<polyline points="60,-60 60,0" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="6" data-net="VSS" data-wire="-" data-points="[[60,180],[60,120]]">
+<polyline points="60,180 60,120" stroke="#000" stroke-width="2" fill="none" transform="matrix(1 0 0 1 0 0)"></polyline>
+</g>
+<g data-drawing-index="7" data-device="U1" data-type="opamp" data-stage-index="0">
+<g transform="matrix(1 0 0 1 0 0)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-opamp-open-loop-element-7-opamp" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path id="fixture-opamp-open-loop-element-7-reference-0" d="M 36.905989232 60 L 36.905989232 20 L 106.188021535 60 L 36.905989232 100 L 36.905989232 60 M 106.188021535 60" stroke="#000" fill="none"></path>
+    <path id="fixture-opamp-open-loop-element-7-reference-1" d="M 42.36624327 40 L 48.76624327 40" stroke="#000" fill="none"></path>
+    <path id="fixture-opamp-open-loop-element-7-reference-2" d="M 42.36624327 80 L 48.76624327 80" stroke="#000" fill="none"></path>
+    <path id="fixture-opamp-open-loop-element-7-reference-3" d="M 45.56624327 83.2 L 45.56624327 76.8" stroke="#000" fill="none"></path>
+    <path id="fixture-opamp-open-loop-element-7-signal-leads" d="M 0 40 L 36.905989232 40 M 0 80 L 36.905989232 80 M 106.188021535 60 L 120 60" stroke="#000" fill="none"></path>
+    <path id="fixture-opamp-open-loop-element-7-supply-leads" d="M 60 0 L 60 33.333333333 M 60 86.666666667 L 60 120" stroke="#000" fill="none"></path>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="8" data-label="true" data-device-label="U1">
+<text x="132" y="104" xml:space="preserve" fill="#000">U1</text>
+</g>
+<g data-drawing-index="9" data-label="true" data-terminal="in1" data-terminal-device="U1" data-terminal-side="L" text-anchor="end" dominant-baseline="text-after-edge" data-x="0" data-y="40" data-terminal-net="Negative">
+<text x="-4" y="36" xml:space="preserve" fill="#000">in1</text>
+</g>
+<g data-drawing-index="10" data-label="true" data-terminal="in2" data-terminal-device="U1" data-terminal-side="L" text-anchor="end" dominant-baseline="text-after-edge" data-x="0" data-y="80" data-terminal-net="Positive">
+<text x="-4" y="76" xml:space="preserve" fill="#000">in2</text>
+</g>
+<g data-drawing-index="11" data-label="true" data-terminal="out" data-terminal-device="U1" data-terminal-side="R" text-anchor="start" dominant-baseline="text-after-edge" data-x="120" data-y="60" data-terminal-net="Output">
+<text x="124" y="56" xml:space="preserve" fill="#000">out</text>
+</g>
+<g data-drawing-index="12" data-label="true" data-terminal="vd" data-terminal-device="U1" data-terminal-side="T" text-anchor="start" dominant-baseline="text-after-edge" data-x="60" data-y="0" data-terminal-net="VDD">
+<text x="64" y="-4" xml:space="preserve" fill="#000">vd</text>
+</g>
+<g data-drawing-index="13" data-label="true" data-terminal="vs" data-terminal-device="U1" data-terminal-side="B" text-anchor="start" dominant-baseline="hanging" data-x="60" data-y="120" data-terminal-net="VSS">
+<text x="64" y="124" xml:space="preserve" fill="#000">vs</text>
+</g>
+<g data-drawing-index="14" data-net-occurrence="0" data-net="Negative" data-type="pinIn" data-branches="1">
+<g transform="matrix(1 0 0 1 -270 -20)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-opamp-open-loop-element-14-pin-in" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polygon id="fixture-opamp-open-loop-element-14-body" points="44,42 104,42 116,60 104,78 44,78"></polygon>
+    <line id="fixture-opamp-open-loop-element-14-stem" x1="116" y1="60" x2="120" y2="60"></line>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="15" data-label="true" data-net-label="Negative" text-anchor="middle">
+<text x="-188" y="45" xml:space="preserve" fill="#000">IN-</text>
+</g>
+<g data-drawing-index="16" data-net-occurrence="1" data-net="Positive" data-type="pinIn" data-branches="1">
+<g transform="matrix(1 0 0 1 -270 20)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-opamp-open-loop-element-16-pin-in" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polygon id="fixture-opamp-open-loop-element-16-body" points="44,42 104,42 116,60 104,78 44,78"></polygon>
+    <line id="fixture-opamp-open-loop-element-16-stem" x1="116" y1="60" x2="120" y2="60"></line>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="17" data-label="true" data-net-label="Positive" text-anchor="middle">
+<text x="-188" y="85" xml:space="preserve" fill="#000">IN+</text>
+</g>
+<g data-drawing-index="18" data-net-occurrence="2" data-net="Output" data-type="pinOut" data-branches="1">
+<g transform="matrix(1 0 0 1 300 0)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-opamp-open-loop-element-18-pin-out" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <line id="fixture-opamp-open-loop-element-18-stem" x1="0" y1="60" x2="4" y2="60"></line>
+    <polygon id="fixture-opamp-open-loop-element-18-body" points="4,42 64,42 76,60 64,78 4,78"></polygon>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="19" data-label="true" data-net-label="Output" text-anchor="middle">
+<text x="338" y="65" xml:space="preserve" fill="#000">OUT</text>
+</g>
+<g data-drawing-index="20" data-net-occurrence="3" data-net="VDD" data-type="supplyNet" data-branches="1">
+<g transform="matrix(1 0 0 1 0 -180)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-opamp-open-loop-element-20-supplyNet" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 60 120 L 60 74.4" id="fixture-opamp-open-loop-element-20-reference-0" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path d="M 60 74.4 L 33 74.4" id="fixture-opamp-open-loop-element-20-reference-1" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path d="M 60 74.4 L 87 74.4" id="fixture-opamp-open-loop-element-20-reference-2" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="21" data-label="true" data-net-label="VDD" text-anchor="middle">
+<text x="60" y="-117.6" xml:space="preserve" fill="#000">V+</text>
+</g>
+<g data-drawing-index="22" data-net-occurrence="4" data-net="VSS" data-type="ground" data-branches="1">
+<g transform="matrix(1 0 0 1 0 180)">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g id="fixture-opamp-open-loop-element-22-ground" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 60 0 L 60 45.6 L 24 45.6 L 96 45.6 M 34.8 62.88 L 85.2 62.88 M 52.8 80.16 L 67.2 80.16" id="fixture-opamp-open-loop-element-22-reference-0" stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+  </g>
+</svg>
+
+</g>
+</g>
+<g data-drawing-index="23" data-label="true" data-net-label="VSS" text-anchor="middle">
+<text x="60" y="282.15999999999997" xml:space="preserve" fill="#000">VSS</text>
+</g>
+</svg>

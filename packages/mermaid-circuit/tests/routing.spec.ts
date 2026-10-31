@@ -92,6 +92,84 @@ describe('orthogonal routing', () => {
     expect(routeLayout(floorplan(model))).toEqual(routing);
   });
 
+  it.each(['opamp-voltage-follower', 'opamp-noninverting-amplifier', 'capacitor-feedback'])
+  ('routes %s locally with near-output branching, clear approaches and connected returns', (name) => {
+    const source = name === 'capacitor-feedback'
+      ? fixtures['../examples/fixtures/opamp-noninverting-amplifier.mmd'].replace(':::resistor', ':::capacitor')
+      : fixtures[`../examples/fixtures/${name}.mmd`];
+    const model = parseCircuit(source), layout = floorplan(model), routed = routeLayout(layout);
+    const amplifier = layout.devices.find((item) => item.device.id === 'U1')!;
+    const output = amplifier.placed.anchors.out, input = amplifier.placed.anchors.in1;
+    const branch = [output[0] + 60, output[1]];
+    expect(routed.junctions).toHaveLength(name === 'opamp-voltage-follower' ? 1 : 2);
+    expect(routed.junctions).toContainEqual({ net: 'VOUT', point: branch });
+    expect(routed.routes).toContainEqual({ net: 'VOUT', points: [output, branch], shape: '-' });
+    const left = input[0] - (name === 'opamp-voltage-follower' ? 120 : 360);
+    const inputNet = model.connections.find((item) => item.device === 'U1' && item.terminal === 'in1')!.net;
+    expect(routed.routes).toContainEqual({ net: inputNet, points: [[left, input[1]], input], shape: '-' });
+    if (name !== 'opamp-voltage-follower') {
+      expect(routed.junctions).toContainEqual({ net: inputNet, point: [left, input[1]] });
+      const rf = model.connections.filter((item) => item.device === 'RF');
+      expect(new Set(rf.map((item) => item.net)).size).toBe(2);
+    }
+    expect(() => validateConnectivity(layout, routed)).not.toThrow();
+    expect(routed.crossings).toBe(1);
+    expect(routed.junctions.some((joint) => joint.point[0] === output[0] + 120 && joint.point[1] === output[1])).toBe(false);
+    expect(routed.occurrences.find((item) => item.net.id === 'VOUT')!.placed.anchors.anchor[0]).toBeGreaterThan(branch[0]);
+    for (const route of routed.routes) {
+      expect(validPath(route.points)).toBe(true);
+      expect(acceptsRoute(route, routed.routes, layout.devices.map((item) => item.placed.bounds))).toBe(true);
+    }
+    const withoutOutput = source.replace('U1 |out| --- VOUT', '');
+    expect(routeLayout(floorplan(parseCircuit(withoutOutput))).junctions).toHaveLength(name === 'opamp-voltage-follower' ? 0 : 1);
+    const broken = routed.routes.filter((route) => !(route.net === inputNet && route.points.at(-1) === input));
+    expect(() => validateConnectivity(layout, { ...routed, routes: broken })).toThrow();
+  });
+
+  it('does not grant ordinary output feeds, positive-feedback paths or other input nets a return-route exception', () => {
+    expect(validPath([[0, 0], [60, 0], [60, -180], [-120, -180], [-120, 0], [0, 0]])).toBe(false);
+    const positive = fixtures['../examples/fixtures/opamp-noninverting-amplifier.mmd']
+      .replace('RF |B| --- |in1| U1', 'RF |B| --- |in2| U1');
+    expect(() => routeLayout(floorplan(parseCircuit(positive)))).toThrow('Routing failure');
+    const layout = floorplan(parseCircuit(fixtures['../examples/fixtures/opamp-voltage-follower.mmd']));
+    const routed = routeLayout(layout);
+    const ordinary: Route = { net: 'VOUT', points: [[180, 60], [240, 60], [120, 60]], shape: '-|' };
+    expect(acceptsRoute(ordinary, routed.routes)).toBe(false);
+    expect(() => chooseRoute('ordinary', [120, 60], [0, 40], routed.routes, layout.devices.map((item) => item.placed.bounds)))
+      .toThrow('Routing failure');
+  });
+
+  it.each(['mux', 'demux'].flatMap((type) => [2, 4].map((size) => ({ type, size }))))
+  ('routes external inputs to bottom select terminals on $type size=$size', ({ type, size }) => {
+    const declaration = `circuitDiagram D\nU["U<br/>size=${size}"]:::${type}`;
+    const device = parseCircuit(declaration).devices[0];
+    const selects = device.terminals.filter((terminal) => terminal.startsWith('S'));
+    const orders = [selects, [...selects].reverse(), ...selects.map((terminal) => [terminal]), [...device.terminals]];
+    for (const terminals of orders) {
+      const source = `${declaration}\n${terminals.map((terminal) =>
+        `N${terminal}([${terminal}]):::${terminal.startsWith('O') ? 'pinOut' : 'pinIn'}\nN${terminal} --- U |${terminal}|`).join('\n')}`;
+      const model = parseCircuit(source), snapshot = JSON.stringify(model), layout = floorplan(model), routed = routeLayout(layout);
+      expect(JSON.stringify(model)).toBe(snapshot);
+      expect(routed.junctions).toEqual([]);
+      expect(routed.crossings).toBe(0);
+      expect(routed.occurrences).toHaveLength(terminals.length);
+      expect(routed.occurrences.some((item) => item.isProxy)).toBe(false);
+      expect(() => validateConnectivity(layout, routed)).not.toThrow();
+      for (const attachment of layout.attachments.filter((item) => item.terminal.startsWith('S'))) {
+        expect(attachment.side).toBe('B');
+        const route = routed.routes.find((item) => item.net === attachment.net)!;
+        const arrival = route.points.at(-2)!;
+        expect(route.points.at(-1)).toEqual(attachment.point);
+        expect(arrival[0]).toBe(attachment.point[0]);
+        expect(arrival[1] - attachment.point[1]).toBeGreaterThanOrEqual(60);
+      }
+      for (const route of routed.routes) {
+        expect(validPath(route.points)).toBe(true);
+        expect(acceptsRoute(route, routed.routes, layout.devices.map((item) => item.placed.bounds))).toBe(true);
+      }
+    }
+  });
+
   it('uses original graph counts and permits input proxies only at the four-to-one threshold', () => {
     const base = 'circuitDiagram D\nA([A]):::pinIn\nB([B]):::pinIn\nY([Y]):::pinOut\nV{{V}}:::supplyNet\nG{{G}}:::ground\n';
     const source = (count: number) => base + Array.from({ length: count }, (_, index) => `U${index}[U${index}]:::buffer`).join('\n');
