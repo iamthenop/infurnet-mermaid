@@ -1,4 +1,5 @@
 import { compareIds, relationshipId, type Family, type Individual, type Litter, type ParsedFamily, type Relationship } from './model.js';
+import { resolveGenerations } from './generations.js';
 
 function validateBirth(value: string, id: string): void {
   const match = /^(\d{4})(?:-(\d{2})(?:-(\d{2}))?)?$/u.exec(value);
@@ -25,7 +26,7 @@ export function validateFamily(parsed: ParsedFamily): Family {
   }
   const byId = new Map(individuals.map((node) => [node.id, node]));
   const relationships = new Map<string, Relationship>();
-  const add = (kind: Relationship['kind'], source: string, target: string) => {
+  const add = (kind: 'maternity' | 'candidate' | 'adoption', source: string, target: string) => {
     const id = relationshipId(kind, source, target);
     relationships.set(id, { id, kind, source, target });
   };
@@ -37,11 +38,19 @@ export function validateFamily(parsed: ParsedFamily): Family {
       if (edge.source === edge.target) throw new Error(`Individual ${edge.source} cannot adopt itself.`);
       add('adoption', edge.source, edge.target);
     } else {
-      if (parent.classification !== 'queen' && parent.classification !== 'tom') {
-        throw new Error(`Line ${edge.line}: parent ${parent.id} requires an unambiguous queen or tom classification.`);
+      if (parent.classification === 'human' || byId.get(edge.target)?.classification === 'human') throw new Error(`Line ${edge.line}: biological ancestry involving human ${parent.classification === 'human' ? parent.id : edge.target} is outside catmode.`);
+      if (parsed.litters.has(edge.target)) {
+        if (edge.notation !== '-->') throw new Error(`Line ${edge.line}: generation spans apply to individuals; use --> for litter ${edge.target}.`);
+        if (parent.classification !== 'queen' && parent.classification !== 'tom') {
+          throw new Error(`Line ${edge.line}: parent ${parent.id} requires an unambiguous queen or tom classification.`);
+        }
+        add(parent.classification === 'queen' ? 'maternity' : 'candidate', edge.source, edge.target);
+      } else {
+        const kind = edge.notation === '-->' ? 'confirmed' : 'ancestry';
+        const id = kind === 'confirmed' ? relationshipId(kind, edge.source, edge.target)
+          : JSON.stringify([kind, edge.source, edge.target, edge.notation]);
+        relationships.set(id, { id, kind, source: edge.source, target: edge.target, span: edge.span, notation: edge.notation });
       }
-      if (byId.get(edge.target)?.classification === 'human') throw new Error(`Line ${edge.line}: biological parentage of human ${edge.target} is outside catmode.`);
-      add(parsed.litters.has(edge.target) ? (parent.classification === 'queen' ? 'maternity' : 'candidate') : 'confirmed', edge.source, edge.target);
     }
   }
   const membership = new Map<string, string>();
@@ -85,6 +94,7 @@ export function validateFamily(parsed: ParsedFamily): Family {
       throw new Error(`Impossible candidate ancestry: ${parent} cannot sire its ancestor ${child}.`);
     }
   }
+  resolveGenerations(family);
   return family;
 }
 
@@ -99,6 +109,7 @@ export function parentage(family: Family, includeCandidates = false): Map<string
       for (const sire of litter.candidateSires) parents.add(sire);
     }
   }
+  for (const edge of family.relationships) if (edge.kind === 'ancestry') result.get(edge.target)!.add(edge.source);
   return result;
 }
 

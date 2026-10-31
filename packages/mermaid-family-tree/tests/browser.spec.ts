@@ -67,6 +67,78 @@ it.each(Object.entries(fixtures))('renders valid, deterministic SVG with correct
   } finally { await page.close(); }
 }, 60_000);
 
+it.each([
+  ['generation-spans', [['Grandfather', 'Granddaughter', 2], ['Ancestor', 'Descendant', 3], ['Mother', 'Daughter', 1], ['A', 'B', 1], ['B', 'C', 1], ['A', 'C', 2]], 9],
+  ['unknown-generation-spans', [['Ancestor', 'Descendant', 1], ['Grandparent', 'Child', 2], ['Founder', 'Middle', 1], ['Middle', 'Last', 2], ['Founder', 'Last', 3]], 8],
+] as const)('draws the declared rank separations and endpoint geometry in %s', async (name, expected, count) => {
+  const page = await browser!.newPage();
+  try {
+    await page.goto(server!.resolvedUrls!.local[0]);
+    await page.waitForFunction(() => document.getElementById('status')?.textContent === 'Pedigree rendered successfully.');
+    await page.addScriptTag({ type: 'module', content: "import { renderFixture } from '/main.ts'; window.renderFixture = renderFixture;" });
+    await page.waitForFunction(() => 'renderFixture' in window);
+    const result = await page.evaluate(async ({ source, expected }) => {
+      const { renderFixture } = window as unknown as { renderFixture: typeof import('../examples/browser/main.js')['renderFixture'] };
+      const { svg } = await renderFixture('spans', source);
+      const host = document.createElement('div'); host.innerHTML = svg; document.body.append(host);
+      const root = host.querySelector('svg')!;
+      const nodes = new Map([...root.querySelectorAll<SVGGElement>('[data-individual]')].map((node) => {
+        const plate = node.querySelector<SVGRectElement>('[data-nameplate]')!, box = plate.getBBox();
+        return [node.getAttribute('data-individual')!, { rank: Number(node.getAttribute('data-generation')),
+          x: box.x, y: box.y, width: box.width, height: box.height }];
+      }));
+      const errors: string[] = [];
+      for (const [from, to, span] of expected) {
+        const a = nodes.get(from)!, b = nodes.get(to)!;
+        if (b.rank - a.rank !== span || Math.abs((b.y - a.y) / span - 212) > 0.001) errors.push(`rank separation: ${from} -> ${to}`);
+      }
+      const declarations: string[] = [];
+      for (const edge of root.querySelectorAll('[data-kind="ancestry"], [data-kind="confirmed"]')) {
+        const from = edge.getAttribute('data-source')!, to = edge.getAttribute('data-target')!;
+        const a = nodes.get(from)!, b = nodes.get(to)!, path = edge.querySelector<SVGPathElement>('path')!;
+        const first = path.getPointAtLength(0), last = path.getPointAtLength(path.getTotalLength());
+        if (Math.abs(first.y - a.y - a.height) > 0.001 || first.x < a.x || first.x > a.x + a.width) errors.push(`source port: ${from}`);
+        if (Math.abs(last.x - b.x) > 0.001 || Math.abs(last.y - b.y - b.height / 2) > 0.001) errors.push(`target port: ${to}`);
+        const points = path.getAttribute('d')!.match(/-?\d+(?:\.\d+)?/gu)!.map(Number);
+        for (let i = 2; i < points.length; i += 2) {
+          const [x0, y0, x1, y1] = points.slice(i - 2, i + 2);
+          if (x0 !== x1 && y0 !== y1) errors.push('non-orthogonal segment');
+          for (const [id, node] of nodes) {
+            if (id === from || id === to) continue;
+            const intersects = x0 === x1
+              ? x0 > node.x && x0 < node.x + node.width && Math.max(y0, y1) > node.y && Math.min(y0, y1) < node.y + node.height
+              : y0 > node.y && y0 < node.y + node.height && Math.max(x0, x1) > node.x && Math.min(x0, x1) < node.x + node.width;
+            if (intersects) errors.push(`${from} -> ${to} crosses ${id}`);
+          }
+        }
+        if (edge.hasAttribute('data-generation-span')) declarations.push(`${from}:${to}:${edge.getAttribute('data-generation-span')}`);
+      }
+      return { errors, count: nodes.size, declarations };
+    }, { source: fixtures[`../examples/fixtures/${name}.mmd`], expected });
+    expect(result.errors).toEqual([]); expect(result.count).toBe(count);
+    if (name === 'unknown-generation-spans') {
+      expect(result.declarations).toContain('Grandparent:Child:unknown');
+      expect(result.declarations).toContain('Ancestor:Descendant:unknown');
+    } else expect(result.declarations).toContain('Grandfather:Granddaughter:2');
+  } finally { await page.close(); }
+}, 60_000);
+
+it('reports contradictory paths through Mermaid before drawing a pedigree', async () => {
+  const page = await browser!.newPage();
+  try {
+    await page.goto(server!.resolvedUrls!.local[0]);
+    await page.waitForFunction(() => document.getElementById('status')?.textContent === 'Pedigree rendered successfully.');
+    await page.addScriptTag({ type: 'module', content: "import { renderFixture } from '/main.ts'; window.renderFixture = renderFixture;" });
+    await page.waitForFunction(() => 'renderFixture' in window);
+    const error = await page.evaluate(async () => {
+      const { renderFixture } = window as unknown as { renderFixture: typeof import('../examples/browser/main.js')['renderFixture'] };
+      try { await renderFixture('conflict', 'familyTree TB\ncatmode\nA-->B\nB-->C\nA-->C'); return ''; }
+      catch (error) { return String(error); }
+    });
+    for (const edge of ['A --> B', 'B --> C', 'A --> C']) expect(error).toContain(edge);
+  } finally { await page.close(); }
+}, 60_000);
+
 it('clears failed parses and keeps untrusted labels as text', async () => {
   const page = await browser!.newPage();
   try {

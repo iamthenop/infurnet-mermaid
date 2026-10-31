@@ -3,11 +3,11 @@
 <rect width="100%" height="100%" fill="#ffffff"/>
 <defs><marker id="ft-67-65-6e-65-72-61-74-69-6f-6e-2d-67-61-70-arrow-63-6f-6e-66-69-72-6d-65-64" viewBox="0 0 8 8" refX="8" refY="4" markerWidth="8" markerHeight="8" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#344054"/></marker></defs>
 <g stroke="#344054" stroke-width="1.6" stroke-linejoin="round">
-<g id="ft-67-65-6e-65-72-61-74-69-6f-6e-2d-67-61-70-relationship-5b-22-63-61-6e-64-69-64-61-74-65-22-2c-22-46-6f-75-6e-64-65-72-22-2c-22-4c-31-22-5d" data-kind="candidate" data-source="Founder" data-target="L1" stroke-dasharray="6 5">
-<path d="M106,114 L106,208 L236,208 L236,226" fill="none" />
+<g id="ft-67-65-6e-65-72-61-74-69-6f-6e-2d-67-61-70-relationship-5b-22-61-6e-63-65-73-74-72-79-22-2c-22-46-6f-75-6e-64-65-72-22-2c-22-4b-69-74-74-65-6e-22-2c-22-2d-2d-2d-2d-3e-22-5d" data-kind="ancestry" data-source="Founder" data-target="Kitten" data-generation-span="3">
+<path d="M106,114 L106,146 L448,146 L448,696 L146,696 L146,732 L170,732" fill="none" marker-end="url(#ft-67-65-6e-65-72-61-74-69-6f-6e-2d-67-61-70-arrow-63-6f-6e-66-69-72-6d-65-64)"/>
 </g>
-<g id="ft-67-65-6e-65-72-61-74-69-6f-6e-2d-67-61-70-relationship-5b-22-63-6f-6e-66-69-72-6d-65-64-22-2c-22-46-6f-75-6e-64-65-72-22-2c-22-4b-69-74-74-65-6e-22-5d" data-kind="confirmed" data-source="Founder" data-target="Kitten">
-<path d="M146,114 L146,146 L448,146 L448,688 L146,688 L146,732 L170,732" fill="none" marker-end="url(#ft-67-65-6e-65-72-61-74-69-6f-6e-2d-67-61-70-arrow-63-6f-6e-66-69-72-6d-65-64)"/>
+<g id="ft-67-65-6e-65-72-61-74-69-6f-6e-2d-67-61-70-relationship-5b-22-63-61-6e-64-69-64-61-74-65-22-2c-22-46-6f-75-6e-64-65-72-22-2c-22-4c-31-22-5d" data-kind="candidate" data-source="Founder" data-target="L1" stroke-dasharray="6 5">
+<path d="M146,114 L146,200 L236,200 L236,226" fill="none" />
 </g>
 <g id="ft-67-65-6e-65-72-61-74-69-6f-6e-2d-67-61-70-relationship-5b-22-6d-61-74-65-72-6e-69-74-79-22-2c-22-44-61-75-67-68-74-65-72-22-2c-22-4c-32-22-5d" data-kind="maternity" data-source="Daughter" data-target="L2">
 <path d="M236,326 L236,404 L236,404 L236,438" fill="none" />

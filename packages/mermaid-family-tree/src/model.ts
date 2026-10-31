@@ -18,12 +18,18 @@ export interface Litter {
   readonly candidateSires: readonly string[];
 }
 
-export interface Relationship {
+export type GenerationSpan = { readonly kind: 'exact'; readonly generations: number } | { readonly kind: 'unknown' };
+
+interface RelationshipEndpoints {
   readonly id: string;
-  readonly kind: 'maternity' | 'candidate' | 'confirmed' | 'adoption';
   readonly source: string;
   readonly target: string;
 }
+
+export type Relationship = RelationshipEndpoints & (
+  | { readonly kind: 'maternity' | 'candidate' | 'adoption' }
+  | { readonly kind: 'confirmed' | 'ancestry'; readonly span: GenerationSpan; readonly notation: string }
+);
 
 export interface Family {
   readonly individuals: readonly Individual[];
@@ -42,7 +48,7 @@ export interface ParsedIndividual {
 export interface ParsedFamily {
   individuals: Map<string, ParsedIndividual>;
   litters: Map<string, { id: string; label: string; offspring: Set<string> }>;
-  edges: { source: string; target: string; adoption: boolean; line: number }[];
+  edges: { source: string; target: string; adoption: boolean; span: GenerationSpan; notation: string; line: number }[];
 }
 
 export function compareIds(a: string, b: string): number {

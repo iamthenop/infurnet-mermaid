@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" id="unknown-generation-spans" viewBox="0 0 1044 798" width="1044" height="798" role="img" aria-labelledby="ft-75-6e-6b-6e-6f-77-6e-2d-67-65-6e-65-72-61-74-69-6f-6e-2d-73-70-61-6e-73-title-74-69-74-6c-65" font-family="sans-serif" font-size="14">
+<title id="ft-75-6e-6b-6e-6f-77-6e-2d-67-65-6e-65-72-61-74-69-6f-6e-2d-73-70-61-6e-73-title-74-69-74-6c-65">Cat family pedigree</title>
+<rect width="100%" height="100%" fill="#ffffff"/>
+<defs><marker id="ft-75-6e-6b-6e-6f-77-6e-2d-67-65-6e-65-72-61-74-69-6f-6e-2d-73-70-61-6e-73-arrow-63-6f-6e-66-69-72-6d-65-64" viewBox="0 0 8 8" refX="8" refY="4" markerWidth="8" markerHeight="8" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#344054"/></marker></defs>
+<g stroke="#344054" stroke-width="1.6" stroke-linejoin="round">
+<g id="ft-75-6e-6b-6e-6f-77-6e-2d-67-65-6e-65-72-61-74-69-6f-6e-2d-73-70-61-6e-73-relationship-5b-22-61-6e-63-65-73-74-72-79-22-2c-22-41-6e-63-65-73-74-6f-72-22-2c-22-44-65-73-63-65-6e-64-61-6e-74-22-2c-22-2d-2a-2d-3e-22-5d" data-kind="ancestry" data-source="Ancestor" data-target="Descendant" data-generation-span="unknown">
+<path d="M458,114 L458,272 L368,272 L368,308 L392,308" fill="none" marker-end="url(#ft-75-6e-6b-6e-6f-77-6e-2d-67-65-6e-65-72-61-74-69-6f-6e-2d-73-70-61-6e-73-arrow-63-6f-6e-66-69-72-6d-65-64)"/>
+</g>
+<g id="ft-75-6e-6b-6e-6f-77-6e-2d-67-65-6e-65-72-61-74-69-6f-6e-2d-73-70-61-6e-73-relationship-5b-22-61-6e-63-65-73-74-72-79-22-2c-22-46-6f-75-6e-64-65-72-22-2c-22-4c-61-73-74-22-2c-22-2d-2d-2d-2d-3e-22-5d" data-kind="ancestry" data-source="Founder" data-target="Last" data-generation-span="3">
+<path d="M770,114 L770,146 L892,146 L892,688 L640,688 L640,732 L664,732" fill="none" marker-end="url(#ft-75-6e-6b-6e-6f-77-6e-2d-67-65-6e-65-72-61-74-69-6f-6e-2d-73-70-61-6e-73-arrow-63-6f-6e-66-69-72-6d-65-64)"/>
+</g>
+<g id="ft-75-6e-6b-6e-6f-77-6e-2d-67-65-6e-65-72-61-74-69-6f-6e-2d-73-70-61-6e-73-relationship-5b-22-61-6e-63-65-73-74-72-79-22-2c-22-46-6f-75-6e-64-65-72-22-2c-22-4d-69-64-64-6c-65-22-2c-22-2d-2a-2d-3e-22-5d" data-kind="ancestry" data-source="Founder" data-target="Middle" data-generation-span="unknown">
+<path d="M810,114 L810,256 L588,256 L588,308 L612,308" fill="none" marker-end="url(#ft-75-6e-6b-6e-6f-77-6e-2d-67-65-6e-65-72-61-74-69-6f-6e-2d-73-70-61-6e-73-arrow-63-6f-6e-66-69-72-6d-65-64)"/>
+</g>
+<g id="ft-75-6e-6b-6e-6f-77-6e-2d-67-65-6e-65-72-61-74-69-6f-6e-2d-73-70-61-6e-73-relationship-5b-22-61-6e-63-65-73-74-72-79-22-2c-22-47-72-61-6e-64-70-61-72-65-6e-74-22-2c-22-43-68-69-6c-64-22-2c-22-2d-2a-2d-3e-22-5d" data-kind="ancestry" data-source="Grandparent" data-target="Child" data-generation-span="unknown">
+<path d="M106,114 L106,146 L916,146 L916,460 L36,460 L36,520 L60,520" fill="none" marker-end="url(#ft-75-6e-6b-6e-6f-77-6e-2d-67-65-6e-65-72-61-74-69-6f-6e-2d-73-70-61-6e-73-arrow-63-6f-6e-66-69-72-6d-65-64)"/>
+</g>
+<g id="ft-75-6e-6b-6e-6f-77-6e-2d-67-65-6e-65-72-61-74-69-6f-6e-2d-73-70-61-6e-73-relationship-5b-22-61-6e-63-65-73-74-72-79-22-2c-22-4d-69-64-64-6c-65-22-2c-22-4c-61-73-74-22-2c-22-2d-2a-2d-3e-22-5d" data-kind="ancestry" data-source="Middle" data-target="Last" data-generation-span="unknown">
+<path d="M678,326 L678,358 L940,358 L940,696 L640,696 L640,732 L664,732" fill="none" marker-end="url(#ft-75-6e-6b-6e-6f-77-6e-2d-67-65-6e-65-72-61-74-69-6f-6e-2d-73-70-61-6e-73-arrow-63-6f-6e-66-69-72-6d-65-64)"/>
+</g>
+<g id="ft-75-6e-6b-6e-6f-77-6e-2d-67-65-6e-65-72-61-74-69-6f-6e-2d-73-70-61-6e-73-relationship-5b-22-63-6f-6e-66-69-72-6d-65-64-22-2c-22-47-72-61-6e-64-70-61-72-65-6e-74-22-2c-22-50-61-72-65-6e-74-22-5d" data-kind="confirmed" data-source="Grandparent" data-target="Parent">
+<path d="M146,114 L146,264 L148,264 L148,308 L172,308" fill="none" marker-end="url(#ft-75-6e-6b-6e-6f-77-6e-2d-67-65-6e-65-72-61-74-69-6f-6e-2d-73-70-61-6e-73-arrow-63-6f-6e-66-69-72-6d-65-64)"/>
+</g>
+<g id="ft-75-6e-6b-6e-6f-77-6e-2d-67-65-6e-65-72-61-74-69-6f-6e-2d-73-70-61-6e-73-relationship-5b-22-63-6f-6e-66-69-72-6d-65-64-22-2c-22-50-61-72-65-6e-74-22-2c-22-43-68-69-6c-64-22-5d" data-kind="confirmed" data-source="Parent" data-target="Child">
+<path d="M238,326 L238,468 L36,468 L36,520 L60,520" fill="none" marker-end="url(#ft-75-6e-6b-6e-6f-77-6e-2d-67-65-6e-65-72-61-74-69-6f-6e-2d-73-70-61-6e-73-arrow-63-6f-6e-66-69-72-6d-65-64)"/>
+</g>
+</g>
+<g id="ft-75-6e-6b-6e-6f-77-6e-2d-67-65-6e-65-72-61-74-69-6f-6e-2d-73-70-61-6e-73-individual-41-6e-63-65-73-74-6f-72" data-individual="Ancestor" data-generation="0" data-classes="">
+<title>Ancestor</title>
+<rect data-nameplate="true" x="392" y="78" width="132" height="36" rx="9" fill="#f8fafc" stroke="#344054" stroke-width="1.6"/>
+<text x="458" y="96" dominant-baseline="central" text-anchor="middle" fill="#182230">Ancestor</text>
+</g>
+<g id="ft-75-6e-6b-6e-6f-77-6e-2d-67-65-6e-65-72-61-74-69-6f-6e-2d-73-70-61-6e-73-individual-43-68-69-6c-64" data-individual="Child" data-generation="2" data-classes="">
+<title>Child</title>
+<rect data-nameplate="true" x="60" y="502" width="132" height="36" rx="9" fill="#f8fafc" stroke="#344054" stroke-width="1.6"/>
+<text x="126" y="520" dominant-baseline="central" text-anchor="middle" fill="#182230">Child</text>
+</g>
+<g id="ft-75-6e-6b-6e-6f-77-6e-2d-67-65-6e-65-72-61-74-69-6f-6e-2d-73-70-61-6e-73-individual-44-65-73-63-65-6e-64-61-6e-74" data-individual="Descendant" data-generation="1" data-classes="">
+<title>Descendant</title>
+<rect data-nameplate="true" x="392" y="290" width="132" height="36" rx="9" fill="#f8fafc" stroke="#344054" stroke-width="1.6"/>
+<text x="458" y="308" dominant-baseline="central" text-anchor="middle" fill="#182230">Descendant</text>
+</g>
+<g id="ft-75-6e-6b-6e-6f-77-6e-2d-67-65-6e-65-72-61-74-69-6f-6e-2d-73-70-61-6e-73-individual-46-6f-75-6e-64-65-72" data-individual="Founder" data-generation="0" data-classes="">
+<title>Founder</title>
+<rect data-nameplate="true" x="724" y="78" width="132" height="36" rx="9" fill="#f8fafc" stroke="#344054" stroke-width="1.6"/>
+<text x="790" y="96" dominant-baseline="central" text-anchor="middle" fill="#182230">Founder</text>
+</g>
+<g id="ft-75-6e-6b-6e-6f-77-6e-2d-67-65-6e-65-72-61-74-69-6f-6e-2d-73-70-61-6e-73-individual-47-72-61-6e-64-70-61-72-65-6e-74" data-individual="Grandparent" data-generation="0" data-classes="">
+<title>Grandparent</title>
+<rect data-nameplate="true" x="60" y="78" width="132" height="36" rx="9" fill="#f8fafc" stroke="#344054" stroke-width="1.6"/>
+<text x="126" y="96" dominant-baseline="central" text-anchor="middle" fill="#182230">Grandparent</text>
+</g>
+<g id="ft-75-6e-6b-6e-6f-77-6e-2d-67-65-6e-65-72-61-74-69-6f-6e-2d-73-70-61-6e-73-individual-4c-61-73-74" data-individual="Last" data-generation="3" data-classes="">
+<title>Last</title>
+<rect data-nameplate="true" x="664" y="714" width="132" height="36" rx="9" fill="#f8fafc" stroke="#344054" stroke-width="1.6"/>
+<text x="730" y="732" dominant-baseline="central" text-anchor="middle" fill="#182230">Last</text>
+</g>
+<g id="ft-75-6e-6b-6e-6f-77-6e-2d-67-65-6e-65-72-61-74-69-6f-6e-2d-73-70-61-6e-73-individual-4d-69-64-64-6c-65" data-individual="Middle" data-generation="1" data-classes="">
+<title>Middle</title>
+<rect data-nameplate="true" x="612" y="290" width="132" height="36" rx="9" fill="#f8fafc" stroke="#344054" stroke-width="1.6"/>
+<text x="678" y="308" dominant-baseline="central" text-anchor="middle" fill="#182230">Middle</text>
+</g>
+<g id="ft-75-6e-6b-6e-6f-77-6e-2d-67-65-6e-65-72-61-74-69-6f-6e-2d-73-70-61-6e-73-individual-50-61-72-65-6e-74" data-individual="Parent" data-generation="1" data-classes="">
+<title>Parent</title>
+<rect data-nameplate="true" x="172" y="290" width="132" height="36" rx="9" fill="#f8fafc" stroke="#344054" stroke-width="1.6"/>
+<text x="238" y="308" dominant-baseline="central" text-anchor="middle" fill="#182230">Parent</text>
+</g>
+</svg>

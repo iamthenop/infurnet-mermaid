@@ -5,6 +5,7 @@ import { parentage } from '../src/validator.js';
 
 const parse = (body: string) => parseFamily(`familyTree TB\ncatmode\n${body}`);
 const fixtures = import.meta.glob<string>('../examples/fixtures/*.mmd', { eager: true, query: '?raw', import: 'default' });
+const invalid = import.meta.glob<string>('../examples/invalid/*.mmd', { eager: true, query: '?raw', import: 'default' });
 const fixture = (name: string) => parseFamily(fixtures[`../examples/fixtures/${name}.mmd`]);
 
 describe('catmode identities and biological relationships', () => {
@@ -85,7 +86,7 @@ describe('Mermaid-style notation', () => {
     ['A:::tom\nA-->A', /Biological ancestry cycle.*A/u],
     ['A:::queen\nsubgraph L\nA\nend\nA-->L', /Biological ancestry cycle/u],
     ['A:::queen\nB:::tom\nA-->B\nsubgraph L\nA\nend\nB-->L', /candidate ancestry/u],
-    ['P-->K', /parent P requires/u],
+    ['subgraph L\nK\nend\nP-->L', /parent P requires/u],
     ['A:::queen:::tom', /Ambiguous.*A/u],
     ['A@{birth: "2025-02-29"}', /Invalid birth date/u],
     ['A@{birth: "2024-13"}', /Invalid birth date/u],
@@ -107,5 +108,75 @@ describe('Mermaid-style notation', () => {
 
   it.each(['familyTree TB\nA', 'familyTree LR\ncatmode', 'flowchart TB\ncatmode', 'familyTreeExtra\ncatmode'])('requires native activation: %s', (source) => {
     expect(() => parseFamily(source)).toThrow(/Expected/u);
+  });
+});
+
+describe('generation-span notation', () => {
+  it('rejects the documented conflict fixture and identifies all three edges', () => {
+    for (const edge of ['A --> B', 'B --> C', 'A --> C']) {
+      expect(() => parseFamily(invalid['../examples/invalid/generation-conflict.mmd'])).toThrow(edge);
+    }
+  });
+
+  it('distinguishes compact span arrows from hyphens inside source IDs', () => {
+    expect(parse('Grand--parent--->Grand--child').relationships[0]).toMatchObject({ source: 'Grand--parent', target: 'Grand--child', span: { kind: 'exact', generations: 2 } });
+    expect(parse('A--B-*->C--D').relationships[0]).toMatchObject({ source: 'A--B', target: 'C--D', span: { kind: 'unknown' } });
+  });
+  it.each([['-->', 1], ['--->', 2], ['---->', 3], ['---------->', 9]] as const)('preserves %s as an exact span of %i', (notation, generations) => {
+    const family = parse(`Ancestor${notation}Descendant`);
+    expect(family.relationships).toHaveLength(1);
+    expect(family.relationships[0]).toMatchObject({ source: 'Ancestor', target: 'Descendant', notation,
+      kind: generations === 1 ? 'confirmed' : 'ancestry', span: { kind: 'exact', generations } });
+    expect(family.individuals.map((node) => node.id)).toEqual(['Ancestor', 'Descendant']);
+    expect(family.individuals.every((node) => node.classification === undefined)).toBe(true);
+  });
+
+  it('keeps an unknown distance distinct even when other paths determine its value', () => {
+    const family = parse('A-->B\nB-->C\nA-*->C');
+    expect(family.relationships.find((edge) => edge.kind === 'ancestry')).toMatchObject({ notation: '-*->', span: { kind: 'unknown' } });
+    expect([...parentage(family).get('C')!].sort()).toEqual(['A', 'B']);
+  });
+
+  it('accepts consistent parallel paths without treating grandparents as extra parents', () => {
+    const family = parse('A:::tom\nB:::tom\nA-->B\nB-->C\nA--->C');
+    expect(family.relationships.filter((edge) => edge.kind === 'confirmed')).toHaveLength(2);
+    expect(family.relationships.filter((edge) => edge.kind === 'ancestry')).toHaveLength(1);
+  });
+
+  it('keeps nonadjacent ancestry independent of confirmed paternity and litter uncertainty', () => {
+    const family = parse('G:::tom\nT:::tom\nQ:::queen\nsubgraph L\nK\nend\nQ-->L\nT-->L\nG--->K');
+    expect(family.litters[0].candidateSires).toEqual(['T']);
+    expect([...parentage(family, true).get('K')!].sort()).toEqual(['G', 'Q', 'T']);
+    expect(family.relationships.filter((edge) => edge.kind === 'confirmed')).toHaveLength(0);
+  });
+
+  it.each([
+    ['A-->B\nB-->C\nA-->C', ['A --> B', 'B --> C', 'A --> C']],
+    ['A--->B\nA---->B', ['A ---> B', 'A ----> B']],
+    ['A-->B\nB-*->C\nA-->C', ['A --> B', 'B -*-> C', 'A --> C']],
+    ['A--->B\nC--->D\nB-*->C\nD-*->A', []],
+  ] as const)('rejects conflicting ancestry constraints: %s', (source, edges) => {
+    expect(() => parse(source)).toThrow(/generation constraints|Biological ancestry cycle/u);
+    for (const edge of edges) expect(() => parse(source)).toThrow(edge);
+  });
+
+  it.each(['->', '-**->', '--*->', '-*-->', '--', '-- >', '<--', '-->>'])('rejects malformed span %s', (arrow) => {
+    expect(() => parse(`A ${arrow} B`)).toThrow(/Line/u);
+    if (arrow !== '--') expect(() => parse(`A${arrow}B`)).toThrow(/Line/u);
+  });
+
+  it.each(['--->', '-*->'])('rejects %s on a litter without changing its meaning', (arrow) => {
+    expect(() => parse(`T:::tom\nsubgraph L\nK\nend\nT${arrow}L`)).toThrow('use --> for litter L');
+    expect(() => parse(`Q:::queen\nsubgraph L\nK\nend\nQ${arrow}L`)).toThrow('use --> for litter L');
+  });
+
+  it.each(['A--->B\nB-->A', 'A-*->B\nB-*->A', 'A---->A'])('still rejects biological cycles: %s', (source) => {
+    expect(() => parse(source)).toThrow(/Biological ancestry cycle/u);
+  });
+
+  it('keeps adoption free of biological span constraints', () => {
+    const family = parse('A:::tom\nB:::queen\nA--->B\nB-.->|adopt|A');
+    expect(family.relationships.find((edge) => edge.kind === 'adoption')).not.toHaveProperty('span');
+    expect(parentage(family).get('A')!.size).toBe(0);
   });
 });

@@ -1,4 +1,4 @@
-import { type ParsedFamily, type ParsedIndividual, type Family } from './model.js';
+import { type ParsedFamily, type ParsedIndividual, type Family, type GenerationSpan } from './model.js';
 import { validateFamily } from './validator.js';
 
 interface Statement { text: string; line: number }
@@ -46,7 +46,7 @@ class Reader {
   fail(message: string): never { throw new Error(`Line ${this.line}: ${message}`); }
   id(): string {
     this.space();
-    const match = /^[\p{L}_](?:[\p{L}\p{N}_]|-(?!->|\.->))*/u.exec(this.rest());
+    const match = /^[\p{L}_](?:[\p{L}\p{N}_]|-(?!-*[>.*]))*/u.exec(this.rest());
     if (!match) return this.fail(`expected an identifier near ${JSON.stringify(this.rest())}.`);
     this.offset += match[0].length;
     return match[0];
@@ -157,11 +157,20 @@ export function parseFamily(source: string): Family {
     if (litter) reader.fail('litter subgraphs contain kitten declarations only; put relationships outside.');
     while (reader.rest().trim()) {
       const adoption = reader.take('-.->');
+      let span: GenerationSpan = { kind: 'exact', generations: 1 }, notation = '-.->';
       if (adoption) {
         if (!reader.take('|adopt|')) reader.fail('adoption requires -.->|adopt|.');
-      } else if (!reader.take('-->')) reader.fail('expected --> or -.->|adopt|.');
+      } else if (reader.take('-*->')) {
+        span = { kind: 'unknown' }; notation = '-*->';
+      } else {
+        reader.space();
+        const arrow = /^-{2,}>/u.exec(reader.rest());
+        notation = arrow?.[0] ?? reader.fail('malformed ancestry edge: expected -->, additional dashes, -*->, or -.->|adopt|.');
+        reader.offset += notation.length;
+        span = { kind: 'exact', generations: notation.length - 2 };
+      }
       const to = endpoint();
-      parsed.edges.push({ source: from, target: to, adoption, line });
+      parsed.edges.push({ source: from, target: to, adoption, span, notation, line });
       from = to;
     }
   }

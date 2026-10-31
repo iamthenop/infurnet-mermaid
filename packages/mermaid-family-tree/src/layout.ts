@@ -1,6 +1,6 @@
 import { graphStratify, layeringSimplex, sugiyama, type GraphNode } from 'd3-dag';
 import { compareIds, type Family, type Individual, type Litter, type Relationship } from './model.js';
-import { parentage } from './validator.js';
+import { resolveGenerations } from './generations.js';
 
 export interface Point { readonly x: number; readonly y: number }
 export interface PlacedIndividual {
@@ -36,31 +36,6 @@ const mean = (values: readonly number[]): number => values.reduce((sum, value) =
 const widthOf = (node: Individual): number => Math.max(132, Array.from(node.label).length * 8 + 32);
 const round = (value: number): number => Math.round(value * 1000) / 1000;
 
-function generations(family: Family): Map<string, number> {
-  const parents = parentage(family, true);
-  const group = new Map(family.individuals.map((node) => [node.id, `individual:${node.id}`]));
-  for (const litter of family.litters) for (const child of litter.offspring) group.set(child, `litter:${litter.id}`);
-  const dependencies = new Map<string, Set<string>>([...group.values()].map((id) => [id, new Set()]));
-  for (const [child, ancestors] of parents) for (const parent of ancestors) dependencies.get(group.get(child)!)!.add(group.get(parent)!);
-  const rank = new Map<string, number>(), active = new Set<string>();
-  const visit = (id: string): number => {
-    if (active.has(id)) throw new Error(`Cannot align littermates in generations: cyclic parent constraints at ${id}.`);
-    if (rank.has(id)) return rank.get(id)!;
-    active.add(id);
-    const value = Math.max(0, ...[...dependencies.get(id)!].map((parent) => visit(parent) + 1));
-    active.delete(id); rank.set(id, value);
-    return value;
-  };
-  for (const id of dependencies.keys()) visit(id);
-  const result = new Map([...group].map(([id, key]) => [id, rank.get(key)!]));
-  for (const individual of family.individuals) {
-    if (parents.get(individual.id)!.size) continue;
-    const children = [...parents].filter(([, ancestors]) => ancestors.has(individual.id)).map(([child]) => result.get(child)!);
-    if (children.length) result.set(individual.id, Math.min(...children) - 1);
-  }
-  return result;
-}
-
 function chronologicalOrder(nodes: readonly Individual[]): Individual[] {
   const start = (date: string) => `${date}${date.length === 4 ? '-01-01' : date.length === 7 ? '-01' : ''}`;
   const end = (date: string) => `${date}${date.length === 4 ? '-12-31' : date.length === 7 ? '-31' : ''}`;
@@ -74,7 +49,7 @@ function chronologicalOrder(nodes: readonly Individual[]): Individual[] {
 
 export function layoutFamily(family: Family): FamilyLayout {
   if (!family.individuals.length) return { individuals: [], litters: [], relationships: [], width: 160, height: 80 };
-  const generation = generations(family);
+  const generation = resolveGenerations(family, true);
   const birthLitter = new Map<string, Litter>();
   for (const litter of family.litters) for (const child of litter.offspring) birthLitter.set(child, litter);
   const litterGeneration = new Map(family.litters.map((litter) => [litter.id, Math.max(
@@ -83,7 +58,7 @@ export function layoutFamily(family: Family): FamilyLayout {
   const data: LayoutDatum[] = family.individuals.map((node) => ({ id: node.id, width: widthOf(node), layer: generation.get(node.id)! * 2,
     parentIds: [...new Set([
       ...(birthLitter.has(node.id) ? [`@litter:${birthLitter.get(node.id)!.id}`] : []),
-      ...family.relationships.filter((edge) => edge.kind === 'confirmed' && edge.target === node.id).map((edge) => edge.source),
+      ...family.relationships.filter((edge) => (edge.kind === 'confirmed' || edge.kind === 'ancestry') && edge.target === node.id).map((edge) => edge.source),
     ])] }));
   for (const litter of family.litters) data.push({ id: `@litter:${litter.id}`, width: 12,
     layer: litterGeneration.get(litter.id)! * 2 - 1, parentIds: [litter.queen, ...litter.candidateSires] });
@@ -93,8 +68,7 @@ export function layoutFamily(family: Family): FamilyLayout {
   sugiyama().layering(layering).nodeSize((node: GraphNode<LayoutDatum>) => [node.data.width + 52, 24]).gap([28, 40])(dag);
   const seed = new Map([...dag.nodes()].map((node) => [node.data.id, node.x]));
   const xPositions = new Map<string, number>();
-  const maxGeneration = Math.max(...generation.values(), ...litterGeneration.values());
-  for (let row = maxGeneration; row >= 0; row--) {
+  for (const row of [...new Set(generation.values())].sort((a, b) => b - a)) {
     const groups = new Map<string, Individual[]>();
     for (const node of family.individuals.filter((item) => generation.get(item.id) === row)) {
       const key = birthLitter.has(node.id) ? `litter:${birthLitter.get(node.id)!.id}` : `individual:${node.id}`;
@@ -156,7 +130,7 @@ export function layoutFamily(family: Family): FamilyLayout {
     const start = { x: from.x + offset, y: from.bottom };
     const gap = (litterGeneration.get(relationship.target) ?? target?.generation ?? 0) - from.generation;
     const channelY = to.y - 18 - index % 4 * 8;
-    if (relationship.kind === 'confirmed') {
+    if (relationship.kind === 'confirmed' || relationship.kind === 'ancestry') {
       const sideX = target!.x - target!.width / 2 - 24;
       const end: Point[] = [{ x: sideX, y: channelY }, { x: sideX, y: target!.y }, { x: target!.x - target!.width / 2, y: target!.y }];
       if (gap > 1) {

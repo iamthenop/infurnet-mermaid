@@ -9,9 +9,13 @@ Generations run from top to bottom. Littermates share a row. The layout places
 known parents and candidate sires above the relevant litter, preserving the
 relationship's confirmed or uncertain status.
 
-Root parents with no earlier
-relationships align just above their earliest offspring. Other relationships
-can span generations without adding ancestor nodes.
+Generation ranks enforce the [declared biological distances](notation.md#generation-spans).
+Empty ranks leave vertical space without adding ancestor nodes. Unknown spans
+use the smallest feasible distance in stable graph order when several solutions
+are possible.
+
+Candidate sires sit as close above their litter as these constraints allow.
+Birth dates order individuals within a row and never change generation ranks.
 
 Each litter retains a separate junction, a vertical stem, a horizontal sibling
 rail, and one vertical drop per kitten. Litters with the same parents remain
@@ -57,6 +61,7 @@ Labels remain escaped SVG text, not embedded HTML.
 | Candidate sire to litter | Dashed orthogonal line into the shared litter junction |
 | Litter to offspring | Solid stem, sibling rail, and individual vertical drops |
 | Confirmed individual parentage | Solid orthogonal arrow to the kitten's nameplate side |
+| Longer or unknown biological ancestry | Solid orthogonal arrow to the descendant's nameplate side |
 | Adoption | Purple dashed arrow to the adoptee with an explicit `adopt` label |
 
 Confirmed lines attach separately from the sibling rail. Repeated parents use

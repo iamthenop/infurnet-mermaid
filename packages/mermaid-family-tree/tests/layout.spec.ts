@@ -3,6 +3,7 @@ import { expect, it } from 'vitest';
 import { parseFamily } from '../src/parser.js';
 import { layoutFamily } from '../src/layout.js';
 import { renderFamily } from '../src/svg.js';
+import { resolveGenerations } from '../src/generations.js';
 
 const fixtures = import.meta.glob<string>('../examples/fixtures/*.mmd', { eager: true, query: '?raw', import: 'default' });
 const references = import.meta.glob<string>('../examples/fixtures/*.svg', { eager: true, query: '?raw', import: 'default' });
@@ -55,7 +56,7 @@ it('keeps generation gaps without adding individuals or asserting candidate ance
   const kitten = layout.individuals.find((node) => node.individual.id === 'Kitten')!;
   expect(kitten.generation - founder.generation).toBe(3);
   expect(layout.individuals).toHaveLength(5);
-  expect(layout.relationships.find((route) => route.relationship.kind === 'confirmed')!.points).toHaveLength(7);
+  expect(layout.relationships.find((route) => route.relationship.kind === 'ancestry')!.points).toHaveLength(7);
 });
 
 it('orders known birth dates without using dates to establish ancestry', () => {
@@ -91,4 +92,45 @@ it('generates distinct SVG identities for special identifiers and escaped labels
   const ids = [...svg.matchAll(/\bid="([^"]+)"/gu)].map((match) => match[1]);
   expect(new Set(ids).size).toBe(ids.length);
   expect(svg).toContain('A &amp; B');
+});
+
+it.each([
+  ['A-->B', [['A', 'B', 1]]],
+  ['A--->B', [['A', 'B', 2]]],
+  ['A---->B', [['A', 'B', 3]]],
+  ['A---------->B', [['A', 'B', 9]]],
+  ['A-*->B', [['A', 'B', 1]]],
+  ['A-->B\nB-->C\nA--->C', [['A', 'B', 1], ['B', 'C', 1], ['A', 'C', 2]]],
+  ['A-->B\nB-->C\nA-*->C', [['A', 'C', 2]]],
+  ['A--->C\nA-*->B\nB-*->C', [['A', 'B', 1], ['B', 'C', 1]]],
+  ['A---->C\nA-*->B\nB-*->C', [['A', 'B', 1], ['B', 'C', 2]]],
+  ['A---->B\nC-*->B', [['A', 'B', 3], ['C', 'B', 1]]],
+  ['A--->B\nA-*->C', [['A', 'B', 2], ['A', 'C', 1]]],
+  ['A--->B\nB-.->|adopt|A', [['A', 'B', 2]]],
+] as const)('enforces declared and minimum feasible unknown distances: %s', (body, expected) => {
+  const family = parseFamily(`familyTree TB\ncatmode\n${body}`), before = JSON.stringify(family);
+  const layout = layoutFamily(family), nodes = new Map(layout.individuals.map((node) => [node.individual.id, node]));
+  for (const [from, to, span] of expected) {
+    expect(nodes.get(to)!.generation - nodes.get(from)!.generation).toBe(span);
+    expect(nodes.get(to)!.y - nodes.get(from)!.y).toBe(212 * span);
+  }
+  expect(layout.individuals).toHaveLength(family.individuals.length);
+  expect(JSON.stringify(family)).toBe(before);
+});
+
+it('detects contradictions across exact components connected by unknown inequalities', () => {
+  const body = 'A--->B\nC-->D\nA-*->C\nD-*->B';
+  expect(() => parseFamily(`familyTree TB\ncatmode\n${body}`)).toThrow(/Conflicting generation constraints/u);
+  for (const text of ['A ---> B', 'C --> D', 'A -*-> C', 'D -*-> B']) {
+    expect(() => parseFamily(`familyTree TB\ncatmode\n${body}`)).toThrow(text);
+  }
+});
+
+it('keeps constraint solving independent of source order and birth dates', () => {
+  const declarations = ['A---->D', 'A-*->B', 'B-*->C', 'C-*->D'];
+  const parse = (lines: string[]) => parseFamily(`familyTree TB\ncatmode\n${lines.join('\n')}`);
+  const first = parse(declarations), second = parse([...declarations].reverse());
+  expect(resolveGenerations(first)).toEqual(resolveGenerations(second));
+  expect(renderFamily(first)).toBe(renderFamily(second));
+  expect(resolveGenerations(parse([...declarations, 'A@{birth:"2026"}', 'D@{birth:"2020"}']))).toEqual(resolveGenerations(first));
 });

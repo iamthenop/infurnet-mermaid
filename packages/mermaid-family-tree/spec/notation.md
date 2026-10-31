@@ -2,7 +2,8 @@
 
 This is the notation contract for the catmode implementation commissioned by
 [Issue #24](https://github.com/iamthenop/infurnet-mermaid/issues/24), with the
-owner's approved notation resolutions. Drawing rules live in [style.md](style.md).
+owner's approved notation resolutions and [PR #25 R2](https://github.com/iamthenop/infurnet-mermaid/pull/25)
+generation spans. Drawing rules live in [style.md](style.md).
 
 ## Declaration
 
@@ -42,7 +43,9 @@ Multiple `:::` suffixes are supported.
 
 Classes are retained in the model.
 Only `queen`, `tom`, and `human` have built-in meaning; they are mutually exclusive.
-Unclassified individuals are valid, but a biological parent needs `queen` or `tom`.
+
+Unclassified individuals can have biological ancestry edges. A parent connected
+to a litter needs `queen` or `tom`; direct edges do not infer a reproductive role.
 
 Custom classes do not change styles or reproductive roles.
 
@@ -68,7 +71,7 @@ do not prevent the diagram from rendering. Relative URLs resolve in the host pag
 or standalone SVG's location.
 
 Biological relationships determine generation. Birth dates constrain ordering,
-never ancestry. There is no generation override syntax in version 1.
+never ancestry. Edge notation declares generation distances as described below.
 
 ## Litters
 
@@ -92,6 +95,9 @@ name an individual. Nested or repeated litter declarations are rejected.
 | `Queen --> Litter` | Biological maternity for that litter |
 | `Tom --> Litter` | Candidate sire for that litter |
 | `Parent --> Kitten` | Confirmed individual biological parentage |
+| `Ancestor ---> Descendant` | Biological ancestry spanning exactly two generations |
+| `Ancestor ----> Descendant` | Biological ancestry spanning exactly three generations |
+| `Ancestor -*-> Descendant` | Biological ancestry spanning an unknown positive number of generations |
 | `Human -.->\|adopt\| Cat` | Adoption, independent of biological ancestry |
 
 Arrow endpoints accept node labels, classes, and metadata. Chains such as
@@ -114,6 +120,38 @@ reuse it.
 
 Adoption does not change birth-litter membership, reproductive roles,
 or biological generation.
+
+## Generation spans
+
+Between individuals, `-->` spans exactly one generation. Each additional dash
+adds one generation: `--->` spans two and `---->` spans three.
+The parser stores the positive integer distance without adding intermediate individuals.
+
+`-*->` asserts ancestry with an unknown positive span. Other biological paths
+can constrain its distance; otherwise layout uses the smallest valid separation.
+The declared span remains unknown in the semantic graph even when layout fixes
+its distance.
+
+All biological paths must agree. This graph is valid:
+
+```text
+familyTree TB
+    catmode
+    A --> B
+    B --> C
+    A ---> C
+```
+
+Replacing the last edge with `A --> C` creates a conflict. Diagnostics identify
+the conflicting edges. An unknown span must also fit the other constraints while
+remaining positive.
+
+Longer and unknown ancestry edges do not declare immediate parentage. They do
+not replace a litter's candidate sires or count as another confirmed parent.
+Only ordinary `-->` is accepted for biological edges into litters.
+
+Span notation never creates placeholder ancestors, changes endpoint IDs, or
+reverses ancestry. Adoption contributes no biological distance constraint.
 
 ## Diagnostics
 

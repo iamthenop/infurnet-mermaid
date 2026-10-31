@@ -21,15 +21,16 @@ export function renderLayout(layout: FamilyLayout, options: SvgOptions = {}): st
     `<title id="${id('title', 'title')}">Cat family pedigree</title>`,
     '<rect width="100%" height="100%" fill="#ffffff"/>',
   ];
-  for (const kind of ['confirmed', 'adoption']) if (layout.relationships.some((route) => route.relationship.kind === kind)) {
+  for (const kind of ['confirmed', 'adoption']) if (layout.relationships.some((route) => route.relationship.kind === kind || kind === 'confirmed' && route.relationship.kind === 'ancestry')) {
     lines.push(`<defs><marker id="${id('arrow', kind)}" viewBox="0 0 8 8" refX="8" refY="4" markerWidth="8" markerHeight="8" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="${kind === 'adoption' ? '#7c3f99' : '#344054'}"/></marker></defs>`);
   }
   lines.push('<g stroke="#344054" stroke-width="1.6" stroke-linejoin="round">');
   for (const route of layout.relationships) {
     const edge = route.relationship;
     const dashed = edge.kind === 'candidate' || edge.kind === 'adoption';
-    const marker = edge.kind === 'adoption' || edge.kind === 'confirmed' ? `marker-end="url(#${id('arrow', edge.kind)})"` : '';
-    lines.push(`<g id="${id('relationship', edge.id)}" data-kind="${edge.kind}" data-source="${escape(edge.source)}" data-target="${escape(edge.target)}"${dashed ? ' stroke-dasharray="6 5"' : ''}${edge.kind === 'adoption' ? ' stroke="#7c3f99"' : ''}>`, path(route.points, marker), '</g>');
+    const marker = edge.kind === 'adoption' || edge.kind === 'confirmed' || edge.kind === 'ancestry' ? `marker-end="url(#${id('arrow', edge.kind === 'ancestry' ? 'confirmed' : edge.kind)})"` : '';
+    const span = edge.kind === 'ancestry' ? ` data-generation-span="${edge.span.kind === 'unknown' ? 'unknown' : edge.span.generations}"` : '';
+    lines.push(`<g id="${id('relationship', edge.id)}" data-kind="${edge.kind}" data-source="${escape(edge.source)}" data-target="${escape(edge.target)}"${span}${dashed ? ' stroke-dasharray="6 5"' : ''}${edge.kind === 'adoption' ? ' stroke="#7c3f99"' : ''}>`, path(route.points, marker), '</g>');
     if (route.label) lines.push(`<text x="${route.label.x}" y="${route.label.y}" stroke="none" fill="#7c3f99" font-size="12">adopt</text>`);
   }
   for (const item of layout.litters) {
